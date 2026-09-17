@@ -97,7 +97,36 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
     for L in lines:
         lh = max(w["y1"] for w in L) - min(w["y0"] for w in L)
         L[:] = [g for w in L for g in split_tokens(w, lh)]
-    return lines, stray
+    return reorder_strays(lines), stray
+
+
+def reorder_strays(lines):
+    """Azure's line order is reading order, columns included, except for the
+    odd line it lists out of place — a running footer given before the body.
+    A line is out of place when its height contradicts both neighbours in
+    the sequence while the sequence itself continues past it; such a line
+    is moved to the first later position where the heights agree. Column
+    blocks are untouched: at a column change every following line is
+    consistent with the new block, so nothing looks isolated."""
+    def top(L): return min(w["y0"] for w in L)
+    def hgt(L): return max(w["y1"] for w in L) - top(L)
+    seq = [L for L in lines if L]
+    moved = True
+    while moved:
+        moved = False
+        for i in range(len(seq)):
+            y = top(seq[i]); h = max(1.0, hgt(seq[i]))
+            prev_y = top(seq[i - 1]) if i else None; next_y = top(seq[i + 1]) if i + 1 < len(seq) else None
+            resumes = prev_y is None or next_y is None or next_y >= prev_y - h   # the sequence continues without it
+            # far below both neighbours (a footer listed first)
+            down = (prev_y is None or y > prev_y + 3 * h) and next_y is not None and y > next_y + 3 * h
+            # far above both neighbours (a header listed late)
+            up = (next_y is None or y < next_y - 3 * h) and prev_y is not None and y < prev_y - 3 * h
+            if resumes and (down or up):
+                L = seq.pop(i)
+                k = next((j for j in range(len(seq)) if top(seq[j]) > y and (j >= i or up)), len(seq))
+                seq.insert(k, L); moved = True; break
+    return seq
 
 
 # ---- pieces: the ink side of the same split

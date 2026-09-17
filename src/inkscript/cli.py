@@ -68,7 +68,8 @@ def cmd_native(a) -> int:
         if a.verify:
             r["verify"] = v = pdfium_words(out / f"{stem}.pdf", r, ad)
             rotated = {p["page"] for p in r["pages"] if p.get("rotated")}
-            inv, nl = pdfium_order(out / f"{stem}.pdf", skip=rotated); r["order"] = dict(inversions=inv, lines=nl, sideways_pages=len(rotated))
+            digital = {p["page"] for p in r["pages"] if p["text"] == "native-digital"}
+            inv, nl = pdfium_order(out / f"{stem}.pdf", skip=rotated | digital); r["order"] = dict(inversions=inv, lines=nl, sideways_pages=len(rotated), digital_pages=len(digital))
             tw, ti = sum(x["words"] for x in v), sum(x["intact"] for x in v)
             line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
         print(line, flush=True); reports.append(r)
