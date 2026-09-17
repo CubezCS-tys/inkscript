@@ -38,7 +38,8 @@ document (five pages) so the tests and a first run need no data setup.
 ## Status
 
 30-document test set, 115 pages: 98.5% of words copy out intact in pdfium,
-0 reading-order inversions. Selection is per word. Every glyph is the
+0 reading-order inversions. Selection snaps to pieces of ink (24% of words
+split at the joins the script dictates; the rest stay whole rather than guess). Every glyph is the
 printed occurrence's own outline, stored in scan pixels; the document's shape
 alphabet is exported beside the PDF and never substituted into it. `experiments/` keeps the
 numbered scripts that established the geometry results, verbatim.

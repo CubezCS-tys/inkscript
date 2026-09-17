@@ -94,3 +94,61 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
         lh = max(w["y1"] for w in L) - min(w["y0"] for w in L)
         L[:] = [g for w in L for g in split_tokens(w, lh)]
     return lines, stray
+
+
+# ---- pieces: the ink side of the same split
+def ink_pieces(w, lh: float):
+    """Group a word's blobs into connected pieces: base strokes, with the
+    dots and marks that float above or below attached to the base they
+    overlap. Returned right to left, as the text is read."""
+    if not w["blobs"]:
+        return []
+    # Base strokes are tall enough; dots, hamza, tashkeel and short tatweel
+    # stubs are not. Judging by position instead let dots that sit inside
+    # the word's box count as strokes, and words came out with more pieces
+    # than letters (their "pieces" overlapped by tens of pixels).
+    def is_base(b):
+        return b["h"] >= 0.3 * lh
+    bases = [b for b in w["blobs"] if is_base(b)]
+    marks = [b for b in w["blobs"] if not is_base(b)]
+    if not bases:
+        bases, marks = list(w["blobs"]), []
+    groups = [dict(blobs=[b], x0=b["x"], x1=b["x"] + b["w"]) for b in sorted(bases, key=lambda b: -(b["x"] + b["w"]))]
+    for m in marks:
+        cx = m["x"] + m["w"] / 2
+        g = max(groups, key=lambda g: (overlap(m["x"], m["x"] + m["w"], g["x0"], g["x1"]), -abs((g["x0"] + g["x1"]) / 2 - cx)))
+        g["blobs"].append(m); g["x0"] = min(g["x0"], m["x"]); g["x1"] = max(g["x1"], m["x"] + m["w"])
+    return groups
+
+
+def split_word(w, lh: float):
+    """One glyph per piece when the text's pieces and the ink's pieces agree
+    in number; otherwise the word stays one glyph. Never guesses."""
+    from ..text import pieces
+    from ..text import ARABIC_LETTER
+    text = w["text"].strip() or w["az"]
+    tp = pieces(text)
+    ip = ink_pieces(w, lh)
+    # A digit/Latin run of n characters is printed as n separate blobs but
+    # stays one glyph, so it consumes n ink pieces.
+    from ..text import TRANSPARENT
+    arabic = [bool(ARABIC_LETTER.match(t[0])) for t in tp]
+    need = [1 if a else len(t) for t, a in zip(tp, arabic)]
+    whole = [dict(w, text=text, blobs=w["blobs"], first=True, split=False)]
+    if len(tp) < 2 or sum(need) != len(ip):
+        return whole
+    out, i = [], 0
+    for k, (t, n, a) in enumerate(zip(tp, need, arabic)):   # both right to left
+        gs = ip[i:i + n]; i += n
+        x0, x1 = min(g["x0"] for g in gs), max(g["x1"] for g in gs)
+        # A matching count is not proof: a detached stroke (the upper bar of
+        # ك) can stand in for a whole run of letters. Each Arabic piece's ink
+        # must be as wide as its letters could plausibly be, or the word
+        # stays one glyph.
+        if a:
+            letters = max(1, len(TRANSPARENT.sub("", t)))
+            per = (x1 - x0) / lh / letters
+            if per < 0.12 or per > 1.4:
+                return whole
+        out.append(dict(w, text=t, blobs=[b for g in gs for b in g["blobs"]], x0=x0, x1=x1, first=(k == 0), split=True, order=k))
+    return out

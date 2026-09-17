@@ -10,6 +10,7 @@ from __future__ import annotations
 import fitz
 
 from ..text import RTL, visual
+from ..geometry.layout import split_word
 
 DPI = 300
 
@@ -55,6 +56,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
     geo.sort(key=lambda g: g["ly1"])
     to_pdf = lambda x, y: fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
     glyphs = 0
+    stats = dict(words=0, split=0, pieces=0)
     for li, g in enumerate(geo):
         L, ly1, ly0 = g["L"], g["ly1"], g["top"]
         size_pt = SIZE_PT
@@ -71,7 +73,23 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
         gap = max(2.0, GAP_FRAC * (g["bot"] - g["top"]))
         if li > 0:
             ly0 = max(ly0, geo[li - 1]["bot"] + gap)
-        ws = sorted((w for w in L if w["blobs"]), key=lambda w: w["x0"])
+        # One glyph per connected piece of ink where text and ink agree on
+        # the count (see layout.split_word); the word otherwise. Pieces are
+        # laid out in visual order; a word's pieces carry its id so that the
+        # space glyph goes between words only.
+        lh_line = max(1.0, g["bot"] - g["top"])
+        ws = []
+        for wid, w in enumerate(sorted((w for w in L if w["blobs"]), key=lambda w: w["x0"])):
+            pcs = split_word(w, lh_line)
+            # Within a word, pieces go in text order reversed (right to left),
+            # not by ink position: a و whose tail sweeps under the next letter
+            # starts further left than that letter and would otherwise be
+            # written after it, and the word would copy out as `اولعالم`.
+            for pc in reversed(pcs) if len(pcs) > 1 else pcs:
+                pc["_wid"] = wid; ws.append(pc)
+        stats["words"] += wid + 1 if L else 0
+        stats["split"] += sum(1 for w in ws if w["split"] and w["first"])
+        stats["pieces"] += len(ws)
         lim_top = max(1.0, ly1 - ly0) * u
         lim_bot = -((geo[li + 1]["top"] - ly1) - gap) * u if li + 1 < len(geo) else -1e9
         lh = max(1.0, ly1 - ly0)
@@ -84,6 +102,13 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
             gx0 = min(p[:, 0].min() for b in w["blobs"] for p in b["paths"]); gx1 = max(p[:, 0].max() for b in w["blobs"] for p in b["paths"])
             gy0 = min(p[:, 1].min() for b in w["blobs"] for p in b["paths"]); gy1 = max(p[:, 1].max() for b in w["blobs"] for p in b["paths"])
             adv = (gx1 - gx0) * u
+            # Inside a word, a piece's advance runs up to the next piece, so
+            # no pen adjustment is needed between them: pdfium turns a kerning
+            # adjustment after a narrow glyph into a generated space, which
+            # copied `الحكم` out as `ا لحكم` and `362` as `3 6 2`.
+            if k + 1 < len(ws) and ws[k + 1]["_wid"] == w["_wid"]:
+                nxt = min(p[:, 0].min() for b in ws[k + 1]["blobs"] for p in b["paths"])
+                adv = max(adv, (nxt - gx0) * u)
             cmds = []
             for b in w["blobs"]:
                 for p in b["paths"]:
@@ -135,14 +160,16 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
         # out swapped in pairs. A narrow glyph at both ends restores the test.
         parts.append(f"<01> {sp_w * tj:.1f}")
         for k, w in enumerate(ws[:253]):
-            if k:
+            if k and w["_wid"] != ws[k - 1]["_wid"]:
                 parts.append(f"<01> {-((w['_gx0'] - pen) * u - sp_w) * tj:.1f}")
+            elif k and abs((w["_gx0"] - pen) * u) >= 1:
+                parts.append(f"{-((w['_gx0'] - pen) * u) * tj:.1f}")
             parts.append(f"<{k + 2:02X}>")
             pen = w["_gx0"] + w["_adv"] / u
         parts.append("<01>")
         out.append(f"BT /{fname} {size_pt:.3f} Tf 1 0 0 1 {origin.x:.2f} {origin.y:.2f} Tm [{' '.join(parts)}] TJ ET")
     out.append("Q")
-    return "\n".join(out) + "\n", glyphs
+    return "\n".join(out) + "\n", glyphs, stats
 
 
 def stray_paths(stray, M):

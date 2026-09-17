@@ -57,15 +57,15 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                     placements.append(dict(page=pn, text=w["text"].strip() or w["az"], shapes=w["shapes"],
                                            box=[int(w["x0"]), int(w["y0"]), int(w["x1"]), int(w["y1"])]))
         M = ~page.transformation_matrix
-        content, glyphs = write_text_layer(src, page, M, lines, f"P{pn}", invisible=True)
+        content, glyphs, pstats = write_text_layer(src, page, M, lines, f"P{pn}", invisible=True)
         append_content(src, page, content.encode())
         if vec is not None:
             vp = vec.new_page(width=page.rect.width, height=page.rect.height)
             Mv = ~vp.transformation_matrix
-            vcontent, _ = write_text_layer(vec, vp, Mv, lines, f"P{pn}", invisible=False)
+            vcontent, _, _ = write_text_layer(vec, vp, Mv, lines, f"P{pn}", invisible=False)
             append_content(vec, vp, (stray_paths(stray, Mv) + vcontent).encode())
         report["pages"].append(dict(info, lines=sum(1 for L in lines if any(w["blobs"] for w in L)),
-                                    glyphs=glyphs, blobs=len(blobs), stray=len(stray),
+                                    glyphs=glyphs, blobs=len(blobs), stray=len(stray), pieces=pstats,
                                     placed=[w["text"].strip() or w["az"] for L in lines for w in L if w["blobs"]]))
     out_dir.mkdir(parents=True, exist_ok=True)
     src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()

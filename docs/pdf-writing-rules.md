@@ -64,10 +64,39 @@ rule records the experiment, not a theory.
   tracing error. The alphabet is exported beside the PDF instead
   (`<stem>.shapes.json`, `<stem>.alphabet.svg`, `<stem>.alphabet.png`).
 
+## Pieces (selection inside a word)
+
+A viewer decides which characters of a multi-character glyph a drag-select
+covers by slicing the glyph's width equally, so a drag that starts a few
+pixels inside `362` yields `62`. The finer the glyphs, the more exact the
+selection. Glyphs are therefore one *piece* of ink where that is certain:
+
+- **Text side:** Arabic breaks after `ا د ذ ر ز و ة ى` and hamza (letters
+  that never join leftward); marks stay on their letter; any non-Arabic run
+  (`126/4`, `(1)`) is one piece.
+- **Ink side:** base strokes (height ≥ 0.3 of the line) with their dots and
+  marks attached by horizontal overlap.
+- **Split only when the counts agree** and every Arabic piece's ink width is
+  plausible for its letter count (0.12–1.4 line heights per letter): a
+  detached stroke (the bar of ك) can make the count match by accident.
+  Otherwise the word stays one glyph. Never guess.
+- **Within a word, pieces are written in text order** (reversed for the
+  right-to-left run), not by ink position: a و whose tail sweeps under the
+  next letter starts further left than that letter.
+- **A piece's advance runs to the next piece**, so no pen adjustment sits
+  inside a word: pdfium turns a kerning adjustment after a narrow glyph into
+  a generated space (`ا لحكم`, `3 6 2`).
+
+Measured on the 30 documents: 24% of words split (1.34 glyphs per word),
+words intact in pdfium unchanged at 98.5%, and pieces sharing the same
+strict ink shape carry the same text 99.74% of the time — the check that
+catches a wrong assignment.
+
 ## Known ceiling
 
 Words whose ink physically touches cannot be split by any layer. Brackets
-mirror as they do in native Arabic PDFs. Selection is per word.
+mirror as they do in native Arabic PDFs. Selection is per piece; cutting
+inside a connected run of letters is not done.
 
 ## Numbers (30 documents, 115 pages, pdfium)
 

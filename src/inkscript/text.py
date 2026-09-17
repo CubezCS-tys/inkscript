@@ -76,3 +76,49 @@ def visual(s: str) -> str:
         runs = re.findall(r"[0-9٠-٩]+|[^0-9٠-٩]+", t)
         return "".join(r if re.match(r"[0-9٠-٩]", r) else r[::-1] for r in reversed(runs))
     return " ".join(vis(t) for t in reversed(toks))
+
+
+# ---- pieces: where printed Arabic must break
+# Letters that never join to the letter after them (Unicode joining type R),
+# plus non-joining hamza. After any of these a new stroke begins.
+RIGHT_JOINING = set("اأإآدذرزوؤةىٱ")
+NON_JOINING = set("ء")
+TRANSPARENT = re.compile(r"[ؐ-ًؚ-ٰٟۖ-ۭ]")   # marks ride on the letter before
+ARABIC_LETTER = re.compile(r"[ؠ-يٮ-ۓۺ-ۿـ]")
+
+
+def pieces(word: str) -> list[str]:
+    """Split a word's text where the script cannot connect.
+
+    `الحكم` -> ['ا', 'لحكم']; `126/4` -> ['126/4']; `العربى،` -> ['ا', 'لعر', 'بى', '،'].
+    Arabic letters group into connected runs by the joining rules. Anything
+    else — digits, Latin, punctuation — forms one piece per run: printed as
+    one blob per character, but a viewer's bidi keeps `126/4` in order only
+    if it is one glyph. Marks stay with the letter they sit on.
+    """
+    out: list[str] = []
+    cur = ""; joins_left = False           # does the run so far accept a letter on its left?
+    for ch in word:
+        if TRANSPARENT.match(ch):
+            if cur: cur += ch
+            elif out: out[-1] += ch
+            continue
+        if ARABIC_LETTER.match(ch):
+            if cur and joins_left:
+                cur += ch
+            else:
+                if cur: out.append(cur)
+                cur = ch
+            joins_left = ch not in RIGHT_JOINING and ch not in NON_JOINING
+            if ch in NON_JOINING:
+                out.append(cur); cur = ""; joins_left = False
+        else:
+            if cur and ARABIC_LETTER.match(cur[0]):
+                out.append(cur); cur = ""
+            joins_left = False
+            if not ch.strip():
+                if cur: out.append(cur); cur = ""
+            else:
+                cur += ch                  # digits, Latin, punctuation: one piece per run (`126/4`, `(1)`), read as one by a viewer's bidi
+    if cur: out.append(cur)
+    return out
