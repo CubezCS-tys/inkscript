@@ -158,6 +158,11 @@ def cmd_check(a) -> int:
         if out:
             out.mkdir(parents=True, exist_ok=True)
             (out / f"{stem}.review.json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+            if a.html:
+                from .verify.review_html import write_review_html
+                pdf = sj.with_name(f"{stem}.pdf")
+                if pdf.exists():
+                    write_review_html(sj, pdf, out / f"{stem}.review.html")
     print(f"\nall: {tot['words']} words; {tot['repeated']} share ink with another word ({tot['repeated'] / max(1, tot['words']):.0%}); "
           f"{tot['conflicts']} contradictions, {tot['suspects']} words to review; {tot['numbers']} numbers")
     return 0
@@ -200,6 +205,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("check", help="review list: same ink, different text; and every number")
     p.add_argument("dir", help="a native output dir (reads <stem>.shapes.json)"); p.add_argument("--out", help="write <stem>.review.json here")
     p.add_argument("--show", type=int, default=3, help="contradictions to print per document")
+    p.add_argument("--html", action="store_true", help="also write <stem>.review.html: ink crops beside readings")
     p.set_defaults(fn=cmd_check)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")

@@ -25,9 +25,9 @@ def review(shapes_json: Path) -> dict:
         if len(texts) > 1:
             top = texts.most_common(1)[0][0]
             conflicts.append(dict(sig=sig, readings={t: n for t, n in texts.items()},
-                                  suspects=[dict(page=p["page"], box=p["box"], text=p["text"])
+                                  suspects=[dict(page=p["page"], box=p["box"], text=p["text"], rot=p.get("rot", 0))
                                             for p in ps if norm(p["text"]) != top]))
-    numbers = [dict(page=p["page"], box=p["box"], text=p["text"]) for p in doc["placements"] if DIGITS.search(p["text"])]
+    numbers = [dict(page=p["page"], box=p["box"], text=p["text"], rot=p.get("rot", 0)) for p in doc["placements"] if DIGITS.search(p["text"])]
     repeated = sum(len(ps) for ps in groups.values() if len(ps) > 1)
     return dict(words=len(doc["placements"]), repeated_ink=repeated, groups=sum(1 for ps in groups.values() if len(ps) > 1),
                 conflicts=conflicts, numbers=numbers)
