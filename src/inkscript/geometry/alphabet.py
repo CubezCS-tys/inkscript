@@ -68,3 +68,63 @@ class Alphabet:
         ci = len(self.protos) - 1; self.index.setdefault(self.key(b), []).append(ci); return ci
 
     def __len__(self): return len(self.protos)
+
+
+# ---- the alphabet as artifacts: knowledge about the document's ink, never a
+# drawing shortcut. The pages keep every occurrence's own outline.
+
+def prototypes(A: "Alphabet"):
+    """Shape ids ranked by frequency, with each prototype's outline in its own pixel frame."""
+    order = sorted(range(len(A)), key=lambda c: -A.counts[c])
+    out = []
+    for rank, c in enumerate(order):
+        p = A.protos[c]
+        out.append(dict(id=c, rank=rank, count=A.counts[c], w=p["w"], h=p["h"], page=p.get("page"),
+                        paths=[(q - [p["x"], p["y"]]).tolist() for q in p["paths"]], holes=p["holes"]))
+    return out
+
+
+def to_json(A, path, placements):
+    import json
+    doc = dict(shapes=len(A), blobs=sum(A.counts), alphabet=prototypes(A), placements=placements)
+    path.write_text(json.dumps(doc, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+
+
+def to_svg(A, path, cols=16, cell=96):
+    """One <symbol> per shape, plus a sheet laying them out by frequency — a
+    typeface specimen a browser can open, with each shape addressable by id."""
+    import html
+    protos = prototypes(A)
+    rows = -(-len(protos) // cols)
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+             f'width="{cols * cell}" height="{rows * (cell + 18)}" viewBox="0 0 {cols * cell} {rows * (cell + 18)}">',
+             "<style>text{font:11px ui-monospace,monospace;fill:#666}</style><defs>"]
+    for p in protos:
+        d = " ".join("M" + " L".join(f"{x},{y}" for x, y in q) + " Z" for q in p["paths"])
+        parts.append(f'<symbol id="s{p["id"]}" viewBox="0 0 {max(1, p["w"])} {max(1, p["h"])}"><path d="{d}" fill-rule="evenodd"/></symbol>')
+    parts.append("</defs>")
+    for k, p in enumerate(protos):
+        r, c = divmod(k, cols); s = min((cell - 12) / max(p["w"], p["h"], 1), 3.0)
+        w, h = p["w"] * s, p["h"] * s
+        x, y = c * cell + (cell - w) / 2, r * (cell + 18) + 4
+        parts.append(f'<use xlink:href="#s{p["id"]}" x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}"/>'
+                     f'<text x="{c * cell + 3}" y="{r * (cell + 18) + cell + 12}">{p["id"]}:{p["count"]}</text>')
+    parts.append("</svg>")
+    path.write_text("\n".join(parts), encoding="utf-8")
+
+
+def to_sheet(A, path, cols=16, cell=64, limit=320):
+    """PNG glyph sheet of the most frequent shapes, drawn from their outlines."""
+    protos = prototypes(A)[:limit]
+    rows = max(1, -(-len(protos) // cols))
+    sheet = np.full((rows * (cell + 18), cols * cell), 255, np.uint8)
+    for k, p in enumerate(protos):
+        s = min((cell - 8) / max(p["w"], p["h"], 1), 3.0)
+        g = np.full((max(1, int(p["h"] * s) + 1), max(1, int(p["w"] * s) + 1)), 255, np.uint8)
+        for q, hole in zip(p["paths"], p["holes"]):
+            cv2.fillPoly(g, [(np.array(q) * s).astype(np.int32)], 255 if hole else 0)
+        r, c = divmod(k, cols); y0, x0 = r * (cell + 18) + 4, c * cell + (cell - g.shape[1]) // 2
+        h, w = min(g.shape[0], cell - 8), min(g.shape[1], cell)
+        sheet[y0:y0 + h, x0:x0 + w] = g[:h, :w]
+        cv2.putText(sheet, f"{p['id']}:{p['count']}", (c * cell + 2, r * (cell + 18) + cell + 12), cv2.FONT_HERSHEY_SIMPLEX, 0.35, 0, 1, cv2.LINE_AA)
+    cv2.imwrite(str(path), sheet)

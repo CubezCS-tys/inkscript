@@ -13,6 +13,7 @@ from ..text import fold_digits
 from ..geometry.trace import page_blobs, DPI
 from ..geometry.layout import layout_page
 from .type3 import write_text_layer, stray_paths, append_content
+from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
 def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_exact):
     words, _, dims = load_azure(azure_dir / stem / f"{stem}.json")
@@ -21,6 +22,12 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     src = fitz.open(scan_pdf)
     vec = fitz.open() if vector else None
     report = dict(doc=stem, pages=[])
+    # One shape alphabet for the whole document. It labels the ink — every
+    # glyph records which shapes it is made of — and is exported beside the
+    # PDF as the document's typeface. It never replaces an outline: the
+    # measured cost of drawing one occurrence with another's ink is a median
+    # 15% of its pixels, six times the tracing error.
+    A = Alphabet(); placements = []
     for pno in range(src.page_count):
         pn = pno + 1
         page = src[pno]
@@ -39,7 +46,16 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         gray = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
         W_in, H_in = dims[pn]
         blobs = page_blobs(gray)
+        prepare(blobs)
+        for b in blobs:
+            b["page"] = pn; b["shape"] = A.assign(b)
         lines, stray = layout_page(pwords, texts, az_pages[pn].get("lines", []), blobs, pix.w / W_in, pix.h / H_in)
+        for L in lines:
+            for w in L:
+                if w["blobs"]:
+                    w["shapes"] = [b["shape"] for b in sorted(w["blobs"], key=lambda b: -b["x"])]
+                    placements.append(dict(page=pn, text=w["text"].strip() or w["az"], shapes=w["shapes"],
+                                           box=[int(w["x0"]), int(w["y0"]), int(w["x1"]), int(w["y1"])]))
         M = ~page.transformation_matrix
         content, glyphs = write_text_layer(src, page, M, lines, f"P{pn}", invisible=True)
         append_content(src, page, content.encode())
@@ -53,6 +69,12 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                                     placed=[w["text"].strip() or w["az"] for L in lines for w in L if w["blobs"]]))
     out_dir.mkdir(parents=True, exist_ok=True)
     src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
+    if len(A):
+        to_json(A, out_dir / f"{stem}.shapes.json", placements)
+        to_svg(A, out_dir / f"{stem}.alphabet.svg")
+        to_sheet(A, out_dir / f"{stem}.alphabet.png")
+        report["alphabet"] = dict(shapes=len(A), blobs=sum(A.counts),
+                                  repeated=sum(c for c in A.counts if c > 1))
     if vec is not None:
         vec.save(out_dir / f"{stem}_vector.pdf", garbage=3, deflate=True); vec.close()
     return report

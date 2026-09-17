@@ -32,11 +32,22 @@ inkscript alphabet  DATA/input/*.pdf --pages 5 --out OUT/alphabet.json
 `DATA/azure/<stem>/<stem>.json` + `<stem>.pdf` are Azure prebuilt-read outputs;
 `DATA/input/<stem>.pdf` the image-only scans. Data never lives in the repo.
 
+## The alphabet beside the PDF
+
+`inkscript native` builds one shape alphabet per document and writes:
+
+- `<stem>.shapes.json` — every shape's prototype outline and count, and every
+  glyph's placement (page, text, box, the shape ids it is made of);
+- `<stem>.alphabet.svg` — one `<symbol id="s<id>">` per shape and a specimen
+  sheet by frequency; `<stem>.alphabet.png` — the same sheet as an image.
+
+Inside the PDF each glyph stream carries `/InkShapes [ids]`. The alphabet is
+knowledge about the ink; the page always draws each occurrence's own outline
+(see pdf-writing-rules.md, "Exactness"). Different type weights are different
+alphabets; that is correct, not a defect.
+
 ## What the geometry does not do yet
 
-- Share one glyph per repeated shape across a document (the alphabet
-  saturates within a document; different type weights are different
-  alphabets). Today each page carries its own outlines — hence file size.
 - Letter-level glyphs (Arabic joins letters; a blob is a sub-word).
 - Read on its own: labels come from the OCR half. See
   `experiments/04_label_once_purity.py` for the measurement that frames it:

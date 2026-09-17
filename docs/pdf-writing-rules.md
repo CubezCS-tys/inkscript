@@ -48,6 +48,22 @@ rule records the experiment, not a theory.
 - **Invisible over the scan = zero opacity (ExtGState ca 0)**, not render
   mode 3, which does not apply to Type 3 glyphs.
 
+## Exactness
+
+- **Glyph space is in scan pixels.** The FontMatrix scales one glyph unit to
+  one pixel at the nominal size, so the traced integer outlines are stored
+  as they are: no scaling, no decimal rounding, lines placed on a whole
+  pixel. Every glyph's absolute coordinates agree with the previous
+  (decimal 1/1000-unit) writer to 0.02 px — the previous writer's rounding.
+  The space glyph's advance is a whole pixel too; the pen adjustments must
+  use the same rounded value or words drift along the line.
+- **Every occurrence keeps its own outline.** A document alphabet labels
+  each glyph (`/InkShapes [ids]` on the glyph stream, right to left) but
+  never substitutes a shared outline: drawing one occurrence with
+  another's ink changes a median 15% of its pixels (max 43%), six times the
+  tracing error. The alphabet is exported beside the PDF instead
+  (`<stem>.shapes.json`, `<stem>.alphabet.svg`, `<stem>.alphabet.png`).
+
 ## Known ceiling
 
 Words whose ink physically touches cannot be split by any layer. Brackets

@@ -58,7 +58,16 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
     for li, g in enumerate(geo):
         L, ly1, ly0 = g["L"], g["ly1"], g["top"]
         size_pt = SIZE_PT
-        u = 1000.0 / (size_pt * DPI / 72)                 # glyph units per pixel
+        # Glyph space is in PIXELS: FontMatrix scales one glyph unit to one
+        # scan pixel at SIZE_PT, so outline coordinates are the traced integers
+        # and the geometry is stored unchanged to the pixel. (Decimal 1/1000
+        # units cost 19% more after compression for no extra precision.)
+        # TJ adjustments are in thousandths of text space regardless of the
+        # font matrix, hence `tj` for those.
+        km = 72.0 / (DPI * size_pt)                        # glyph unit (1 px) in text space
+        u = 1.0
+        tj = 1000.0 * km
+        ly1 = int(round(ly1))                              # integer baseline: every glyph coordinate stays integral
         gap = max(2.0, GAP_FRAC * (g["bot"] - g["top"]))
         if li > 0:
             ly0 = max(ly0, geo[li - 1]["bot"] + gap)
@@ -67,8 +76,8 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
         lim_bot = -((geo[li + 1]["top"] - ly1) - gap) * u if li + 1 < len(geo) else -1e9
         lh = max(1.0, ly1 - ly0)
         gaps = [ws[k + 1]["x0"] - ws[k]["x1"] for k in range(len(ws) - 1)]
-        sp_w = max(1.0, min([g for g in gaps if g > 0] + [0.2 * lh])) * u
-        procs = {"sp": f"{sp_w:.1f} 0 0 0 0 0 d1\n"}; widths = [sp_w]; names = ["sp"]; tou = [(1, " ")]
+        sp_w = float(round(max(1.0, min([g for g in gaps if g > 0] + [0.2 * lh])) * u))   # whole pixels: the glyph's advance and the pen must agree
+        procs = {"sp": f"{sp_w:.0f} 0 0 0 0 0 d1\n"}; widths = [sp_w]; names = ["sp"]; tou = [(1, " ")]; shapes = {}
         bbox = [0, 0, 0, 0]
         for k, w in enumerate(ws[:253]):
             code = k + 2
@@ -79,7 +88,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
             for b in w["blobs"]:
                 for p in b["paths"]:
                     pts = [((px - gx0) * u, (ly1 - py) * u) for px, py in p]
-                    cmds.append(f"{pts[0][0]:.1f} {pts[0][1]:.1f} m " + " ".join(f"{x:.1f} {y:.1f} l" for x, y in pts[1:]) + " h")
+                    cmds.append(f"{pts[0][0]:.0f} {pts[0][1]:.0f} m " + " ".join(f"{x:.0f} {y:.0f} l" for x, y in pts[1:]) + " h")
             by0, by1 = (ly1 - gy1) * u, (ly1 - gy0) * u
             # Clip the declared box at the neighbouring lines, but never to
             # nothing: a glyph lying wholly past the clip (a superscript, a
@@ -88,25 +97,32 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
             keep = 0.3 * max(1.0, by1 - by0)
             dy1 = max(min(by1, lim_top), by0 + keep)
             dy0 = min(max(by0, min(lim_bot, 0.0)), dy1 - keep)
-            procs[f"g{code}"] = f"{adv:.1f} 0 0 {dy0:.1f} {adv:.1f} {dy1:.1f} d1\n" + "\n".join(cmds) + "\nf*\n"
+            procs[f"g{code}"] = f"{adv:.0f} 0 0 {dy0:.0f} {adv:.0f} {dy1:.0f} d1\n" + "\n".join(cmds) + "\nf*\n"
+            shapes[f"g{code}"] = w.get("shapes")
             widths.append(adv); names.append(f"g{code}"); tou.append((code, visual(w["text"].strip() or w["az"])))
             bbox = [0, min(bbox[1], dy0), max(bbox[2], adv), max(bbox[3], dy1)]
             w["_gx0"], w["_adv"] = gx0, adv
             glyphs += 1
         cp = {}
         for nm, body in procs.items():
-            x = doc.get_new_xref(); doc.update_object(x, "<< >>"); doc.update_stream(x, body.encode()); cp[nm] = x
+            x = doc.get_new_xref()
+            # /InkShapes: the document-alphabet ids of the blobs this glyph is
+            # made of (right to left). Knowledge about the ink, not a drawing
+            # shortcut — the outline is always this occurrence's own.
+            ids = shapes.get(nm)
+            doc.update_object(x, "<< /InkShapes [%s] >>" % " ".join(str(i) for i in ids) if ids else "<< >>")
+            doc.update_stream(x, body.encode()); cp[nm] = x
         tu = doc.get_new_xref(); doc.update_object(tu, "<< >>")
         doc.update_stream(tu, ("/CIDInit /ProcSet findresource begin 12 dict begin begincmap /CMapName /T3-UCS def /CMapType 2 def\n"
             "1 begincodespacerange <00> <FF> endcodespacerange\n" + f"{len(tou)} beginbfchar\n"
             + "".join(f"<{c:02X}> <{hex16(s)}>\n" for c, s in tou)
             + "endbfchar\nendcmap CMapName currentdict /CMap defineresource pop end end").encode())
         fx = doc.get_new_xref()
-        doc.update_object(fx, "<< /Type /Font /Subtype /Type3 /FontBBox [%d %d %d %d] /FontMatrix [0.001 0 0 0.001 0 0] "
+        doc.update_object(fx, "<< /Type /Font /Subtype /Type3 /FontBBox [%d %d %d %d] /FontMatrix [%.8f 0 0 %.8f 0 0] "
             "/CharProcs << %s >> /Encoding << /Type /Encoding /Differences [1 %s] >> /FirstChar 1 /LastChar %d /Widths [%s] "
-            "/Resources << >> /ToUnicode %d 0 R >>" % (bbox[0], bbox[1] - 1, bbox[2] + 1, bbox[3] + 1,
+            "/Resources << >> /ToUnicode %d 0 R >>" % (bbox[0], bbox[1] - 1, bbox[2] + 1, bbox[3] + 1, km, km,
             " ".join(f"/{nm} {x} 0 R" for nm, x in cp.items()), " ".join("/" + nm for nm in names), len(names),
-            " ".join(f"{wd:.1f}" for wd in widths), tu))
+            " ".join(f"{wd:.0f}" for wd in widths), tu))
         fname = f"T3{tag}L{li}"
         doc.xref_set_key(res_xref, f"Font/{fname}", f"{fx} 0 R")
         origin = to_pdf(ws[0]["_gx0"], ly1)
@@ -117,10 +133,10 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
         # next; a word-wide glyph made 15pt line pitch look like one line, and
         # pdfium then sorted equal-x runs among themselves — body lines came
         # out swapped in pairs. A narrow glyph at both ends restores the test.
-        parts.append(f"<01> {sp_w:.1f}")
+        parts.append(f"<01> {sp_w * tj:.1f}")
         for k, w in enumerate(ws[:253]):
             if k:
-                parts.append(f"<01> {-((w['_gx0'] - pen) * u - sp_w):.1f}")
+                parts.append(f"<01> {-((w['_gx0'] - pen) * u - sp_w) * tj:.1f}")
             parts.append(f"<{k + 2:02X}>")
             pen = w["_gx0"] + w["_adv"] / u
         parts.append("<01>")
