@@ -39,3 +39,13 @@ def test_words_split_where_safe(fixture):
             pcs = split_word(w, lh); n += 1; split += pcs[0]["split"]
             assert "".join(p["text"] for p in pcs).replace(" ", "") == (w["text"].strip() or w["az"]).replace(" ", "")   # text is never altered
     assert 0.15 < split / n < 0.6                        # a fair share splits; the rest stay whole rather than guess
+
+
+def test_vowelled_words_stay_whole_and_storage_inverts():
+    from inkscript.text import visual
+    # pdfium reverses letter runs between marks in place; storing the same
+    # transformation means pdfium gives the word back
+    assert visual("كتاب") == "باتك"
+    assert visual("كتابُ") == "باتكُ"
+    assert visual("التَّقَاوِيمِ") == "تلاَّقَواِميِ"
+    assert visual("379هـ)") == "379)ـه"

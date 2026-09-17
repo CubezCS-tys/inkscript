@@ -65,6 +65,9 @@ RTL = re.compile(r"[؀-ۯۺ-ۿݐ-ݿﭐ-﷿ﹰ-﻿]")
 MARKS = re.compile(r"[\u064B-\u065F\u0670]")        # tashkeel and superscript alef
 
 
+CLUSTER = re.compile(r".[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*")   # a character with the marks that follow it
+
+
 def visual(s: str) -> str:
     """A glyph's text in visual order: what a native Arabic PDF stores."""
     toks = s.split()
@@ -73,8 +76,16 @@ def visual(s: str) -> str:
     def vis(t):
         if not RTL.search(t):
             return t
-        runs = re.findall(r"[0-9٠-٩]+|[^0-9٠-٩]+", t)
-        return "".join(r if re.match(r"[0-9٠-٩]", r) else r[::-1] for r in reversed(runs))
+        # pdfium (Chrome) restores a stored glyph string by reversing each run
+        # of letters BETWEEN vowel marks in place, the marks staying where
+        # they are; digit runs are left alone. That transformation is its own
+        # inverse, so it is applied to the word here and pdfium undoes it.
+        # Reversing by character instead put a word-final mark first and
+        # broke every vowelled word (a poem page copied out 6% intact).
+        # Measured against Chrome's own PDF of the same line, which no engine
+        # extracts correctly at all; there is no native reference to follow.
+        segs = re.findall(r"[0-9٠-٩]+|[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]+|[^0-9٠-٩\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]+", t)
+        return "".join(x if re.match(r"[0-9٠-٩\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]", x) else x[::-1] for x in segs)
     return " ".join(vis(t) for t in reversed(toks))
 
 
@@ -122,3 +133,17 @@ def pieces(word: str) -> list[str]:
                 cur += ch                  # digits, Latin, punctuation: one piece per run (`126/4`, `(1)`), read as one by a viewer's bidi
     if cur: out.append(cur)
     return out
+
+
+def strip_markdown(text: str) -> str:
+    """Gemini sometimes decorates a transcription (`# طنجة`, `---`, `**x**`)
+    despite the prompt. Those marks are not on the page; remove them before
+    the words are aligned to Azure's boxes."""
+    out = []
+    for line in text.split("\n"):
+        if re.fullmatch(r"\s*[-*_=]{3,}\s*", line):
+            continue
+        line = re.sub(r"^\s*#{1,6}\s+", "", line)
+        line = re.sub(r"\*\*(.+?)\*\*", r"\1", line)
+        out.append(line)
+    return "\n".join(out)

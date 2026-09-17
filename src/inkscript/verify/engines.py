@@ -32,12 +32,16 @@ def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
     return v
 
 
-def pdfium_order(pdf: Path) -> tuple[int, int]:
+def pdfium_order(pdf: Path, skip: set[int] | None = None) -> tuple[int, int]:
     """(reading-order inversions, lines) across all pages in pdfium: a line whose
-    median baseline sits above the previous line's by more than half a line."""
+    median baseline sits above the previous line's by more than half a line.
+    `skip` names pages (1-based) to leave out — sideways pages, whose lines
+    run down the page and cannot be judged by baseline."""
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(str(pdf)); inv = nl = 0
     for pn in range(len(doc)):
+        if skip and pn + 1 in skip:
+            continue
         tp = doc[pn].get_textpage(); t = tp.get_text_range(); lines, cur = [], []
         for k, c in enumerate(t):
             if c in "\r\n":
@@ -47,5 +51,12 @@ def pdfium_order(pdf: Path) -> tuple[int, int]:
         if cur: lines.append(cur)
         base = [statistics.median(b[1] for b in L) for L in lines]
         h = [statistics.median(b[3] - b[1] for b in L) for L in lines]
-        inv += sum(1 for i in range(len(base) - 1) if base[i + 1] > base[i] + 0.5 * h[i]); nl += len(lines)
+        xr = [(min(b[0] for b in L), max(b[2] for b in L)) for L in lines]
+        # A jump back up the page is an inversion only within a column: two
+        # consecutive lines that do not overlap horizontally are a column
+        # change (right column finished, left column begins), not an error.
+        def same_col(i, j):
+            o = min(xr[i][1], xr[j][1]) - max(xr[i][0], xr[j][0])
+            return o > 0.3 * min(xr[i][1] - xr[i][0], xr[j][1] - xr[j][0])
+        inv += sum(1 for i in range(len(base) - 1) if base[i + 1] > base[i] + 0.5 * h[i] and same_col(i, i + 1)); nl += len(lines)
     return inv, nl

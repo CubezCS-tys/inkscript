@@ -46,6 +46,15 @@ knowledge about the ink; the page always draws each occurrence's own outline
 (see pdf-writing-rules.md, "Exactness"). Different type weights are different
 alphabets; that is correct, not a defect.
 
+## Checking a document against itself
+
+`inkscript check OUT/native` reads each `<stem>.shapes.json` and lists
+*contradictions*: words whose ink signature (shape ids right to left, small
+blobs tagged above/on/below) matches another word's but whose text differs —
+one of the readings is wrong. It also lists every word containing a digit,
+since a wrong date is the error that hurts most and shows least. `--out`
+writes `<stem>.review.json` per document.
+
 ## What the geometry does not do yet
 
 - Letter-level glyphs (Arabic joins letters; a blob is a sub-word).

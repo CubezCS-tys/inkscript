@@ -32,7 +32,7 @@ inkscript native --azure-dir DATA/azure --scan-dir DATA/input \
     --frontpage-dir OUT/frontpage --out OUT/native --vector --verify
 ```
 
-`inkscript --help` lists the five commands. `tests/fixtures/` holds one real
+`inkscript --help` lists the commands (`fetch` pulls documents from the corpus bucket; `check` writes a review list from the shape alphabet). `tests/fixtures/` holds one real
 document (five pages) so the tests and a first run need no data setup.
 
 ## Status

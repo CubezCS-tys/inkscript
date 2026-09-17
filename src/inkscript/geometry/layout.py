@@ -40,7 +40,11 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
             for k, Bl in enumerate(lines):
                 if k == i or len(Bl) <= 2: continue
                 bx0, by0, bx1, by1 = box(Bl); bh = by1 - by0
-                if overlap(ay0, ay1, by0, by1) > 0.5 * ah and overlap(ax0, ax1, bx0, bx1) <= 0:
+                # Beside it means beside it: a short line in the other column of
+                # a two-column page also sits on the same row with no horizontal
+                # overlap, and merging those swallowed whole pages (87 lines -> 8).
+                near = min(abs(ax0 - bx1), abs(bx0 - ax1)) <= 1.5 * bh
+                if ah < 0.8 * bh and near and overlap(ay0, ay1, by0, by1) > 0.5 * ah and overlap(ax0, ax1, bx0, bx1) <= 0:
                     Bl.extend(A); del lines[i]; merged = True; break
             if merged: break
 
@@ -125,20 +129,30 @@ def split_word(w, lh: float):
     """One glyph per piece when the text's pieces and the ink's pieces agree
     in number; otherwise the word stays one glyph. Never guesses."""
     from ..text import pieces
-    from ..text import ARABIC_LETTER
+    from ..text import ARABIC_LETTER, TRANSPARENT
     text = w["text"].strip() or w["az"]
-    tp = pieces(text)
+    whole = [dict(w, text=text, blobs=w["blobs"], first=True, split=False, tok=0)]
+    # A word carrying vowel marks stays one glyph. pdfium never reorders
+    # glyphs inside a word; for an unvowelled word that is harmless because
+    # its letter-run reversal spans the whole word, but a mark cuts the run,
+    # and split pieces then come out in the wrong order whatever is stored
+    # (measured; no invisible separator changes it).
+    if TRANSPARENT.search(text):
+        return whole
+    # Tokens that share one Azure box are separate words for spacing.
+    tp, tok = [], []
+    for ti, token in enumerate(text.split()):
+        for pc in pieces(token):
+            tp.append(pc); tok.append(ti)
     ip = ink_pieces(w, lh)
     # A digit/Latin run of n characters is printed as n separate blobs but
     # stays one glyph, so it consumes n ink pieces.
-    from ..text import TRANSPARENT
     arabic = [bool(ARABIC_LETTER.match(t[0])) for t in tp]
     need = [1 if a else len(t) for t, a in zip(tp, arabic)]
-    whole = [dict(w, text=text, blobs=w["blobs"], first=True, split=False)]
     if len(tp) < 2 or sum(need) != len(ip):
         return whole
     out, i = [], 0
-    for k, (t, n, a) in enumerate(zip(tp, need, arabic)):   # both right to left
+    for k, (t, n, a, ti) in enumerate(zip(tp, need, arabic, tok)):   # both right to left
         gs = ip[i:i + n]; i += n
         x0, x1 = min(g["x0"] for g in gs), max(g["x1"] for g in gs)
         # A matching count is not proof: a detached stroke (the upper bar of
@@ -150,5 +164,5 @@ def split_word(w, lh: float):
             per = (x1 - x0) / lh / letters
             if per < 0.12 or per > 1.4:
                 return whole
-        out.append(dict(w, text=t, blobs=[b for g in gs for b in g["blobs"]], x0=x0, x1=x1, first=(k == 0), split=True, order=k))
+        out.append(dict(w, text=t, blobs=[b for g in gs for b in g["blobs"]], x0=x0, x1=x1, first=(k == 0), split=True, order=k, tok=ti))
     return out

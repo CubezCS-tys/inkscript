@@ -11,10 +11,16 @@ rule records the experiment, not a theory.
 - **One Type 3 font per line, one glyph per word.** A glyph's drawing
   commands are the word's traced ink polygons (holes filled even-odd), its
   advance is the ink width, its ToUnicode entry is the word's text.
-- **Text stored in visual order.** Extractors take a glyph's characters as
-  laid out and run bidi over them; Arabic stored logically extracted
-  backwards (`تاسارد`). Arabic letters are stored reversed; **digit runs are
-  not** (native PDFs store `379هـ)` as `)ـه379`; reversing digits gave `973`).
+- **Text stored the way pdfium inverts it.** pdfium (Chrome) restores a
+  glyph string by reversing each run of letters *between vowel marks* in
+  place; marks stay put and digit runs are left alone. That transformation
+  is its own inverse, so the word is stored with it applied. Reversing by
+  character instead put a word-final mark first and pdfium then read the
+  run left-to-right: a fully vowelled poem page copied out 6% intact, now
+  100%. There is no native reference to follow here — Chrome's own PDF of
+  the same line extracts wrongly in every engine — and MuPDF and poppler
+  disagree with pdfium on vowelled text, so Chrome's engine is the target
+  and the others are measured, not matched.
 - **Punctuation rides on its word** when Azure boxed it separately and the
   ink touches; a box holding several tokens is split into one glyph per
   token when its ink splits the same way. A glyph whose text *starts* with
@@ -48,6 +54,39 @@ rule records the experiment, not a theory.
 - **Invisible over the scan = zero opacity (ExtGState ca 0)**, not render
   mode 3, which does not apply to Type 3 glyphs.
 
+## Source pages
+
+- **The corpus PDFs are Azure's own searchable PDFs.** Every `BT…ET` text
+  object is cut out of their content streams before the layer is added
+  (the image and line art untouched, checked pixel-identical). Redaction
+  was not enough: MuPDF left 19 of 34 runs it could not measure, and every
+  engine then read two layers — lines merged, thousands of order inversions.
+- **Gemini's page-1 read is stripped of Markdown** (`# …`, `---`, `**…**`)
+  before alignment; it decorates some pages despite the prompt.
+- **Born-digital pages are left untouched.** A page whose text is set in
+  real embedded fonts (a modern journal typeset in InDesign) already is
+  native text; stripping "the text layer" there erased the page's words.
+  Azure's scans carry exactly one font, `Dummy`; anything else is real.
+- **Sideways pages** (tables printed landscape; Azure's page angle ≈ ±90°)
+  are laid out in a turned frame and written with a rotated text matrix, so
+  the glyphs land on the ink and pdfium reads the lines as lines (65–76% →
+  100% of words intact on such pages).
+- **Runs are written in Azure's line order**, which is reading order: on a
+  two-column page Azure gives the right column's lines, then the left's,
+  band by band. Sorting by baseline interleaved the columns. Vertical
+  neighbours for box clipping still come from page order.
+- **Superscript-line folding is limited to a small line right beside a
+  larger one**; without the size and distance limits, a short line in the
+  other column of a two-column page was folded into it, chain-merging 87
+  lines into 8.
+
+## Not handled yet
+
+- Reading order on two-column pages is only as good as Azure's line order.
+- MuPDF- and poppler-based viewers get vowelled words wrong where Chrome
+  gets them right; the engines contradict each other on this and Chrome is
+  the target.
+
 ## Exactness
 
 - **Glyph space is in scan pixels.** The FontMatrix scales one glyph unit to
@@ -80,6 +119,13 @@ selection. Glyphs are therefore one *piece* of ink where that is certain:
   plausible for its letter count (0.12–1.4 line heights per letter): a
   detached stroke (the bar of ك) can make the count match by accident.
   Otherwise the word stays one glyph. Never guess.
+- **A word carrying vowel marks stays one glyph.** pdfium never reorders
+  glyphs inside a word; an unvowelled word survives because its letter-run
+  reversal spans all its pieces, but a mark cuts the run and split pieces
+  come out in the wrong order whatever is stored (no invisible separator
+  changes it — every one leaks into the text).
+- **Tokens that share one Azure box are separate words for spacing**, or
+  they copy out fused (`مكةتاريخ`).
 - **Within a word, pieces are written in text order** (reversed for the
   right-to-left run), not by ink position: a و whose tail sweeps under the
   next letter starts further left than that letter.

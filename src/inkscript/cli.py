@@ -17,7 +17,7 @@ def cmd_frontpage(a) -> int:
     from .ocr.azure import load_azure  # noqa
     from .ocr.gemini import client, gemini_page1, GEMINI_MODEL, GEMINI_IN_PER_M, GEMINI_OUT_PER_M
     from .ocr.frontpage import build, verify, FONT
-    from .text import fold_digits
+    from .text import fold_digits, strip_markdown
     ad, out = Path(a.azure_dir).expanduser(), Path(a.out).expanduser()
     sd = Path(a.scan_dir).expanduser() if a.scan_dir else None
     stems = sorted(d.name for d in ad.iterdir() if (d / f"{d.name}.json").exists() and (d / f"{d.name}.pdf").exists())
@@ -32,7 +32,7 @@ def cmd_frontpage(a) -> int:
         aj, apdf = ad / stem / f"{stem}.json", ad / stem / f"{stem}.pdf"
         scan = sd / f"{stem}.pdf" if sd and (sd / f"{stem}.pdf").exists() else apdf
         gtext, usage = gemini_page1(gc, scan, out / f"{stem}.gemini.p1.md", a.gemini_model)
-        gtext = fold_digits(gtext) if gtext is not None else None
+        gtext = fold_digits(strip_markdown(gtext)) if gtext is not None else None
         tin += usage.get("in", 0); tout += usage.get("out", 0)
         st, placed = build(stem, aj, apdf, gtext, out / f"{stem}.pdf", a.min_exact, a.font)
         vs = ""
@@ -54,19 +54,23 @@ def cmd_frontpage(a) -> int:
 def cmd_native(a) -> int:
     from .pdf.native import build_document
     from .verify.engines import pdfium_words, pdfium_order
-    ad, sd, out = Path(a.azure_dir).expanduser(), Path(a.scan_dir).expanduser(), Path(a.out).expanduser()
+    ad, out = Path(a.azure_dir).expanduser(), Path(a.out).expanduser()
+    sd = Path(a.scan_dir).expanduser() if a.scan_dir else None
     fd = Path(a.frontpage_dir).expanduser() if a.frontpage_dir else None
-    stems = sorted(d.name for d in ad.iterdir() if (d / f"{d.name}.json").exists() and (sd / f"{d.name}.pdf").exists())
+    scan = lambda stem: (sd / f"{stem}.pdf") if sd and (sd / f"{stem}.pdf").exists() else ad / stem / f"{stem}.pdf"
+    stems = sorted(d.name for d in ad.iterdir() if (d / f"{d.name}.json").exists() and scan(d.name).exists())
     if a.docs: stems = stems[:a.docs]
     reports = []
     for stem in stems:
-        r = build_document(stem, ad, sd / f"{stem}.pdf", fd / f"{stem}.gemini.p1.md" if fd else None, out, a.vector, a.min_exact)
-        line = f"{stem:<24} {len(r['pages'])} pages  {sum(p.get('glyphs', 0) for p in r['pages']):>5} glyphs  p1 {r['pages'][0]['text']}"
+        r = build_document(stem, ad, scan(stem), fd / f"{stem}.gemini.p1.md" if fd else None, out, a.vector, a.min_exact)
+        nd = sum(1 for p in r["pages"] if p["text"] == "native-digital")
+        line = f"{stem:<24} {len(r['pages'])} pages  {sum(p.get('glyphs', 0) for p in r['pages']):>5} glyphs  p1 {r['pages'][0]['text']}" + (f"  ({nd} born-digital pages left as they are)" if nd else "")
         if a.verify:
             r["verify"] = v = pdfium_words(out / f"{stem}.pdf", r, ad)
-            inv, nl = pdfium_order(out / f"{stem}.pdf"); r["order"] = dict(inversions=inv, lines=nl)
+            rotated = {p["page"] for p in r["pages"] if p.get("rotated")}
+            inv, nl = pdfium_order(out / f"{stem}.pdf", skip=rotated); r["order"] = dict(inversions=inv, lines=nl, sideways_pages=len(rotated))
             tw, ti = sum(x["words"] for x in v), sum(x["intact"] for x in v)
-            line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions"
+            line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
         print(line, flush=True); reports.append(r)
     out.mkdir(parents=True, exist_ok=True)
     (out / "native_pdf_report.json").write_text(json.dumps(reports, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -118,6 +122,47 @@ def cmd_alphabet(a) -> int:
     return 0
 
 
+def cmd_fetch(a) -> int:
+    """Pull <id>/<id>.pdf + .json from the corpus bucket into --out/<id>/ (the --azure-dir layout)."""
+    import subprocess
+    from concurrent.futures import ThreadPoolExecutor
+    out = Path(a.out).expanduser(); out.mkdir(parents=True, exist_ok=True)
+    ids = list(a.ids)
+    for f in a.id_file or []:
+        ids += [l.strip() for l in Path(f).read_text().splitlines() if l.strip()]
+    def one(i):
+        d = out / i; d.mkdir(exist_ok=True); got = []
+        for ext in ("pdf", "json"):
+            if (d / f"{i}.{ext}").exists(): got.append(ext); continue
+            r = subprocess.run(["aws", "s3", "cp", f"s3://{a.bucket}/{i}/{i}.{ext}", str(d / f"{i}.{ext}"), "--quiet"], capture_output=True, text=True)
+            if r.returncode == 0: got.append(ext)
+        return i, got
+    with ThreadPoolExecutor(a.workers) as ex:
+        for i, got in ex.map(one, ids):
+            print(f"{i}: {' '.join(got) or 'MISSING'}", flush=True)
+    return 0
+
+
+def cmd_check(a) -> int:
+    from .verify.consistency import review
+    out = Path(a.out).expanduser() if a.out else None
+    tot = dict(words=0, repeated=0, conflicts=0, suspects=0, numbers=0)
+    for sj in sorted(Path(a.dir).expanduser().glob("*.shapes.json")):
+        r = review(sj); stem = sj.name.replace(".shapes.json", "")
+        ns = sum(len(c["suspects"]) for c in r["conflicts"])
+        print(f"{stem:<24} {r['words']:>6} words, {r['repeated_ink']:>5} with ink seen elsewhere in the document, "
+              f"{len(r['conflicts']):>3} contradictions ({ns} words to review), {len(r['numbers']):>4} numbers", flush=True)
+        for c in r["conflicts"][:a.show]:
+            print(f"    {c['readings']}  -> pages {sorted({s['page'] for s in c['suspects']})}")
+        tot["words"] += r["words"]; tot["repeated"] += r["repeated_ink"]; tot["conflicts"] += len(r["conflicts"]); tot["suspects"] += ns; tot["numbers"] += len(r["numbers"])
+        if out:
+            out.mkdir(parents=True, exist_ok=True)
+            (out / f"{stem}.review.json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"\nall: {tot['words']} words; {tot['repeated']} share ink with another word ({tot['repeated'] / max(1, tot['words']):.0%}); "
+          f"{tot['conflicts']} contradictions, {tot['suspects']} words to review; {tot['numbers']} numbers")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="inkscript", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -131,7 +176,7 @@ def main(argv=None) -> int:
     p.set_defaults(fn=cmd_frontpage)
 
     p = sub.add_parser("native", help="PDF whose text layer is the page's own ink")
-    p.add_argument("--azure-dir", required=True); p.add_argument("--scan-dir", required=True, help="image-only source PDFs, <stem>.pdf")
+    p.add_argument("--azure-dir", required=True); p.add_argument("--scan-dir", help="source PDFs <stem>.pdf; defaults to the PDF beside each Azure JSON (its text layer is stripped)")
     p.add_argument("--frontpage-dir", help="frontpage output: <stem>.gemini.p1.md gives page 1 Gemini's text")
     p.add_argument("--out", required=True); p.add_argument("--docs", type=int, default=0); p.add_argument("--min-exact", type=float, default=0.6)
     p.add_argument("--vector", action="store_true", help="also write <stem>_vector.pdf: no image, glyphs only")
@@ -146,6 +191,16 @@ def main(argv=None) -> int:
     p = sub.add_parser("trace", help="one page -> outlines, fidelity, geometry JSON")
     p.add_argument("--pdf", required=True); p.add_argument("--page", type=int, default=1); p.add_argument("--dpi", type=int, default=300)
     p.add_argument("--out", required=True); p.set_defaults(fn=cmd_trace)
+
+    p = sub.add_parser("fetch", help="pull documents from the corpus bucket into the --azure-dir layout")
+    p.add_argument("ids", nargs="*"); p.add_argument("--id-file", action="append", help="file of ids, one per line")
+    p.add_argument("--bucket", default="mandumah-source-docs"); p.add_argument("--out", required=True); p.add_argument("--workers", type=int, default=8)
+    p.set_defaults(fn=cmd_fetch)
+
+    p = sub.add_parser("check", help="review list: same ink, different text; and every number")
+    p.add_argument("dir", help="a native output dir (reads <stem>.shapes.json)"); p.add_argument("--out", help="write <stem>.review.json here")
+    p.add_argument("--show", type=int, default=3, help="contradictions to print per document")
+    p.set_defaults(fn=cmd_check)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")
     p.add_argument("pdfs", nargs="+"); p.add_argument("--pages", type=int, default=0, help="first N pages of each")

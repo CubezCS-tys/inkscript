@@ -28,8 +28,31 @@ def hex16(s: str) -> str:
     return s.encode("utf-16-be").hex().upper()
 
 
-def write_text_layer(doc, pg, M, lines, tag, invisible):
+class Frame:
+    """The pixel frame the layout was done in, relative to the page's own.
+
+    rot=0: the page as rendered. rot=90 / -90: the page image was turned so
+    that sideways text (Azure angle ≈ ±90°) reads horizontally; (u, v) are
+    pixels in that turned image, W and H the page image's own width/height.
+    """
+    def __init__(self, rot: int, W: int, H: int):
+        self.rot, self.W, self.H = rot, W, H
+
+    def to_page(self, u, v):
+        if self.rot == 90:    return self.W - v, u          # image turned counter-clockwise
+        if self.rot == -90:   return v, self.H - u          # clockwise
+        return u, v
+
+    def text_axes(self):
+        """(x-axis, y-axis) of text space in page-pixel terms (y down)."""
+        if self.rot == 90:    return (0, 1), (1, 0)
+        if self.rot == -90:   return (0, -1), (-1, 0)
+        return (1, 0), (0, -1)
+
+
+def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = None):
     """Type 3 font per line + one text run per line, appended as content."""
+    frame = frame or Frame(0, 0, 0)
     res = doc.xref_get_key(pg.xref, "Resources")
     if res[0] == "xref":
         res_xref = int(res[1].split()[0])
@@ -53,8 +76,22 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
     for L in live:
         bl = [b for w in L if w["blobs"] for b in w["blobs"]]
         geo.append(dict(L=L, ly1=max(w["y1"] for w in L if w["blobs"]), top=min(b["y"] for b in bl), bot=max(b["y"] + b["h"] for b in bl)))
-    geo.sort(key=lambda g: g["ly1"])
-    to_pdf = lambda x, y: fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
+    # Vertical neighbours (for box clipping) come from the page order; the
+    # runs themselves are written in Azure's line order, which is reading
+    # order: on a two-column page Azure gives the right column's lines, then
+    # the left's, band by band. Sorting by baseline interleaved the columns.
+    by_y = sorted(geo, key=lambda g: g["ly1"])
+    for i, g in enumerate(by_y):
+        g["above"] = by_y[i - 1] if i else None
+        g["below"] = by_y[i + 1] if i + 1 < len(by_y) else None
+    def to_pdf(u, v):
+        x, y = frame.to_page(u, v)
+        return fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
+    (ax, ay), (bx, by) = frame.text_axes()
+    # M's linear part maps page-pixel directions to PDF directions.
+    a, b = M.a * ax + M.c * ay, M.b * ax + M.d * ay
+    c, d = M.a * bx + M.c * by, M.b * bx + M.d * by
+    tm = f"{a:.4f} {b:.4f} {c:.4f} {d:.4f}"
     glyphs = 0
     stats = dict(words=0, split=0, pieces=0)
     for li, g in enumerate(geo):
@@ -71,8 +108,8 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
         tj = 1000.0 * km
         ly1 = int(round(ly1))                              # integer baseline: every glyph coordinate stays integral
         gap = max(2.0, GAP_FRAC * (g["bot"] - g["top"]))
-        if li > 0:
-            ly0 = max(ly0, geo[li - 1]["bot"] + gap)
+        if g["above"] is not None:
+            ly0 = max(ly0, g["above"]["bot"] + gap)
         # One glyph per connected piece of ink where text and ink agree on
         # the count (see layout.split_word); the word otherwise. Pieces are
         # laid out in visual order; a word's pieces carry its id so that the
@@ -86,12 +123,12 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
             # starts further left than that letter and would otherwise be
             # written after it, and the word would copy out as `اولعالم`.
             for pc in reversed(pcs) if len(pcs) > 1 else pcs:
-                pc["_wid"] = wid; ws.append(pc)
+                pc["_wid"] = (wid, pc.get("tok", 0)); ws.append(pc)   # a space glyph goes between tokens, not pieces
         stats["words"] += wid + 1 if L else 0
         stats["split"] += sum(1 for w in ws if w["split"] and w["first"])
         stats["pieces"] += len(ws)
         lim_top = max(1.0, ly1 - ly0) * u
-        lim_bot = -((geo[li + 1]["top"] - ly1) - gap) * u if li + 1 < len(geo) else -1e9
+        lim_bot = -((g["below"]["top"] - ly1) - gap) * u if g["below"] is not None else -1e9
         lh = max(1.0, ly1 - ly0)
         gaps = [ws[k + 1]["x0"] - ws[k]["x1"] for k in range(len(ws) - 1)]
         sp_w = float(round(max(1.0, min([g for g in gaps if g > 0] + [0.2 * lh])) * u))   # whole pixels: the glyph's advance and the pen must agree
@@ -167,13 +204,16 @@ def write_text_layer(doc, pg, M, lines, tag, invisible):
             parts.append(f"<{k + 2:02X}>")
             pen = w["_gx0"] + w["_adv"] / u
         parts.append("<01>")
-        out.append(f"BT /{fname} {size_pt:.3f} Tf 1 0 0 1 {origin.x:.2f} {origin.y:.2f} Tm [{' '.join(parts)}] TJ ET")
+        out.append(f"BT /{fname} {size_pt:.3f} Tf {tm} {origin.x:.2f} {origin.y:.2f} Tm [{' '.join(parts)}] TJ ET")
     out.append("Q")
     return "\n".join(out) + "\n", glyphs, stats
 
 
-def stray_paths(stray, M):
-    to_pdf = lambda x, y: fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
+def stray_paths(stray, M, frame: "Frame | None" = None):
+    frame = frame or Frame(0, 0, 0)
+    def to_pdf(u, v):
+        x, y = frame.to_page(u, v)
+        return fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
     cmds = ["q 0 g"]
     for bl in stray:
         for p in bl["paths"]:
