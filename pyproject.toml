@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "inkscript"
+version = "0.1.0"
+description = "Ink as geometry, geometry as a font, the scanned page as native text."
+requires-python = ">=3.10"
+dependencies = [
+  "pymupdf>=1.26",
+  "opencv-python-headless>=4.9",
+  "numpy>=1.26",
+  "python-dotenv>=1.0",
+  "google-genai>=1.0",
+  "pypdfium2>=4.30",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+inkscript = "inkscript.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
