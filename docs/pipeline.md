@@ -55,6 +55,13 @@ one of the readings is wrong. It also lists every word containing a digit,
 since a wrong date is the error that hurts most and shows least. `--out`
 writes `<stem>.review.json` per document.
 
+`inkscript numbers OUT/review OUT/native` reads every number again from its
+own ink (crops, twelve per Gemini request, sideways pages turned upright)
+and writes `<stem>.numbers.json`; a number whose digits the two readings
+disagree on goes to review, one they agree on is very likely right. Nothing
+is corrected automatically. Trial: 36 of 36 agreed on a footnote-heavy
+document, $0.03.
+
 ## What the geometry does not do yet
 
 - Letter-level glyphs (Arabic joins letters; a blob is a sub-word).

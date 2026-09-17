@@ -168,6 +168,24 @@ def cmd_check(a) -> int:
     return 0
 
 
+def cmd_numbers(a) -> int:
+    from .ocr.gemini import client, GEMINI_MODEL, GEMINI_IN_PER_M, GEMINI_OUT_PER_M
+    from .verify.numbers import reread_numbers
+    gc = client(); tot = dict(numbers=0, agree=0, tin=0, tout=0)
+    rd = Path(a.review_dir).expanduser(); nd = Path(a.native_dir).expanduser()
+    reviews = sorted(rd.glob("*.review.json"))[:a.docs] if a.docs else sorted(rd.glob("*.review.json"))
+    for rj in reviews:
+        stem = rj.name.replace(".review.json", ""); pdf = nd / f"{stem}.pdf"
+        if not pdf.exists(): continue
+        r = reread_numbers(gc, a.gemini_model or GEMINI_MODEL, pdf, rj, limit=a.limit)
+        (rd / f"{stem}.numbers.json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+        tot["numbers"] += r["numbers"]; tot["agree"] += r["agree"]; tot["tin"] += r["usage"]["tokens_in"]; tot["tout"] += r["usage"]["tokens_out"]
+        print(f"{stem:<24} {r['numbers']:>4} numbers, {r['agree']:>4} agree, {len(r['disagree']):>3} to review" + (f"  e.g. {[(d['ocr'], d['gemini']) for d in r['disagree'][:3]]}" if r["disagree"] else ""), flush=True)
+    cost = tot["tin"] / 1e6 * GEMINI_IN_PER_M + tot["tout"] / 1e6 * GEMINI_OUT_PER_M
+    print(f"\nall: {tot['numbers']} numbers re-read, {tot['agree']} agree ({tot['agree'] / max(1, tot['numbers']):.1%}), {tot['numbers'] - tot['agree']} to review; gemini ${cost:.3f}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="inkscript", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -207,6 +225,11 @@ def main(argv=None) -> int:
     p.add_argument("--show", type=int, default=3, help="contradictions to print per document")
     p.add_argument("--html", action="store_true", help="also write <stem>.review.html: ink crops beside readings")
     p.set_defaults(fn=cmd_check)
+
+    p = sub.add_parser("numbers", help="second reading of every number from its own ink (Gemini); disagreements to review")
+    p.add_argument("review_dir", help="dir of <stem>.review.json from `check --out`"); p.add_argument("native_dir", help="dir of the native PDFs")
+    p.add_argument("--docs", type=int, default=0); p.add_argument("--limit", type=int, default=0, help="numbers per document (0 = all)")
+    p.add_argument("--gemini-model", default=None); p.set_defaults(fn=cmd_numbers)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")
     p.add_argument("pdfs", nargs="+"); p.add_argument("--pages", type=int, default=0, help="first N pages of each")
