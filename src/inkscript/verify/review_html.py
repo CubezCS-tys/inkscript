@@ -26,7 +26,12 @@ def crop(page, box, rot, W, H, pad=6):
     f = Frame(rot, W, H)
     (x0, y0), (x1, y1) = f.to_page(box[0], box[1]), f.to_page(box[2], box[3])
     r = fitz.Rect(min(x0, x1) - pad, min(y0, y1) - pad, max(x0, x1) + pad, max(y0, y1) + pad) * (72 / DPI)
-    pix = page.get_pixmap(dpi=150, clip=r & page.rect, colorspace=fitz.csGRAY)
+    r = r & page.rect
+    if r.is_empty or r.width < 2 or r.height < 2:
+        return ""
+    pix = page.get_pixmap(dpi=150, clip=r, colorspace=fitz.csGRAY)
+    if pix.w < 1 or pix.h < 1:
+        return ""
     return "data:image/jpeg;base64," + base64.b64encode(pix.tobytes("jpeg", jpg_quality=70)).decode()
 
 
