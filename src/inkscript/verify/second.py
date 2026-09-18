@@ -73,8 +73,12 @@ def reread_contradictions(client, model, pdf: Path, review_json: Path, batch: in
         for k, (c, sp) in enumerate(chunk):
             g = got[k] if got is not None and k < len(got) and isinstance(got[k], str) else None
             others = [t for t in c["readings"] if core(t) != core(sp["text"])]
-            if g is None or not core(g):
+            if g is None or not g.strip():
                 verdict = "unread"
+            elif core(g) == core(sp["text"]) and (core(g) or norm(g).strip() == norm(sp["text"]).strip()):   # a dash is a dash
+                verdict = "confirmed"
+            elif not core(g):
+                verdict = "review"
             elif core(g) == core(sp["text"]):
                 verdict = "confirmed"
             elif any(core(g) == core(t) for t in others):

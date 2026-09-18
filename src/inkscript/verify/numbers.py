@@ -24,13 +24,14 @@ def crop_png(page, box, rot, W, H, pad=8):
     f = Frame(rot, W, H)
     (x0, y0), (x1, y1) = f.to_page(box[0], box[1]), f.to_page(box[2], box[3])
     r = fitz.Rect(min(x0, x1) - pad, min(y0, y1) - pad, max(x0, x1) + pad, max(y0, y1) + pad) * (72 / DPI)
-    pix = page.get_pixmap(dpi=300, clip=r & page.rect, colorspace=fitz.csGRAY)
-    if not rot:
-        return pix.tobytes("png")
-    # a sideways page: turn the crop upright, as the layout did, or the
-    # digits are read in the wrong order
+    # Three times the scan's resolution: a two-letter word is 40 px wide at
+    # 300 dpi, too small a picture for a reliable reading.
+    pix = page.get_pixmap(dpi=900, clip=r & page.rect, colorspace=fitz.csGRAY)
     img = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
-    img = np.ascontiguousarray(np.rot90(img, 1 if rot == 90 else -1))
+    if rot:
+        # a sideways page: turn the crop upright, as the layout did, or the
+        # digits are read in the wrong order
+        img = np.ascontiguousarray(np.rot90(img, 1 if rot == 90 else -1))
     ok, png = cv2.imencode(".png", img)
     return png.tobytes()
 
