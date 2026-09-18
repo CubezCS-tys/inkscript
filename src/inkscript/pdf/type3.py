@@ -223,6 +223,19 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
             bbox = [0, min(bbox[1], dy0), max(bbox[2], adv), max(bbox[3], dy1)]
             w["_gx0"], w["_adv"] = gx0, adv
             glyphs += 1
+        # pdfium drops a text object as a duplicate (fake bold) when one of
+        # the five objects before it has the same number of items with the
+        # same char codes and lies within a fraction of a line of it. Two
+        # runs with the same word count have identical codes here, so a
+        # whole body line vanished (0005, page 4). The closing space glyph
+        # therefore has six spellings, chosen by line number.
+        end_code = 1
+        if li % 6:
+            # codes are positional (Differences from 1), so the closing
+            # glyph's CODE must differ: pad with unused copies of the space
+            for v in range(li % 6):
+                nm = f"sp{v}"; procs[nm] = procs["sp"]; names.append(nm); widths.append(sp_w); tou.append((len(names), " "))
+            end_code = len(names)
         cp = {}
         for nm, body in procs.items():
             x = doc.get_new_xref()
@@ -270,7 +283,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
                 parts.append(f"{-((w['_gx0'] - pen) * u) * tj:.1f}")
             parts.append(f"<{k + 2:02X}>")
             pen = w["_gx0"] + w["_adv"] / u
-        parts.append("<01>")
+        parts.append(f"<{end_code:02X}>")
         out.append(f"BT /{fname} {size_pt:.3f} Tf {tm} {origin.x:.2f} {origin.y:.2f} Tm [{' '.join(parts)}] TJ ET")
     out.append("Q")
     return "\n".join(out) + "\n", glyphs, stats
