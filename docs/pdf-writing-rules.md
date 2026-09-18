@@ -171,6 +171,41 @@ rule records the experiment, not a theory.
   tracing error. The alphabet is exported beside the PDF instead
   (`<stem>.shapes.json`, `<stem>.alphabet.svg`, `<stem>.alphabet.png`).
 
+## Letters (selection inside a connected run)
+
+- **A piece's letters are aligned to its ink, not detected.** The letters
+  are known (the OCR's text, split where the script cannot join), and
+  each has signatures visible in any typeface: dots above or below and
+  how many, an ascender (`ا ل ك ط`), a descending bowl (`ج ح خ`; `ن ي س ص
+  ق ل م` when the piece ends there), a width class. A dynamic programme
+  divides the piece's width into one interval per letter, scoring each
+  interval against its letter and each cut against a thin join
+  (`geometry/letters.py`). Where the old thin-join method had a clean
+  answer, the alignment agrees with it 93% of the time — and it also cuts
+  bold titles and tooth letters, which the thin method could not
+  (`experiments/08`).
+- **The document is the witness.** No signature table is trusted on its
+  own: what each letter-form actually shows in this document — ascender,
+  bowl, dot counts — is learned by majority over all its aligned
+  occurrences (at least five), and a piece's cuts are accepted only when
+  every letter shows its usual signature. Fixture: 443 of 1,057 plans
+  accepted; 1,105 letter glyphs; Chrome unchanged at 1,246/1,246 words,
+  113/113 lines. A wrong cut can only move a highlight: the letters'
+  texts concatenate to the word.
+- **A letter glyph's ink is the piece's ink cut at the column**, the main
+  run divided at the cut and each dot going with the interval that holds
+  its centre; the union of a piece's letter glyphs is exactly the piece's
+  ink. Vowelled words are not cut (marks would break the run order in
+  pdfium); lam-alef is one glyph; a kashida rides on the letter before it.
+- **Vertical neighbours for box clipping are the nearest runs on other
+  bands.** Two runs on one baseline are not each other's neighbour; taken
+  as one, they clipped a whole line's boxes to a sliver. The clip itself
+  still stops at the neighbour's ink plus the gap even when neighbours
+  overlap (a sliver there is the price): stopping at the midpoint of the
+  overlap made pdfium read neighbouring lines as one (113 → 7 lines on a
+  page), so `--verify` now warns when pdfium returns far fewer lines than
+  were written.
+
 ## Pieces (selection inside a word)
 
 A viewer decides which characters of a multi-character glyph a drag-select

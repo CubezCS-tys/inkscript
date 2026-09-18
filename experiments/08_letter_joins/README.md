@@ -49,3 +49,15 @@ method had a clean answer, the alignment's cuts fall within one stroke
 width of it **93.4%** of the time — and it also cuts the bold titles and
 the tooth-letter words the thin method could not (`align.png`: red = the
 alignment's cuts, grey = thin-join cuts).
+
+## Outcome
+
+The alignment plus the document-as-witness acceptance now live in
+`src/inkscript/geometry/letters.py` and run in every build: two passes
+(plans, then the build), accepted pieces become one glyph per letter.
+Acceptance on the fixture: 443 of 1,057 plans (42%), 1,105 letter glyphs,
+Chrome unchanged (1,246/1,246 words, 113/113 lines). `witness.py` here
+keeps the measurements: hand-written signatures alone accept 29% of
+words; the document's own majority signatures 54% of the words all of
+whose letter-forms are known; an image-similarity witness (mean images
+per letter-form) was too weak and is kept only as a statistic.
