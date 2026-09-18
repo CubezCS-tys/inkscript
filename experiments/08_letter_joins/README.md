@@ -36,3 +36,16 @@ is not lower than the teeth. Height alone cannot find those; the dots
 above and below (separate components, currently ignored) and the tooth
 rhythm would have to be read. That is the actual research problem behind
 roadmap item 4, and it is where this stops for now.
+
+## Forced alignment (`align.py`)
+
+The letters of a piece are known, so cutting is alignment, not detection:
+the ink's width is divided into one interval per letter by a dynamic
+programme scoring each interval against its letter's signatures — dots
+above/below and how many, ascender, descending bowl (form-aware), a width
+class, and a thin join at the cut. Fixture, 280 single-piece words: every
+one aligned (6 s for the document); on the 107 words where the thin-join
+method had a clean answer, the alignment's cuts fall within one stroke
+width of it **93.4%** of the time — and it also cuts the bold titles and
+the tooth-letter words the thin method could not (`align.png`: red = the
+alignment's cuts, grey = thin-join cuts).
