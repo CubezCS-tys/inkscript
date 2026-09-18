@@ -25,3 +25,14 @@ and lower contours separately so a bowl below the baseline does not hide a
 join above it; verify a cut against pdfium (per-letter glyphs copy out
 identically to the whole word, so a wrong cut changes only what a drag
 selects, never the text). Adopt cuts only where the count matches.
+
+Second criterion (the baseline band from the ink row profile at half its
+peak, instead of ± a stroke width): 30.6% clean (122 / 399; 25 over, 252
+under); allowing ink below the band (a bowl swooping under the next
+letter): 32.8% (131; 47 over, 221 under). The under-cuts that remain are
+mostly tooth letters (`ب ت ث ن ي س ش` in medial form), whose bodies are
+themselves small bumps on the baseline stroke: the join between two teeth
+is not lower than the teeth. Height alone cannot find those; the dots
+above and below (separate components, currently ignored) and the tooth
+rhythm would have to be read. That is the actual research problem behind
+roadmap item 4, and it is where this stops for now.
