@@ -60,7 +60,7 @@ def fold_digits(text: str) -> str:
 # NOT the Extended Arabic-Indic digits Urdu uses (۰-۹): Unicode classes those as
 # European numbers, PyMuPDF already lays them out left to right, and reversing
 # them turned the page number ۱۳۶۶ into ۶۶۳۱ in the extracted text.
-RTL = re.compile(r"[؀-ۯۺ-ۿݐ-ݿﭐ-﷿ﹰ-﻿]")
+RTL = re.compile(r"[؀-ۯۺ-ۿݐ-ݿﭐ-﷿ﹰ-﻿\u0590-\u05FF]")     # Arabic script and Hebrew: a 1395 article quotes Hebrew, which pdfium reads right to left too
 
 
 MARKS = re.compile(r"[\u064B-\u065F\u0670]")        # tashkeel and superscript alef

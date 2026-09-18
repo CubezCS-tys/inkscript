@@ -15,7 +15,13 @@ from ..geometry.layout import layout_page
 from .type3 import write_text_layer, stray_paths, append_content, Frame
 from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
-FIX_COVERAGE = 0.995                                  # share of a page's junk glyphs that must be mapped before the page trusts its own fonts
+# Share of a page's junk glyphs that must be mapped before the page trusts
+# its own fixed fonts instead of our layer. Off (> 1): on the 451-document
+# sample two documents crossed 99.5% and their fixed fonts read back as
+# nothing in pdfium (1400-008-004-005: 1 of 553 words on a page). The
+# neutralised-junk path is the verified one; the switch waits for a
+# verification of its own.
+FIX_COVERAGE = 1.01
 
 
 def born_digital(page) -> bool:
