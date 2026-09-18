@@ -18,40 +18,17 @@ STEM = "0582-004-009-012"
 
 def glyph_explorer(native_dir: Path, stem: str, top_share: float = 0.50, scale: float = 2.2) -> dict:
     """A region of page 1 as an image, with every glyph's outline, text and shape ids read from the PDF."""
-    import fitz
-    doc = fitz.open(native_dir / f"{stem}.pdf"); pg = doc[0]; c = pg.read_contents().decode("latin1"); H = pg.rect.height
-    glyphs = []
-    for fn, fx in {f[4]: f[0] for f in pg.get_fonts(full=True)}.items():
-        if not re.match(r"T3P1L\d+$", fn):
-            continue
-        obj = doc.xref_object(fx); tu = doc.xref_get_key(fx, "ToUnicode"); cmap = doc.xref_stream(int(tu[1].split()[0])).decode()
-        bf = {code: "".join(chr(int(h[i:i + 4], 16)) for i in range(0, len(h), 4)) for code, h in re.findall(r"<([0-9A-F]{2})> <([0-9A-F]+)>", cmap)}
-        fm = float(re.search(r"/FontMatrix\s*\[\s*([\d.]+)", obj).group(1)); widths = [float(x) for x in re.search(r"/Widths\s*\[(.*?)\]", obj, re.S).group(1).split()]
-        names = re.search(r"/Differences\s*\[\s*1\s*(.*?)\]", obj, re.S).group(1).split()
-        procs = dict(re.findall(r"/(\w+) (\d+) 0 R", re.search(r"/CharProcs\s*<<(.*?)>>", obj, re.S).group(1)))
-        m = re.search(r"BT /%s ([\d.]+) Tf ([-\d. ]+) Tm \[(.*?)\] TJ ET" % fn, c, re.S); size = float(m.group(1)); tmv = [float(x) for x in m.group(2).split()]
-        ox, oy = tmv[4], tmv[5]; k = fm * size; pen = ox
-        for tok in re.findall(r"<([0-9A-F]{2})>|(-?[\d.]+)", m.group(3)):
-            if tok[0]:
-                code = int(tok[0], 16); nm = names[code - 1].lstrip("/"); w = widths[code - 1] * k
-                if not nm.startswith("sp"):
-                    body = doc.xref_stream(int(procs[nm])).decode(); paths = []
-                    for seg in re.findall(r"(-?\d+ -?\d+ m(?: -?\d+ -?\d+ l)+ h)", body):
-                        pts = [(float(a), float(b)) for a, b in re.findall(r"(-?\d+) (-?\d+) [ml]", seg)]
-                        paths.append([[pen + px * k, oy + py * k] for px, py in pts])
-                    d1 = [float(x) for x in body.split("\n")[0].split()[:6]]
-                    ids = re.findall(r"/InkShapes \[([^\]]*)\]", doc.xref_object(int(procs[nm])))
-                    glyphs.append(dict(t=bf.get(tok[0], ""), y=oy, box=[pen, oy + d1[3] * k, pen + d1[4] * k, oy + d1[5] * k], paths=paths, ids=ids[0].split() if ids else []))
-                pen += w
-            else:
-                pen -= float(tok[1]) / 1000 * size
-    top = [g for g in glyphs if g["y"] > H * top_share]
+    import fitz, sys
+    sys.path.insert(0, str(HERE.parent.parent / "src"))
+    from inkscript.pdf.inspect import page_glyphs
+    doc = fitz.open(native_dir / f"{stem}.pdf"); pg = doc[0]; H = pg.rect.height
+    top = [g for g in page_glyphs(doc, 0) if g["box"][1] > H * top_share]
     ymin = min(p[1] for g in top for path in g["paths"] for p in path) - 6; ymax = max(p[1] for g in top for path in g["paths"] for p in path) + 6
     xmin = min(p[0] for g in top for path in g["paths"] for p in path) - 14; xmax = max(p[0] for g in top for path in g["paths"] for p in path) + 14
     pix = pg.get_pixmap(matrix=fitz.Matrix(scale, scale), clip=fitz.Rect(xmin, H - ymax, xmax, H - ymin), colorspace=fitz.csGRAY)
     px = lambda x, y: [round((x - xmin) * scale, 1), round((ymax - y) * scale, 1)]
     return dict(w=pix.width, h=pix.height, jpg=base64.b64encode(pix.tobytes("jpg", jpg_quality=72)).decode(), page=1, doc=stem,
-                glyphs=[dict(t=g["t"], ids=g["ids"], box=[*px(g["box"][0], g["box"][3]), *px(g["box"][2], g["box"][1])],
+                glyphs=[dict(t=g["text"], ids=g["ids"], box=[*px(g["box"][0], g["box"][3]), *px(g["box"][2], g["box"][1])],
                              paths=[[px(x, y) for x, y in path] for path in g["paths"]]) for g in top])
 
 

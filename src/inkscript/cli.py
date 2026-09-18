@@ -95,6 +95,21 @@ def cmd_native(a) -> int:
     return 0
 
 
+def cmd_correct(a) -> int:
+    from .pdf.correct import apply_corrections
+    pdf = Path(a.pdf).expanduser()
+    if a.file:
+        corrections = json.loads(Path(a.file).expanduser().read_text(encoding="utf-8"))
+    else:
+        if a.page is None or not a.box or a.text is None:
+            raise SystemExit("give --page, --box and --text, or --file")
+        corrections = [dict(page=a.page, box=[float(x) for x in a.box.split(",")], text=a.text)]
+    shapes = Path(a.shapes).expanduser() if a.shapes else pdf.with_suffix(".shapes.json")
+    for d in apply_corrections(pdf, corrections, shapes):
+        print(f"page {d['page']} {d['box']}: " + (f"{d['was']!r} -> {d['text']!r} ({d['font']} code {d['code']}, overlap {d['iou']})" if d["applied"] else f"not applied: {d['reason']}"))
+    return 0
+
+
 def cmd_compare(a) -> int:
     from .viewer.frontpage_compare import build
     return build(a)
@@ -247,6 +262,12 @@ def main(argv=None) -> int:
     p.add_argument("review_dir", help="dir of <stem>.review.json from `check --out`"); p.add_argument("native_dir", help="dir of the native PDFs")
     p.add_argument("--docs", type=int, default=0); p.add_argument("--limit", type=int, default=0, help="numbers per document (0 = all)")
     p.add_argument("--gemini-model", default=None); p.set_defaults(fn=cmd_numbers)
+
+    p = sub.add_parser("correct", help="write a corrected reading into a finished PDF's text layer (no rebuild)")
+    p.add_argument("pdf"); p.add_argument("--page", type=int); p.add_argument("--box", help="x0,y0,x1,y1 in scan pixels (as in the review list)")
+    p.add_argument("--text"); p.add_argument("--file", help="JSON list of {page, box, text} instead")
+    p.add_argument("--shapes", help="<stem>.shapes.json to update too (default: beside the PDF)")
+    p.set_defaults(fn=cmd_correct)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")
     p.add_argument("pdfs", nargs="+"); p.add_argument("--pages", type=int, default=0, help="first N pages of each")
