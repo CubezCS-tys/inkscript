@@ -428,6 +428,7 @@ const RULES=[
  {k:'17 × 27 px',h:'Gemini sees the page at scan resolution',p:'Ten documents carried a thumbnail as their single embedded image; Gemini read nothing. Pages are rendered unless the image is ≥150 dpi.',w:'ocr/gemini.py · page_images'},
  {k:'5 of 6',h:'Refused covers: masthead, then title only',p:'The recitation filter refuses a verbatim page of a published journal but allows a title-and-author extraction.',w:'ocr/gemini.py · gemini_page1'},
  {k:'65% → 100%',h:'Sideways pages get a turned frame',p:'Tables printed landscape are laid out in a rotated frame and written with a rotated text matrix, so glyphs land on the ink.',w:'pdf/type3.py · Frame'},
+ {k:'40 → 1',h:'Junk-encoded fonts become inert, not invisible',p:'A typeset page whose font extracts as symbols keeps drawing its glyphs, but each text object is wrapped in an /ActualText span holding a space; every engine then reads our layer alone.',w:'pdf/native.py · neutralise_text'},
 ];
 document.getElementById('rules').innerHTML=RULES.map(r=>`<div class="rule"><span class="k">${r.k}</span><h3>${r.h}</h3><p>${r.p}</p><span class="where">${r.w}</span></div>`).join('');
 
