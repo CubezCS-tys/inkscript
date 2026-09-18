@@ -75,6 +75,24 @@ rule records the experiment, not a theory.
   both neighbours.
 - **Invisible over the scan = zero opacity (ExtGState ca 0)**, not render
   mode 3, which does not apply to Type 3 glyphs.
+- **No two nearby runs may share their char-code sequence.** pdfium drops
+  a text object as a fake-bold duplicate (`IsSameTextObject`) when one of
+  the five objects before it has the same item count with the same codes
+  and sits within a fraction of a line. Codes here are positional, so two
+  runs with the same word count were identical, and a whole body line
+  vanished from `0005` page 4 (727 → 733 of 733 words). The closing space
+  glyph's code is now shifted by the line number modulo 6.
+- **A kerned pair moves the pen back before its space glyph**, not after:
+  a backwards adjustment right after the space lost it in pdfium (`سبأ لم`
+  → `سبألم`; `0385`: 10,717 → 10,734 of 10,736).
+- **Runs sharing a band go left to right** (see "Source pages"): pdfium
+  joins text objects whose boxes overlap vertically whatever the gap, then
+  reverses the whole line's segments.
+- **A line whose Latin segments outnumber its Arabic ones is stored the
+  left-to-right way**: pdfium keeps its segment order and reverses only
+  the Arabic segments (and neutrals after them) in place, so those are
+  stored reversed and pre-mirrored while the words stay in stream order
+  (`text.visual(..., ltr_line=True)`, `text.latin_majority`).
 
 ## Source pages
 
