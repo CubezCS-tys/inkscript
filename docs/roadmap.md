@@ -33,10 +33,10 @@ from.
    report for anything under 97% or with inversions. Every failure mode
    so far was found this way, not by reasoning. Cost: ~$0.005 per document
    for Gemini page 1.
-2. **Make the review list useful.** `inkscript check` finds contradictions
-   and lists numbers; turn that into crops (the word's ink, the two
-   readings) that a person can judge in seconds, and a way to write the
-   corrected text back into the PDF's ToUnicode without rebuilding.
+2. **Make the review list useful.** Done 2026-09-18: `check --html` shows
+   each reading editable beside its ink and exports the changes;
+   `inkscript correct` writes them into the PDF's ToUnicode without a
+   rebuild (`pdf/correct.py`, `pdf/inspect.py`).
 3. **Second reading for numbers and contradictions only.** Send just those
    crops to Gemini (a few per page) and accept a correction only when the
    two readings agree. Cheap, and it targets the errors that matter.

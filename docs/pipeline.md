@@ -62,6 +62,25 @@ disagree on goes to review, one they agree on is very likely right. Nothing
 is corrected automatically. Trial: 36 of 36 agreed on a footnote-heavy
 document, $0.03.
 
+## Correcting a reading without a rebuild
+
+The review page (`check --html`) shows each reading in an editable field
+beside its ink. Change the wrong ones, press **Show corrections**, and the
+page lists them as `[{page, box, text}]` (also copied to the clipboard). Then
+
+```
+inkscript correct OUT/native/<stem>.pdf --file corrections.json
+```
+
+finds the glyph whose declared box lies in each Azure box, stores the new
+text the way that line is stored (the inverse of Chrome's reading, right-
+or left-to-right by the line's majority), rewrites only that ToUnicode
+entry (incremental save; the ink is untouched), marks the placement in
+`<stem>.shapes.json` and appends to `<stem>.corrections.json`. A single
+word: `--page 3 --box 535,2709,550,2744 --text "..."`.
+`inkscript.pdf.inspect.page_glyphs` is the reader behind it (and behind the
+storyboard's glyph explorer): every glyph of a page back out of its font.
+
 ## Checking against the viewer
 
 `inkscript native --verify` opens every finished PDF in pdfium — Chrome's
