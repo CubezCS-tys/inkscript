@@ -13,7 +13,7 @@ dependencies = [
   "numpy>=1.26",
   "python-dotenv>=1.0",
   "google-genai>=1.0",
-  "pypdfium2>=4.30",
+  "pypdfium2==5.12.1",   # pdfium 7947: reads RTL lines like Chrome 144 (7559); 5.13 (7999) does not
 ]
 
 [project.optional-dependencies]

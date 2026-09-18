@@ -5,7 +5,7 @@ from __future__ import annotations
 import re, statistics, unicodedata
 from pathlib import Path
 
-from ..text import norm
+from ..text import norm, ARABIC
 
 def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
     """pdfium (Chrome's engine): every page's line count vs Azure's, and how
@@ -29,6 +29,34 @@ def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
         hit = sum(1 for x in want if x in got)
         nl = len([l for l in t.replace("\r\n", "\n").split("\n") if l.strip()])
         v.append(dict(page=pn, lines_pdfium=nl, lines_layer=pinfo["lines"], words=len(want), intact=hit))
+    doc.close()
+    return v
+
+
+def pdfium_lines(pdf: Path, report: dict) -> list[dict]:
+    """Word ORDER, line by line: how many of the layer's lines (three or more
+    Arabic words) pdfium gives back as a line with the words in reading
+    order, and how many come back reversed. The words-intact check cannot
+    see this; pdfium build 7999 reversed every line and passed it."""
+    import pypdfium2 as pdfium
+    N = lambda s: unicodedata.normalize("NFKC", s)
+    def edge(t):
+        while t and unicodedata.category(t[0])[0] in "PSZ": t = t[1:]
+        while t and unicodedata.category(t[-1])[0] in "PSZ": t = t[:-1]
+        return t
+    def key(line):
+        return tuple(x for x in (edge(w) for w in N(line).split()) if x and ARABIC.search(x))
+    doc = pdfium.PdfDocument(str(pdf))
+    v = []
+    for pinfo in report["pages"]:
+        pn = pinfo["page"]
+        if pn > len(doc) or not pinfo.get("glyphs") or "runs" not in pinfo:
+            continue
+        t = re.sub(r"[\u200e\u200f\u202a-\u202e]", "", doc[pn - 1].get_textpage().get_text_range()).replace("\r\n", "\n")
+        got = {key(l) for l in t.split("\n")}
+        want = [k for k in (key(r) for r in pinfo["runs"]) if len(k) >= 3]
+        ok = sum(1 for k in want if k in got); rev = sum(1 for k in want if k not in got and k[::-1] in got)
+        v.append(dict(page=pn, lines=len(want), in_order=ok, reversed=rev))
     doc.close()
     return v
 

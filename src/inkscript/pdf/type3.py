@@ -16,6 +16,8 @@ DPI = 300
 
 
 SIZE_PT = 8.0
+SIZE_MODE = "fixed"                                 # "gap": per-line size from the widest word gap (Firefox)
+SIZE_MAX = 48.0
 
 
 # Gap kept between the declared boxes of adjacent lines, as a fraction of the
@@ -145,6 +147,17 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         lim_bot = -((g["below"]["top"] - ly1) - gap) * u if g["below"] is not None else -1e9
         lh = max(1.0, ly1 - ly0)
         gaps = [ws[k + 1]["x0"] - ws[k]["x1"] for k in range(len(ws) - 1)]
+        if SIZE_MODE == "gap":
+            # pdf.js (Firefox) infers spaces from the pen's jumps relative to
+            # the font size: a jump under 0.102 x size is no space (words
+            # merge) and one over 0.6 x size starts a new item, and items
+            # come out in stream order, so a right-to-left line breaks into
+            # halves that copy out swapped. Size each line so its widest
+            # word gap stays inside that window. pdfium does not care.
+            wgaps = [ws[k + 1]["x0"] - ws[k]["x1"] for k in range(len(ws) - 1) if ws[k + 1]["_wid"] != ws[k]["_wid"]]
+            if wgaps:
+                size_pt = min(SIZE_MAX, max(SIZE_PT, max(wgaps) * 72.0 / DPI / 0.55))
+                km = 72.0 / (DPI * size_pt); tj = 1000.0 * km
         sp_w = float(round(max(1.0, min([g for g in gaps if g > 0] + [0.2 * lh])) * u))   # whole pixels: the glyph's advance and the pen must agree
         procs = {"sp": f"{sp_w:.0f} 0 0 0 0 0 d1\n"}; widths = [sp_w]; names = ["sp"]; tou = [(1, " ")]; shapes = {}
         bbox = [0, 0, 0, 0]

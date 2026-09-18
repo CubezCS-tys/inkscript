@@ -1,7 +1,8 @@
 """Arabic text helpers shared by both halves: matching normalisation, digit
 folding, and the visual-order form a PDF stores."""
 from __future__ import annotations
-import re, unicodedata
+import re
+import unicodedata, unicodedata
 
 # Tashkeel, superscript alef, and tatweel — the marks the engines disagree about.
 STRIP = re.compile(r"[ً-ْٰـ]")
@@ -68,25 +69,72 @@ MARKS = re.compile(r"[\u064B-\u065F\u0670]")        # tashkeel and superscript a
 CLUSTER = re.compile(r".[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]*")   # a character with the marks that follow it
 
 
+def _keeps_order(c: str) -> bool:
+    """Characters pdfium never reverses inside a run: its 'left' and 'weak
+    left' bidi segments (Latin letters; digits, vowel marks, and the
+    separators , . / - : + % that Unicode classes CS/ES/ET/NSM/AN/EN/BN)."""
+    return unicodedata.bidirectional(c) in ("L", "AN", "EN", "NSM", "CS", "ES", "ET", "BN")
+
+
 def visual(s: str) -> str:
-    """A glyph's text in visual order: what a native Arabic PDF stores."""
-    toks = s.split()
-    if not any(RTL.search(t) for t in toks):
+    """A glyph's text in visual order: what a native Arabic PDF stores.
+
+    pdfium (Chrome; branches 7559–7947 and main) rebuilds a line whose
+    text has right-to-left segments by reversing the ORDER of its bidi
+    segments and then reversing each Arabic (and neutral-after-Arabic)
+    segment in place, while Latin, digit, mark and separator segments keep
+    their internal order. The inverse of that is: reverse the whole string,
+    then put every run of order-keeping characters back the way it was.
+    Digits stay `362`, a word's vowel marks stay after their letters
+    (`كِتابُ` is stored `ُباتِك`), `126/4` stays whole, `379هـ)` becomes
+    `)ـه379`. Words in a line are separate glyphs laid out left to right,
+    so a glyph holding several words reverses their order too.
+
+    pdfium build 7999 (pypdfium2 5.13) briefly switched the auto-order off
+    and read words in stream order with marks in place; main restored it.
+    Verify against 7947 (pypdfium2 5.12.1), which behaves like Chrome."""
+    if not RTL.search(s):
         return s
-    def vis(t):
-        if not RTL.search(t):
-            return t
-        # pdfium (Chrome) restores a stored glyph string by reversing each run
-        # of letters BETWEEN vowel marks in place, the marks staying where
-        # they are; digit runs are left alone. That transformation is its own
-        # inverse, so it is applied to the word here and pdfium undoes it.
-        # Reversing by character instead put a word-final mark first and
-        # broke every vowelled word (a poem page copied out 6% intact).
-        # Measured against Chrome's own PDF of the same line, which no engine
-        # extracts correctly at all; there is no native reference to follow.
-        segs = re.findall(r"[0-9٠-٩]+|[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]+|[^0-9٠-٩\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]+", t)
-        return "".join(x if re.match(r"[0-9٠-٩\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]", x) else x[::-1] for x in segs)
-    return " ".join(vis(t) for t in reversed(toks))
+    out, i, n = [], 0, len(s)
+    rev = s[::-1]
+    while i < n:
+        if _keeps_order(rev[i]):
+            j = i
+            while j < n and _keeps_order(rev[j]):
+                j += 1
+            out.append(rev[i:j][::-1]); i = j
+        else:
+            out.append(rev[i]); i += 1
+    return "".join(out)
+
+
+def chrome_reads(line: str) -> str:
+    """What pdfium (Chrome 144, branch 7559; also 7665–7947 and main) makes
+    of a line's stored text: CPDF_TextPage::CloseTempLine with
+    CFX_BidiString's automatic overall direction. Kept here as the
+    reference the storage is verified against; `visual` is its inverse."""
+    segs = []                                              # [start, count, class]
+    for i, c in enumerate(line):
+        b = unicodedata.bidirectional(c)
+        d = "L" if b == "L" else "LW" if b in ("AN", "EN", "NSM", "CS", "ES", "ET", "BN") else "R" if b in ("R", "AL") else "N"
+        if segs and segs[-1][2] == d:
+            segs[-1][1] += 1
+        else:
+            segs.append([i, 1, d])
+    nR = sum(1 for x in segs if x[2] == "R"); nL = sum(1 for x in segs if x[2] == "L")
+    cur = "L"
+    if nR > 0 and nR >= nL:
+        segs = segs[::-1]; cur = "R"
+    out = []
+    for st, n, d in segs:
+        part = line[st:st + n]
+        if d == "R" or (d == "N" and cur == "R"):
+            cur = "R"; out.append(part[::-1])
+        else:
+            if d != "LW":
+                cur = "L"
+            out.append(part)
+    return "".join(out)
 
 
 # ---- pieces: where printed Arabic must break

@@ -53,7 +53,7 @@ def cmd_frontpage(a) -> int:
 
 def cmd_native(a) -> int:
     from .pdf.native import build_document
-    from .verify.engines import pdfium_words, pdfium_order, pages_missing_image
+    from .verify.engines import pdfium_words, pdfium_order, pdfium_lines, pages_missing_image
     ad, out = Path(a.azure_dir).expanduser(), Path(a.out).expanduser()
     sd = Path(a.scan_dir).expanduser() if a.scan_dir else None
     fd = Path(a.frontpage_dir).expanduser() if a.frontpage_dir else None
@@ -74,7 +74,9 @@ def cmd_native(a) -> int:
             digital = {p["page"] for p in r["pages"] if p["text"] == "native-digital"}
             inv, nl = pdfium_order(out / f"{stem}.pdf", skip=rotated | digital); r["order"] = dict(inversions=inv, lines=nl, sideways_pages=len(rotated), digital_pages=len(digital))
             tw, ti = sum(x["words"] for x in v), sum(x["intact"] for x in v)
-            line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
+            r["lines"] = lv = pdfium_lines(out / f"{stem}.pdf", r)
+            tl, tok, trev = sum(x["lines"] for x in lv), sum(x["in_order"] for x in lv), sum(x["reversed"] for x in lv)
+            line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), lines in order {tok}/{tl}" + (f" ({trev} reversed)" if trev else "") + f", {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
             r["lost_image"] = lost = pages_missing_image(out / f"{stem}.pdf", scan(stem))
             if lost: line += f"  !! {len(lost)} pages lost their image: {lost[:6]}"
         print(line, flush=True); reports.append(r)
@@ -86,8 +88,9 @@ def cmd_native(a) -> int:
     if a.verify:
         tw = sum(x["words"] for r in reports for x in r["verify"]); ti = sum(x["intact"] for r in reports for x in r["verify"])
         inv = sum(r["order"]["inversions"] for r in reports)
+        tl = sum(x["lines"] for r in reports for x in r.get("lines", [])); tok = sum(x["in_order"] for r in reports for x in r.get("lines", []))
         lost = sum(len(r.get("lost_image", [])) for r in reports)
-        print(f"\nall documents: {ti}/{tw} words intact in pdfium ({ti / max(1, tw):.1%}), {inv} reading-order inversions" + (f", !! {lost} pages lost their image" if lost else ", every page keeps its image"))
+        print(f"\nall documents: {ti}/{tw} words intact in pdfium ({ti / max(1, tw):.1%}), lines in order {tok}/{tl} ({tok / max(1, tl):.1%}), {inv} reading-order inversions" + (f", !! {lost} pages lost their image" if lost else ", every page keeps its image"))
     print(f"wrote {len(reports)} documents to {out}")
     return 0
 

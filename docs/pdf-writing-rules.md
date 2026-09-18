@@ -11,16 +11,32 @@ rule records the experiment, not a theory.
 - **One Type 3 font per line, one glyph per word.** A glyph's drawing
   commands are the word's traced ink polygons (holes filled even-odd), its
   advance is the ink width, its ToUnicode entry is the word's text.
-- **Text stored the way pdfium inverts it.** pdfium (Chrome) restores a
-  glyph string by reversing each run of letters *between vowel marks* in
-  place; marks stay put and digit runs are left alone. That transformation
-  is its own inverse, so the word is stored with it applied. Reversing by
-  character instead put a word-final mark first and pdfium then read the
-  run left-to-right: a fully vowelled poem page copied out 6% intact, now
-  100%. There is no native reference to follow here — Chrome's own PDF of
-  the same line extracts wrongly in every engine — and MuPDF and poppler
-  disagree with pdfium on vowelled text, so Chrome's engine is the target
-  and the others are measured, not matched.
+- **Text stored the way pdfium inverts it.** pdfium (Chrome) rebuilds a
+  line that has right-to-left text by reversing the *order* of its bidi
+  segments and then reversing each Arabic segment (and a neutral one that
+  follows it) in place; Latin, digit, vowel-mark and separator segments
+  (`, . / - : + %`) keep their internal order (`CPDF_TextPage::CloseTempLine`
+  with `CFX_BidiString`'s automatic direction — branches 7559 = Chrome 144,
+  7665–7947, and main). The stored form is the inverse: the word reversed
+  as a whole, with every run of order-keeping characters put back the way
+  it was — `362` stays `362`, `كِتابُ` is stored `ُباتِك`, `379هـ)` becomes
+  `)ـه379`. `text.chrome_reads` is that pdfium routine in Python and the
+  tests check `chrome_reads(visual(line)) == line`.
+  *History:* the first rule here ("reverse each run of letters between
+  vowel marks in place, word order as stored") was measured against
+  pypdfium2 5.13, whose pdfium build 7999 had switched the automatic
+  direction off; it passed the words-intact check because that check
+  ignores order, while Chrome itself read every line's words backwards
+  only in that build and vowelled words backwards in ours. pypdfium2 is
+  now pinned to 5.12.1 (build 7947, reads like Chrome) and `--verify`
+  also reports **lines in order**. A multi-word Latin phrase inside an
+  Arabic line still comes back with its words swapped in Chrome — pdfium
+  reverses every segment's position — and that is left as it is, because
+  swapping the glyphs' texts would break the ink↔text mapping.
+  There is no native reference to follow — Chrome's own PDF of the same
+  line extracts wrongly in every engine — and MuPDF and poppler disagree
+  with pdfium on vowelled text, so Chrome's engine is the target and the
+  others are measured, not matched.
 - **Punctuation rides on its word** when Azure boxed it separately and the
   ink touches; a box holding several tokens is split into one glyph per
   token when its ink splits the same way. A glyph whose text *starts* with
