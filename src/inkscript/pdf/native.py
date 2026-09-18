@@ -16,12 +16,22 @@ from .type3 import write_text_layer, stray_paths, append_content, Frame
 from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
 def born_digital(page) -> bool:
-    """True when the page's text is set in real fonts and there is no Azure
-    'Dummy' layer at all: a typeset page, already native text. A scan whose
-    page also carries a real font (a digitally added stamp or header beside
-    Azure's invisible layer) is still a scan."""
-    fonts = page.get_fonts()
-    return bool(fonts) and all(f[3] != "Dummy" for f in fonts) and bool(page.get_text("text").strip())
+    """True when the page's text is set in real fonts: a typeset page,
+    already native text. Azure's invisible 'Dummy' layer may sit on top of
+    it (the corpus has typeset journals that went through OCR anyway); the
+    page is still native when the real fonts carry at least half as many
+    words as that layer. A scan whose page carries a real font only for a
+    digitally added stamp, folio or header is still a scan."""
+    real = dummy = 0
+    for b in page.get_text("dict")["blocks"]:
+        for l in b.get("lines", []):
+            for sp in l["spans"]:
+                n = len(sp["text"].split())
+                if sp["font"] == "Dummy":
+                    dummy += n
+                else:
+                    real += n
+    return real > 0 and real >= 0.5 * dummy
 
 
 def strip_text_objects(doc, page) -> int:
@@ -73,6 +83,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         # touched and it needs no ink glyphs. Azure's searchable PDFs of
         # scans carry exactly one font, 'Dummy', for their invisible layer.
         if born_digital(page):
+            strip_text_objects(src, page)                 # Azure's layer over typeset text: the real fonts stay, the Dummy layer goes
             report["pages"].append(dict(page=pn, words=sum(1 for w in words if w["page"] == pn), text="native-digital", lines=0, glyphs=0))
             if vec is not None:
                 vec.insert_pdf(src, from_page=pno, to_page=pno)

@@ -18,6 +18,7 @@ DPI = 300
 SIZE_PT = 8.0
 SIZE_MODE = "fixed"                                 # "gap": per-line size from the widest word gap (Firefox)
 SIZE_MAX = 48.0
+BAND_SORT = True                                    # same-band runs left to right (see write_text_layer)
 
 
 # Gap kept between the declared boxes of adjacent lines, as a fraction of the
@@ -117,7 +118,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
     # and the reversal gives them back right to left, in reading order.
     # Written in Azure's (reading) order they came back swapped.
     ordered, i = [], 0
-    while i < len(geo):
+    while BAND_SORT and i < len(geo):
         band, j = [geo[i]], i + 1
         while j < len(geo):
             g, last = geo[j], band[-1]
@@ -127,7 +128,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
                 break
         band.sort(key=lambda g: min(w["x0"] for w in g["L"] if w["blobs"]))
         ordered += band; i = j
-    geo = ordered
+    geo = ordered or geo
     def to_pdf(u, v):
         x, y = frame.to_page(u, v)
         return fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
