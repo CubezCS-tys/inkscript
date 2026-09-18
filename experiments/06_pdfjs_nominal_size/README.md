@@ -16,12 +16,19 @@ word gap). Measured on three test-set documents, pdfium 7947:
 
 | nominal size | pdfium words intact | pdf.js words intact | pdf.js lines same as Chrome / reversed |
 |---|---|---|---|
-| 8 pt (current) | 99.9% | 95.2% | 1% / 28% |
-| 16 pt | 99.8% | 92.6% | 48% / 0% |
-| 24 pt | 99.8% | 92.6% | 49% / 0% |
-| per-line from gap | 99.8% | 92.7% | 44% / 0% |
+| 8 pt (current) | 100.0% | 95.1% | 2% / 27% |
+| 16 pt | 99.9% | 94.0% | 48% / 0% |
+| 24 pt | 99.9% | 92.6% | 48% / 0% |
+| per-line from widest gap, min 8 | 99.9% | 94.1% | 33% / 0% |
+| per-line from widest gap, min 16 | 99.9% | 93.8% | 49% / 0% |
 
-The other half of the lines differ from Chrome's for reasons not yet
-separated (pdf.js merges tight word gaps, joins lines differently). Not
-adopted: Chrome is the target and the words-intact figure drops in pdf.js.
+(final writer, 2026-09-18 morning; the single-column fixture alone reaches
+86% of lines at 24 pt.) The other half: pdf.js merges word gaps under
+0.102 × size (`أدخلهاعلى`), and a word written as pieces (right to left in
+the stream, as pdfium wants) moves the pen backwards by more than
+0.2 × size, which starts a new item — so piece-heavy documents break up.
+Decision: keep 8 pt. Every larger size costs pdfium 0.1% of words, and
+pdf.js loses words faster than it gains line order. A Firefox-specific
+build would need its own piece order; not worth it while Chrome is the
+target.
 `items.mjs` prints pdf.js's text items with positions for one page.

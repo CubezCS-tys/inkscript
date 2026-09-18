@@ -63,8 +63,9 @@ Parked by the user to carry on with the roadmap; pick up in this order.
       three weakest documents by words intact (`0005-032-001-001`,
       `0385-012-019-001`, `1245-001-004-001`). Per-page listing from the
       `lines` and `order` fields of `native_pdf_report.json`.
-- [ ] Firefox: explain the half of the lines that differ from Chrome's at
-      a 16–24 pt nominal size (`experiments/06`); decide the size.
+- [x] Firefox: the other half is tight word gaps (merged) and words
+      written as pieces (split into items); every larger nominal size
+      costs pdfium 0.1%. Decision: 8 pt stays (`experiments/06`).
 - [ ] Recitation-filter cover pages (Gemini refuses some title pages).
 - [ ] Comparison against ABBYY / ocrmypdf on the same pages.
 - [ ] Push the repo when the user asks.
