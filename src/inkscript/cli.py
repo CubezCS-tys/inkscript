@@ -62,6 +62,8 @@ def cmd_native(a) -> int:
     if a.docs: stems = stems[:a.docs]
     reports = []
     for stem in stems:
+        if a.resume and (out / f"{stem}.pdf").exists() and (out / f"{stem}.shapes.json").exists():
+            print(f"{stem:<24} already built, skipped", flush=True); continue
         r = build_document(stem, ad, scan(stem), fd / f"{stem}.gemini.p1.md" if fd else None, out, a.vector, a.min_exact)
         nd = sum(1 for p in r["pages"] if p["text"] == "native-digital")
         line = f"{stem:<24} {len(r['pages'])} pages  {sum(p.get('glyphs', 0) for p in r['pages']):>5} glyphs  p1 {r['pages'][0]['text']}" + (f"  ({nd} born-digital pages left as they are)" if nd else "")
@@ -74,6 +76,9 @@ def cmd_native(a) -> int:
             line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
         print(line, flush=True); reports.append(r)
     out.mkdir(parents=True, exist_ok=True)
+    if a.resume and (out / "native_pdf_report.json").exists():      # keep earlier documents' reports
+        old = {r["doc"]: r for r in json.loads((out / "native_pdf_report.json").read_text(encoding="utf-8"))}
+        old.update({r["doc"]: r for r in reports}); reports = list(old.values())
     (out / "native_pdf_report.json").write_text(json.dumps(reports, ensure_ascii=False, indent=1), encoding="utf-8")
     if a.verify:
         tw = sum(x["words"] for r in reports for x in r["verify"]); ti = sum(x["intact"] for r in reports for x in r["verify"])
@@ -206,6 +211,7 @@ def main(argv=None) -> int:
     p.add_argument("--out", required=True); p.add_argument("--docs", type=int, default=0); p.add_argument("--min-exact", type=float, default=0.6)
     p.add_argument("--vector", action="store_true", help="also write <stem>_vector.pdf: no image, glyphs only")
     p.add_argument("--verify", action="store_true", help="check the result in pdfium (Chrome's engine)")
+    p.add_argument("--resume", action="store_true", help="skip documents whose PDF and shapes.json already exist")
     p.set_defaults(fn=cmd_native)
 
     p = sub.add_parser("compare", help="static review bundle: front page three ways")

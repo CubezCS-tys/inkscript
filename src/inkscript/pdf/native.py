@@ -101,7 +101,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         blobs = page_blobs(gray)
         prepare(blobs)
         for b in blobs:
-            b["page"] = pn; b["shape"] = A.assign(b)
+            b["page"] = pn; b["shape"] = A.assign_and_release(b)
         lines, stray = layout_page(pwords, texts, az_pages[pn].get("lines", []), blobs, gray.shape[1] / W_in, gray.shape[0] / H_in)
         for L in lines:
             for w in L:
@@ -133,6 +133,9 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     out_dir.mkdir(parents=True, exist_ok=True)
     src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
     if len(A):
+        for pr in A.protos:                                # export needs the outlines, not the rasters
+            for k in ("fill", "edge", "dist"):
+                pr.pop(k, None)
         to_json(A, out_dir / f"{stem}.shapes.json", placements)
         to_svg(A, out_dir / f"{stem}.alphabet.svg")
         to_sheet(A, out_dir / f"{stem}.alphabet.png")

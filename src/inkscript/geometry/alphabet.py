@@ -61,11 +61,21 @@ class Alphabet:
             for o in np.argsort(-iou)[:5]:
                 if iou[o] < self.iou: break
                 c = cands[o]
-                chd = 0.5 * (self.dists[c][b["edge"]].mean() + b["dist"][self.edges[c]].mean())
+                chd = 0.5 * (float(self.dists[c][b["edge"]].mean()) + float(b["dist"][self.edges[c]].mean()))
                 if chd <= self.ch:
                     self.counts[c] += 1; return c
-        self.protos.append(b); self.fills.append(b["fill"]); self.edges.append(b["edge"]); self.dists.append(b["dist"]); self.counts.append(1)
+        self.protos.append(b); self.fills.append(b["fill"]); self.edges.append(b["edge"]); self.dists.append(b["dist"].astype(np.float16)); self.counts.append(1)
         ci = len(self.protos) - 1; self.index.setdefault(self.key(b), []).append(ci); return ci
+
+    def assign_and_release(self, b) -> int:
+        """assign(), then drop the matching arrays from a blob that did not
+        become a prototype. A 238-page document holds ~400k blobs; keeping
+        three 48x48 arrays on each of them ran the machine out of memory."""
+        ci = self.assign(b)
+        if self.protos[ci] is not b:
+            for k in ("fill", "edge", "dist"):
+                b.pop(k, None)
+        return ci
 
     def __len__(self): return len(self.protos)
 
