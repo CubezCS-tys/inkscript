@@ -152,7 +152,11 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         append_content(src, page, content.encode())
         n_blobs, n_stray = len(blobs), len(stray)
         placed_texts = [w["text"].strip() or w["az"] for L in lines for w in L if w["blobs"]]
-        run_texts = [" ".join(w["text"].strip() or w["az"] for w in L if w["blobs"]) for L in lines]   # each line in reading order
+        # Each line's words right to left by position: the reading order of
+        # its Arabic words as the ink has them, which is what the line-order
+        # check compares Chrome's text with. Azure's own word order is not
+        # reliable on vowelled verse or table rows.
+        run_texts = [" ".join(w["text"].strip() or w["az"] for w in sorted((w for w in L if w["blobs"]), key=lambda w: -w["x1"])) for L in lines]
         if vec is not None:
             vp = vec.new_page(width=page.rect.width, height=page.rect.height)
             Mv = ~vp.transformation_matrix

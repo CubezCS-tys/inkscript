@@ -5,7 +5,7 @@ from __future__ import annotations
 import re, statistics, unicodedata
 from pathlib import Path
 
-from ..text import norm, ARABIC, _class
+from ..text import norm, ARABIC, ARABIC_LETTER, _class
 
 def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
     """pdfium (Chrome's engine): every page's line count vs Azure's, and how
@@ -44,8 +44,8 @@ def pdfium_lines(pdf: Path, report: dict) -> list[dict]:
         while t and unicodedata.category(t[0])[0] in "PSZ": t = t[1:]
         while t and unicodedata.category(t[-1])[0] in "PSZ": t = t[:-1]
         return t
-    def key(line):
-        return tuple(x for x in (edge(w) for w in N(line).split()) if x and ARABIC.search(x))
+    def key(line):                                  # words with Arabic letters; a line of numbers alone has no direction
+        return tuple(x for x in (edge(w) for w in N(line).split()) if x and ARABIC_LETTER.search(x))
     doc = pdfium.PdfDocument(str(pdf))
     v = []
     for pinfo in report["pages"]:
