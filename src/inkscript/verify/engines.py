@@ -62,3 +62,20 @@ def pdfium_order(pdf: Path, skip: set[int] | None = None) -> tuple[int, int]:
         inv += sum(1 for i in range(len(base) - 1) if base[i + 1] > base[i] + 0.5 * h[i] and same_col(i, i + 1)); nl += len(lines)
     doc.close()
     return inv, nl
+
+
+def pages_missing_image(pdf: Path, scan: Path) -> list[int]:
+    """Pages (1-based) whose output renders with less than half the ink of
+    the scan page: the page image was lost (a writer defect seen once with
+    inherited /Resources). Rendered at 30 dpi, so cheap."""
+    import fitz, numpy as np
+    src, out = fitz.open(str(scan)), fitz.open(str(pdf))
+    lost = []
+    for pn in range(min(src.page_count, out.page_count)):
+        a = np.frombuffer(src[pn].get_pixmap(dpi=30, colorspace=fitz.csGRAY).samples, np.uint8)
+        b = np.frombuffer(out[pn].get_pixmap(dpi=30, colorspace=fitz.csGRAY).samples, np.uint8)
+        ia, ib = int((a < 128).sum()), int((b < 128).sum())
+        if ia > 100 and ib < 0.5 * ia:
+            lost.append(pn + 1)
+    src.close(); out.close()
+    return lost

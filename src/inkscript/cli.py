@@ -53,7 +53,7 @@ def cmd_frontpage(a) -> int:
 
 def cmd_native(a) -> int:
     from .pdf.native import build_document
-    from .verify.engines import pdfium_words, pdfium_order
+    from .verify.engines import pdfium_words, pdfium_order, pages_missing_image
     ad, out = Path(a.azure_dir).expanduser(), Path(a.out).expanduser()
     sd = Path(a.scan_dir).expanduser() if a.scan_dir else None
     fd = Path(a.frontpage_dir).expanduser() if a.frontpage_dir else None
@@ -75,6 +75,8 @@ def cmd_native(a) -> int:
             inv, nl = pdfium_order(out / f"{stem}.pdf", skip=rotated | digital); r["order"] = dict(inversions=inv, lines=nl, sideways_pages=len(rotated), digital_pages=len(digital))
             tw, ti = sum(x["words"] for x in v), sum(x["intact"] for x in v)
             line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
+            r["lost_image"] = lost = pages_missing_image(out / f"{stem}.pdf", scan(stem))
+            if lost: line += f"  !! {len(lost)} pages lost their image: {lost[:6]}"
         print(line, flush=True); reports.append(r)
     out.mkdir(parents=True, exist_ok=True)
     if a.resume and (out / "native_pdf_report.json").exists():      # keep earlier documents' reports
@@ -84,7 +86,8 @@ def cmd_native(a) -> int:
     if a.verify:
         tw = sum(x["words"] for r in reports for x in r["verify"]); ti = sum(x["intact"] for r in reports for x in r["verify"])
         inv = sum(r["order"]["inversions"] for r in reports)
-        print(f"\nall documents: {ti}/{tw} words intact in pdfium ({ti / max(1, tw):.1%}), {inv} reading-order inversions")
+        lost = sum(len(r.get("lost_image", [])) for r in reports)
+        print(f"\nall documents: {ti}/{tw} words intact in pdfium ({ti / max(1, tw):.1%}), {inv} reading-order inversions" + (f", !! {lost} pages lost their image" if lost else ", every page keeps its image"))
     print(f"wrote {len(reports)} documents to {out}")
     return 0
 
