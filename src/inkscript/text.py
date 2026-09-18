@@ -76,7 +76,17 @@ def _keeps_order(c: str) -> bool:
     return unicodedata.bidirectional(c) in ("L", "AN", "EN", "NSM", "CS", "ES", "ET", "BN")
 
 
-MIRROR = dict(zip("()[]{}<>«»‹›﴾﴿", ")(][}{><»«›‹﴿﴾"))
+MIRROR = dict(zip("()[]{}<>«»‹›", ")(][}{><»«›‹"))          # pdfium's GetMirrorChar; the ornate ﴾﴿ are not mirrored (Bidi_Mirrored=N)
+
+
+def latin_majority(text: str) -> bool:
+    """pdfium's overall direction for a line (CFX_BidiString, auto order):
+    right-to-left only when the Arabic segments are at least as many as the
+    Latin ones. A line with more Latin words is read left to right."""
+    segs = [_class(c) for c in text]
+    runs = [d for i, d in enumerate(segs) if i == 0 or segs[i - 1] != d]
+    r = runs.count("R")
+    return not (r > 0 and r >= runs.count("L"))
 
 
 def _class(c: str) -> str:
@@ -103,7 +113,7 @@ def _mirror_set(logical: str) -> set[int]:
     return out
 
 
-def visual(s: str, in_rtl_line: bool = False) -> str:
+def visual(s: str, in_rtl_line: bool = False, ltr_line: bool = False) -> str:
     """A glyph's text in visual order: what a native Arabic PDF stores.
 
     pdfium (Chrome; branches 7559–7947 and main) rebuilds a line whose
@@ -122,6 +132,25 @@ def visual(s: str, in_rtl_line: bool = False) -> str:
     Verify against 7947 (pypdfium2 5.12.1), which behaves like Chrome.
     `in_rtl_line` says the glyph sits in a line with Arabic, which is how
     pdfium will read it even when the token itself has none."""
+    if ltr_line:
+        # pdfium reads the line left to right (Latin segments outnumber the
+        # Arabic ones): segment order is kept, each Arabic segment and a
+        # neutral one after it are reversed in place and mirrored. Store the
+        # inverse of that; the line's words stay in stream order.
+        out, cur, i = [], "L", 0
+        while i < len(s):
+            d = _class(s[i]); j = i
+            while j < len(s) and _class(s[j]) == d:
+                j += 1
+            part = s[i:j]
+            if d == "R" or (d == "N" and cur == "R"):
+                cur = "R"; out.append("".join(MIRROR.get(c, c) for c in part)[::-1])
+            else:
+                if d != "LW":
+                    cur = "L"
+                out.append(part)
+            i = j
+        return "".join(out)
     if not RTL.search(s) and not in_rtl_line:
         return s
     # A token without Arabic in an Arabic line ("(Kose)", "(2)") is still

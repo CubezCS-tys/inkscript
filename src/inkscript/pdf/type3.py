@@ -9,7 +9,7 @@ see docs/pdf-writing-rules.md.
 from __future__ import annotations
 import fitz
 
-from ..text import RTL, visual
+from ..text import RTL, visual, latin_majority
 from ..geometry.layout import split_word
 
 DPI = 300
@@ -161,6 +161,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         # space glyph goes between words only.
         lh_line = max(1.0, g["bot"] - g["top"])
         rtl_line = any(RTL.search(w["text"]) for w in L)
+        ltr_line = rtl_line and latin_majority(" ".join(w["text"] for w in L))   # pdfium reads it left to right
         ws = []
         for wid, w in enumerate(sorted((w for w in L if w["blobs"]), key=lambda w: w["x0"])):
             pcs = split_word(w, lh_line)
@@ -218,7 +219,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
             dy0 = min(max(by0, min(lim_bot, 0.0)), dy1 - keep)
             procs[f"g{code}"] = f"{adv:.0f} 0 0 {dy0:.0f} {adv:.0f} {dy1:.0f} d1\n" + "\n".join(cmds) + "\nf*\n"
             shapes[f"g{code}"] = w.get("shapes")
-            widths.append(adv); names.append(f"g{code}"); tou.append((code, visual(w["text"].strip() or w["az"], rtl_line)))
+            widths.append(adv); names.append(f"g{code}"); tou.append((code, visual(w["text"].strip() or w["az"], rtl_line, ltr_line)))
             bbox = [0, min(bbox[1], dy0), max(bbox[2], adv), max(bbox[3], dy1)]
             w["_gx0"], w["_adv"] = gx0, adv
             glyphs += 1
