@@ -112,12 +112,18 @@ rule records the experiment, not a theory.
   fonts hold at least half as many words as the `Dummy` layer, and then
   only the `Dummy` layer is stripped (`0500`: 0 → 724 inversions when its
   16 typeset pages got a third layer). A real font whose text extracts as
-  symbol junk (`ΔϴϤϨΘϟ`, no usable encoding) counts as no text: the page
-  gets our layer, but its junk text stays, because on such a page it IS
-  the visible ink — stripping it blanked 41 pages of `0470`. The order
-  check leaves junk lines out; the junk still interleaves with ours in
-  Chrome (40 inversions on that document). Giving such fonts a correct
-  ToUnicode from Azure's words would be the real fix.
+  symbol junk (`ΔϴϤϨΘϟ`, no usable encoding, or a ToUnicode yielding
+  under 90% letters) counts as no text: the page gets our layer, and its
+  junk text objects are wrapped in a marked-content span whose
+  `/ActualText` is a single space. The glyphs still draw — on such a page
+  they ARE the visible ink; stripping them blanked 41 pages of `0470` —
+  but pdfium, MuPDF and poppler extract the span's text instead, so our
+  layer is the only text (`0470`: 40 → 1 inversions, `1370`: 43 → 23).
+  `pdf/fontfix.py` can also build the fonts a real ToUnicode from Azure's
+  words (glyphs aligned to word boxes, letters by vote); on `0470` it
+  covers 93–98% of glyphs but reads back at 88% of words against our
+  layer's 100%, so a page trusts its own fixed fonts only above 99.5%
+  coverage (`FIX_COVERAGE`), which no document has reached yet.
 - **Gemini sees the page at scan resolution.** The embedded image is
   handed over verbatim only when it is at least 150 dpi for the page; 10
   of 227 night documents carried a thumbnail (17 × 27 px once) or a 75 dpi

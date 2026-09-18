@@ -15,6 +15,9 @@ from ..geometry.layout import layout_page
 from .type3 import write_text_layer, stray_paths, append_content, Frame
 from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
+FIX_COVERAGE = 0.995                                  # share of a page's junk glyphs that must be mapped before the page trusts its own fonts
+
+
 def born_digital(page) -> bool:
     """True when the page's text is set in real fonts: a typeset page,
     already native text. Azure's invisible 'Dummy' layer may sit on top of
@@ -93,6 +96,30 @@ def _azure_lines(az_page, pw):
     return out
 
 
+def neutralise_text(doc, page, fonts: set) -> int:
+    """Wrap every text object that uses one of `fonts` (resource names) in a
+    marked-content span whose /ActualText is a single space. Viewers keep
+    drawing the glyphs — on a typeset page they are the visible ink — but
+    pdfium, MuPDF and poppler extract the span's ActualText instead of the
+    junk, so our layer is the page's only text. Returns objects wrapped."""
+    import re
+    n = 0
+    for xref in page.get_contents():
+        raw = doc.xref_stream(xref)
+        if raw is None or b"BT" not in raw:
+            continue
+        k = 0
+        def wrap(m):
+            nonlocal k
+            if any(re.search(rb"/" + re.escape(f.encode()) + rb"\s+[-\d.]+\s+Tf", m.group(0)) for f in fonts):
+                k += 1; return b"/Span << /ActualText ( ) >> BDC\n" + m.group(0) + b"\nEMC"
+            return m.group(0)
+        new = re.sub(rb"BT\b.*?\bET\b", wrap, raw, flags=re.S)
+        if k:
+            doc.update_stream(xref, new); n += k
+    return n
+
+
 def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_exact):
     words, _, dims = load_azure(azure_dir / stem / f"{stem}.json")
     j = json.load(open(azure_dir / stem / f"{stem}.json")); ar = j.get("analyzeResult", j)
@@ -103,19 +130,24 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # and needs no ink layer. Votes are collected over the whole document.
     from collections import Counter, defaultdict
     from .fontfix import collect_votes, write_tounicode, junk_fonts
-    votes = defaultdict(Counter); junk_pages = set()
+    votes = defaultdict(Counter); junk_pages = {}; junk_named = {}
     for pno in range(src.page_count):
-        if junk_fonts(src, src[pno]) and text_words(src[pno])[0] == 0:
-            junk_pages.add(pno + 1)
-            collect_votes(src, src[pno], [w for w in words if w["page"] == pno + 1], votes)
+        jf = junk_fonts(src, src[pno])
+        if jf and text_words(src[pno])[0] == 0:
+            junk_named[pno + 1] = set(jf)                              # resource names, before any ToUnicode is added
+            junk_pages[pno + 1] = collect_votes(src, src[pno], [w for w in words if w["page"] == pno + 1], votes)["keys"]
     from .fontfix import coverage, settle
     if votes:
         settle(votes)
     mapping = write_tounicode(src, votes) if votes else {}
     # a page is native once (nearly) every junk glyph has its letter; a page
     # the votes could not cover keeps our ink layer over its junk text
-    fixed_pages = {pn: coverage(src, src[pn - 1], mapping) for pn in junk_pages} if mapping else {}
-    fixed_pages = {pn: c for pn, c in fixed_pages.items() if c >= 0.9}
+    fixed_pages = {pn: coverage(keys, mapping) for pn, keys in junk_pages.items()} if mapping else {}
+    # Measured on 0470: at 93-98% coverage the fixed fonts read back at 88%
+    # of words in Chrome, our layer at 100%. So a page switches to its own
+    # fonts only when practically every glyph is covered; otherwise it keeps
+    # our layer and its junk text is neutralised (`neutralise_text`).
+    fixed_pages = {pn: c for pn, c in fixed_pages.items() if c >= FIX_COVERAGE}
     if mapping:
         src = fitz.open("pdf", src.tobytes())                 # reopen: MuPDF caches the fonts' encodings
     vec = fitz.open() if vector else None
@@ -133,8 +165,14 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         # in InDesign) already IS native text; its visible text must not be
         # touched and it needs no ink glyphs. Azure's searchable PDFs of
         # scans carry exactly one font, 'Dummy', for their invisible layer.
-        if born_digital(page) or pn in fixed_pages:
+        # a junk-font page counts as native only when its fonts were fixed
+        # well enough; a partial fix must not make it look born-digital
+        if (pn in fixed_pages) or (pn not in junk_pages and born_digital(page)):
             strip_text_objects(src, page)                 # Azure's layer over typeset text: the real fonts stay, the Dummy layer goes
+            if pn not in fixed_pages:
+                jf = set(junk_fonts(src, page))
+                if jf:
+                    neutralise_text(src, page, jf)         # a junk-encoded font beside real ones: its symbols leave the text
             info = dict(page=pn, words=sum(1 for w in words if w["page"] == pn), text="native-digital", lines=0, glyphs=0)
             if pn in fixed_pages:
                 # fonts fixed from the OCR: verify the page's own text against Azure's words, like a layer of ours
@@ -152,6 +190,10 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         # not measure — so every text object is cut out of the content
         # streams directly; the image and any line art are untouched.
         strip_text_objects(src, page)
+        jf = set(junk_fonts(src, page)) | set(junk_named.get(pn, ()))
+        if jf:
+            neutralise_text(src, page, jf)                 # symbol junk beside our layer would be a second text
+
         pwords = [w for w in words if w["page"] == pn]
         info = dict(page=pn, words=len(pwords), text="azure")
         if pn == 1 and gemini_md and gemini_md.exists():
