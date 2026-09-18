@@ -57,17 +57,27 @@ from.
 
 Parked by the user to carry on with the roadmap; pick up in this order.
 
-- [ ] Go through the weakest pages of the 227-journal sample: the 42
-      reversed lines, the ~900 out-of-order lines, the 422 in-column
-      inversions (`0470-000-001-003` 71, `0140-000-062-001` 25), and the
-      three weakest documents by words intact (`0005-032-001-001`,
-      `0385-012-019-001`, `1245-001-004-001`). Per-page listing from the
-      `lines` and `order` fields of `native_pdf_report.json`.
+- [x] Went through the weakest pages of the 227-journal sample. Found
+      and fixed: the line-order reference (Azure's word order is wrong on
+      verse and tables — now by position; number-only lines not judged);
+      pdfium dropping a whole run as a fake-bold duplicate when a nearby
+      run had the same codes (`0005`); a kerned pair losing its space
+      (`0385`); Latin-majority lines needing the left-to-right storage;
+      the ornate ﴾﴿ wrongly mirrored; typeset pages with junk-encoded
+      fonts (`0470`, inversions come from that text, left out of the
+      check). Remaining: table cells pdfium joins across rows, math
+      tokens (`i=1,2,K,N)xi`).
 - [x] Firefox: the other half is tight word gaps (merged) and words
       written as pieces (split into items); every larger nominal size
       costs pdfium 0.1%. Decision: 8 pt stays (`experiments/06`).
-- [ ] Recitation-filter cover pages (Gemini refuses some title pages).
-- [ ] Comparison against ABBYY / ocrmypdf on the same pages.
+- [x] Refused cover pages: the top half is tried, then a title-and-author
+      extraction (5 of 6 read); and the real cause on most — Gemini was
+      handed a thumbnail instead of the scan (10 of 227 documents) — fixed
+      by rendering pages whose single image is under 150 dpi.
+- [x] Comparison against ocrmypdf (Tesseract) and Azure's own searchable
+      PDF on three documents (`experiments/07`): lines in reading order
+      in Chrome 98–100% vs 34–75% (Azure) vs 2–16% (ocrmypdf). ABBYY not
+      available here.
 - [ ] Push the repo when the user asks.
 
 ## Standing rules
