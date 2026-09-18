@@ -89,6 +89,28 @@ rule records the experiment, not a theory.
   real embedded fonts (a modern journal typeset in InDesign) already is
   native text; stripping "the text layer" there erased the page's words.
   Azure's scans carry exactly one font, `Dummy`; anything else is real.
+  A typeset page may also carry Azure's layer on top (the corpus has
+  journals that went through OCR anyway): it is still native when the real
+  fonts hold at least half as many words as the `Dummy` layer, and then
+  only the `Dummy` layer is stripped (`0500`: 0 → 724 inversions when its
+  16 typeset pages got a third layer). A real font whose text extracts as
+  symbol junk (`ΔϴϤϨΘϟ`, no usable encoding) counts as no text: the page
+  gets our layer, but its junk text stays, because on such a page it IS
+  the visible ink — stripping it blanked 41 pages of `0470`. The order
+  check leaves junk lines out; the junk still interleaves with ours in
+  Chrome (40 inversions on that document). Giving such fonts a correct
+  ToUnicode from Azure's words would be the real fix.
+- **Gemini sees the page at scan resolution.** The embedded image is
+  handed over verbatim only when it is at least 150 dpi for the page; 10
+  of 227 night documents carried a thumbnail (17 × 27 px once) or a 75 dpi
+  copy as their single image, and Gemini read little or nothing from it.
+  Otherwise the page is rendered at 300 dpi.
+- **Refused cover pages.** When the strict transcription comes back empty
+  twice, the top half of the page is tried, then a title-and-author
+  extraction, which the recitation filter allows where a verbatim page is
+  refused (`FinishReason.RECITATION`). Five of six refused covers in the
+  night sample read this way; the sixth is an editorial with a heading
+  only.
 - **Sideways pages** (tables printed landscape; Azure's page angle ≈ ±90°)
   are laid out in a turned frame and written with a rotated text matrix, so
   the glyphs land on the ink and pdfium reads the lines as lines (65–76% →
