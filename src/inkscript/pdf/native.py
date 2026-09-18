@@ -31,7 +31,7 @@ def text_words(page) -> tuple[int, int]:
     without a usable encoding extracts as symbol junk (`ΔϴϤϨΘϟ`); those
     words are not text anyone can search or copy and do not count."""
     import re
-    good = re.compile(r"[\u0600-\u06FFA-Za-z0-9]")
+    good = re.compile(r"[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFFA-Za-z0-9]")   # Arabic incl. presentation forms (typeset fonts)
     real = dummy = chars = goodc = 0
     for b in page.get_text("dict")["blocks"]:
         for l in b.get("lines", []):

@@ -84,7 +84,7 @@ def pdfium_order(pdf: Path, skip: set[int] | None = None) -> tuple[int, int]:
         if skip and pn + 1 in skip:
             continue
         tp = doc[pn].get_textpage(); t = tp.get_text_range(); lines, cur, junk = [], [], []
-        good = re.compile(r"[\u0600-\u06FFA-Za-z0-9]")
+        good = re.compile(r"[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFFA-Za-z0-9]")
         def close():
             # a line of symbol junk comes from a typeset font with no usable
             # encoding, not from the layer: not judged
