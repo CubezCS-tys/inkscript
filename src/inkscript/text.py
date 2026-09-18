@@ -76,7 +76,34 @@ def _keeps_order(c: str) -> bool:
     return unicodedata.bidirectional(c) in ("L", "AN", "EN", "NSM", "CS", "ES", "ET", "BN")
 
 
-def visual(s: str) -> str:
+MIRROR = dict(zip("()[]{}<>«»‹›﴾﴿", ")(][}{><»«›‹﴿﴾"))
+
+
+def _class(c: str) -> str:
+    b = unicodedata.bidirectional(c)
+    return "L" if b == "L" else "LW" if b in ("AN", "EN", "NSM", "CS", "ES", "ET", "BN") else "R" if b in ("R", "AL") else "N"
+
+
+def _mirror_set(logical: str) -> set[int]:
+    """Positions of neutral characters pdfium will mirror: those it adds in
+    right-to-left context, i.e. before any Latin segment has switched the
+    line's running direction to left (its state machine in CloseTempLine)."""
+    cur, out, i = "R", set(), 0
+    while i < len(logical):
+        d = _class(logical[i]); j = i
+        while j < len(logical) and _class(logical[j]) == d:
+            j += 1
+        if d == "R":
+            cur = "R"
+        elif d == "N" and cur == "R":
+            out.update(range(i, j))
+        elif d == "L":
+            cur = "L"
+        i = j
+    return out
+
+
+def visual(s: str, in_rtl_line: bool = False) -> str:
     """A glyph's text in visual order: what a native Arabic PDF stores.
 
     pdfium (Chrome; branches 7559–7947 and main) rebuilds a line whose
@@ -92,11 +119,18 @@ def visual(s: str) -> str:
 
     pdfium build 7999 (pypdfium2 5.13) briefly switched the auto-order off
     and read words in stream order with marks in place; main restored it.
-    Verify against 7947 (pypdfium2 5.12.1), which behaves like Chrome."""
-    if not RTL.search(s):
+    Verify against 7947 (pypdfium2 5.12.1), which behaves like Chrome.
+    `in_rtl_line` says the glyph sits in a line with Arabic, which is how
+    pdfium will read it even when the token itself has none."""
+    if not RTL.search(s) and not in_rtl_line:
         return s
+    # A token without Arabic in an Arabic line ("(Kose)", "(2)") is still
+    # read through the line's right-to-left pass, so it gets the same
+    # treatment; digits and Latin letters keep their order either way.
+    mir = _mirror_set(s)
+    logical = "".join(MIRROR.get(c, c) if i in mir else c for i, c in enumerate(s))   # pdfium mirrors brackets it reads right-to-left
     out, i, n = [], 0, len(s)
-    rev = s[::-1]
+    rev = logical[::-1]
     while i < n:
         if _keeps_order(rev[i]):
             j = i
@@ -115,8 +149,7 @@ def chrome_reads(line: str) -> str:
     reference the storage is verified against; `visual` is its inverse."""
     segs = []                                              # [start, count, class]
     for i, c in enumerate(line):
-        b = unicodedata.bidirectional(c)
-        d = "L" if b == "L" else "LW" if b in ("AN", "EN", "NSM", "CS", "ES", "ET", "BN") else "R" if b in ("R", "AL") else "N"
+        d = _class(c)
         if segs and segs[-1][2] == d:
             segs[-1][1] += 1
         else:
@@ -129,7 +162,7 @@ def chrome_reads(line: str) -> str:
     for st, n, d in segs:
         part = line[st:st + n]
         if d == "R" or (d == "N" and cur == "R"):
-            cur = "R"; out.append(part[::-1])
+            cur = "R"; out.append("".join(MIRROR.get(c, c) for c in part[::-1]))   # AddCharInfoByRLDirection: GetMirrorChar
         else:
             if d != "LW":
                 cur = "L"

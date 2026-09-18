@@ -63,6 +63,8 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
                     bl["word"] = min(cands, key=lambda w: abs((w["x0"] + w["x1"]) / 2 - bl["cx"])); break
     page_h = max((w["y1"] for w in wpx), default=0) or 1
     for bl in blobs:                                      # rules and pictures are furniture, not letters
+        if bl.get("rule"):
+            bl["word"] = None; continue
         w = bl["word"]
         if w is None:
             continue

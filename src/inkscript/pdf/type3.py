@@ -75,13 +75,22 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
                 parent = doc.xref_get_key(px, "Parent")
         res_xref = doc.get_new_xref(); doc.update_object(res_xref, inherited or "<< >>")
         doc.xref_set_key(pg.xref, "Resources", f"{res_xref} 0 R")
-    if doc.xref_get_key(res_xref, "Font")[0] == "null":
-        doc.xref_set_key(res_xref, "Font", "<< >>")
+    def subdict(name):
+        """(xref, key prefix) to add entries to Resources/<name>: the
+        sub-dictionary may be inline, missing, or an indirect object (an
+        inherited Resources copy), and PyMuPDF refuses a key path through
+        an indirect reference."""
+        v = doc.xref_get_key(res_xref, name)
+        if v[0] == "xref":
+            return int(v[1].split()[0]), ""
+        if v[0] == "null":
+            doc.xref_set_key(res_xref, name, "<< >>")
+        return res_xref, name + "/"
+    font_x, font_p = subdict("Font")
     if invisible:
         gs = doc.get_new_xref(); doc.update_object(gs, "<< /Type /ExtGState /ca 0 /CA 0 >>")
-        if doc.xref_get_key(res_xref, "ExtGState")[0] == "null":
-            doc.xref_set_key(res_xref, "ExtGState", "<< >>")
-        doc.xref_set_key(res_xref, f"ExtGState/GSinv{tag}", f"{gs} 0 R")
+        gx, gp = subdict("ExtGState")
+        doc.xref_set_key(gx, f"{gp}GSinv{tag}", f"{gs} 0 R")
     out = ["q", f"/GSinv{tag} gs" if invisible else "0 g"]
     live = [L for L in lines if any(w["blobs"] for w in L)]
     # Lines in page order, each with its baseline (bottom of Azure's boxes)
@@ -100,6 +109,25 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
     for i, g in enumerate(by_y):
         g["above"] = by_y[i - 1] if i else None
         g["below"] = by_y[i + 1] if i + 1 < len(by_y) else None
+    # Runs that share a band (a run's baseline inside the previous run's
+    # ink: table cells, a running head's two halves, the two columns of a
+    # line pair) are one line to pdfium — it joins text objects whose boxes
+    # overlap vertically whatever the horizontal gap, then reverses the
+    # whole line's segments. So within a band the runs go left to right,
+    # and the reversal gives them back right to left, in reading order.
+    # Written in Azure's (reading) order they came back swapped.
+    ordered, i = [], 0
+    while i < len(geo):
+        band, j = [geo[i]], i + 1
+        while j < len(geo):
+            g, last = geo[j], band[-1]
+            if abs(g["ly1"] - last["ly1"]) < 0.5 * min(last["bot"] - last["top"], g["bot"] - g["top"]):
+                band.append(g); j += 1
+            else:
+                break
+        band.sort(key=lambda g: min(w["x0"] for w in g["L"] if w["blobs"]))
+        ordered += band; i = j
+    geo = ordered
     def to_pdf(u, v):
         x, y = frame.to_page(u, v)
         return fitz.Point(x * 72 / DPI, y * 72 / DPI) * M
@@ -131,6 +159,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         # laid out in visual order; a word's pieces carry its id so that the
         # space glyph goes between words only.
         lh_line = max(1.0, g["bot"] - g["top"])
+        rtl_line = any(RTL.search(w["text"]) for w in L)
         ws = []
         for wid, w in enumerate(sorted((w for w in L if w["blobs"]), key=lambda w: w["x0"])):
             pcs = split_word(w, lh_line)
@@ -188,7 +217,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
             dy0 = min(max(by0, min(lim_bot, 0.0)), dy1 - keep)
             procs[f"g{code}"] = f"{adv:.0f} 0 0 {dy0:.0f} {adv:.0f} {dy1:.0f} d1\n" + "\n".join(cmds) + "\nf*\n"
             shapes[f"g{code}"] = w.get("shapes")
-            widths.append(adv); names.append(f"g{code}"); tou.append((code, visual(w["text"].strip() or w["az"])))
+            widths.append(adv); names.append(f"g{code}"); tou.append((code, visual(w["text"].strip() or w["az"], rtl_line)))
             bbox = [0, min(bbox[1], dy0), max(bbox[2], adv), max(bbox[3], dy1)]
             w["_gx0"], w["_adv"] = gx0, adv
             glyphs += 1
@@ -213,7 +242,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
             " ".join(f"/{nm} {x} 0 R" for nm, x in cp.items()), " ".join("/" + nm for nm in names), len(names),
             " ".join(f"{wd:.0f}" for wd in widths), tu))
         fname = f"T3{tag}L{li}"
-        doc.xref_set_key(res_xref, f"Font/{fname}", f"{fx} 0 R")
+        doc.xref_set_key(font_x, f"{font_p}{fname}", f"{fx} 0 R")
         origin = to_pdf(ws[0]["_gx0"], ly1)
         parts, pen = [], ws[0]["_gx0"]
         # Each run starts and ends with the space glyph (advance cancelled).

@@ -53,9 +53,12 @@ def pdfium_lines(pdf: Path, report: dict) -> list[dict]:
         if pn > len(doc) or not pinfo.get("glyphs") or "runs" not in pinfo:
             continue
         t = re.sub(r"[\u200e\u200f\u202a-\u202e]", "", doc[pn - 1].get_textpage().get_text_range()).replace("\r\n", "\n")
-        got = {key(l) for l in t.split("\n")}
+        got = [key(l) for l in t.split("\n")]
+        def within(k):                                  # the run's words, contiguous, inside one pdfium line
+            n = len(k)
+            return any(l[i:i + n] == k for l in got if len(l) >= n for i in range(len(l) - n + 1))
         want = [k for k in (key(r) for r in pinfo["runs"]) if len(k) >= 3]
-        ok = sum(1 for k in want if k in got); rev = sum(1 for k in want if k not in got and k[::-1] in got)
+        ok = sum(1 for k in want if within(k)); rev = sum(1 for k in want if not within(k) and within(k[::-1]))
         v.append(dict(page=pn, lines=len(want), in_order=ok, reversed=rev))
     doc.close()
     return v

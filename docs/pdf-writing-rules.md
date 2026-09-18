@@ -19,9 +19,15 @@ rule records the experiment, not a theory.
   with `CFX_BidiString`'s automatic direction — branches 7559 = Chrome 144,
   7665–7947, and main). The stored form is the inverse: the word reversed
   as a whole, with every run of order-keeping characters put back the way
-  it was — `362` stays `362`, `كِتابُ` is stored `ُباتِك`, `379هـ)` becomes
-  `)ـه379`. `text.chrome_reads` is that pdfium routine in Python and the
-  tests check `chrome_reads(visual(line)) == line`.
+  it was, and brackets pdfium will read right-to-left are pre-mirrored,
+  since it mirrors them (`AddCharInfoByRLDirection`) — `362` stays `362`,
+  `كِتابُ` is stored `ُباتِك`, `379هـ)` becomes `(ـه379`, `(2)` stays `(2)`.
+  Tokens without Arabic in an Arabic line get the same treatment, since
+  pdfium reads the whole line in one pass. `text.chrome_reads` is that
+  pdfium routine in Python and the tests check
+  `chrome_reads(visual(line)) == line`. Known limit: `(Kose) في` comes
+  back `(Kose )في`, the space glyph and the bracket forming one neutral
+  segment that pdfium keeps forward after Latin text.
   *History:* the first rule here ("reverse each run of letters between
   vowel marks in place, word order as stored") was measured against
   pypdfium2 5.13, whose pdfium build 7999 had switched the automatic
