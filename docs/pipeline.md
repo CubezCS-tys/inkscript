@@ -62,6 +62,26 @@ disagree on goes to review, one they agree on is very likely right. Nothing
 is corrected automatically. Trial: 36 of 36 agreed on a footnote-heavy
 document, $0.03.
 
+## Checking against the viewer
+
+`inkscript native --verify` opens every finished PDF in pdfium — Chrome's
+engine, pinned to the build that reads like Chrome (pypdfium2 5.12.1,
+pdfium 7947; 5.13's 7999 does not, see pdf-writing-rules.md "History") —
+and reports per document:
+
+- **words intact**: each word placed in the layer comes back whole (marks
+  included, edge punctuation ignored);
+- **lines in order**: each line's Arabic words come back contiguous and in
+  reading order inside one pdfium line (lines of three or more words);
+  the count of lines that come back *reversed* is shown when non-zero;
+- **order inversions**: consecutive pdfium lines in the same column whose
+  baseline jumps back up the page (sideways and born-digital pages skipped);
+- **pages that lost their image**: the output page renders with less than
+  half the scan page's ink.
+
+`inkscript.text.chrome_reads` is pdfium's line reconstruction in Python;
+the tests round-trip `visual()` through it.
+
 ## What the geometry does not do yet
 
 - Letter-level glyphs (Arabic joins letters; a blob is a sub-word).
