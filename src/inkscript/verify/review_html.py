@@ -49,14 +49,14 @@ def write_review_html(shapes_json: Path, pdf: Path, out: Path, max_numbers: int 
         for sp in c["suspects"]:
             W, H = pagedims(sp["page"]); rot = sp.get("rot", 0)
             rows.append(f'<tr><td><img src="{crop(doc[sp["page"] - 1], sp["box"], rot, W, H)}" alt=""></td>'
-                        f'<td class="ar">{html.escape(sp["text"])}</td><td class="ar alt">{readings}</td><td class="pg">p{sp["page"]}</td></tr>')
+                        f'<td class="ar">{html.escape(sp["text"])}</td><td class="ar alt">{readings}</td><td class="pg">{c["kind"]}<br>p{sp["page"]}</td></tr>')
     nums = []
     for n in r["numbers"][:max_numbers]:
         W, H = pagedims(n["page"]); rot = n.get("rot", 0)
         nums.append(f'<tr><td><img src="{crop(doc[n["page"] - 1], n["box"], rot, W, H)}" alt=""></td><td class="ar">{html.escape(n["text"])}</td><td class="pg">p{n["page"]}</td></tr>')
     body = (f"<title>review {html.escape(stem)}</title>{CSS}<h1>{html.escape(stem)}</h1>"
             f'<p class="sum">{r["words"]} words · {r["repeated_ink"]} share ink with another word · {len(r["conflicts"])} contradictions ({len(rows)} words to judge) · {len(r["numbers"])} numbers</p>'
-            f'<h2>Same ink, different reading</h2><div class="wrap"><table><tr><th>ink</th><th>read as</th><th>other readings of this ink</th><th>page</th></tr>{"".join(rows) or "<tr><td colspan=4>none</td></tr>"}</table></div>'
+            f'<h2>Same ink, different reading — {r["kinds"]}</h2><div class="wrap"><table><tr><th>ink</th><th>read as</th><th>other readings of this ink</th><th>kind · page</th></tr>{"".join(rows) or "<tr><td colspan=4>none</td></tr>"}</table></div>'
             f'<h2>Numbers ({min(len(r["numbers"]), max_numbers)} of {len(r["numbers"])})</h2><div class="wrap"><table><tr><th>ink</th><th>read as</th><th>page</th></tr>{"".join(nums)}</table></div>')
     out.write_text(body, encoding="utf-8")
     return dict(conflicts=len(r["conflicts"]), suspects=len(rows), numbers=len(r["numbers"]))

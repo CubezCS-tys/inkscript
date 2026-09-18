@@ -92,6 +92,19 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
         groups.append(cur)
         if len(groups) != len(toks):
             return [w]
+        # A matching count is not proof (the checker caught `قال` on a
+        # 21-pixel dot). Each token's ink must be plausible for it: an Arabic
+        # token at least 0.12 line heights per letter, punctuation no wider
+        # than half a line height. Otherwise the box stays one glyph, its
+        # text intact with the space inside.
+        from ..text import ARABIC_LETTER, TRANSPARENT
+        for g, t in zip(groups, reversed(toks)):
+            width = max(b["x"] + b["w"] for b in g) - min(b["x"] for b in g)
+            if ARABIC_LETTER.search(t):
+                if width < 0.12 * lh * max(1, len(TRANSPARENT.sub("", t))):
+                    return [w]
+            elif not any(ch.isalnum() for ch in t) and width > 0.5 * lh:
+                return [w]
         return [dict(w, text=t, az=t, blobs=g, x0=min(b["x"] for b in g), x1=max(b["x"] + b["w"] for b in g))
                 for g, t in zip(groups, reversed(toks))]
     for L in lines:

@@ -151,8 +151,9 @@ def cmd_check(a) -> int:
     for sj in sorted(Path(a.dir).expanduser().glob("*.shapes.json")):
         r = review(sj); stem = sj.name.replace(".shapes.json", "")
         ns = sum(len(c["suspects"]) for c in r["conflicts"])
-        print(f"{stem:<24} {r['words']:>6} words, {r['repeated_ink']:>5} with ink seen elsewhere in the document, "
-              f"{len(r['conflicts']):>3} contradictions ({ns} words to review), {len(r['numbers']):>4} numbers", flush=True)
+        k = r["kinds"]
+        print(f"{stem:<24} {r['words']:>6} words, {r['repeated_ink']:>5} with ink seen elsewhere, "
+              f"{len(r['conflicts']):>3} contradictions (substitutions {k.get('substitution', 0)}, marks/punct {k.get('marks-or-punctuation', 0)}, extensions {k.get('extension', 0)}), {len(r['numbers']):>4} numbers", flush=True)
         for c in r["conflicts"][:a.show]:
             print(f"    {c['readings']}  -> pages {sorted({s['page'] for s in c['suspects']})}")
         tot["words"] += r["words"]; tot["repeated"] += r["repeated_ink"]; tot["conflicts"] += len(r["conflicts"]); tot["suspects"] += ns; tot["numbers"] += len(r["numbers"])
