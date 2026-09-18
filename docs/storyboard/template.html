@@ -448,8 +448,9 @@ document.getElementById('rules').innerHTML=RULES.map(r=>`<div class="rule"><span
 /* ---------- 8. results ---------- */
 const RESULTS=[
  {set:'30-document test set · 115 pages',w:[34958,34959],l:[3866,3868],inv:3,lost:0},
- {set:'47 corpus documents · 1,007 pages (43 born-digital, 14 sideways)',w:[237695,237741],l:[20213,20224],inv:103,lost:0},
- {set:'227-journal sample · 4,440 pages (903 born-digital, 16 sideways)',w:[912551,912800],l:[84117,84186],inv:535,lost:0},
+ {set:'47 corpus documents · 1,007 pages (43 born-digital, 14 sideways)',w:[237723,237741],l:[20213,20224],inv:103,lost:0},
+ {set:'227-journal sample · 4,440 pages (903 born-digital, 16 sideways)',w:[912672,912800],l:[84121,84186],inv:398,lost:0},
+ /*BIG_ROW*/
 ];
 document.getElementById('results').innerHTML=RESULTS.map(r=>{const pw=r.w[0]/r.w[1],pl=r.l[0]/r.l[1];return `<tr><td>${r.set}</td><td class="n">${r.w[0].toLocaleString()} / ${r.w[1].toLocaleString()}<br>${(pw*100).toFixed(2)}%<span class="bar"><i style="width:${pw*100}%"></i></span></td><td class="n">${r.l[0].toLocaleString()} / ${r.l[1].toLocaleString()}<br>${(pl*100).toFixed(1)}%<span class="bar"><i style="width:${pl*100}%"></i></span></td><td class="n">${r.inv}</td><td class="n">${r.lost}</td></tr>`}).join('')+
  `<tr><td colspan="5" style="font-size:.85rem;color:var(--muted)">Inversions: consecutive lines in one column whose baseline jumps back up the page; most of the remaining ones are typeset pages with junk-encoded fonts and table pages. 51 Latin-majority lines are counted apart (pdfium reads them left to right by its majority rule, as in any native PDF).</td></tr>`;

@@ -40,8 +40,10 @@ document (five pages) so the tests and a first run need no data setup.
 30-document test set, 115 pages (2026-09-18): 34,958 of 34,959 words copy
 out intact in Chrome's engine (100.0%), 99.9% of lines in reading order,
 3 in-column order inversions, every page keeps its image. 227-journal
-sample (4,440 pages): 99.97% of words, 99.9% of lines. Details and the
-comparison with Azure's PDFs and ocrmypdf in `docs/night-report-2026-09-18.md`.
+sample (4,440 pages): 99.99% of words, 99.9% of lines; a further
+451-document sample (10,512 pages) in `docs/night-report-2026-09-18.md`,
+with the comparison against Azure's PDFs and ocrmypdf. A reading can be
+corrected in a finished PDF without a rebuild (`inkscript correct`).
 Selection snaps to pieces of ink (24% of words
 split at the joins the script dictates; the rest stay whole rather than guess). Every glyph is the
 printed occurrence's own outline, stored in scan pixels; the document's shape

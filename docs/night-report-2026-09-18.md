@@ -125,6 +125,54 @@ larger size costs pdfium 0.1% of words. Decision: 8 pt stays.
 4. Letter-level selection inside a connected run (roadmap item 4).
 5. A larger unattended sample (500–1,000 documents) with the same checks.
 
+## Later that day (14:30): the remaining todos
+
+Everything below is committed; every set was rebuilt once more at 14:33 by
+one code state.
+
+| set | words intact | lines in reading order | inversions |
+|---|---|---|---|
+| 30-document test set, 115 pages | 34,958 / 34,959 (**100.0%**) | 3,866 / 3,868 (99.9%) | 3 |
+| 47 corpus documents, 1,007 pages | 237,723 / 237,741 (**100.0%**) | 20,213 / 20,224 (99.9%) | 103 |
+| 227-journal sample, 4,440 pages | 912,672 / 912,800 (**99.99%**) | 84,121 / 84,186 (99.9%) | 398 (was 535) |
+| 451-document sample (two more per journal), 10,512 pages, 4,448 born-digital | see below | | |
+
+- **The interactive storyboard** (`docs/storyboard/`, built by `build.py`
+  from the pipeline's own outputs; published as an artifact): the demo,
+  a real page with its glyphs, a widget that reads any line the way Chrome
+  does (and the way pdfium build 7999 did), the rules with their numbers,
+  what Chrome copies from Azure's PDF and ours, the alphabet as witness,
+  the results.
+- **Corrections without a rebuild.** The review page's readings are
+  editable and export `[{page, box, text}]`; `inkscript correct` writes a
+  reading into the finished PDF's ToUnicode (glyph found by box
+  containment, text stored the way its line is stored), logs it and marks
+  the placement. `inkscript second` reads every contradiction again from
+  its own crop: two readings against one become a proposed correction
+  (`--apply` writes them); crops go to Gemini at 900 dpi.
+- **The 451-document sample** (two more documents from every journal,
+  fetched from the bucket, Gemini $2.25 for the front pages) found three
+  documents at 52–90%: two where the new font-fix switch had fired and the
+  fixed fonts read back as nothing (switch now off), one quoting Hebrew,
+  which was not in the right-to-left set. All three are at 100% now.
+- **Junk-encoded typeset fonts**: their text objects are wrapped in an
+  `/ActualText ( )` span, so every engine reads our layer alone while the
+  glyphs keep drawing (`0470`: 40 → 1 inversions, `1370`: 43 → 23).
+  `pdf/fontfix.py` can also build such fonts a ToUnicode from Azure's
+  words (codes from the content stream paired with traced glyphs, letters
+  by vote, ligatures and separators handled; 93–98% of glyphs on `0470`),
+  but it is not trusted as the page's text until verified.
+- **Math tokens** (`(a-1)`, `Z10/2`): a Latin run and a digit run are two
+  pdfium segments whose order it reverses — stored accordingly (`1245`:
+  2,189 → 2,202 of 2,203).
+- **Firefox**: decided, 8 pt stays (`experiments/06`).
+- **Letter-level selection**: first measurement (`experiments/08`): joins
+  found along the baseline cut 33% of connected runs cleanly; the rest are
+  tooth letters, whose joins are not lower than the teeth. That is the
+  research problem; recorded, not solved.
+- Also: pdfium's own reading of the source's stamps (a "Scanned by
+  CamScanner" footer comes first on one document) is left as is.
+
 ## Honest note on "pioneering"
 
 The parts exist elsewhere: JBIG2/DjVu symbol dictionaries, invisible OCR
