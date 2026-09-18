@@ -78,13 +78,48 @@ def strip_text_objects(doc, page) -> int:
     return n
 
 
+def _azure_lines(az_page, pw):
+    """Azure's lines of a page as lists of its words (with x1 for ordering)."""
+    if not az_page:
+        return []
+    out = []
+    for l in az_page.get("lines", []):
+        xs = l["polygon"][0::2]; ys = l["polygon"][1::2]
+        x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+        inside = [dict(content=w["text"], x1=w["box"][2]) for w in pw
+                  if x0 - 0.02 <= (w["box"][0] + w["box"][2]) / 2 <= x1 + 0.02 and y0 - 0.02 <= (w["box"][1] + w["box"][3]) / 2 <= y1 + 0.02]
+        if inside:
+            out.append(inside)
+    return out
+
+
 def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_exact):
     words, _, dims = load_azure(azure_dir / stem / f"{stem}.json")
     j = json.load(open(azure_dir / stem / f"{stem}.json")); ar = j.get("analyzeResult", j)
     az_pages = {p["pageNumber"]: p for p in ar["pages"]}
     src = fitz.open(scan_pdf)
+    # Typeset pages whose fonts have no usable encoding get a ToUnicode built
+    # from Azure's words (pdf/fontfix.py); such a page is then native text
+    # and needs no ink layer. Votes are collected over the whole document.
+    from collections import Counter, defaultdict
+    from .fontfix import collect_votes, write_tounicode, junk_fonts
+    votes = defaultdict(Counter); junk_pages = set()
+    for pno in range(src.page_count):
+        if junk_fonts(src, src[pno]) and text_words(src[pno])[0] == 0:
+            junk_pages.add(pno + 1)
+            collect_votes(src, src[pno], [w for w in words if w["page"] == pno + 1], votes)
+    from .fontfix import coverage, settle
+    if votes:
+        settle(votes)
+    mapping = write_tounicode(src, votes) if votes else {}
+    # a page is native once (nearly) every junk glyph has its letter; a page
+    # the votes could not cover keeps our ink layer over its junk text
+    fixed_pages = {pn: coverage(src, src[pn - 1], mapping) for pn in junk_pages} if mapping else {}
+    fixed_pages = {pn: c for pn, c in fixed_pages.items() if c >= 0.9}
+    if mapping:
+        src = fitz.open("pdf", src.tobytes())                 # reopen: MuPDF caches the fonts' encodings
     vec = fitz.open() if vector else None
-    report = dict(doc=stem, pages=[])
+    report = dict(doc=stem, pages=[], fonts_fixed={str(k): len(v) for k, v in mapping.items()}, fixed_pages=sorted(fixed_pages))
     # One shape alphabet for the whole document. It labels the ink — every
     # glyph records which shapes it is made of — and is exported beside the
     # PDF as the document's typeface. It never replaces an outline: the
@@ -98,9 +133,16 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         # in InDesign) already IS native text; its visible text must not be
         # touched and it needs no ink glyphs. Azure's searchable PDFs of
         # scans carry exactly one font, 'Dummy', for their invisible layer.
-        if born_digital(page):
+        if born_digital(page) or pn in fixed_pages:
             strip_text_objects(src, page)                 # Azure's layer over typeset text: the real fonts stay, the Dummy layer goes
-            report["pages"].append(dict(page=pn, words=sum(1 for w in words if w["page"] == pn), text="native-digital", lines=0, glyphs=0))
+            info = dict(page=pn, words=sum(1 for w in words if w["page"] == pn), text="native-digital", lines=0, glyphs=0)
+            if pn in fixed_pages:
+                # fonts fixed from the OCR: verify the page's own text against Azure's words, like a layer of ours
+                pw = [w for w in words if w["page"] == pn]
+                info.update(text="native-fixed", placed=[w["text"] for w in pw],
+                            runs=[" ".join(w["content"] for w in sorted(l_words, key=lambda w: -w["x1"]))
+                                  for l_words in _azure_lines(az_pages.get(pn), pw)])
+            report["pages"].append(info)
             if vec is not None:
                 vec.insert_pdf(src, from_page=pno, to_page=pno)
             continue

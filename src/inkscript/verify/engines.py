@@ -20,7 +20,7 @@ def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
     v = []
     for pinfo in report["pages"]:
         pn = pinfo["page"]
-        if pn > len(doc) or not pinfo.get("glyphs"):
+        if pn > len(doc) or not pinfo.get("placed"):
             continue
         t = N(doc[pn - 1].get_textpage().get_text_range())
         got = {edge(x) for x in re.sub(r"[\u200e\u200f\u202a-\u202e]", "", t).split()}
@@ -50,7 +50,7 @@ def pdfium_lines(pdf: Path, report: dict) -> list[dict]:
     v = []
     for pinfo in report["pages"]:
         pn = pinfo["page"]
-        if pn > len(doc) or not pinfo.get("glyphs") or "runs" not in pinfo:
+        if pn > len(doc) or not pinfo.get("runs"):
             continue
         t = re.sub(r"[\u200e\u200f\u202a-\u202e]", "", doc[pn - 1].get_textpage().get_text_range()).replace("\r\n", "\n")
         got = [key(l) for l in t.split("\n")]

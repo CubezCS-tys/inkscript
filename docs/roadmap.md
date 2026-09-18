@@ -84,6 +84,16 @@ Parked by the user to carry on with the roadmap; pick up in this order.
 - [x] Interactive storyboard (`docs/storyboard/`, built from real outputs;
       published as an artifact 2026-09-18). Rebuild it after each
       corpus run so its numbers stay true.
+- [~] Typeset PDFs with junk-encoded fonts: `pdf/fontfix.py` builds a
+      ToUnicode from Azure's words by aligning glyphs to word boxes and
+      voting per code (two passes: exact counts, then one-glyph ligature
+      or mark differences). On `0470` it covers 74% of glyphs — not yet
+      the ≥90% at which a page is switched to its own fixed fonts instead
+      of our layer. Needs a ligature-aware alignment (a glyph absorbing
+      two or three letters, scored by the votes) to finish; wired into
+      `build_document` so it takes effect per document as soon as
+      coverage allows. Fonts with custom /Differences encodings (`1370`)
+      are not yet recognised as junk fonts.
 - [ ] Push the repo when the user asks.
 
 ## Standing rules
