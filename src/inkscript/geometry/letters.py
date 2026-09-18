@@ -120,7 +120,11 @@ def align(units: list[str], F: dict):
         w = b - a; s = -2.4 * abs(np.log(max(w, 1) / (width_class(units[i]) * unit_px))) ** 2
         if c_has[b] - c_has[a] < 0.3 * w: s -= 2
         a_ok, d_ok, da_ok, db_ok = agree(i, a, b)
-        s += (1.5 if a_ok else -1.5) + (1.0 if d_ok else -1.0) + (2.0 if da_ok else -2.0) + (2.0 if db_ok else -2.0)
+        # An ascender or a dot is a hard fact about where a letter is: a
+        # missing one costs far more than a width that is off. With equal
+        # weights the programme traded a final alef's stroke for a nicer
+        # width and final ا came out inconsistent half the time.
+        s += (1.5 if a_ok else -6.0) + (1.0 if d_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
         if i < n - 1:
             s += 1.0 if (thin[min(b, W - 1)] or thin[max(b - 1, 0)]) else -0.5
         return s
