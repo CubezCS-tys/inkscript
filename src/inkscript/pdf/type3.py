@@ -57,7 +57,21 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
     if res[0] == "xref":
         res_xref = int(res[1].split()[0])
     else:
-        res_xref = doc.get_new_xref(); doc.update_object(res_xref, "<< >>")
+        # Resources may be inherited from the Pages tree. A fresh dictionary
+        # on the page would shadow the inherited one and the page's image
+        # XObject would vanish ("cannot find XObject resource 'Im0'": whole
+        # documents rendered blank). Copy the inherited dictionary first.
+        inherited = res[1] if res[0] == "dict" else None
+        if inherited is None:
+            parent = doc.xref_get_key(pg.xref, "Parent")
+            while parent[0] == "xref":
+                px = int(parent[1].split()[0]); r = doc.xref_get_key(px, "Resources")
+                if r[0] == "xref":
+                    inherited = doc.xref_object(int(r[1].split()[0])); break
+                if r[0] == "dict":
+                    inherited = r[1]; break
+                parent = doc.xref_get_key(px, "Parent")
+        res_xref = doc.get_new_xref(); doc.update_object(res_xref, inherited or "<< >>")
         doc.xref_set_key(pg.xref, "Resources", f"{res_xref} 0 R")
     if doc.xref_get_key(res_xref, "Font")[0] == "null":
         doc.xref_set_key(res_xref, "Font", "<< >>")
@@ -224,6 +238,11 @@ def stray_paths(stray, M, frame: "Frame | None" = None):
 
 
 def append_content(doc, pg, content: bytes):
+    # Scanner content often leaves a page-level `cm` (e.g. a flipped 0.75
+    # scale) without q/Q. Our text would inherit it and pdfium would read
+    # every word mirrored, so wrap the existing streams in q … Q first.
+    if not pg.is_wrapped:
+        pg.wrap_contents()
     cx = doc.get_new_xref(); doc.update_object(cx, "<< >>"); doc.update_stream(cx, content)
     old = pg.get_contents()
     doc.xref_set_key(pg.xref, "Contents", "[" + " ".join(f"{x} 0 R" for x in old + [cx]) + "]")

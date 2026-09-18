@@ -187,10 +187,11 @@ def cmd_numbers(a) -> int:
         if not pdf.exists(): continue
         r = reread_numbers(gc, a.gemini_model or GEMINI_MODEL, pdf, rj, limit=a.limit)
         (rd / f"{stem}.numbers.json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
-        tot["numbers"] += r["numbers"]; tot["agree"] += r["agree"]; tot["tin"] += r["usage"]["tokens_in"]; tot["tout"] += r["usage"]["tokens_out"]
-        print(f"{stem:<24} {r['numbers']:>4} numbers, {r['agree']:>4} agree, {len(r['disagree']):>3} to review" + (f"  e.g. {[(d['ocr'], d['gemini']) for d in r['disagree'][:3]]}" if r["disagree"] else ""), flush=True)
+        tot["numbers"] += r["numbers"]; tot["agree"] += r["agree"]; tot["unread"] = tot.get("unread", 0) + r["unread"]; tot["tin"] += r["usage"]["tokens_in"]; tot["tout"] += r["usage"]["tokens_out"]
+        print(f"{stem:<24} {r['numbers']:>4} numbers, {r['agree']:>4} agree, {len(r['disagree']):>3} to review, {r['unread']:>3} unread" + (f"  e.g. {[(d['ocr'], d['gemini']) for d in r['disagree'][:3]]}" if r["disagree"] else ""), flush=True)
     cost = tot["tin"] / 1e6 * GEMINI_IN_PER_M + tot["tout"] / 1e6 * GEMINI_OUT_PER_M
-    print(f"\nall: {tot['numbers']} numbers re-read, {tot['agree']} agree ({tot['agree'] / max(1, tot['numbers']):.1%}), {tot['numbers'] - tot['agree']} to review; gemini ${cost:.3f}")
+    read = tot["numbers"] - tot.get("unread", 0)
+    print(f"\nall: {tot['numbers']} numbers, {read} read back, {tot['agree']} agree ({tot['agree'] / max(1, read):.1%} of those read), {read - tot['agree']} to review, {tot.get('unread', 0)} unread; gemini ${cost:.3f}")
     return 0
 
 

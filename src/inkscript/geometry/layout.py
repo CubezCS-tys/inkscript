@@ -61,9 +61,17 @@ def layout_page(pwords, texts, az_lines, blobs, sx, sy):
                 cands = [w for w in L if overlap(bl["x"], bl["x"] + bl["w"], w["x0"], w["x1"]) > 0]
                 if cands:
                     bl["word"] = min(cands, key=lambda w: abs((w["x0"] + w["x1"]) / 2 - bl["cx"])); break
-    for bl in blobs:                                      # rules are furniture, not letters
+    page_h = max((w["y1"] for w in wpx), default=0) or 1
+    for bl in blobs:                                      # rules and pictures are furniture, not letters
         w = bl["word"]
-        if w is not None and bl["w"] > 8 * bl["h"] and not (w["y0"] <= bl["cy"] <= w["y1"]):
+        if w is None:
+            continue
+        if bl["w"] > 8 * bl["h"] and not (w["y0"] <= bl["cy"] <= w["y1"]):
+            bl["word"] = None
+        # A photograph or a solid block binarises into one blob far larger
+        # than any word; inside a glyph it would make the glyph's box the
+        # picture (a magazine cover copied out 3% intact).
+        elif bl["h"] > 2.5 * (w["y1"] - w["y0"]) and bl["w"] > 2.5 * (w["x1"] - w["x0"]):
             bl["word"] = None
     for bl in blobs:
         if bl["word"] is not None:

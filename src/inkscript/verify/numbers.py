@@ -65,16 +65,29 @@ def reread_numbers(client, model, pdf: Path, review_json: Path, batch: int = 12,
                 usage["requests"] += 1; text = resp.text or "[]"; break
             except Exception:
                 time.sleep(2 * (attempt + 1))
+        # The answer is a JSON array, sometimes inside a ``` fence or with
+        # prose around it; a batch that cannot be parsed is "unread", never
+        # a disagreement (five of six documents came back 0% agreed because
+        # every batch failed to parse and every number counted as wrong).
+        got = None
         try:
             got = json.loads(text)
         except Exception:
-            got = []
+            m = re.search(r"\[.*\]", text, re.S)
+            if m:
+                try: got = json.loads(m.group(0))
+                except Exception: got = None
+        if not isinstance(got, list):
+            got = None
         for k, n in enumerate(chunk):
-            g = got[k] if k < len(got) and isinstance(got[k], str) else ""
+            if got is None or k >= len(got) or not isinstance(got[k], str):
+                results.append(dict(page=n["page"], box=n["box"], ocr=n["text"], gemini=None, agree=None)); continue
+            g = got[k]
             # Judge the digits; brackets and commas at the edge of a crop come
             # and go with the padding and are not what this reading is for.
             digits = lambda t: re.sub(r"[^0-9٠-٩۰-۹]", "", t).translate(str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789"))
             same = digits(g) == digits(n["text"]) and digits(g) != ""
             results.append(dict(page=n["page"], box=n["box"], ocr=n["text"], gemini=g, agree=same))
-    n_agree = sum(1 for x in results if x["agree"])
-    return dict(doc=pdf.stem, numbers=len(results), agree=n_agree, disagree=[x for x in results if not x["agree"]], usage=usage)
+    n_agree = sum(1 for x in results if x["agree"]); unread = sum(1 for x in results if x["agree"] is None)
+    return dict(doc=pdf.stem, numbers=len(results), agree=n_agree, unread=unread,
+                disagree=[x for x in results if x["agree"] is False], usage=usage)

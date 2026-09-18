@@ -16,21 +16,37 @@ from .type3 import write_text_layer, stray_paths, append_content, Frame
 from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
 def born_digital(page) -> bool:
-    """True when the page's text is set in real fonts rather than Azure's
-    invisible 'Dummy' layer over a scan."""
+    """True when the page's text is set in real fonts and there is no Azure
+    'Dummy' layer at all: a typeset page, already native text. A scan whose
+    page also carries a real font (a digitally added stamp or header beside
+    Azure's invisible layer) is still a scan."""
     fonts = page.get_fonts()
-    return any(f[3] != "Dummy" for f in fonts) and bool(page.get_text("text").strip())
+    return bool(fonts) and all(f[3] != "Dummy" for f in fonts) and bool(page.get_text("text").strip())
 
 
 def strip_text_objects(doc, page) -> int:
-    """Remove every BT…ET block from the page's content streams. Returns how many."""
+    """Remove Azure's invisible text objects from the page's content streams.
+    When the page has only the 'Dummy' font every BT…ET block goes; when a
+    real font shares the page, only blocks that select a Dummy font are cut,
+    so a digitally added header keeps its text. Returns how many."""
     import re
+    dummies = [f[4].encode() for f in page.get_fonts(full=True) if f[3] == "Dummy"]
+    only_dummy = all(f[3] == "Dummy" for f in page.get_fonts())
     n = 0
     for xref in page.get_contents():
         raw = doc.xref_stream(xref)
         if raw is None or b"BT" not in raw:
             continue
-        new, k = re.subn(rb"BT\b.*?\bET\b", b"", raw, flags=re.S)
+        if only_dummy:
+            new, k = re.subn(rb"BT\b.*?\bET\b", b"", raw, flags=re.S)
+        else:
+            k = 0
+            def cut(m):
+                nonlocal k
+                if any(re.search(rb"/" + re.escape(d) + rb"\b", m.group(0)) for d in dummies):
+                    k += 1; return b""
+                return m.group(0)
+            new = re.sub(rb"BT\b.*?\bET\b", cut, raw, flags=re.S)
         if k:
             doc.update_stream(xref, new); n += k
     return n
