@@ -53,6 +53,22 @@ from.
    (OpenType via fontTools) once letter-level pieces exist; until then the
    SVG specimen is the honest form.
 
+## Todo (2026-09-18, morning)
+
+Parked by the user to carry on with the roadmap; pick up in this order.
+
+- [ ] Go through the weakest pages of the 227-journal sample: the 42
+      reversed lines, the ~900 out-of-order lines, the 422 in-column
+      inversions (`0470-000-001-003` 71, `0140-000-062-001` 25), and the
+      three weakest documents by words intact (`0005-032-001-001`,
+      `0385-012-019-001`, `1245-001-004-001`). Per-page listing from the
+      `lines` and `order` fields of `native_pdf_report.json`.
+- [ ] Firefox: explain the half of the lines that differ from Chrome's at
+      a 16–24 pt nominal size (`experiments/06`); decide the size.
+- [ ] Recitation-filter cover pages (Gemini refuses some title pages).
+- [ ] Comparison against ABBYY / ocrmypdf on the same pages.
+- [ ] Push the repo when the user asks.
+
 ## Standing rules
 
 - Every glyph is the printed occurrence's own outline, stored in scan
