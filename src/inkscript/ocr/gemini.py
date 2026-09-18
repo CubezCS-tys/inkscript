@@ -112,6 +112,16 @@ def page_images(pdf: Path, fallback_dpi: int = 300,
         if blob is None:
             pix = pg.get_pixmap(dpi=fallback_dpi)
             blob = (pix.tobytes("png"), "image/png", pix.width, pix.height)
+        if pg.rotation and blob[1] != "":
+            # The embedded scan is stored sideways and the page's /Rotate turns
+            # it upright for the viewer; Gemini must see it upright too. (A
+            # sideways cover page came back empty.)
+            import cv2, numpy as np
+            img = cv2.imdecode(np.frombuffer(blob[0], np.uint8), cv2.IMREAD_UNCHANGED)
+            k = {90: -1, 180: 2, 270: 1}[pg.rotation % 360]
+            img = np.ascontiguousarray(np.rot90(img, k))
+            ok, png = cv2.imencode(".png", img)
+            blob = (png.tobytes(), "image/png", img.shape[1], img.shape[0])
         out.append(blob)
     doc.close()
     return out
@@ -187,12 +197,21 @@ def gemini_text(client, model: str, images: list, arm: str, resolution: str,
 
 def gemini_page1(client, scan: Path, cache: Path, model: str) -> tuple[str | None, dict]:
     """Page 1 through Gemini, or the cached read. None means the call failed."""
-    if cache.exists():
+    if cache.exists() and len(cache.read_text(encoding="utf-8").strip()) >= 20:
         return cache.read_text(encoding="utf-8"), {"in": 0, "out": 0, "cached": True}
-    text, usage = gemini_text(client, model, page_images(scan, limit=1), "strict",
-                              "ultra_high", 8192, False)
-    if usage["errors"]:
-        return None, usage        # never cache a failure, or it is never retried
+    images = page_images(scan, limit=1)
+    text, usage = gemini_text(client, model, images, "strict", "ultra_high", 8192, False)
+    # An empty answer is usually transient (a retry reads the page), sometimes
+    # the recitation filter; try again, the last time at a lower resolution.
+    for res in ("ultra_high", "high"):
+        if not usage["errors"] and len(text.strip()) >= 20:
+            break
+        time.sleep(3)
+        text, u2 = gemini_text(client, model, images, "strict", res, 8192, False)
+        for k in ("in", "out", "requests", "errors"):
+            usage[k] = usage.get(k, 0) + u2.get(k, 0)
+    if usage["errors"] or len(text.strip()) < 20:
+        return None, usage        # never cache a failure or an empty answer, or it is never retried
     cache.write_text(text, encoding="utf-8")
     return text, usage
 
