@@ -81,6 +81,9 @@ Parked by the user to carry on with the roadmap; pick up in this order.
       PDF on three documents (`experiments/07`): lines in reading order
       in Chrome 98–100% vs 34–75% (Azure) vs 2–16% (ocrmypdf). ABBYY not
       available here.
+- [x] Interactive storyboard (`docs/storyboard/`, built from real outputs;
+      published as an artifact 2026-09-18). Rebuild it after each
+      corpus run so its numbers stay true.
 - [ ] Push the repo when the user asks.
 
 ## Standing rules

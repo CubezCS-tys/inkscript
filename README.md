@@ -49,3 +49,7 @@ alphabet is exported beside the PDF and never substituted into it. `experiments/
 numbered scripts that established the geometry results, verbatim.
 
 `docs/demo/ink_to_text.html` is a self-contained animation of the idea.
+`docs/storyboard/index.html` is the interactive storyboard — the demo, a real
+page with its glyphs, a widget that reads a line the way Chrome does, every
+rule with the number behind it, and the results — built from the pipeline's
+own outputs by `docs/storyboard/build.py` (see its docstring for the inputs).

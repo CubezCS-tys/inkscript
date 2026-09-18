@@ -1,0 +1,455 @@
+<title>Inkscript Storyboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=Amiri:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#EEEBE4; --ink:#17150F; --lapis:#2C4B96; --lapis-soft:#8FA5D8; --sel:#BBD4F5; --sel-strong:#7FA7EA; --muted:#6B675F; --rule:#D3CFC5; --panel:#F6F4EF; --panel2:#E6E2D8; --ok:#2F7A4E; --bad:#A63D2F; --warn:#9A6B15;
+  --serif:"Newsreader",Georgia,"Times New Roman",serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; --ar:"Amiri","Noto Naskh Arabic","Scheherazade New",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}}
+:root[data-theme="dark"]{--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.5;padding-block:0 4rem;padding-inline:20px}
+a{color:var(--lapis)}
+.layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:3rem}
+nav.chapters{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;padding-top:2.4rem;font-family:var(--mono);font-size:.74rem;letter-spacing:.03em}
+nav.chapters .brand{font-family:var(--serif);font-size:1.15rem;letter-spacing:0;font-weight:500;margin:0 0 .3rem}
+nav.chapters .sub{color:var(--muted);margin:0 0 1.4rem;font-size:.7rem;line-height:1.5}
+nav.chapters ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--rule)}
+nav.chapters li a{display:block;padding:.42rem .9rem;color:var(--muted);text-decoration:none;border-left:2px solid transparent;margin-left:-1px;transition:color .15s,border-color .15s}
+nav.chapters li a:hover{color:var(--ink)}
+nav.chapters li a.on{color:var(--ink);border-left-color:var(--lapis)}
+nav.chapters li a .n{display:inline-block;width:1.6em;color:var(--lapis)}
+main{min-width:0}
+header.hero{padding:2.6rem 0 1.6rem}
+header.hero .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--lapis);margin:0 0 .9rem}
+header.hero h1{font-weight:500;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.02;letter-spacing:-.015em;margin:0;text-wrap:balance;max-width:20ch}
+header.hero p.lede{font-size:1.2rem;color:var(--muted);max-width:58ch;margin:1.1rem 0 0}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin:1.8rem 0 0}
+.facts div{padding:.9rem .4rem .9rem 0}
+.facts b{display:block;font-family:var(--mono);font-weight:500;font-size:1.5rem;font-variant-numeric:tabular-nums;color:var(--lapis)}
+.facts span{font-size:.88rem;color:var(--muted)}
+section.chapter{padding:3.4rem 0 1rem;border-top:1px solid var(--rule);scroll-margin-top:1rem}
+section.chapter .num{font-family:var(--mono);font-size:.74rem;letter-spacing:.12em;color:var(--lapis)}
+section.chapter h2{font-weight:500;font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.1;margin:.3rem 0 .6rem;letter-spacing:-.01em;text-wrap:balance}
+section.chapter p.thesis{font-size:1.15rem;margin:0 0 1.4rem;max-width:62ch;color:var(--ink)}
+.prose{max-width:62ch}
+.prose p{margin:0 0 .9rem}
+.prose .ar{font-family:var(--ar);font-size:1.45rem;direction:rtl;text-align:right;line-height:1.75}
+.stage{position:relative;width:100%;border:1px solid var(--rule);background:#EEEBE4;overflow:hidden}
+.stage.demo{aspect-ratio:810/390}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .copied{position:absolute;left:0;right:0;bottom:0;padding:.55rem .9rem;background:var(--panel);border-top:1px solid var(--rule);display:flex;gap:1rem;align-items:baseline;transform:translateY(100%);transition:transform .3s}
+.stage .copied.on{transform:none}
+.copied .lbl,.lbl{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:none}
+.copied .txt{font-family:var(--ar);font-size:1.3rem;direction:rtl;text-align:right;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#17150F}
+.caption{display:grid;grid-template-columns:auto 1fr;gap:.2rem 1rem;align-items:baseline;min-height:3.2rem;margin-top:.8rem}
+.caption .cnum{font-family:var(--mono);font-size:.78rem;color:var(--lapis);letter-spacing:.08em}
+.caption .name{font-size:1.25rem;font-weight:500;margin:0}
+.caption .text{grid-column:2;margin:0;color:var(--muted);font-style:italic;font-size:1.02rem;max-width:62ch}
+.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:.4rem}
+.rail button{all:unset;cursor:pointer;display:block;padding:.55rem 0 0;border-top:2px solid var(--rule);font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.04em;transition:border-color .2s,color .2s}
+.rail button.on{border-top-color:var(--lapis);color:var(--ink)}
+.rail button:focus-visible{outline:2px solid var(--lapis);outline-offset:3px}
+.rail .bar{display:block;height:2px;margin-top:-2px;background:var(--lapis);width:0;transition:width .1s linear}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.8rem}
+button.btn,.controls button{font-family:var(--mono);font-size:.8rem;padding:.45rem .9rem;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer;border-radius:2px}
+button.btn:hover,.controls button:hover{border-color:var(--lapis)}
+button.btn:focus-visible,.controls button:focus-visible{outline:2px solid var(--lapis);outline-offset:2px}
+button.btn.on{background:var(--sel);border-color:var(--lapis)}
+.controls .sp{flex:1}
+.hint{font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+.code{display:flex;flex-wrap:wrap;gap:.4rem;margin:1.2rem 0 0}
+.code span{font-family:var(--mono);font-size:.72rem;padding:.25rem .55rem;border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:2px}
+.code span b{font-weight:500;color:var(--lapis)}
+.measured{margin:1.2rem 0 0;padding:.9rem 1rem;border-left:3px solid var(--lapis);background:var(--panel)}
+.measured .lbl{display:block;margin-bottom:.3rem}
+.measured p{margin:0;max-width:60ch}
+.measured b{font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+/* pipeline */
+.pipe{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:stretch;margin:.4rem 0 1rem}
+.pipe .half{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem}
+.pipe .half h3{margin:0 0 .3rem;font-size:1.1rem;font-weight:500}
+.pipe .half .lbl{display:block;margin-bottom:.4rem}
+.pipe .half ul{margin:.4rem 0 0;padding-left:1.1rem;font-size:.95rem}
+.pipe .half li{margin:.15rem 0}
+.pipe .meet{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.72rem;color:var(--muted);min-width:110px}
+.pipe .meet .arrow{font-size:1.6rem;color:var(--lapis)}
+.pipe .out{grid-column:1/-1;border:1px solid var(--lapis);padding:.9rem 1.1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pipe .out div{font-size:.95rem}
+.pipe .out .lbl{display:block;margin-bottom:.2rem}
+/* explorer */
+.explorer{position:relative;border:1px solid var(--rule);background:#F3F1EB;overflow:hidden}
+.explorer img{display:block;width:100%;height:auto}
+.explorer svg{position:absolute;inset:0;width:100%;height:100%}
+.explorer svg path{fill:transparent;stroke:transparent;stroke-width:1;cursor:pointer;transition:fill .12s}
+.explorer svg path:hover,.explorer svg path.on{fill:rgba(44,75,150,.28);stroke:#2C4B96}
+.explorer svg path.selected{fill:rgba(127,167,234,.5)}
+.explorer svg rect.box{fill:none;stroke:#2C4B96;stroke-dasharray:3 3;stroke-width:1;pointer-events:none}
+.xinfo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem;margin-top:.8rem;border:1px solid var(--rule);background:var(--panel);padding:.8rem 1rem;min-height:5.4rem;align-items:start}
+.xinfo .lbl{display:block;margin-bottom:.2rem}
+.xinfo .v{font-family:var(--ar);font-size:1.5rem;direction:rtl;text-align:right;line-height:1.3}
+.xinfo .v.ltr{direction:ltr;text-align:left;unicode-bidi:bidi-override}
+.xinfo .m{font-family:var(--mono);font-size:.8rem;word-break:break-all}
+.xinfo .empty{grid-column:1/-1;color:var(--muted);font-style:italic}
+/* bidi lab */
+.lab{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem}
+.lab textarea{width:100%;font-family:var(--ar);font-size:1.4rem;direction:rtl;padding:.5rem .7rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);resize:vertical;min-height:3.2rem;line-height:1.6}
+.lab .rows{display:grid;gap:.6rem;margin-top:.8rem}
+.lab .row{display:grid;grid-template-columns:150px 1fr auto;gap:1rem;align-items:baseline;padding:.5rem 0;border-top:1px solid var(--rule)}
+.lab .row .lbl{align-self:start;padding-top:.4rem;line-height:1.4}
+.lab .row .val{font-family:var(--ar);font-size:1.5rem;line-height:1.6;direction:rtl;text-align:right;overflow-wrap:anywhere}
+.lab .row .val.stream{direction:ltr;text-align:left;unicode-bidi:bidi-override}
+.lab .row .val .seg{padding:0 .04em;border-bottom:3px solid transparent}
+.lab .row .val .R{border-bottom-color:var(--lapis-soft)}
+.lab .row .val .L{border-bottom-color:var(--warn)}
+.lab .row .val .LW{border-bottom-color:var(--ok)}
+.lab .verdict{font-family:var(--mono);font-size:.78rem;white-space:nowrap}
+.lab .verdict.ok{color:var(--ok)}.lab .verdict.bad{color:var(--bad)}
+.lab .legend{display:flex;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.6rem}
+.lab .legend i{display:inline-block;width:1.4em;height:3px;vertical-align:middle;margin-right:.3em}
+.lab .toggles{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.8rem;margin-top:.4rem}
+.rule{border:1px solid var(--rule);background:var(--panel);padding:.9rem 1rem;display:grid;gap:.35rem;align-content:start}
+.rule .k{font-family:var(--mono);font-size:1.35rem;font-weight:500;color:var(--lapis);font-variant-numeric:tabular-nums;line-height:1.1}
+.rule h3{margin:0;font-size:1.05rem;font-weight:500;line-height:1.25}
+.rule p{margin:0;font-size:.92rem;color:var(--muted)}
+.rule .where{font-family:var(--mono);font-size:.68rem;color:var(--ink);opacity:.8}
+/* copies */
+.copies{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.4rem}
+.copies .col{border:1px solid var(--rule);background:var(--panel);padding:.8rem 1rem}
+.copies .col.ours{border-color:var(--lapis)}
+.copies h3{margin:0 0 .5rem;font-size:1rem;font-weight:500;display:flex;justify-content:space-between;align-items:baseline}
+.copies .line{font-family:var(--ar);font-size:1.25rem;direction:rtl;text-align:right;line-height:1.7;padding:.15rem 0;border-top:1px dashed var(--rule)}
+.copies .line.bad{color:var(--bad)}
+.copies .line.ok{color:var(--ink)}
+/* alphabet */
+.sheet{border:1px solid var(--rule);background:#fff;overflow:hidden}
+.sheet img{display:block;width:100%;height:auto}
+.witness{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.witness .crops{display:flex;gap:.8rem;flex-wrap:wrap;align-items:flex-end}
+.witness .crop{text-align:center}
+.witness .crop img{display:block;border:1px solid var(--rule);background:#fff;height:78px;width:auto}
+.witness .crop span{font-family:var(--mono);font-size:.68rem;color:var(--muted)}
+.witness .crop b{display:block;font-family:var(--ar);font-size:1.3rem;font-weight:400}
+.witness .box{border:1px solid var(--rule);background:var(--panel);padding:.9rem 1rem}
+.witness .box h3{margin:0 0 .3rem;font-size:1rem;font-weight:500}
+/* results */
+table.results{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:.4rem}
+table.results th,table.results td{text-align:left;padding:.6rem .5rem;border-bottom:1px solid var(--rule);vertical-align:top}
+table.results th{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+table.results td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+table.results td .bar{display:block;height:4px;background:var(--rule);margin-top:.35rem;position:relative}
+table.results td .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--lapis)}
+table.results td .bar i.other{background:var(--muted)}
+.tablewrap{overflow-x:auto}
+.next ol{padding-left:1.2rem;max-width:62ch}
+.next li{margin:.3rem 0}
+footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+@media (max-width:900px){.layout{grid-template-columns:1fr;gap:1rem}nav.chapters{position:static;padding-top:1.4rem}nav.chapters ol{display:flex;flex-wrap:wrap;gap:.2rem;border:0}nav.chapters li a{border:1px solid var(--rule);border-radius:2px;padding:.3rem .6rem}nav.chapters li a.on{border-color:var(--lapis)}}
+@media (max-width:700px){.facts{grid-template-columns:1fr 1fr}.pipe{grid-template-columns:1fr}.pipe .meet{flex-direction:row}.pipe .out{grid-template-columns:1fr}.xinfo{grid-template-columns:1fr 1fr}.copies{grid-template-columns:1fr}.witness{grid-template-columns:1fr}.lab .row{grid-template-columns:1fr}.rail button{font-size:.6rem}.caption{grid-template-columns:1fr}.caption .text{grid-column:1}}
+@media (prefers-reduced-motion: reduce){.stage .copied{transition:none}}
+</style>
+
+<div class="layout">
+<nav class="chapters" aria-label="Chapters">
+  <p class="brand">Inkscript</p>
+  <p class="sub">A scanned Arabic page that selects and copies like typed text. Every picture here is a real output.</p>
+  <ol id="toc"></ol>
+</nav>
+<main>
+<header class="hero">
+  <p class="eyebrow">Storyboard · 2026-09-18</p>
+  <h1>The page's own ink becomes its font</h1>
+  <p class="lede">Scanned journals are pictures. OCR layers put invisible typed text over them, and copying from that text is a lottery in Arabic. Inkscript traces every printed word's ink into a glyph of its own, tells the viewer what each glyph says, and checks the result the way a reader would: by what Chrome copies out.</p>
+  <div class="facts">
+    <div><b>99.97%</b><span>of 912,800 words copy out intact from 227 journals (Chrome's engine)</span></div>
+    <div><b>99.9%</b><span>of 84,186 lines come back in reading order</span></div>
+    <div><b>0</b><span>pixels substituted: every glyph is the printed occurrence's own outline</span></div>
+    <div><b>3</b><span>engines measured: pdfium (Chrome), MuPDF, poppler — plus Firefox's pdf.js</span></div>
+  </div>
+</header>
+
+<!-- 1 -->
+<section class="chapter" id="c1" data-title="The idea">
+  <div class="num">01 · THE IDEA</div>
+  <h2>One title, five steps</h2>
+  <p class="thesis">A liquid floods the page and stops at ink. Where it stopped is an outline; identical outlines get a number; the numbered shapes become a font placed back where the ink was. The page is text again.</p>
+  <div class="stage demo" id="stage"><canvas id="cv" aria-label="Animation of a scanned title becoming outlines, shapes and selectable text"></canvas>
+    <div class="copied" id="copied"><span class="lbl">copied</span><span class="txt" id="copiedTxt"></span></div>
+  </div>
+  <div class="caption"><span class="cnum" id="capNum">1 / 5</span><h3 class="name" id="capName">The scan</h3><p class="text" id="capText"></p></div>
+  <div class="rail" id="rail"></div>
+  <div class="controls"><button type="button" id="btnPrev">◀ Prev</button><button type="button" id="btnPlay">Pause</button><button type="button" id="btnNext">Next ▶</button><button type="button" id="btnReplay">Replay</button><span class="sp"></span><span class="hint"><span id="fBlobs"></span> ink blobs · <span id="fPoints"></span> outline points on this page</span></div>
+  <div class="prose" style="margin-top:1.2rem"><p>This is the whole project in one picture. Everything after it is what it took to make a real PDF viewer agree.</p></div>
+  <div class="code"><span><b>docs/demo/ink_to_text.html</b> the animation</span><span><b>experiments/01–05</b> the geometry results, verbatim</span></div>
+</section>
+
+<!-- 2 -->
+<section class="chapter" id="c2" data-title="Two halves">
+  <div class="num">02 · THE PIPELINE</div>
+  <h2>What a word says, and what a mark is</h2>
+  <p class="thesis">Two independent readings of the same scan meet in the PDF. OCR says what each word <em>says</em>; geometry says what each mark <em>is</em> and exactly where. Neither is allowed to edit the other.</p>
+  <div class="pipe">
+    <div class="half"><span class="lbl">OCR half · inkscript.ocr</span><h3>Text and boxes</h3><ul><li>Azure prebuilt-read: every word with its polygon, every line in reading order.</li><li>Gemini re-reads <em>page 1 only</em> — the title and author lines Azure mangles — with a strict transcription prompt, then a masthead crop, then a title-only extraction if the recitation filter refuses.</li><li>Gemini's tokens are aligned into Azure's boxes (runs of five words anchor, gaps fill).</li></ul></div>
+    <div class="meet"><span>meet in</span><span class="arrow">⤵</span><span>inkscript.pdf</span></div>
+    <div class="half"><span class="lbl">Geometry half · inkscript.geometry</span><h3>Ink and outlines</h3><ul><li>Binarise at 300 dpi (Otsu); rules and table borders cut out first.</li><li>Connected components → outline polygons (holes filled even-odd), integer pixel coordinates.</li><li>Blobs are assigned to word boxes; where the ink splits the way the script dictates, a word becomes pieces.</li><li>A document alphabet labels every shape — knowledge, never a substitute drawing.</li></ul></div>
+    <div class="out"><div><span class="lbl">&lt;stem&gt;.pdf</span>The scan, plus one Type 3 font per line whose glyphs are the words' own ink at zero opacity, each glyph's ToUnicode entry the word's text.</div><div><span class="lbl">&lt;stem&gt;_vector.pdf · .shapes.json · .alphabet.svg</span>The glyphs alone (no image), every placement with its shape ids, and the alphabet as a specimen.</div></div>
+  </div>
+  <div class="code"><span><b>ocr/azure.py</b> load_lines</span><span><b>ocr/gemini.py</b> gemini_page1</span><span><b>ocr/align.py</b> align_page</span><span><b>geometry/trace.py</b> page_blobs</span><span><b>geometry/layout.py</b> layout_page</span><span><b>geometry/alphabet.py</b> Alphabet</span><span><b>pdf/type3.py</b> write_text_layer</span><span><b>pdf/native.py</b> build_document</span></div>
+</section>
+
+<!-- 3 -->
+<section class="chapter" id="c3" data-title="A real page">
+  <div class="num">03 · A REAL PAGE</div>
+  <h2>Hover a word: its glyph is its own ink</h2>
+  <p class="thesis">This is page 1 of a 1970s journal from the test set, and the outlines are read back out of the finished PDF's fonts — not drawn for the demo. Each shape is one glyph; its text is what a viewer copies.</p>
+  <div class="explorer" id="explorer"><img id="xImg" alt="Top of the first page of a scanned Arabic journal article"><svg id="xSvg" aria-hidden="true"></svg></div>
+  <div class="xinfo" id="xInfo"><div class="empty">Hover or tap a word on the page.</div></div>
+  <div class="controls"><button type="button" class="btn" id="xSelectAll">Simulate Ctrl+A</button><button type="button" class="btn" id="xClear">Clear</button><span class="sp"></span><span class="hint" id="xCount"></span></div>
+  <div class="measured"><span class="lbl">measured</span><p>Every glyph's outline is stored in scan pixels, unchanged: the FontMatrix maps one glyph unit to one pixel. Drawing a word with another occurrence's outline would change a median <b>15%</b> of its pixels, so no shape is ever shared into the PDF; the alphabet is exported beside it.</p></div>
+  <div class="code"><span><b>pdf/type3.py</b> one font per line, glyph space = scan pixels, <code>/InkShapes</code> ids</span><span><b>geometry/layout.py</b> split_word, ink_pieces</span></div>
+</section>
+
+<!-- 4 -->
+<section class="chapter" id="c4" data-title="How Chrome reads">
+  <div class="num">04 · HOW CHROME READS A LINE</div>
+  <h2>Stored backwards on purpose</h2>
+  <p class="thesis">A PDF viewer does not know Arabic; it rebuilds a line from glyph positions and a bidi pass of its own. Chrome's engine (pdfium) reverses the order of a line's segments and each Arabic segment in place, mirroring brackets, while digits, vowel marks and Latin keep their order. So the text is stored as the exact inverse of that — and Chrome gives the line back. Type a line to see all three forms.</p>
+  <div class="lab">
+    <textarea id="labIn" rows="2" spellcheck="false">362 هـ - وهو وان لم يكن فى الحقيقة تأليفا مبتكرا بالمعنى الدقيق ، الا أن</textarea>
+    <div class="rows">
+      <div class="row"><span class="lbl">what the page says<br>(logical order)</span><div class="val" id="labLogical"></div><span></span></div>
+      <div class="row"><span class="lbl">stored in the PDF<br>(stream order, shown left to right)</span><div class="val stream" id="labStored"></div><span></span></div>
+      <div class="row"><span class="lbl">what Chrome copies</span><div class="val" id="labOut"></div><span class="verdict" id="labVerdict"></span></div>
+    </div>
+    <div class="legend"><span><i style="background:var(--lapis-soft)"></i>Arabic segment</span><span><i style="background:var(--ok)"></i>digits · marks · separators (order kept)</span><span><i style="background:var(--warn)"></i>Latin (order kept)</span></div>
+    <div class="toggles"><button type="button" class="btn on" id="tgChrome">Read as Chrome 144 (pdfium 7559–7947, main)</button><button type="button" class="btn" id="tg7999">Read as pdfium build 7999 (the verifier we trusted for a day)</button></div>
+  </div>
+  <div class="measured"><span class="lbl">measured</span><p>The first storage rule was tuned against pypdfium2 5.13, whose pdfium build 7999 has this automatic direction switched off. It passed the words-intact check — which ignores order — while Chrome itself read vowelled words backwards. Reading pdfium's source for Chrome's branch settled it; the verifier is now pinned to build 7947 and reports <b>lines in order</b>. Try a vowelled word above under the 7999 reading.</p></div>
+  <div class="code"><span><b>text.py</b> visual() — the inverse</span><span><b>text.py</b> chrome_reads() — pdfium's CloseTempLine in Python, this widget in JS</span><span><b>tests/test_pieces.py</b> round trip</span><span><b>docs/pdf-writing-rules.md</b> "History"</span></div>
+</section>
+
+<!-- 5 -->
+<section class="chapter" id="c5" data-title="Rules, measured">
+  <div class="num">05 · RULES FOUND BY MEASUREMENT</div>
+  <h2>Nothing about the text layer was adopted on reasoning alone</h2>
+  <p class="thesis">Each rule below was found by writing a PDF, reading it back with the engine, and looking at what went wrong. The number is what justified it.</p>
+  <div class="rules" id="rules"></div>
+  <div class="code"><span><b>docs/pdf-writing-rules.md</b> every rule with its experiment</span><span><b>verify/engines.py</b> pdfium_words · pdfium_lines · pdfium_order · pages_missing_image</span></div>
+</section>
+
+<!-- 6 -->
+<section class="chapter" id="c6" data-title="What Chrome copies">
+  <div class="num">06 · WHAT CHROME COPIES</div>
+  <h2>Page 2, six lines, two PDFs</h2>
+  <p class="thesis">The same scanned page with Azure's own searchable layer and with ours, read by Chrome's engine. Both hold the same words on this page; the difference is whether the line comes back as a line.</p>
+  <div class="copies" id="copies"></div>
+  <div class="measured"><span class="lbl">measured · experiments/07</span><p>Three test documents, one reader: lines in reading order — ours <b>98–100%</b>, Azure's searchable PDF <b>34–75%</b>, ocrmypdf (Tesseract) <b>2–16%</b>. Words intact 99.9–100% / 96–99% / 62–85% (the last also reflects Tesseract's reading, not only its layer).</p></div>
+</section>
+
+<!-- 7 -->
+<section class="chapter" id="c7" data-title="The alphabet as witness">
+  <div class="num">07 · THE ALPHABET AS WITNESS</div>
+  <h2>Same ink, different text: one of them is wrong</h2>
+  <p class="thesis">Every shape in a document is labelled; a word's ink signature is the sequence of its shape ids. When two words share a signature but not a text, the OCR contradicted itself, and the crops make the call easy. Numbers get the same treatment from a second, independent reading.</p>
+  <div class="sheet"><img id="sheetImg" alt="Specimen sheet of the document's shape alphabet, ordered by frequency"></div>
+  <div class="witness" id="witness"></div>
+  <div class="code"><span><b>geometry/alphabet.py</b> Alphabet.assign</span><span><b>verify/consistency.py</b> review()</span><span><b>verify/review_html.py</b> crops beside readings</span><span><b>verify/numbers.py</b> reread_numbers</span></div>
+</section>
+
+<!-- 8 -->
+<section class="chapter" id="c8" data-title="Results">
+  <div class="num">08 · RESULTS</div>
+  <h2>Three sets, one reader, final build</h2>
+  <p class="thesis">Chrome's engine, pinned build 7947. "Words intact": each placed word comes back whole. "Lines in order": a line's Arabic words come back contiguous and in reading order, the reference being the words by ink position.</p>
+  <div class="tablewrap"><table class="results">
+    <thead><tr><th>set</th><th>words intact</th><th>lines in order</th><th>inversions</th><th>pages that lost their image</th></tr></thead>
+    <tbody id="results"></tbody>
+  </table></div>
+  <div class="measured"><span class="lbl">the night before</span><p>The 227-journal sample stood at <b>98.02%</b> with <b>1,299</b> inversions and <b>98</b> documents with blank pages at 01:00. The blank pages (inherited <code>/Resources</code> shadowed by a fresh dictionary), the mirrored documents (an unbalanced <code>cm</code>), the wrong engine build, a run dropped as a fake-bold duplicate, thumbnails handed to Gemini — each was found from a number that looked wrong, never from theory.</p></div>
+</section>
+
+<!-- 9 -->
+<section class="chapter next" id="c9" data-title="What's next">
+  <div class="num">09 · WHAT'S NEXT</div>
+  <h2>Open, in the order I'd take them</h2>
+  <ol>
+    <li>Typeset PDFs whose fonts have no usable encoding: give them a correct ToUnicode from the OCR words — the born-digital variant of this project.</li>
+    <li>Table pages: cells pdfium joins across rows; the OCR's line order there.</li>
+    <li>Letter-level selection inside a connected run — the remaining selection limit.</li>
+    <li>Firefox: pdf.js splits lines at wide gaps and merges tight ones; measured, decision deferred (experiments/06).</li>
+    <li>A larger unattended sample, read the same way.</li>
+  </ol>
+  <div class="code"><span><b>docs/roadmap.md</b></span><span><b>docs/night-report-2026-09-18.md</b></span></div>
+</section>
+
+<footer>Built by <code>docs/storyboard/build.py</code> from the pipeline's own outputs · inkscript, 2026-09-18</footer>
+</main>
+</div>
+
+<script>
+const DATA=/*DEMO_DATA*/;
+const STORY=/*STORY_DATA*/;
+
+/* ---------- table of contents ---------- */
+const toc=document.getElementById('toc'); const chapters=[...document.querySelectorAll('section.chapter')];
+chapters.forEach((s,i)=>{const li=document.createElement('li');li.innerHTML=`<a href="#${s.id}"><span class="n">${String(i+1).padStart(2,'0')}</span>${s.dataset.title}</a>`;toc.appendChild(li)});
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){[...toc.querySelectorAll('a')].forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-30% 0px -60% 0px'});
+chapters.forEach(s=>io.observe(s));
+
+/* ---------- 1. the demo (docs/demo/ink_to_text.html, verbatim logic) ---------- */
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+const W=DATA.w, H=DATA.h; let dpr=1;
+function size(){dpr=Math.min(2,window.devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;}
+size(); addEventListener('resize',size);
+const img=new Image(); img.src='data:image/jpeg;base64,'+DATA.jpg; let imgReady=false;
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const blobs=DATA.blobs.map(b=>{const paths=b.p.map(p=>{let L=0;for(let i=0;i<p.length;i++){const a=p[i],c=p[(i+1)%p.length];L+=Math.hypot(c[0]-a[0],c[1]-a[1]);}return {pts:p,len:L}});return {s:b.s,n:b.n,paths,cx:avg(b.p[0],0),cy:avg(b.p[0],1)}});
+function avg(p,k){return p.reduce((s,q)=>s+q[k],0)/p.length}
+const totalLen=blobs.reduce((s,b)=>s+b.paths.reduce((t,p)=>t+p.len,0),0);
+function tracePath(b){ctx.beginPath();for(const p of b.paths){const q=p.pts;ctx.moveTo(q[0][0],q[0][1]);for(let i=1;i<q.length;i++)ctx.lineTo(q[i][0],q[i][1]);ctx.closePath();}}
+function fillInk(color){ctx.fillStyle=color;for(const b of blobs){tracePath(b);ctx.fill('evenodd');}}
+function hue(s){return (s*137.508)%360}
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const STAGES=[
+ {name:'The scan',dur:2600,text:'The page as the scanner saw it: a picture. Nothing in it can be selected or searched.'},
+ {name:'The liquid',dur:4200,text:'A liquid floods the page. It flows around every letter and stops wherever it meets ink.'},
+ {name:'The outline',dur:4200,text:'Where liquid touched ink is the outline. Each letter is now a boundary made of points — geometry, not pixels.'},
+ {name:'The shapes',dur:4200,text:'Identical shapes get the same number. The page becomes a list of shapes and where each one sits.'},
+ {name:'The font',dur:5200,text:'The shapes become a font and are placed back where the ink was. The page is text again: select it, copy it, search it.'},
+];
+let stage=0, t0=performance.now(), playing=!reduced, raf=0;
+const rail=document.getElementById('rail');
+STAGES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML=`${i+1} · ${s.name}<span class="bar"></span>`;b.addEventListener('click',()=>goto(i));rail.appendChild(b)});
+const copied=document.getElementById('copied'), copiedTxt=document.getElementById('copiedTxt');
+const wordsRtl=[...DATA.words].sort((a,b)=>b.b[0]-a.b[0]);
+const lines=[]; for(const w of wordsRtl){const cy=(w.b[1]+w.b[3])/2;let L=lines.find(l=>Math.abs(l.cy-cy)<(w.b[3]-w.b[1])*.6);if(!L){L={cy,ws:[]};lines.push(L)}L.ws.push(w)} lines.sort((a,b)=>a.cy-b.cy);
+const orderedWords=lines.flatMap(l=>l.ws.sort((a,b)=>b.b[0]-a.b[0]));
+function goto(i){stage=(i+STAGES.length)%STAGES.length;t0=performance.now();updateCaption();render(0);}
+function updateCaption(){document.getElementById('capNum').textContent=`${stage+1} / 5`;document.getElementById('capName').textContent=STAGES[stage].name;document.getElementById('capText').textContent=STAGES[stage].text;[...rail.children].forEach((b,i)=>b.classList.toggle('on',i===stage));}
+function paper(){ctx.fillStyle='#EEEBE4';ctx.fillRect(0,0,W,H);}
+function drawScan(alpha){if(!imgReady)return;ctx.globalAlpha=alpha;ctx.drawImage(img,0,0,W,H);ctx.globalAlpha=1;}
+function liquid(level,alpha,time){ctx.fillStyle='#2C4B96';ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(0,H);ctx.lineTo(0,level);for(let x=0;x<=W;x+=6){ctx.lineTo(x,level+5*Math.sin(x/38+time*4)+3*Math.sin(x/17-time*2.6));}ctx.lineTo(W,H);ctx.closePath();ctx.fill();ctx.globalAlpha=1;}
+function outlines(frac,color,width){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineJoin='round';let budget=frac*totalLen;for(const b of blobs){for(const p of b.paths){if(budget<=0)return;const q=p.pts;const show=Math.min(1,budget/p.len);budget-=p.len;ctx.setLineDash([p.len*show,p.len]);ctx.beginPath();ctx.moveTo(q[0][0],q[0][1]);for(let i=1;i<q.length;i++)ctx.lineTo(q[i][0],q[i][1]);ctx.closePath();ctx.stroke();}}ctx.setLineDash([]);}
+function render(t){
+  ctx.setTransform(dpr,0,0,dpr,0,0); paper(); const now=performance.now()/1000; const ink='#17150F';
+  copied.classList.toggle('on', stage===4 && t>0.62);
+  if(stage===0){drawScan(1);}
+  else if(stage===1){drawScan(1);const level=H*(1-ease(Math.min(1,t*1.15)));liquid(level,0.88,now);fillInk(ink);}
+  else if(stage===2){const a=t<0.55?1:1-ease((t-0.55)/0.45); drawScan(a); liquid(-12,0.88*a,now); fillInk(t<0.55?ink:`rgba(23,21,15,${0.12+0.88*a})`); outlines(Math.min(1,t/0.5),t<0.55?'#FFFFFF':'#2C4B96',t<0.55?1.6:1.4);}
+  else if(stage===3){const reveal=Math.min(1,t/0.6);
+    blobs.forEach((b,i)=>{const on=i/blobs.length<reveal;if(!on)return;const col=`hsl(${hue(b.s)} 55% 42%)`;tracePath(b);ctx.fillStyle=`hsl(${hue(b.s)} 55% 62% / 0.35)`;ctx.fill('evenodd');ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.stroke();
+      for(const p of b.paths){ctx.fillStyle=col;for(const q of p.pts){ctx.fillRect(q[0]-1,q[1]-1,2,2);}}
+      if(b.n>1&&t>0.5){ctx.font='500 11px "IBM Plex Mono",monospace';ctx.fillStyle='#17150F';ctx.textAlign='center';ctx.fillText('#'+b.s,b.cx,Math.max(10,b.cy-14));}});}
+  else if(stage===4){fillInk(ink);
+    if(t>0.22){const n=orderedWords.length;const prog=Math.min(1,(t-0.22)/0.38);const k=Math.floor(prog*n+0.001);ctx.fillStyle='#BBD4F5';ctx.globalAlpha=0.55;
+      orderedWords.slice(0,k).forEach(w=>ctx.fillRect(w.b[0]-2,w.b[1]-2,w.b[2]-w.b[0]+4,w.b[3]-w.b[1]+4));ctx.globalAlpha=1; fillInk(ink);
+      copiedTxt.textContent=lines.map(l=>l.ws.filter(w=>orderedWords.indexOf(w)<k).map(w=>w.t).join(' ')).filter(Boolean).join('  ·  ');}}
+  [...rail.children].forEach((b,i)=>b.classList.toggle('on',i===stage));
+  const bar=rail.children[stage].querySelector('.bar'); bar.style.width=(t*100)+'%'; [...rail.children].forEach((b,i)=>{if(i!==stage)b.querySelector('.bar').style.width=i<stage?'100%':'0'});
+}
+function loop(){const t=Math.min(1,(performance.now()-t0)/STAGES[stage].dur);render(t);if(playing&&t>=1){if(stage===4){t0=performance.now()+1400;stage=0;setTimeout(updateCaption,1400);}else{stage++;t0=performance.now();updateCaption();}}raf=requestAnimationFrame(loop);}
+document.getElementById('btnPlay').addEventListener('click',e=>{playing=!playing;e.target.textContent=playing?'Pause':'Play';if(playing)t0=performance.now()-Math.min(STAGES[stage].dur,performance.now()-t0);});
+document.getElementById('btnPrev').addEventListener('click',()=>goto(stage-1));
+document.getElementById('btnNext').addEventListener('click',()=>goto(stage+1));
+document.getElementById('btnReplay').addEventListener('click',()=>{playing=true;document.getElementById('btnPlay').textContent='Pause';goto(0);});
+document.getElementById('fBlobs').textContent=DATA.page.blobs.toLocaleString();document.getElementById('fPoints').textContent=DATA.page.points.toLocaleString();
+if(reduced){stage=4;document.getElementById('btnPlay').textContent='Play';}
+updateCaption(); img.onload=()=>{imgReady=true;render(0)}; if(img.complete)imgReady=true; loop();
+
+/* ---------- pdfium's line reconstruction, in JS (text.py: chrome_reads / visual) ---------- */
+const MIRROR={'(':')',')':'(','[':']',']':'[','{':'}','}':'{','<':'>','>':'<','«':'»','»':'«','‹':'›','›':'‹'};
+function cls(ch){
+  if(/[A-Za-zÀ-ɏ]/.test(ch))return 'L';
+  if(/[0-9٠-٩۰-۹]/.test(ch))return 'LW';
+  if(/[ؐ-ًؚ-ٰٟۖ-ۭ]/.test(ch))return 'LW';
+  if(/[,.\/:+\-%#$،٪٫٬]/.test(ch))return 'LW';
+  if(/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿]/.test(ch))return 'R';
+  return 'N';
+}
+function segments(s){const out=[];for(const ch of s){const d=cls(ch);if(out.length&&out[out.length-1].d===d)out[out.length-1].t+=ch;else out.push({t:ch,d});}return out}
+const rev=s=>[...s].reverse().join('');
+function chromeReads(line,auto=true){
+  let segs=segments(line);const nR=segs.filter(x=>x.d==='R').length,nL=segs.filter(x=>x.d==='L').length;let cur='L';
+  if(auto&&nR>0&&nR>=nL){segs=segs.slice().reverse();cur='R';}
+  return segs.map(sg=>{if(sg.d==='R'||(sg.d==='N'&&cur==='R')){cur='R';return rev([...sg.t].map(c=>MIRROR[c]||c).join(''));}if(sg.d!=='LW')cur='L';return sg.t;}).join('');
+}
+function latinMajority(text){const segs=segments(text);const r=segs.filter(x=>x.d==='R').length;return !(r>0&&r>=segs.filter(x=>x.d==='L').length)}
+function visualWord(s,ltr){
+  if(ltr){let cur='L';return segments(s).map(sg=>{if(sg.d==='R'||(sg.d==='N'&&cur==='R')){cur='R';return rev([...sg.t].map(c=>MIRROR[c]||c).join(''));}if(sg.d!=='LW')cur='L';return sg.t;}).join('');}
+  let cur='R';const mir=new Set();let i=0;const ch=[...s];
+  while(i<ch.length){const d=cls(ch[i]);let j=i;while(j<ch.length&&cls(ch[j])===d)j++;if(d==='R')cur='R';else if(d==='N'&&cur==='R'){for(let k=i;k<j;k++)mir.add(k);}else if(d==='L')cur='L';i=j;}
+  const logical=ch.map((c,k)=>mir.has(k)?(MIRROR[c]||c):c);const r=logical.slice().reverse();const out=[];i=0;
+  const keeps=c=>{const d=cls(c);return d==='L'||d==='LW'};
+  while(i<r.length){if(keeps(r[i])){let j=i;while(j<r.length&&keeps(r[j]))j++;out.push(r.slice(i,j).reverse().join(''));i=j;}else{out.push(r[i]);i++;}}
+  return out.join('');
+}
+function storedLine(line){const words=line.trim().split(/\s+/).filter(Boolean);if(!/[؀-ۿ]/.test(line))return line;const ltr=latinMajority(line);const ws=words.map(w=>visualWord(w,ltr));return (ltr?ws:ws.slice().reverse()).join(' ');}
+function paintSegments(el,s){el.innerHTML='';for(const sg of segments(s)){const span=document.createElement('span');span.className='seg '+sg.d;span.textContent=sg.t;el.appendChild(span);}}
+let labMode='chrome';
+function lab(){const line=document.getElementById('labIn').value.replace(/\n/g,' ').trim();const stored=storedLine(line);const out=chromeReads(stored,labMode==='chrome');
+  paintSegments(document.getElementById('labLogical'),line);paintSegments(document.getElementById('labStored'),stored);paintSegments(document.getElementById('labOut'),out);
+  const v=document.getElementById('labVerdict');const ok=out.replace(/\s+/g,' ')===line.replace(/\s+/g,' ');v.textContent=ok?'✓ line comes back exactly':'✗ differs from the page';v.className='verdict '+(ok?'ok':'bad');}
+document.getElementById('labIn').addEventListener('input',lab);
+document.getElementById('tgChrome').addEventListener('click',()=>{labMode='chrome';document.getElementById('tgChrome').classList.add('on');document.getElementById('tg7999').classList.remove('on');lab()});
+document.getElementById('tg7999').addEventListener('click',()=>{labMode='7999';document.getElementById('tg7999').classList.add('on');document.getElementById('tgChrome').classList.remove('on');lab()});
+lab();
+
+/* ---------- 3. the glyph explorer ---------- */
+(function(){const X=STORY.explorer;const wrap=document.getElementById('explorer');const im=document.getElementById('xImg');im.src='data:image/jpeg;base64,'+X.jpg;wrap.style.aspectRatio=`${X.w}/${X.h}`;
+  const svg=document.getElementById('xSvg');svg.setAttribute('viewBox',`0 0 ${X.w} ${X.h}`);svg.setAttribute('preserveAspectRatio','none');
+  const info=document.getElementById('xInfo');const NS='http://www.w3.org/2000/svg';const paths=[];
+  X.glyphs.forEach((g,i)=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',g.paths.map(poly=>'M'+poly.map(q=>q.join(' ')).join('L')+'Z').join(''));p.setAttribute('fill-rule','evenodd');p.dataset.i=i;svg.appendChild(p);paths.push(p);
+    const show=()=>{paths.forEach(q=>q.classList.remove('on'));p.classList.add('on');const logical=chromeReads(g.t);const pts=g.paths.reduce((s,q)=>s+q.length,0);
+      info.innerHTML=`<div><span class="lbl">the viewer copies</span><div class="v">${esc(logical)}</div></div><div><span class="lbl">stored (stream order)</span><div class="v ltr">${esc(g.t)}</div></div><div><span class="lbl">outline</span><div class="m">${g.paths.length} polygon${g.paths.length>1?'s':''}, ${pts} points<br>box ${Math.round(g.box[2]-g.box[0])}×${Math.round(g.box[3]-g.box[1])} px</div></div><div><span class="lbl">shape ids (right to left)</span><div class="m">${g.ids.length?g.ids.join(' · '):'—'}</div></div>`;};
+    p.addEventListener('mouseenter',show);p.addEventListener('click',show);p.addEventListener('focus',show);p.setAttribute('tabindex','0');});
+  document.getElementById('xCount').textContent=`${X.glyphs.length} glyphs in this region · document ${X.doc}, page ${X.page}`;
+  let timer=null;document.getElementById('xSelectAll').addEventListener('click',()=>{clearTimeout(timer);paths.forEach(p=>p.classList.remove('selected'));const order=X.glyphs.map((g,i)=>i).sort((a,b)=>{const ga=X.glyphs[a],gb=X.glyphs[b];const dy=(ga.box[1]+ga.box[3])/2-(gb.box[1]+gb.box[3])/2;return Math.abs(dy)>12?dy:gb.box[0]-ga.box[0]});
+    let k=0;const step=()=>{if(k>=order.length)return;paths[order[k]].classList.add('selected');k++;timer=setTimeout(step,reduced?0:45)};step();
+    info.innerHTML=`<div class="empty">Selection runs line by line, right to left inside each line — the order the text layer holds. Copying gives: <span class="v" style="display:inline;font-size:1.2rem">${esc(order.map(i=>chromeReads(X.glyphs[i].t)).join(' '))}</span></div>`;});
+  document.getElementById('xClear').addEventListener('click',()=>{clearTimeout(timer);paths.forEach(p=>p.classList.remove('selected','on'));info.innerHTML='<div class="empty">Hover or tap a word on the page.</div>'});
+})();
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+/* ---------- 5. rules ---------- */
+const RULES=[
+ {k:'98 → 0',h:'Keep inherited resources',p:'Pages inheriting /Resources lost their scan image when a fresh dictionary was made for the fonts. 98 of 224 night documents had blank pages.',w:'pdf/type3.py · write_text_layer'},
+ {k:'11% → 99%',h:'Wrap scanner content in q…Q',p:'Content ending in an unbalanced cm (a flipped 0.75 scale) mirrored every word in Chrome.',w:'pdf/type3.py · append_content'},
+ {k:'6% → 100%',h:'Store the exact inverse of Chrome’s bidi pass',p:'Segment order reversed, Arabic segments reversed in place, brackets mirrored; digits, marks, Latin keep order. A vowelled poem page went from 6% to 100%.',w:'text.py · visual, chrome_reads'},
+ {k:'727 → 733',h:'No two nearby runs may share char codes',p:'pdfium drops a text object as a fake-bold duplicate when one of the five before it has the same codes. A whole body line vanished.',w:'pdf/type3.py · closing space glyph code'},
+ {k:'25 → 0',h:'Each run starts and ends with a narrow space glyph',p:'pdfium judges new-line from the width of the end glyphs; word-wide ends made body lines swap in pairs.',w:'pdf/type3.py'},
+ {k:'30%',h:'Clip glyph boxes at the neighbouring lines, never to empty',p:'Boxes that merely touched were read as one line; an inverted box made pdfium drop the glyph.',w:'pdf/type3.py · GAP_FRAC'},
+ {k:'10,717 → 10,734',h:'Kerned pairs move the pen back before the space',p:'A backwards move right after the space glyph lost the space: سبأ لم came out as سبألم.',w:'pdf/type3.py'},
+ {k:'4%',h:'Rules are cut from the ink first',p:'A straight run of ink 4% of the page wide is a rule. A header’s underline had fused with a word into a glyph spanning the page.',w:'geometry/trace.py · page_blobs'},
+ {k:'2 → 0',h:'Same-band runs go left to right',p:'pdfium joins text objects that overlap vertically whatever the gap, then reverses the line; running heads came back with halves swapped.',w:'pdf/type3.py'},
+ {k:'17 × 27 px',h:'Gemini sees the page at scan resolution',p:'Ten documents carried a thumbnail as their single embedded image; Gemini read nothing. Pages are rendered unless the image is ≥150 dpi.',w:'ocr/gemini.py · page_images'},
+ {k:'5 of 6',h:'Refused covers: masthead, then title only',p:'The recitation filter refuses a verbatim page of a published journal but allows a title-and-author extraction.',w:'ocr/gemini.py · gemini_page1'},
+ {k:'65% → 100%',h:'Sideways pages get a turned frame',p:'Tables printed landscape are laid out in a rotated frame and written with a rotated text matrix, so glyphs land on the ink.',w:'pdf/type3.py · Frame'},
+];
+document.getElementById('rules').innerHTML=RULES.map(r=>`<div class="rule"><span class="k">${r.k}</span><h3>${r.h}</h3><p>${r.p}</p><span class="where">${r.w}</span></div>`).join('');
+
+/* ---------- 6. what Chrome copies ---------- */
+(function(){const C=STORY.copies;const el=document.getElementById('copies');
+  const col=(label,lines,ours)=>`<div class="col ${ours?'ours':''}"><h3><span>${label}</span><span class="hint">${ours?'inkscript':'Azure searchable PDF'}</span></h3>${lines.map(l=>`<div class="line ${ours?'ok':''}">${esc(l)}</div>`).join('')}</div>`;
+  el.innerHTML=col('Azure’s own layer, read by Chrome',C.azure,false)+col('Our layer, read by Chrome',C.ours,true);
+})();
+
+/* ---------- 7. alphabet and the witness ---------- */
+(function(){document.getElementById('sheetImg').src='data:image/png;base64,'+STORY.alphabet_png;const c=STORY.contradiction;const w=document.getElementById('witness');if(!c){w.innerHTML='';return}
+  const readings=Object.entries(c.readings).map(([t,n])=>`<b class="ar" style="font-family:var(--ar);font-size:1.3rem">${esc(t)}</b> ×${n}`).join(' · ');
+  w.innerHTML=`<div class="box"><h3>One contradiction from document ${c.doc}</h3><p style="margin:.2rem 0 .6rem;font-size:.95rem">Ink signature <code>${esc(c.sig)}</code> was read as ${readings}. The crops are the actual occurrences; a person decides in a second which reading the ink supports.</p><div class="crops">${c.crops.map(cr=>`<div class="crop"><img src="data:image/jpeg;base64,${cr.jpg}" alt="ink crop"><b>${esc(cr.text)}</b><span>page ${cr.page}</span></div>`).join('')}</div></div>
+  <div class="box"><h3>Across that document</h3><p style="margin:.2rem 0 0;font-size:.95rem">${c.words.toLocaleString()} words · ${c.conflicts} contradictions (${Object.entries(c.kinds).map(([k,v])=>`${v} ${k}`).join(', ')}) · ${c.numbers.toLocaleString()} numbers listed for a second reading.</p><p style="margin:.6rem 0 0;font-size:.95rem">Over the 227-journal sample: 959,667 words, 1,399 contradictions, 50,007 numbers. A numbers re-read by Gemini from each crop agreed on 87% of 308 tried; the rest go to review, nothing is corrected automatically.</p></div>`;
+})();
+
+/* ---------- 8. results ---------- */
+const RESULTS=[
+ {set:'30-document test set · 115 pages',w:[34958,34959],l:[3866,3868],inv:3,lost:0},
+ {set:'47 corpus documents · 1,007 pages (43 born-digital, 14 sideways)',w:[237695,237741],l:[20213,20224],inv:103,lost:0},
+ {set:'227-journal sample · 4,440 pages (903 born-digital, 16 sideways)',w:[912551,912800],l:[84117,84186],inv:535,lost:0},
+];
+document.getElementById('results').innerHTML=RESULTS.map(r=>{const pw=r.w[0]/r.w[1],pl=r.l[0]/r.l[1];return `<tr><td>${r.set}</td><td class="n">${r.w[0].toLocaleString()} / ${r.w[1].toLocaleString()}<br>${(pw*100).toFixed(2)}%<span class="bar"><i style="width:${pw*100}%"></i></span></td><td class="n">${r.l[0].toLocaleString()} / ${r.l[1].toLocaleString()}<br>${(pl*100).toFixed(1)}%<span class="bar"><i style="width:${pl*100}%"></i></span></td><td class="n">${r.inv}</td><td class="n">${r.lost}</td></tr>`}).join('')+
+ `<tr><td colspan="5" style="font-size:.85rem;color:var(--muted)">Inversions: consecutive lines in one column whose baseline jumps back up the page; most of the remaining ones are typeset pages with junk-encoded fonts and table pages. 51 Latin-majority lines are counted apart (pdfium reads them left to right by its majority rule, as in any native PDF).</td></tr>`;
+</script>
