@@ -80,7 +80,11 @@ JSON_SCHEMA = {
 }
 
 
-ARMS = {"strict": STRICT_PROMPT, "naive": NAIVE_PROMPT, "json": JSON_PROMPT}
+TITLE_PROMPT = ("This is the first page of an Arabic journal article. Write out, exactly as printed and in the same "
+                "script, only the article title and the author line(s) (names, affiliations) from the top of the page, "
+                "one line per printed line, in reading order. Nothing else: no body text, no labels, no Markdown, no translation.")
+
+ARMS = {"strict": STRICT_PROMPT, "naive": NAIVE_PROMPT, "json": JSON_PROMPT, "title": TITLE_PROMPT}
 
 
 def page_images(pdf: Path, fallback_dpi: int = 300,
@@ -106,7 +110,10 @@ def page_images(pdf: Path, fallback_dpi: int = 300,
         if len(imgs) == 1:
             info = doc.extract_image(imgs[0][0])
             ext = (info.get("ext") or "").lower()
-            if ext in ("png", "jpeg", "jpg") and info.get("image"):
+            # Only when that image really is the scan: some pages carry a
+            # thumbnail (17 x 27 px) or a 75 dpi copy and draw the page
+            # otherwise; Gemini then saw nothing and answered nothing.
+            if ext in ("png", "jpeg", "jpg") and info.get("image") and info["width"] >= pg.rect.width / 72 * 150:
                 mime = "image/jpeg" if ext in ("jpg", "jpeg") else "image/png"
                 blob = (info["image"], mime, info["width"], info["height"])
         if blob is None:
@@ -178,6 +185,9 @@ def gemini_text(client, model: str, images: list, arm: str, resolution: str,
                         getattr(um, "thoughts_token_count", 0) or 0)
                 usage["requests"] += 1
                 text = (r.text or "").strip()
+                fin = str(getattr(r.candidates[0], "finish_reason", "") or "") if r.candidates else ""
+                if "RECITATION" in fin:
+                    usage["recitation"] = usage.get("recitation", 0) + 1
                 break
             except Exception as e:
                 if attempt == 2:
@@ -211,9 +221,42 @@ def gemini_page1(client, scan: Path, cache: Path, model: str) -> tuple[str | Non
         for k in ("in", "out", "requests", "errors"):
             usage[k] = usage.get(k, 0) + u2.get(k, 0)
     if usage["errors"] or len(text.strip()) < 20:
+        # Still nothing: usually the recitation filter refusing a cover page
+        # of a published journal. The masthead alone — the top half, where
+        # the title and author are — is a much smaller quotation; the
+        # alignment takes a partial read (the rest of the page stays Azure).
+        time.sleep(3)
+        text, u2 = gemini_text(client, model, [top_half(images[0])], "strict", "ultra_high", 8192, False)
+        for k in ("in", "out", "requests", "errors"):
+            usage[k] = usage.get(k, 0) + u2.get(k, 0)
+        usage["top_half"] = True
+    if usage["errors"] or len(text.strip()) < 20:
+        # The recitation filter stops a verbatim transcription of a
+        # published page; a title-and-author extraction is a short quotation
+        # it allows. That is exactly what the front page needs from Gemini,
+        # and the alignment takes it as a title-only read.
+        time.sleep(3)
+        text, u2 = gemini_text(client, model, images, "title", "high", 2048, False)
+        for k in ("in", "out", "requests", "errors"):
+            usage[k] = usage.get(k, 0) + u2.get(k, 0)
+        usage["title_only"] = True
+        if text.strip().lower().startswith(("there is no", "the provided", "i cannot", "i'm sorry")):
+            text = ""
+        elif len(text.strip()) >= 6:                  # a heading alone ("الافتتاحية") is a real title-only read
+            text = text.strip() + "\n" * 3
+    if usage["errors"] or len(text.strip()) < 20:
         return None, usage        # never cache a failure or an empty answer, or it is never retried
     cache.write_text(text, encoding="utf-8")
     return text, usage
+
+
+def top_half(blob: tuple[bytes, str, int, int], share: float = 0.5) -> tuple[bytes, str, int, int]:
+    """The top `share` of a page image, as PNG."""
+    import cv2, numpy as np
+    img = cv2.imdecode(np.frombuffer(blob[0], np.uint8), cv2.IMREAD_UNCHANGED)
+    img = np.ascontiguousarray(img[: max(1, int(img.shape[0] * share))])
+    ok, png = cv2.imencode(".png", img)
+    return (png.tobytes(), "image/png", img.shape[1], img.shape[0])
 
 
 def client():
