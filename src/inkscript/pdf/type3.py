@@ -256,7 +256,16 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         parts.append(f"<01> {sp_w * tj:.1f}")
         for k, w in enumerate(ws[:253]):
             if k and w["_wid"] != ws[k - 1]["_wid"]:
-                parts.append(f"<01> {-((w['_gx0'] - pen) * u - sp_w) * tj:.1f}")
+                back = (w["_gx0"] - pen) * u - sp_w                # pen travel after the space glyph
+                if back < 0:
+                    # The next word starts inside the previous one's ink (a
+                    # kerned pair): a backwards move right after the space
+                    # glyph loses the space in pdfium (`سبأ لم` copied out as
+                    # `سبألم`). Move back before the space instead, so the
+                    # space glyph ends exactly where the next word begins.
+                    parts.append(f"{-back * tj:.1f} <01>")
+                else:
+                    parts.append(f"<01> {-back * tj:.1f}")
             elif k and abs((w["_gx0"] - pen) * u) >= 1:
                 parts.append(f"{-((w['_gx0'] - pen) * u) * tj:.1f}")
             parts.append(f"<{k + 2:02X}>")
