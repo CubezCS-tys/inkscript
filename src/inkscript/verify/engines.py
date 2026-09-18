@@ -5,7 +5,7 @@ from __future__ import annotations
 import re, statistics, unicodedata
 from pathlib import Path
 
-from ..text import norm, ARABIC
+from ..text import norm, ARABIC, _class
 
 def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
     """pdfium (Chrome's engine): every page's line count vs Azure's, and how
@@ -57,9 +57,18 @@ def pdfium_lines(pdf: Path, report: dict) -> list[dict]:
         def within(k):                                  # the run's words, contiguous, inside one pdfium line
             n = len(k)
             return any(l[i:i + n] == k for l in got if len(l) >= n for i in range(len(l) - n + 1))
-        want = [k for k in (key(r) for r in pinfo["runs"]) if len(k) >= 3]
+        # A line whose Latin segments outnumber its Arabic ones is read
+        # left to right by pdfium's majority rule (CFX_BidiString), as in
+        # any native PDF; such lines are counted apart, not judged.
+        def latin_majority(text):
+            segs = [c for c in (_class(ch) for ch in N(text)) ]
+            runs = [d for i, d in enumerate(segs) if i == 0 or segs[i - 1] != d]
+            return runs.count("L") > runs.count("R")
+        runs_ = [(key(r), latin_majority(r)) for r in pinfo["runs"]]
+        want = [k for k, lm in runs_ if len(k) >= 3 and not lm]
+        ltr = sum(1 for k, lm in runs_ if len(k) >= 3 and lm)
         ok = sum(1 for k in want if within(k)); rev = sum(1 for k in want if not within(k) and within(k[::-1]))
-        v.append(dict(page=pn, lines=len(want), in_order=ok, reversed=rev))
+        v.append(dict(page=pn, lines=len(want), in_order=ok, reversed=rev, ltr=ltr))
     doc.close()
     return v
 
