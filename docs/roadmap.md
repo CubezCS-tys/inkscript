@@ -13,6 +13,15 @@ from.
   end. Numbers in `docs/pdf-writing-rules.md`.
 - Chrome's engine is the verification target; MuPDF and poppler are
   measured but disagree with it on vowelled text.
+- (2026-09-18, night) Chrome's line reconstruction is now known from
+  pdfium's source and emulated (`text.chrome_reads`); the stored text is
+  its exact inverse, and `--verify` reports words intact, **lines in
+  order**, in-column inversions and pages that lost their image.
+  pypdfium2 is pinned to the build that reads like Chrome (see
+  `docs/pdf-writing-rules.md`, "History"). Two writer defects that the
+  old checks could not see were found and fixed the same night: pages
+  inheriting `/Resources` lost their image (98 of 224 night documents);
+  scanner content ending in an unbalanced `cm` mirrored every word.
 
 ## Next, in order
 
@@ -33,9 +42,13 @@ from.
    verification design (a wrong cut is a wrong answer, not a fallback),
    and pdfium's per-glyph behaviour kept in mind: only unvowelled words
    can carry it.
-5. **Other viewers.** Test Firefox (pdf.js) and Apple Preview on vowelled
-   pages; if they follow MuPDF's reading rather than Chrome's, decide
-   whether a per-viewer build is worth it.
+5. **Other viewers.** Firefox (pdf.js) measured (`experiments/06`): words
+   come back intact (95%) but lines copy out word-reversed at the 8 pt
+   nominal size, because pdf.js splits a line into items at any pen jump
+   over 0.6 × size and keeps items in stream order; a 16–24 pt nominal
+   size fixes about half the lines with no effect on Chrome. Decide
+   whether to adopt it after the other half is understood. Apple Preview
+   untested.
 6. **The typeface.** Export the document alphabet as an installable font
    (OpenType via fontTools) once letter-level pieces exist; until then the
    SVG specimen is the honest form.
