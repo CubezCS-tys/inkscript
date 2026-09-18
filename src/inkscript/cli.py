@@ -59,6 +59,7 @@ def cmd_native(a) -> int:
     fd = Path(a.frontpage_dir).expanduser() if a.frontpage_dir else None
     scan = lambda stem: (sd / f"{stem}.pdf") if sd and (sd / f"{stem}.pdf").exists() else ad / stem / f"{stem}.pdf"
     stems = sorted(d.name for d in ad.iterdir() if (d / f"{d.name}.json").exists() and scan(d.name).exists())
+    if a.only: stems = [s for s in stems if s in set(a.only)]
     if a.docs: stems = stems[:a.docs]
     reports = []
     for stem in stems:
@@ -212,6 +213,7 @@ def main(argv=None) -> int:
     p.add_argument("--vector", action="store_true", help="also write <stem>_vector.pdf: no image, glyphs only")
     p.add_argument("--verify", action="store_true", help="check the result in pdfium (Chrome's engine)")
     p.add_argument("--resume", action="store_true", help="skip documents whose PDF and shapes.json already exist")
+    p.add_argument("--only", action="append", help="build only this document id (repeatable)")
     p.set_defaults(fn=cmd_native)
 
     p = sub.add_parser("compare", help="static review bundle: front page three ways")

@@ -29,6 +29,7 @@ def pdfium_words(pdf: Path, report: dict, azure_dir: Path) -> dict:
         hit = sum(1 for x in want if x in got)
         nl = len([l for l in t.replace("\r\n", "\n").split("\n") if l.strip()])
         v.append(dict(page=pn, lines_pdfium=nl, lines_layer=pinfo["lines"], words=len(want), intact=hit))
+    doc.close()
     return v
 
 
@@ -59,4 +60,5 @@ def pdfium_order(pdf: Path, skip: set[int] | None = None) -> tuple[int, int]:
             o = min(xr[i][1], xr[j][1]) - max(xr[i][0], xr[j][0])
             return o > 0.3 * min(xr[i][1] - xr[i][0], xr[j][1] - xr[j][0])
         inv += sum(1 for i in range(len(base) - 1) if base[i + 1] > base[i] + 0.5 * h[i] and same_col(i, i + 1)); nl += len(lines)
+    doc.close()
     return inv, nl
