@@ -55,17 +55,25 @@ class Alphabet:
         cands = [c for c in cands if abs(self.protos[c]["hu"] - b["hu"]) <= self.gate * max(b["hu"], 0.3)
                  and abs(self.protos[c]["wu"] - b["wu"]) <= self.gate * max(b["wu"], 0.3)]
         if cands:
-            F = np.stack([self.fills[c] for c in cands])
+            F = np.stack([self._fill(c) for c in cands])
             inter = np.logical_and(F, b["fill"]).sum((1, 2)); union = np.logical_or(F, b["fill"]).sum((1, 2))
             iou = inter / np.maximum(union, 1)
             for o in np.argsort(-iou)[:5]:
                 if iou[o] < self.iou: break
                 c = cands[o]
-                chd = 0.5 * (float(self.dists[c][b["edge"]].mean()) + float(b["dist"][self.edges[c]].mean()))
+                chd = 0.5 * (float(self._dist(c)[b["edge"]].mean()) + float(b["dist"][self._edge(c)].mean()))
                 if chd <= self.ch:
                     self.counts[c] += 1; return c
-        self.protos.append(b); self.fills.append(b["fill"]); self.edges.append(b["edge"]); self.dists.append(b["dist"].astype(np.float16)); self.counts.append(1)
+        # Prototypes are stored packed — masks as bits, the distance field in
+        # tenths of a pixel as bytes — so a long document's alphabet (tens of
+        # thousands of shapes) stays in the hundreds of megabytes, not gigabytes.
+        self.protos.append(b); self.fills.append(np.packbits(b["fill"])); self.edges.append(np.packbits(b["edge"]))
+        self.dists.append(np.clip(b["dist"] * 10, 0, 255).astype(np.uint8)); self.counts.append(1)
         ci = len(self.protos) - 1; self.index.setdefault(self.key(b), []).append(ci); return ci
+
+    def _fill(self, c): return np.unpackbits(self.fills[c])[:C * C].reshape(C, C).astype(bool)
+    def _edge(self, c): return np.unpackbits(self.edges[c])[:C * C].reshape(C, C).astype(bool)
+    def _dist(self, c): return self.dists[c].astype(np.float32) / 10.0
 
     def assign_and_release(self, b) -> int:
         """assign(), then drop the matching arrays from a blob that did not

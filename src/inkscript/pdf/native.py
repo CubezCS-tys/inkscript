@@ -120,16 +120,20 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                     placements.append(dict(page=pn, text=w["text"].strip() or w["az"], shapes=w["shapes"], sig="+".join(tags),
                                            box=[int(w["x0"]), int(w["y0"]), int(w["x1"]), int(w["y1"])], rot=rot))
         M = ~page.transformation_matrix
+        n_lines = sum(1 for L in lines if any(w["blobs"] for w in L))
         content, glyphs, pstats = write_text_layer(src, page, M, lines, f"P{pn}", invisible=True, frame=frame)
         append_content(src, page, content.encode())
+        n_blobs, n_stray = len(blobs), len(stray)
+        placed_texts = [w["text"].strip() or w["az"] for L in lines for w in L if w["blobs"]]
         if vec is not None:
             vp = vec.new_page(width=page.rect.width, height=page.rect.height)
             Mv = ~vp.transformation_matrix
             vcontent, _, _ = write_text_layer(vec, vp, Mv, lines, f"P{pn}", invisible=False, frame=frame)
             append_content(vec, vp, (stray_paths(stray, Mv, frame) + vcontent).encode())
-        report["pages"].append(dict(info, lines=sum(1 for L in lines if any(w["blobs"] for w in L)),
-                                    glyphs=glyphs, blobs=len(blobs), stray=len(stray), pieces=pstats,
-                                    placed=[w["text"].strip() or w["az"] for L in lines for w in L if w["blobs"]]))
+        del blobs, lines, stray, gray, pix                 # a page's ink is not needed once written
+        import gc; gc.collect()
+        report["pages"].append(dict(info, lines=n_lines,
+                                    glyphs=glyphs, blobs=n_blobs, stray=n_stray, pieces=pstats, placed=placed_texts))
     out_dir.mkdir(parents=True, exist_ok=True)
     src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
     if len(A):
