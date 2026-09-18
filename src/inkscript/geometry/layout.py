@@ -184,6 +184,30 @@ def split_word(w, lh: float):
     from ..text import ARABIC_LETTER, TRANSPARENT
     text = w["text"].strip() or w["az"]
     whole = [dict(w, text=text, blobs=w["blobs"], first=True, split=False, tok=0)]
+    return _letters(w, _split_word(w, lh, text, whole))
+
+
+def _letters(w, pcs):
+    """Accepted letter plans (see geometry/letters.py) turn a piece into one glyph per letter,
+    in reading order; the letters' texts concatenate to the piece's text."""
+    plans = w.get("letter_plans")
+    if not plans:
+        return pcs
+    from .letters import letter_blobs
+    out = []
+    for k, pc in enumerate(pcs):
+        p = plans.get(k)
+        lbs = letter_blobs(p, pc["blobs"]) if p else []
+        if not p or len(lbs) != len(p["units"]):
+            out.append(pc); continue
+        for j, (u, bl) in enumerate(zip(p["units"], lbs)):
+            out.append(dict(pc, text=u, blobs=bl, x0=min(b["x"] for b in bl), x1=max(b["x"] + b["w"] for b in bl),
+                            first=pc.get("first", k == 0) and j == 0, split=True, letter=True, shapes=None))
+    return out
+
+
+def _split_word(w, lh: float, text: str, whole: list):
+    from ..text import pieces, ARABIC_LETTER, TRANSPARENT
     # A word carrying vowel marks stays one glyph. pdfium never reorders
     # glyphs inside a word; for an unvowelled word that is harmless because
     # its letter-run reversal spans the whole word, but a mark cuts the run,

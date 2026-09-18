@@ -67,7 +67,8 @@ def cmd_native(a) -> int:
             print(f"{stem:<24} already built, skipped", flush=True); continue
         r = build_document(stem, ad, scan(stem), fd / f"{stem}.gemini.p1.md" if fd else None, out, a.vector, a.min_exact)
         nd = sum(1 for p in r["pages"] if p["text"] == "native-digital")
-        line = f"{stem:<24} {len(r['pages'])} pages  {sum(p.get('glyphs', 0) for p in r['pages']):>5} glyphs  p1 {r['pages'][0]['text']}" + (f"  ({nd} born-digital pages left as they are)" if nd else "")
+        nletters = sum(p.get("pieces", {}).get("letters", 0) for p in r["pages"] if isinstance(p.get("pieces"), dict))
+        line = f"{stem:<24} {len(r['pages'])} pages  {sum(p.get('glyphs', 0) for p in r['pages']):>5} glyphs" + (f" ({nletters} letters)" if nletters else "") + f"  p1 {r['pages'][0]['text']}" + (f"  ({nd} born-digital pages left as they are)" if nd else "")
         if a.verify:
             r["verify"] = v = pdfium_words(out / f"{stem}.pdf", r, ad)
             rotated = {p["page"] for p in r["pages"] if p.get("rotated")}
@@ -77,6 +78,9 @@ def cmd_native(a) -> int:
             r["lines"] = lv = pdfium_lines(out / f"{stem}.pdf", r)
             tl, tok, trev = sum(x["lines"] for x in lv), sum(x["in_order"] for x in lv), sum(x["reversed"] for x in lv)
             line += f"  | pdfium: {ti}/{tw} words intact ({ti / max(1, tw):.0%}), lines in order {tok}/{tl}" + (f" ({trev} reversed)" if trev else "") + f", {inv} order inversions" + (f", {len(rotated)} sideways pages" if rotated else "")
+            lp, ll = sum(x["lines_pdfium"] for x in v), sum(x["lines_layer"] for x in v)
+            if ll and lp < 0.8 * ll:
+                line += f"  !! pdfium joins lines: {lp} for {ll} written"     # boxes of neighbouring lines overlap somewhere
             r["lost_image"] = lost = pages_missing_image(out / f"{stem}.pdf", scan(stem))
             if lost: line += f"  !! {len(lost)} pages lost their image: {lost[:6]}"
         print(line, flush=True); reports.append(r)

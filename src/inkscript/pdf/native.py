@@ -22,6 +22,7 @@ from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 # neutralised-junk path is the verified one; the switch waits for a
 # verification of its own.
 FIX_COVERAGE = 1.01
+LETTERS = True                                        # letter-level pieces where the document agrees (geometry/letters.py)
 
 
 def born_digital(page) -> bool:
@@ -158,6 +159,87 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         src = fitz.open("pdf", src.tobytes())                 # reopen: MuPDF caches the fonts' encodings
     vec = fitz.open() if vector else None
     report = dict(doc=stem, pages=[], fonts_fixed={str(k): len(v) for k, v in mapping.items()}, fixed_pages=sorted(fixed_pages))
+
+    page1_cache = {}
+    def page_texts(pn, pwords):
+        """The words' texts for the layout: Gemini's on page 1 (aligned into Azure's boxes), Azure's elsewhere."""
+        if pn == 1 and gemini_md and gemini_md.exists():
+            if 1 not in page1_cache:
+                page1_cache[1] = page1_text(pwords, fold_digits(strip_markdown(gemini_md.read_text(encoding="utf-8"))), min_exact)
+            texts, st = page1_cache[1]
+            if texts is not None:
+                return texts, st
+            return [w["text"] for w in pwords], st
+        return [w["text"] for w in pwords], None
+
+    def page_geometry(page, pn, pwords, texts):
+        """Render, turn a sideways page upright, trace the ink, lay the words out. Used by both passes."""
+        pix = page.get_pixmap(dpi=DPI, colorspace=fitz.csGRAY)
+        gray = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
+        W_in, H_in = dims[pn]
+        # Sideways pages (tables printed landscape; Azure's page angle ≈ ±90°):
+        # turn the image and every box upright, lay out as usual, and let the
+        # text matrix turn the glyphs back. Otherwise the "lines" run down
+        # the page and the horizontal-line writer mis-spaces them.
+        ang = az_pages[pn].get("angle") or 0.0
+        rot = 90 if ang > 45 else -90 if ang < -45 else 0
+        frame = Frame(rot, pix.w, pix.h)
+        if rot:
+            gray = np.ascontiguousarray(np.rot90(gray, 1 if rot == 90 else -1))
+            def turn(b):
+                x0, y0, x1, y1 = b["box"]
+                if rot == 90:  u0, v0, u1, v1 = y0, W_in - x1, y1, W_in - x0
+                else:          u0, v0, u1, v1 = H_in - y1, x0, H_in - y0, x1
+                return dict(b, box=(u0, v0, u1, v1))
+            pwords = [turn(w) for w in pwords]
+            W_in, H_in = H_in, W_in
+        blobs = page_blobs(gray)
+        lines, stray = layout_page(pwords, texts, az_pages[pn].get("lines", []), blobs, gray.shape[1] / W_in, gray.shape[0] / H_in)
+        return dict(gray=gray, rot=rot, frame=frame, blobs=blobs, lines=lines, stray=stray)
+
+    # First pass — letters inside connected runs (geometry/letters.py): align
+    # every piece's letters to its ink, then learn what each letter-form
+    # shows in this document and keep only the plans the document agrees
+    # with. The geometry is computed twice; the plans are small.
+    from ..geometry.letters import plan as letter_plan, learn as learn_letters, accepted as letters_accepted, letters_of
+    from ..geometry.layout import split_word
+    from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
+    letter_plans = {}
+    if LETTERS:
+        all_plans = []
+        for pno in range(src.page_count):
+            pn = pno + 1
+            if pn in fixed_pages or (pn not in junk_pages and born_digital(src[pno])):
+                continue
+            pwords = [w for w in words if w["page"] == pn]
+            if not pwords or pn not in dims:
+                continue
+            texts, _ = page_texts(pn, pwords)
+            G = page_geometry(src[pno], pn, pwords, texts)
+            for li, L in enumerate(G["lines"]):
+                bl = [b for w in L if w["blobs"] for b in w["blobs"]]
+                if not bl:
+                    continue
+                lh = max(1.0, max(b["y"] + b["h"] for b in bl) - min(b["y"] for b in bl))
+                for wi, w in enumerate(L):
+                    if not w["blobs"] or MARKS.search(w["text"]):
+                        continue
+                    for k, pc in enumerate(split_word(w, lh)):
+                        t = pc["text"].strip()
+                        runs = [q for q in text_pieces(t) if ARABIC_LETTER.search(q)]
+                        if len(runs) != 1 or len(text_pieces(t)) != 1:
+                            continue
+                        units = letters_of(runs[0])
+                        p = letter_plan(units, pc["blobs"]) if len(units) >= 2 else None
+                        if p:
+                            all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
+        majority = learn_letters(all_plans)
+        kept = {}
+        for (pn, li, wi, k), p in letter_plans.items():
+            if letters_accepted(p, majority):
+                kept.setdefault((pn, li, wi), {})[k] = p
+        report["letters"] = dict(planned=len(letter_plans), accepted=sum(len(v) for v in kept.values()), letter_forms=len(majority))
+        letter_plans = kept
     # One shape alphabet for the whole document. It labels the ink — every
     # glyph records which shapes it is made of — and is exported beside the
     # PDF as the document's typeface. It never replaces an outline: the
@@ -202,40 +284,24 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
 
         pwords = [w for w in words if w["page"] == pn]
         info = dict(page=pn, words=len(pwords), text="azure")
-        if pn == 1 and gemini_md and gemini_md.exists():
-            texts, st = page1_text(pwords, fold_digits(strip_markdown(gemini_md.read_text(encoding="utf-8"))), min_exact)
+        texts, st = page_texts(pn, pwords)
+        if st:
             info["text"] = st["page1"]
-        else:
-            texts = None
-        if texts is None:
-            texts = [w["text"] for w in pwords]
         if not pwords or pn not in dims:
             report["pages"].append(dict(info, lines=0, glyphs=0)); continue
-        pix = page.get_pixmap(dpi=DPI, colorspace=fitz.csGRAY)
-        gray = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
-        W_in, H_in = dims[pn]
-        # Sideways pages (tables printed landscape; Azure's page angle ≈ ±90°):
-        # turn the image and every box upright, lay out as usual, and let the
-        # text matrix turn the glyphs back. Otherwise the "lines" run down
-        # the page and the horizontal-line writer mis-spaces them.
-        ang = az_pages[pn].get("angle") or 0.0
-        rot = 90 if ang > 45 else -90 if ang < -45 else 0
-        frame = Frame(rot, pix.w, pix.h)
-        if rot:
-            gray = np.ascontiguousarray(np.rot90(gray, 1 if rot == 90 else -1))
-            def turn(b):
-                x0, y0, x1, y1 = b["box"]
-                if rot == 90:  u0, v0, u1, v1 = y0, W_in - x1, y1, W_in - x0
-                else:          u0, v0, u1, v1 = H_in - y1, x0, H_in - y0, x1
-                return dict(b, box=(u0, v0, u1, v1))
-            pwords = [turn(w) for w in pwords]
-            W_in, H_in = H_in, W_in
+        G = page_geometry(page, pn, pwords, texts)
+        gray, rot, frame, blobs, lines, stray = G["gray"], G["rot"], G["frame"], G["blobs"], G["lines"], G["stray"]
         info["rotated"] = rot
-        blobs = page_blobs(gray)
         prepare(blobs)
         for b in blobs:
             b["page"] = pn; b["shape"] = A.assign_and_release(b)
-        lines, stray = layout_page(pwords, texts, az_pages[pn].get("lines", []), blobs, gray.shape[1] / W_in, gray.shape[0] / H_in)
+        # Letters inside connected runs: the plans made in the first pass and
+        # accepted by the document's own majority become letter pieces.
+        for li, L in enumerate(lines):
+            for wi, w in enumerate(L):
+                lp = letter_plans.get((pn, li, wi))
+                if lp:
+                    w["letter_plans"] = lp
         for L in lines:
             for w in L:
                 if w["blobs"]:
@@ -268,7 +334,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
             Mv = ~vp.transformation_matrix
             vcontent, _, _ = write_text_layer(vec, vp, Mv, lines, f"P{pn}", invisible=False, frame=frame)
             append_content(vec, vp, (stray_paths(stray, Mv, frame) + vcontent).encode())
-        del blobs, lines, stray, gray, pix                 # a page's ink is not needed once written
+        del blobs, lines, stray, gray, G                   # a page's ink is not needed once written
         import gc; gc.collect()
         report["pages"].append(dict(info, lines=n_lines,
                                     glyphs=glyphs, blobs=n_blobs, stray=n_stray, pieces=pstats, placed=placed_texts, runs=run_texts))

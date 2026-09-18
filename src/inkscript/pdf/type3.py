@@ -108,8 +108,13 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
     # the left's, band by band. Sorting by baseline interleaved the columns.
     by_y = sorted(geo, key=lambda g: g["ly1"])
     for i, g in enumerate(by_y):
-        g["above"] = by_y[i - 1] if i else None
-        g["below"] = by_y[i + 1] if i + 1 < len(by_y) else None
+        # Vertical neighbours are the nearest runs on OTHER bands. A run on
+        # the same baseline (a bracketed phrase set apart, the two halves of
+        # a running head) is not above or below; taken as one, it clipped
+        # the declared boxes of a whole line to a sliver at the baseline.
+        lh = max(1.0, g["bot"] - g["top"])
+        g["above"] = next((by_y[j] for j in range(i - 1, -1, -1) if by_y[j]["ly1"] < g["ly1"] - 0.5 * lh), None)
+        g["below"] = next((by_y[j] for j in range(i + 1, len(by_y)) if by_y[j]["ly1"] > g["ly1"] + 0.5 * lh), None)
     # Runs that share a band (a run's baseline inside the previous run's
     # ink: table cells, a running head's two halves, the two columns of a
     # line pair) are one line to pdfium — it joins text objects whose boxes
@@ -154,6 +159,13 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         ly1 = int(round(ly1))                              # integer baseline: every glyph coordinate stays integral
         gap = max(2.0, GAP_FRAC * (g["bot"] - g["top"]))
         if g["above"] is not None:
+            # Clipping stops at the neighbour's ink plus the gap even when the
+            # neighbour's brackets or descenders reach below this line's top:
+            # the boxes then shrink to a sliver on the baseline (a hairline
+            # highlight on that line), but a box that overlapped the
+            # neighbour's made pdfium read the two lines as one (page 2 of
+            # the fixture fell from 113 lines to 7 when the clip stopped at
+            # the midpoint of the overlap instead).
             ly0 = max(ly0, g["above"]["bot"] + gap)
         # One glyph per connected piece of ink where text and ink agree on
         # the count (see layout.split_word); the word otherwise. Pieces are
@@ -174,6 +186,7 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         stats["words"] += wid + 1 if L else 0
         stats["split"] += sum(1 for w in ws if w["split"] and w["first"])
         stats["pieces"] += len(ws)
+        stats["letters"] = stats.get("letters", 0) + sum(1 for w in ws if w.get("letter"))
         lim_top = max(1.0, ly1 - ly0) * u
         lim_bot = -((g["below"]["top"] - ly1) - gap) * u if g["below"] is not None else -1e9
         lh = max(1.0, ly1 - ly0)
