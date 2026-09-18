@@ -164,8 +164,8 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
   <h1>The page's own ink becomes its font</h1>
   <p class="lede">Scanned journals are pictures. OCR layers put invisible typed text over them, and copying from that text is a lottery in Arabic. Inkscript traces every printed word's ink into a glyph of its own, tells the viewer what each glyph says, and checks the result the way a reader would: by what Chrome copies out.</p>
   <div class="facts">
-    <div><b>99.97%</b><span>of 912,800 words copy out intact from 227 journals (Chrome's engine)</span></div>
-    <div><b>99.9%</b><span>of 84,186 lines come back in reading order</span></div>
+    <div><b>99.98%</b><span>of 2,781,570 words copy out intact across 755 documents, 16,074 pages (Chrome's engine)</span></div>
+    <div><b>99.9%</b><span>of 253,026 lines come back in reading order</span></div>
     <div><b>0</b><span>pixels substituted: every glyph is the printed occurrence's own outline</span></div>
     <div><b>3</b><span>engines measured: pdfium (Chrome), MuPDF, poppler — plus Firefox's pdf.js</span></div>
   </div>
@@ -450,7 +450,7 @@ const RESULTS=[
  {set:'30-document test set · 115 pages',w:[34958,34959],l:[3866,3868],inv:3,lost:0},
  {set:'47 corpus documents · 1,007 pages (43 born-digital, 14 sideways)',w:[237723,237741],l:[20213,20224],inv:103,lost:0},
  {set:'227-journal sample · 4,440 pages (903 born-digital, 16 sideways)',w:[912672,912800],l:[84121,84186],inv:398,lost:0},
- /*BIG_ROW*/
+ {set:'451-document sample · 10,512 pages (4,448 born-digital, 23 sideways)',w:[1595673,1596070],l:[144592,144748],inv:1106,lost:0},
 ];
 document.getElementById('results').innerHTML=RESULTS.map(r=>{const pw=r.w[0]/r.w[1],pl=r.l[0]/r.l[1];return `<tr><td>${r.set}</td><td class="n">${r.w[0].toLocaleString()} / ${r.w[1].toLocaleString()}<br>${(pw*100).toFixed(2)}%<span class="bar"><i style="width:${pw*100}%"></i></span></td><td class="n">${r.l[0].toLocaleString()} / ${r.l[1].toLocaleString()}<br>${(pl*100).toFixed(1)}%<span class="bar"><i style="width:${pl*100}%"></i></span></td><td class="n">${r.inv}</td><td class="n">${r.lost}</td></tr>`}).join('')+
  `<tr><td colspan="5" style="font-size:.85rem;color:var(--muted)">Inversions: consecutive lines in one column whose baseline jumps back up the page; most of the remaining ones are typeset pages with junk-encoded fonts and table pages. 51 Latin-majority lines are counted apart (pdfium reads them left to right by its majority rule, as in any native PDF).</td></tr>`;

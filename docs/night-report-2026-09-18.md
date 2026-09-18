@@ -135,7 +135,11 @@ one code state.
 | 30-document test set, 115 pages | 34,958 / 34,959 (**100.0%**) | 3,866 / 3,868 (99.9%) | 3 |
 | 47 corpus documents, 1,007 pages | 237,723 / 237,741 (**100.0%**) | 20,213 / 20,224 (99.9%) | 103 |
 | 227-journal sample, 4,440 pages | 912,672 / 912,800 (**99.99%**) | 84,121 / 84,186 (99.9%) | 398 (was 535) |
-| 451-document sample (two more per journal), 10,512 pages, 4,448 born-digital | see below | | |
+| 451-document sample (two more per journal), 10,512 pages, 4,448 born-digital, 23 sideways | 1,595,673 / 1,596,070 (**99.98%**; 99.38% on its first build, before the three fixes below) | 144,592 / 144,748 (99.9%) | 1,106 (typeset journals' own running heads and ornaments, table pages) |
+
+Consistency check over the 451: 1,656,741 words, 2,302 contradictions,
+3,225 words to review, 89,178 numbers. Weakest documents now: `1255-000-001-028`
+106/108, `0345-039-003-019` 429/437, `0605-000-142-004` 2,564/2,601.
 
 - **The interactive storyboard** (`docs/storyboard/`, built by `build.py`
   from the pipeline's own outputs; published as an artifact): the demo,
