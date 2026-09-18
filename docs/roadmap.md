@@ -9,8 +9,11 @@ from.
 
 - Scans in the corpus are Azure's searchable PDFs; born-digital journals
   exist too and are left alone. Both handled.
-- 30-document test set and 47 corpus documents (1,007 pages) build end to
-  end. Numbers in `docs/pdf-writing-rules.md`.
+- 30-document test set, 47 corpus documents (1,007 pages) and a
+  227-journal sample (4,440 pages) build end to end: 100.0% / 100.0% /
+  99.97% of words intact in Chrome, 99.9% of lines in reading order
+  (2026-09-18 09:19). Numbers and history in
+  `docs/night-report-2026-09-18.md`.
 - Chrome's engine is the verification target; MuPDF and poppler are
   measured but disagree with it on vowelled text.
 - (2026-09-18, night) Chrome's line reconstruction is now known from

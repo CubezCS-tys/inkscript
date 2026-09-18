@@ -37,10 +37,11 @@ document (five pages) so the tests and a first run need no data setup.
 
 ## Status
 
-30-document test set, 115 pages (2026-09-18): 34,952 of 34,955 words copy
-out intact in Chrome's engine (100.0%), 99.5% of lines in reading order,
-3 in-column order inversions, every page keeps its image. Corpus figures
-(47 documents; a 227-journal sample) are in `docs/night-report-2026-09-18.md`.
+30-document test set, 115 pages (2026-09-18): 34,958 of 34,959 words copy
+out intact in Chrome's engine (100.0%), 99.9% of lines in reading order,
+3 in-column order inversions, every page keeps its image. 227-journal
+sample (4,440 pages): 99.97% of words, 99.9% of lines. Details and the
+comparison with Azure's PDFs and ocrmypdf in `docs/night-report-2026-09-18.md`.
 Selection snaps to pieces of ink (24% of words
 split at the joins the script dictates; the rest stay whole rather than guess). Every glyph is the
 printed occurrence's own outline, stored in scan pixels; the document's shape
