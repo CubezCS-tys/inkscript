@@ -158,12 +158,17 @@ def visual(s: str, in_rtl_line: bool = False, ltr_line: bool = False) -> str:
     # treatment; digits and Latin letters keep their order either way.
     mir = _mirror_set(s)
     logical = "".join(MIRROR.get(c, c) if i in mir else c for i, c in enumerate(s))   # pdfium mirrors brackets it reads right-to-left
+    # Reverse the whole string, then put each Latin run and each digit/
+    # mark/separator run back in its own order — separately: `a-1` is two
+    # pdfium segments ([a][-1]) whose ORDER it reverses, so it is stored
+    # `-1a`, not `a-1` (a whole-run treatment copied `(a-1)` out as `(-1a`).
     out, i, n = [], 0, len(s)
     rev = logical[::-1]
     while i < n:
-        if _keeps_order(rev[i]):
+        d = _class(rev[i])
+        if d in ("L", "LW"):
             j = i
-            while j < n and _keeps_order(rev[j]):
+            while j < n and _class(rev[j]) == d:
                 j += 1
             out.append(rev[i:j][::-1]); i = j
         else:

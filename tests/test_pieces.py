@@ -42,7 +42,7 @@ def test_words_split_where_safe(fixture):
 
 
 def test_storage_is_what_chrome_reads_back():
-    from inkscript.text import visual, chrome_reads
+    from inkscript.text import visual, chrome_reads, latin_majority
     # pdfium reverses the order of a line's bidi segments and each Arabic
     # segment in place; digits, marks and Latin keep their order. The stored
     # form is the inverse, so Chrome gives every line back exactly.
@@ -53,9 +53,10 @@ def test_storage_is_what_chrome_reads_back():
     assert visual("(2)", in_rtl_line=True) == "(2)"
     for line in ["362 هـ - وهو وان لم يكن فى الحقيقة", "كتابُ السَّماءِ والعالم", "التَّقَاوِيمِ",
                  "هجرية (٤٥)", "379هـ)", "126/4", "ابن خلدون (ت 808هـ)", "من التأليف المبتكر .(2) وقد",
-                 "الكتاب [المطبوع] «قديماً»", "معجم Lisan العرب"]:
-        words = line.split()
-        stored = " ".join(visual(w, True) for w in reversed(words))
+                 "الكتاب [المطبوع] «قديماً»", "معجم Lisan العرب", "حيث إن Z10/2 هي القيم",
+                 "بجعل i=1,2,K,N)xi) الذي يمثل", "أما في حالة إن تكون2°O غير معلومة"]:
+        words = line.split(); ltr = latin_majority(line)              # pdfium reads a Latin-majority line left to right
+        stored = " ".join(visual(w, True, ltr) for w in (words if ltr else reversed(words)))
         assert chrome_reads(stored) == line, line
     assert chrome_reads("Kose Dagh") == "Kose Dagh"                       # a Latin line is not reversed
     # Known limit: a bracketed Latin word inside an Arabic line comes back
@@ -63,3 +64,4 @@ def test_storage_is_what_chrome_reads_back():
     # space glyph and the bracket form one neutral segment pdfium keeps
     # forward after Latin text.
     assert chrome_reads(" ".join(visual(w, True) for w in reversed("(Kose) في".split()))) == "(Kose )في"
+    assert chrome_reads(" ".join(visual(w, True) for w in reversed("بالرمز (a-1) وتحت".split()))) == "بالرمز (a-1 )وتحت"
