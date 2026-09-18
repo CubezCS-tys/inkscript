@@ -203,8 +203,8 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
 <!-- 3 -->
 <section class="chapter" id="c3" data-title="A real page">
   <div class="num">03 · A REAL PAGE</div>
-  <h2>Hover a word: its glyph is its own ink</h2>
-  <p class="thesis">This is page 1 of a 1970s journal from the test set, and the outlines are read back out of the finished PDF's fonts — not drawn for the demo. Each shape is one glyph; its text is what a viewer copies.</p>
+  <h2>Hover a word — or a letter: its glyph is its own ink</h2>
+  <p class="thesis">This is page 1 of a 1970s journal from the test set, and the outlines are read back out of the finished PDF's fonts — not drawn for the demo. Each shape is one glyph; its text is what a viewer copies. Where the document's own evidence agreed on where one letter ends and the next begins, the glyph is a single letter (chapter 05); elsewhere it is the word.</p>
   <div class="explorer" id="explorer"><img id="xImg" alt="Top of the first page of a scanned Arabic journal article"><svg id="xSvg" aria-hidden="true"></svg></div>
   <div class="xinfo" id="xInfo"><div class="empty">Hover or tap a word on the page.</div></div>
   <div class="controls"><button type="button" class="btn" id="xSelectAll">Simulate Ctrl+A</button><button type="button" class="btn" id="xClear">Clear</button><span class="sp"></span><span class="hint" id="xCount"></span></div>
@@ -428,6 +428,7 @@ const RULES=[
  {k:'17 × 27 px',h:'Gemini sees the page at scan resolution',p:'Ten documents carried a thumbnail as their single embedded image; Gemini read nothing. Pages are rendered unless the image is ≥150 dpi.',w:'ocr/gemini.py · page_images'},
  {k:'5 of 6',h:'Refused covers: masthead, then title only',p:'The recitation filter refuses a verbatim page of a published journal but allows a title-and-author extraction.',w:'ocr/gemini.py · gemini_page1'},
  {k:'65% → 100%',h:'Sideways pages get a turned frame',p:'Tables printed landscape are laid out in a rotated frame and written with a rotated text matrix, so glyphs land on the ink.',w:'pdf/type3.py · Frame'},
+ {k:'42%',h:'Letters where the document agrees',p:'A piece’s known letters are aligned to its ink by their signatures (dots, ascender, bowl, width); each letter-form’s usual look is learned from the document itself, and only pieces every letter of which matches it become one glyph per letter. A wrong cut can only move a highlight.',w:'geometry/letters.py'},
  {k:'40 → 1',h:'Junk-encoded fonts become inert, not invisible',p:'A typeset page whose font extracts as symbols keeps drawing its glyphs, but each text object is wrapped in an /ActualText span holding a space; every engine then reads our layer alone.',w:'pdf/native.py · neutralise_text'},
 ];
 document.getElementById('rules').innerHTML=RULES.map(r=>`<div class="rule"><span class="k">${r.k}</span><h3>${r.h}</h3><p>${r.p}</p><span class="where">${r.w}</span></div>`).join('');
