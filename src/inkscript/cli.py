@@ -216,6 +216,33 @@ def cmd_numbers(a) -> int:
     return 0
 
 
+def cmd_second(a) -> int:
+    from .ocr.gemini import client, GEMINI_MODEL, GEMINI_IN_PER_M, GEMINI_OUT_PER_M
+    from .verify.second import reread_contradictions
+    gc = client(); tot = dict(occurrences=0, confirmed=0, proposed=0, review=0, unread=0, tin=0, tout=0)
+    rd = Path(a.review_dir).expanduser(); nd = Path(a.native_dir).expanduser()
+    reviews = sorted(rd.glob("*.review.json"))[:a.docs] if a.docs else sorted(rd.glob("*.review.json"))
+    for rj in reviews:
+        stem = rj.name.replace(".review.json", ""); pdf = nd / f"{stem}.pdf"
+        if not pdf.exists(): continue
+        r = reread_contradictions(gc, a.gemini_model or GEMINI_MODEL, pdf, rj)
+        (rd / f"{stem}.second.json").write_text(json.dumps(r, ensure_ascii=False, indent=1), encoding="utf-8")
+        if r["proposed"]:
+            (rd / f"{stem}.proposed.json").write_text(json.dumps(r["proposed"], ensure_ascii=False, indent=1), encoding="utf-8")
+        for k in ("occurrences", "confirmed", "review", "unread"): tot[k] += r[k]
+        tot["proposed"] += r["proposed_n"]
+        tot["tin"] += r["usage"]["tokens_in"]; tot["tout"] += r["usage"]["tokens_out"]
+        print(f"{stem:<24} {r['occurrences']:>4} occurrences: {r['confirmed']:>3} confirmed, {r['proposed_n']:>3} proposed, {r['review']:>3} to review, {r['unread']:>3} unread"
+              + (f"  e.g. {[(x['was'], x['text']) for x in r['proposed'][:3]]}" if r["proposed"] else ""), flush=True)
+        if a.apply and r["proposed"]:
+            from .pdf.correct import apply_corrections
+            done = apply_corrections(pdf, r["proposed"], nd / f"{stem}.shapes.json")
+            print(f"{'':<24} applied {sum(1 for d in done if d['applied'])} of {len(done)}")
+    cost = tot["tin"] / 1e6 * GEMINI_IN_PER_M + tot["tout"] / 1e6 * GEMINI_OUT_PER_M
+    print(f"\nall: {tot['occurrences']} occurrences, {tot['confirmed']} confirmed, {tot['proposed']} proposed corrections, {tot['review']} to review, {tot['unread']} unread; gemini ${cost:.3f}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="inkscript", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -262,6 +289,11 @@ def main(argv=None) -> int:
     p.add_argument("review_dir", help="dir of <stem>.review.json from `check --out`"); p.add_argument("native_dir", help="dir of the native PDFs")
     p.add_argument("--docs", type=int, default=0); p.add_argument("--limit", type=int, default=0, help="numbers per document (0 = all)")
     p.add_argument("--gemini-model", default=None); p.set_defaults(fn=cmd_numbers)
+
+    p = sub.add_parser("second", help="second reading of every contradiction from its own ink (Gemini); two readings against one become proposed corrections")
+    p.add_argument("review_dir"); p.add_argument("native_dir"); p.add_argument("--docs", type=int, default=0)
+    p.add_argument("--apply", action="store_true", help="write the proposed corrections into the PDFs (inkscript correct)")
+    p.add_argument("--gemini-model", default=None); p.set_defaults(fn=cmd_second)
 
     p = sub.add_parser("correct", help="write a corrected reading into a finished PDF's text layer (no rebuild)")
     p.add_argument("pdf"); p.add_argument("--page", type=int); p.add_argument("--box", help="x0,y0,x1,y1 in scan pixels (as in the review list)")
