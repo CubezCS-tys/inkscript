@@ -22,7 +22,7 @@ def review(shapes_json: Path) -> dict:
     conflicts = []
     strip = lambda t: re.sub(r"[\u064B-\u0652\u0670\W_]", "", t)
     for sig, ps in groups.items():
-        texts = Counter(norm(p["text"]) for p in ps)
+        texts = Counter(norm(p["text"]) for p in ps if norm(p["text"]).strip())   # an empty reading is a box with no text, not a reading
         if len(texts) > 1:
             top = texts.most_common(1)[0][0]
             # What kind of disagreement? A reading that merely EXTENDS the other
