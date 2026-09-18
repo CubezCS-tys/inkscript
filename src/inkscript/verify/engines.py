@@ -83,13 +83,20 @@ def pdfium_order(pdf: Path, skip: set[int] | None = None) -> tuple[int, int]:
     for pn in range(len(doc)):
         if skip and pn + 1 in skip:
             continue
-        tp = doc[pn].get_textpage(); t = tp.get_text_range(); lines, cur = [], []
+        tp = doc[pn].get_textpage(); t = tp.get_text_range(); lines, cur, junk = [], [], []
+        good = re.compile(r"[\u0600-\u06FFA-Za-z0-9]")
+        def close():
+            # a line of symbol junk comes from a typeset font with no usable
+            # encoding, not from the layer: not judged
+            if cur and len(good.findall(txt)) >= 0.5 * len(txt.replace(" ", "")):
+                lines.append(list(cur))
+        txt = ""
         for k, c in enumerate(t):
             if c in "\r\n":
-                if cur: lines.append(cur); cur = []
+                close(); cur = []; txt = ""
                 continue
-            if c.strip(): cur.append(tp.get_charbox(k))
-        if cur: lines.append(cur)
+            if c.strip(): cur.append(tp.get_charbox(k)); txt += c
+        close()
         base = [statistics.median(b[1] for b in L) for L in lines]
         h = [statistics.median(b[3] - b[1] for b in L) for L in lines]
         xr = [(min(b[0] for b in L), max(b[2] for b in L)) for L in lines]

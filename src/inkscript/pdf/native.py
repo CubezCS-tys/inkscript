@@ -22,16 +22,28 @@ def born_digital(page) -> bool:
     page is still native when the real fonts carry at least half as many
     words as that layer. A scan whose page carries a real font only for a
     digitally added stamp, folio or header is still a scan."""
-    real = dummy = 0
+    real, dummy = text_words(page)
+    return real > 0 and real >= 0.5 * dummy
+
+
+def text_words(page) -> tuple[int, int]:
+    """(readable words in real fonts, words in Azure's Dummy layer). A font
+    without a usable encoding extracts as symbol junk (`ΔϴϤϨΘϟ`); those
+    words are not text anyone can search or copy and do not count."""
+    import re
+    good = re.compile(r"[\u0600-\u06FFA-Za-z0-9]")
+    real = dummy = chars = goodc = 0
     for b in page.get_text("dict")["blocks"]:
         for l in b.get("lines", []):
             for sp in l["spans"]:
-                n = len(sp["text"].split())
                 if sp["font"] == "Dummy":
-                    dummy += n
+                    dummy += len(sp["text"].split())
                 else:
-                    real += n
-    return real > 0 and real >= 0.5 * dummy
+                    real += len(sp["text"].split())
+                    t = sp["text"].replace(" ", ""); chars += len(t); goodc += len(good.findall(t))
+    if chars and goodc < 0.5 * chars:                 # mostly symbols: a font with no usable encoding
+        real = 0
+    return real, dummy
 
 
 def strip_text_objects(doc, page) -> int:
@@ -42,6 +54,10 @@ def strip_text_objects(doc, page) -> int:
     import re
     dummies = [f[4].encode() for f in page.get_fonts(full=True) if f[3] == "Dummy"]
     only_dummy = all(f[3] == "Dummy" for f in page.get_fonts())
+    # A real font whose text extracts as symbol junk stays: on a typeset
+    # page it IS the visible ink (stripping it blanked 41 pages). Our layer
+    # goes on top with Azure's reading; the junk lines remain in the text
+    # Chrome extracts, and the order check leaves them out.
     n = 0
     for xref in page.get_contents():
         raw = doc.xref_stream(xref)
