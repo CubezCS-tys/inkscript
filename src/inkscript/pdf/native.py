@@ -201,7 +201,8 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # every piece's letters to its ink, then learn what each letter-form
     # shows in this document and keep only the plans the document agrees
     # with. The geometry is computed twice; the plans are small.
-    from ..geometry.letters import plan as letter_plan, learn as learn_letters, accepted as letters_accepted, letters_of
+    from ..geometry.letters import plan as letter_plan, learn as learn_letters, accepted as letters_accepted, letters_of, line_geometry
+    import cv2
     from ..geometry.layout import split_word
     from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
     letter_plans = {}
@@ -216,11 +217,13 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                 continue
             texts, _ = page_texts(pn, pwords)
             G = page_geometry(src[pno], pn, pwords, texts)
+            _, ink = cv2.threshold(G["gray"], 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU); ink = ink > 0
             for li, L in enumerate(G["lines"]):
                 bl = [b for w in L if w["blobs"] for b in w["blobs"]]
                 if not bl:
                     continue
                 lh = max(1.0, max(b["y"] + b["h"] for b in bl) - min(b["y"] for b in bl))
+                lg = line_geometry(ink, bl)
                 for wi, w in enumerate(L):
                     if not w["blobs"] or MARKS.search(w["text"]):
                         continue
@@ -230,7 +233,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                         if len(runs) != 1 or len(text_pieces(t)) != 1:
                             continue
                         units = letters_of(runs[0])
-                        p = letter_plan(units, pc["blobs"]) if len(units) >= 2 else None
+                        p = letter_plan(units, pc["blobs"], lg) if len(units) >= 2 else None
                         if p:
                             all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
         majority = learn_letters(all_plans)

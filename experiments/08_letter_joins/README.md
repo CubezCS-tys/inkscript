@@ -61,3 +61,19 @@ keeps the measurements: hand-written signatures alone accept 29% of
 words; the document's own majority signatures 54% of the words all of
 whose letter-forms are known; an image-similarity witness (mean images
 per letter-form) was too weak and is kept only as a statistic.
+
+## Later the same week: the equal-slicing baseline
+
+The number that matters is not agreement with the thin-join method but
+whether a cut beats what Chrome does with an uncut glyph — equal slices
+of its width, one per character. On the 441 pieces with a clean
+thin-join reference (658 cuts): equal slicing puts 91.6% of cuts within
+a stroke of the join, the free alignment 90.9%; within 3 px it is 39%
+against 55%, at the 90th percentile 9.5 px against 12 px. The
+document-as-witness did not separate good cuts from bad either (88.7% of
+accepted pieces fully right against 87.0% of rejected). So the alignment
+now only chooses among real joins (`letters.joins`), and a piece with
+fewer joins than cuts stays whole: 912 of 1,122 pieces get a plan, 654
+are accepted, 1,747 letter glyphs on the fixture. There is no
+independent reference for these cuts any more (the reference was the
+joins); they were checked by eye on a random sheet of 64 pieces.

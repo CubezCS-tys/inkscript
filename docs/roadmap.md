@@ -40,13 +40,14 @@ from.
 3. **Second reading for numbers and contradictions only.** Send just those
    crops to Gemini (a few per page) and accept a correction only when the
    two readings agree. Cheap, and it targets the errors that matter.
-4. **Letter-level selection inside a connected run.** In, conservatively
-   (2026-09-18 evening): letters are aligned to the ink by their
-   signatures and accepted only where the document's own majority agrees
-   (`geometry/letters.py`; 42% of pieces on the fixture, 1,105 letter
-   glyphs, Chrome unchanged). Next: raise acceptance (the alignment
-   wavers on initial/medial `ل` and final `ا`), then measure the
-   selection itself, not only the text.
+4. **Letter-level selection inside a connected run.** In (2026-09-19):
+   letters are aligned to the ink by their signatures, cuts fall only on
+   real joins, and a piece is cut only where the document's own majority
+   agrees (`geometry/letters.py`; 58% of multi-letter pieces on the
+   fixture, 1,747 letter glyphs, Chrome unchanged). Uncut pieces still
+   select in equal slices. Next: pieces with no thin join (`لم`, stacked
+   `لح`), tooth-letter runs the witness rejects, and a hand-checked
+   reference sheet so cuts are measured rather than eyeballed.
 5. **Other viewers.** Firefox (pdf.js) measured (`experiments/06`): words
    come back intact (95%) but lines copy out word-reversed at the 8 pt
    nominal size, because pdf.js splits a line into items at any pen jump

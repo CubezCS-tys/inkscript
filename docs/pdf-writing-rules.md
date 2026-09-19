@@ -178,20 +178,35 @@ rule records the experiment, not a theory.
   each has signatures visible in any typeface: dots above or below and
   how many, an ascender (`ا ل ك ط`), a descending bowl (`ج ح خ`; `ن ي س ص
   ق ل م` when the piece ends there), a width class. A dynamic programme
-  divides the piece's width into one interval per letter, scoring each
-  interval against its letter and each cut against a thin join
-  (`geometry/letters.py`). Where the old thin-join method had a clean
-  answer, the alignment agrees with it 93% of the time — and it also cuts
-  bold titles and tooth letters, which the thin method could not
-  (`experiments/08`).
+  gives each letter one interval of the piece's width, scoring the
+  interval against its letter (`geometry/letters.py`).
+- **A cut falls only on a join.** The geometry offers the places — columns
+  where the ink is nothing but the connecting stroke (`joins`; along a
+  kashida or a flat final `ب`, places a stroke apart) — and the letters'
+  signatures choose among them. A piece with fewer joins than cuts stays
+  whole. Left free over every column the programme was no nearer the
+  joins than equal slices of the width are, which is what Chrome shows
+  for an uncut glyph: 90.9% against 91.6% of cuts within a stroke of the
+  join (its median error was smaller, 3 px against 4, its worst cuts
+  worse). So an unconstrained cut bought nothing over not cutting.
+- **Tall and deep are measured against the line, not the piece.** A
+  threshold from a two-letter piece's own ink missed about half of the
+  real ascenders (`ل` initial showed its ascender 48% of the time, final
+  `ا` 59%); against the line's baseline and its usual rise and drop (60th
+  percentile of its blobs, so a bracket does not inflate it) they show
+  85% and 86%. Presence is a count of columns, not a share: an alef is
+  three pixels of ink in an interval that may be thirty wide.
 - **The document is the witness.** No signature table is trusted on its
-  own: what each letter-form actually shows in this document — ascender,
-  bowl, dot counts — is learned by majority over all its aligned
-  occurrences (at least five), and a piece's cuts are accepted only when
-  every letter shows its usual signature. Fixture: 443 of 1,057 plans
-  accepted; 1,105 letter glyphs; Chrome unchanged at 1,246/1,246 words,
-  113/113 lines. A wrong cut can only move a highlight: the letters'
-  texts concatenate to the word.
+  own: what each letter-form actually shows in this document is learned
+  by majority over all its aligned occurrences (at least five), feature
+  by feature; a feature that holds for under 85% of a form's occurrences
+  says nothing about that form and cannot veto. A piece's cuts are
+  accepted only when every letter shows every reliable feature and at
+  least one is positive (a tall stroke, a bowl, a dot). Fixture: 654 of
+  912 plans accepted (1,122 pieces of two or more letters); 1,747 letter
+  glyphs; Chrome unchanged at 1,246/1,246 words, 113/113 lines. A wrong
+  cut can only move a highlight: the letters' texts concatenate to the
+  word.
 - **A letter glyph's ink is the piece's ink cut at the column**, the main
   run divided at the cut and each dot going with the interval that holds
   its centre; the union of a piece's letter glyphs is exactly the piece's

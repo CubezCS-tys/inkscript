@@ -69,8 +69,11 @@ def piece_mask(blobs: list[dict]):
     return m.astype(bool), (x0, y0)
 
 
-def analyse(crop: np.ndarray):
-    """Main component, dots, baseline band, stroke, per-column features; None if the ink is not one main run."""
+def analyse(crop: np.ndarray, line: dict | None = None, y_off: int = 0):
+    """Main component, dots, baseline band, stroke, per-column features; None if the ink is not one main run.
+    `line` (baseline row in page pixels, rise and drop of the line's ink) makes "tall" and "deep" relative to
+    the line the piece sits in: a threshold taken from a two-letter piece's own ink missed about half of the
+    real ascenders (the kaf's arm or the alef itself shifts the piece's row profile)."""
     n, lab, stats, cent = cv2.connectedComponentsWithStats(crop.astype(np.uint8), connectivity=8)
     if n < 2:
         return None
@@ -84,9 +87,17 @@ def analyse(crop: np.ndarray):
     top = np.array([np.argmax(main[:, x]) if main[:, x].any() else H for x in range(W)])
     bot = np.array([H - 1 - np.argmax(main[::-1, x]) if main[:, x].any() else -1 for x in range(W)])
     has = main.any(0)
-    F = dict(main=main, b0=b0, b1=b1, stroke=stroke, has=has, W=W,
-             asc=has & (top < b0 - 1.5 * stroke), tall=has & (top < b0 - 3 * stroke),
-             desc=has & (bot > b1 + 1.0 * stroke), deep=has & (bot > b1 + 2.5 * stroke),
+    if line and line["rise"] >= 10:                   # any real line; the piece's own stroke estimate is not a reason to distrust it
+        base = line["baseline"] - y_off; rise = line["rise"]; drop = max(line["drop"], stroke)
+        up = base - top; down = bot - base
+        asc, tall = has & (up >= 0.6 * rise), has & (up >= 0.8 * rise)
+        # measured on the fixture: tall letters rise to a median 0.84 of the line's rise (others 0.36, 95th
+        # percentile 0.67); descending letters drop to a median 0.64 of the line's drop (others 0.27, 75th 0.43)
+        desc, deep = has & (down >= 0.5 * drop) & (down > stroke), has & (down >= 0.75 * drop) & (down > 2 * stroke)
+    else:
+        asc, tall = has & (top < b0 - 1.5 * stroke), has & (top < b0 - 3 * stroke)
+        desc, deep = has & (bot > b1 + 1.0 * stroke), has & (bot > b1 + 2.5 * stroke)
+    F = dict(main=main, b0=b0, b1=b1, stroke=stroke, has=has, W=W, asc=asc, tall=tall, desc=desc, deep=deep,
              thin=has & (top >= b0 - 1) & (bot <= b1 + 1), dots=[], dot_labels=[])
     for k in range(1, n):
         if k != big and areas[k - 1] >= 3:
@@ -106,10 +117,12 @@ def align(units: list[str], F: dict):
 
     def agree(i, a, b):
         c = _base(units[i]); w = max(1, b - a); last = i == n - 1
+        # presence is a count of columns, not a share of the interval: an alef is three pixels of ink in an
+        # interval that may be thirty wide
         want_asc = c in ASC or c.startswith("ل")
-        asc_ok = (c_asc[b] - c_asc[a]) > 0.1 * w if want_asc else (c_tall[b] - c_tall[a]) <= 0.1 * w
+        asc_ok = (c_asc[b] - c_asc[a]) >= 2 if want_asc else (c_tall[b] - c_tall[a]) < 2
         want_desc = c in DESC_ANY or (last and c in DESC_END)
-        desc_ok = (c_desc[b] - c_desc[a]) > 0.1 * w if want_desc else (c_deep[b] - c_deep[a]) <= 0.1 * w
+        desc_ok = (c_desc[b] - c_desc[a]) >= 2 if want_desc else (c_deep[b] - c_deep[a]) < 2
         da = sum(1 for x, ab in dots_r if a <= x < b and ab); db = sum(1 for x, ab in dots_r if a <= x < b and not ab)
         wa = DOTS_ABOVE.get(c, 0); wb = DOTS_BELOW.get(c, 0)
         if c == "ي" and last: wb = db if db in (0, 2) else 2
@@ -125,26 +138,46 @@ def align(units: list[str], F: dict):
         # weights the programme traded a final alef's stroke for a nicer
         # width and final ا came out inconsistent half the time.
         s += (1.5 if a_ok else -6.0) + (1.0 if d_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
-        if i < n - 1:
-            s += 1.0 if (thin[min(b, W - 1)] or thin[max(b - 1, 0)]) else -0.5
         return s
 
-    NEG = -1e9; best = np.full((n + 1, W + 1), NEG); back = np.zeros((n + 1, W + 1), int); best[0][0] = 0
-    minw = max(2, int(0.35 * unit_px))
+    # A cut may only fall where the ink is nothing but the connecting stroke (`joins`): the geometry offers
+    # the places, the letters' signatures choose among them. Left free over every column the programme was
+    # no nearer the joins than equal slices were (experiment 08: 90.9% against 91.6% of cuts within a stroke).
+    pos = [0] + sorted({W - 1 - x for x in joins(F)} - {0, W}) + [W]; m = len(pos)
+    if m - 2 < n - 1:
+        return None                                                  # fewer joins than cuts: the piece stays whole
+    NEG = -1e9; best = np.full((n + 1, m), NEG); back = np.zeros((n + 1, m), int); best[0][0] = 0
     for i in range(n):
-        for a in range(W + 1):
-            if best[i][a] == NEG: continue
-            for b in range(a + minw, W + 1):
-                if i == n - 1 and b != W: continue
-                v = best[i][a] + score(i, a, b)
-                if v > best[i + 1][b]: best[i + 1][b] = v; back[i + 1][b] = a
-    if best[n][W] == NEG:
+        for ai in range(m - 1):
+            if best[i][ai] == NEG: continue
+            for bi in range(ai + 1, m):
+                if (i == n - 1) != (bi == m - 1): continue
+                if pos[bi] - pos[ai] < 2: continue
+                v = best[i][ai] + score(i, pos[ai], pos[bi])
+                if v > best[i + 1][bi]: best[i + 1][bi] = v; back[i + 1][bi] = ai
+    if best[n][m - 1] == NEG:
         return None
-    bounds = [W]; b = W
-    for i in range(n, 0, -1):
-        b = back[i][b]; bounds.append(b)
-    bounds = bounds[::-1]
-    return sorted(W - 1 - c for c in bounds[1:-1])
+    bounds = []; bi = m - 1
+    for i in range(n, 1, -1):
+        bi = back[i][bi]; bounds.append(pos[bi])
+    return sorted(W - 1 - c for c in bounds)
+
+
+def joins(F: dict) -> list[int]:
+    """Columns where a cut crosses only the connecting stroke: the middle of each short run of thin columns,
+    and places a stroke apart along a long one (a kashida, or the flat body of a final ba, where the letter
+    boundary is somewhere along it and the widths decide)."""
+    thin, W, stroke = F["thin"], F["W"], F["stroke"]; out = []; x = 0
+    while x < W:
+        if not thin[x]:
+            x += 1; continue
+        j = x
+        while j < W and thin[j]: j += 1
+        if x > 1 and j < W - 1:                                      # a run touching the piece's edge is a tail, not a join
+            k = max(1, -(-(j - x) // (2 * stroke)))
+            out += [int(round(v)) for v in (np.linspace(x, j - 1, 2 * k + 1)[1::2])]
+        x = j
+    return out
 
 
 def observe(units: list[str], F: dict, cuts: list[int]) -> list[tuple]:
@@ -153,18 +186,37 @@ def observe(units: list[str], F: dict, cuts: list[int]) -> list[tuple]:
     for k in range(len(units)):
         a, b = bounds[len(units) - 1 - k], bounds[len(units) - k]; w = max(1, b - a)
         da = sum(1 for x, ab in F["dots"] if a <= x < b and ab); db = sum(1 for x, ab in F["dots"] if a <= x < b and not ab)
-        out.append((float(F["asc"][a:b].sum()) / w > 0.1, float(F["desc"][a:b].sum()) / w > 0.1, min(da, 3), min(db, 3)))
+        out.append((int(F["asc"][a:b].sum()) >= 2, int(F["desc"][a:b].sum()) >= 2, min(da, 3), min(db, 3)))
     return out
 
 
-def plan(units: list[str], blobs: list[dict]):
+def line_geometry(ink: np.ndarray, blobs: list[dict]) -> dict | None:
+    """A line's baseline (the row with the most ink across the whole line), and how far its ink rises above
+    and drops below it. `ink` is the page's binary image, `blobs` the line's blobs."""
+    if not blobs:
+        return None
+    x0 = min(b["x"] for b in blobs); x1 = max(b["x"] + b["w"] for b in blobs); y0 = min(b["y"] for b in blobs); y1 = max(b["y"] + b["h"] for b in blobs)
+    rows = ink[y0:y1, x0:x1].sum(1)
+    if rows.size < 4 or rows.max() == 0:
+        return None
+    base = y0 + int(np.argmax(rows))
+    # How far the line's ink usually rises and drops, not how far its tallest blob does: a bracket or a
+    # footnote marker above the line inflated the rise and real lams fell under the bar (0.58 of it).
+    ups = [base - b["y"] for b in blobs if base - b["y"] > 0.35 * (base - y0)]
+    downs = [b["y"] + b["h"] - base for b in blobs if b["y"] + b["h"] - base > 0.35 * (y1 - base)]
+    rise = float(np.percentile(ups, 60)) if ups else float(base - y0)
+    drop = float(np.percentile(downs, 60)) if downs else float(y1 - base)
+    return dict(baseline=base, rise=rise, drop=drop)
+
+
+def plan(units: list[str], blobs: list[dict], line: dict | None = None):
     """Alignment of one piece: dict(units, cuts (page x), obs, mask, off, F) or None."""
     if len(units) < 2:
         return None
     mask, off = piece_mask(blobs)
     if mask.shape[1] < 4 * len(units) or mask.shape[1] > 1500:
         return None
-    F = analyse(mask)
+    F = analyse(mask, line, off[1])
     if F is None:
         return None
     cuts = align(units, F)
@@ -173,19 +225,47 @@ def plan(units: list[str], blobs: list[dict]):
     return dict(units=units, cuts=cuts, obs=observe(units, F, cuts), mask=mask, off=off, F=F)
 
 
+RELIABLE = 0.85                                         # a feature is evidence for a letter-form when this share of its occurrences agree
+
+
 def learn(plans: list[dict]) -> dict:
-    """The document's own signatures: majority (asc, desc, dots above, dots below) per (letter, form)."""
-    seen = defaultdict(Counter)
+    """The document's own signatures. For each (letter, form) seen often enough, each feature — ascender,
+    descender, dots above, dots below — gets its majority value IF that value holds for at least RELIABLE
+    of the form's occurrences, else None: in this typeface that feature says nothing about this form
+    (a final nun whose bowl hovers at the threshold), and it must not veto a cut."""
+    seen = defaultdict(list)
     for p in plans:
         n = len(p["units"])
         for k, o in enumerate(p["obs"]):
-            seen[(_base(p["units"][k]), form(k, n))][o] += 1
-    return {c: cnt.most_common(1)[0][0] for c, cnt in seen.items() if sum(cnt.values()) >= MIN_EXAMPLES}
+            seen[(_base(p["units"][k]), form(k, n))].append(o)
+    out = {}
+    for c, obs in seen.items():
+        if len(obs) < MIN_EXAMPLES:
+            continue
+        sig = []
+        for i in range(4):
+            v, cnt = Counter(o[i] for o in obs).most_common(1)[0]
+            sig.append(v if cnt >= RELIABLE * len(obs) else None)
+        out[c] = tuple(sig)
+    return out
 
 
 def accepted(p: dict, majority: dict) -> bool:
-    n = len(p["units"])
-    return all((_base(u), form(k, n)) in majority and majority[(_base(u), form(k, n))] == o for k, (u, o) in enumerate(zip(p["units"], p["obs"])))
+    """Every letter's form is known to the document, and the letter shows every feature that is reliable for
+    that form; at least one letter must be confirmed by a positive feature (a tall stroke, a bowl, a dot),
+    so that a run of featureless letters is not accepted on nothing."""
+    n = len(p["units"]); positive = False
+    for k, (u, o) in enumerate(zip(p["units"], p["obs"])):
+        sig = majority.get((_base(u), form(k, n)))
+        if sig is None:
+            return False
+        for want, got in zip(sig, o):
+            if want is None:
+                continue
+            if want != got:
+                return False
+            positive = positive or bool(want)
+    return positive
 
 
 def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
