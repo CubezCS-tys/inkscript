@@ -202,7 +202,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # shows in this document and keep only the plans the document agrees
     # with. The geometry is computed twice; the plans are small.
     from ..geometry.letters import letters_of, line_geometry
-    from ..geometry.penpath import plan as letter_plan, solve as solve_letters, accepted as letters_accepted
+    from ..geometry.penpath import units_forms, plan as letter_plan, solve as solve_letters, accepted as letters_accepted
     import cv2
     from ..geometry.layout import split_word
     from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
@@ -230,11 +230,8 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                         continue
                     for k, pc in enumerate(split_word(w, lh)):
                         t = pc["text"].strip()
-                        runs = [q for q in text_pieces(t) if ARABIC_LETTER.search(q)]
-                        if len(runs) != 1 or len(text_pieces(t)) != 1:
-                            continue
-                        units = letters_of(runs[0])
-                        p = letter_plan(units, pc["blobs"], lg) if len(units) >= 2 else None
+                        uf = units_forms(t)
+                        p = letter_plan(uf[0], pc["blobs"], lg, uf[1]) if uf and len(uf[0]) >= 2 else None
                         if p:
                             all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
         majority = solve_letters(all_plans)

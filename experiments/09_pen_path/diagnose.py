@@ -16,17 +16,20 @@ for pno in range(doc.page_count):
     pn = pno + 1; pw = [w for w in words if w["page"] == pn]; pix = doc[pno].get_pixmap(dpi=300, colorspace=fitz.csGRAY); gray = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
     _, ink = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU); ink = ink > 0
     W_in, H_in = dims[pn]; blobs = page_blobs(gray); lines, _ = layout_page(pw, [w["text"] for w in pw], az[pn].get("lines", []), blobs, gray.shape[1] / W_in, gray.shape[0] / H_in)
-    for L in lines:
+    for li, L in enumerate(lines):
         bl = [b for w in L if w["blobs"] for b in w["blobs"]]
         if not bl: continue
         lh = max(1.0, max(b["y"] + b["h"] for b in bl) - min(b["y"] for b in bl)); lg = line_geometry(ink, bl)
         for w in L:
-            if not w["blobs"] or MARKS.search(w["text"]): continue
+            if not w["blobs"]: continue
+            if pn == 1 and any("لئن" in x["text"] for x in L): print("WORD", w["text"], "-> pieces", [pc["text"] for pc in split_word(w, lh)], "(vowel marks: not cut)" if MARKS.search(w["text"]) else "")
+            if MARKS.search(w["text"]): continue
             for pc in split_word(w, lh):
-                t = pc["text"].strip(); u = letters_of(t)
-                if len(pieces(t)) != 1 or len(u) < 2: continue
-                tried += 1; p = P.plan(u, pc["blobs"], lg)
-                if p: p["text"] = t; plans.append(p)
+                t = pc["text"].strip(); uf = P.units_forms(t)
+                if not uf or len(uf[0]) < 2: continue
+                tried += 1; p = P.plan(uf[0], pc["blobs"], lg, uf[1])
+                if p: p["text"] = t; p["page"] = pn; plans.append(p)
+                elif pn == 1 and show and t in show.split(","): print(t, "NO PEN PATH (not one run of ink, or fewer cut places than cuts)")
 P.solve(plans); why = Counter(); fails = Counter()
 for p in plans:
     fl = [tuple(ok or not r for ok, r in zip(P._facts(p, k, a, b)[:4], p["reliable"].get(P.key(p, k), (True,) * 4))) for k, (a, b) in enumerate(P.intervals(p))]; fk = all(all(f) for f in fl)
@@ -35,7 +38,11 @@ for p in plans:
     for f in fl:
         for name, ok in zip(("tall stroke", "bowl", "dots above", "dots below"), f): fails[name] += not ok
 print("pieces of 2+ letters", tried, "| on a pen path", len(plans), "|", dict(why)); print("failed facts by kind:", dict(fails))
-for p in [p for p in plans if p["text"] == show][:6]:
+NAMES = ("tall stroke", "bowl", "dots above", "dots below")
+for p in [p for p in plans if show and p["text"] in show.split(",") and p.get("page") == 1][:40]:
+    bad = [(p["units"][k], [nm for nm, ok, r in zip(NAMES, P._facts(p, k, a, b)[:4], p["reliable"].get(P.key(p, k), (True,) * 4)) if r and not ok]) for k, (a, b) in enumerate(P.intervals(p))]
+    print(p["text"], "ACCEPTED" if P.accepted(p) else "rejected", "| likeness", [round(s, 2) if s is not None else None for s in p["scores"]], "| failed facts", [(u, f) for u, f in bad if f], "| candidates", len(p["cand"]))
+for p in []:
     print(show, "cuts", p["cuts"], "of", p["G"]["W"], "scores", [round(s, 2) if s is not None else None for s in p["scores"]], "facts", [tuple(bool(v) for v in P._facts(p, k, a, b)[:4]) for k, (a, b) in enumerate(P.intervals(p))])
 
 import random, os
@@ -50,3 +57,6 @@ def tiles(ps):
     return r
 acc = [p for p in plans if P.accepted(p)]; rej = [p for p in plans if not P.accepted(p)]
 sheet(tiles(random.sample(acc, min(90, len(acc)))), f"{out}/accepted90_{azure.stem[:4]}.png"); sheet(tiles(random.sample(rej, min(45, len(rej)))), f"{out}/rejected45_{azure.stem[:4]}.png")
+for p in [p for p in plans if p["text"] == "لمعجم" and p.get("page") == 1][:2]:
+    print("لمعجم intervals (reading order)", P.intervals(p), "dots (s, above)", p["G"]["dots"], "stroke", p["G"]["stroke"], "path length", p["G"]["W"])
+    cv2.imwrite(f"{out}/lmajm.png", picture(p["F"], p["ink_s"], p["cuts"], p["G"], p["n"], up=8))

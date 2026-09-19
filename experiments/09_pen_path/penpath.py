@@ -92,7 +92,7 @@ def picture(F, ink_s, cuts, G, n, up=5):
     H, W = F["main"].shape; im = np.full((H, W, 3), 255, np.uint8); bounds = [0] + list(cuts) + [G["W"]]
     for k in range(n):                                                # k-th letter in reading order = k-th interval from the right end
         a, b = bounds[n - 1 - k], bounds[n - k]; im[(ink_s >= a) & (ink_s < b)] = COLS[k % len(COLS)]
-    for (s, above), lab_id in zip(G["dots"], F["dot_labels"]):
+    for s, above, lab_id in G.get("marks") or [(s, ab, l) for (s, ab), l in zip(G["dots"], F["dot_labels"])]:
         k = next((k for k in range(n) if bounds[n - 1 - k] <= s < bounds[n - k]), 0); im[F["lab"] == lab_id] = COLS[k % len(COLS)]
     return cv2.resize(im, None, fx=up, fy=up, interpolation=cv2.INTER_NEAREST)
 

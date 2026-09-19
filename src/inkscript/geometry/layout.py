@@ -2,6 +2,7 @@
 page furniture set aside, superscript marker lines folded into their row,
 boxes carrying several tokens split into one glyph per token."""
 from __future__ import annotations
+import numpy as np
 
 from ..text import norm
 
@@ -227,6 +228,20 @@ def _split_word(w, lh: float, text: str, whole: list):
     # stays one glyph, so it consumes n ink pieces.
     arabic = [bool(ARABIC_LETTER.match(t[0])) for t in tp]
     need = [1 if a else len(t) for t, a in zip(tp, arabic)]
+    if len(tp) >= 2 and all(arabic) and 2 <= len(ip) < len(tp) and len(tp) - len(ip) <= 2:
+        # Fewer blobs than runs: two runs touch in the ink (`ر` against `بعة`). Which ones is decided by widths —
+        # the runs are grouped into as many consecutive groups as there are blobs, each group as wide as its
+        # letters suggest — and a touching group goes on as one piece, whose letters the pen path can still cut.
+        from itertools import combinations
+        from .letters import letters_of, width_class
+        cls = [sum(width_class(u) for u in letters_of(t)) or 1.0 for t in tp]; wid = [max(1.0, g["x1"] - g["x0"]) for g in ip]
+        unit = sum(wid) / sum(cls); best = None
+        for cutset in combinations(range(1, len(tp)), len(ip) - 1):
+            b = [0, *cutset, len(tp)]; cost = sum(abs(np.log(wid[i] / (unit * sum(cls[b[i]:b[i + 1]])))) for i in range(len(ip)))
+            if best is None or cost < best[0]: best = (cost, b)
+        b = best[1]
+        tp, tok = ["".join(tp[b[i]:b[i + 1]]) for i in range(len(ip))], [tok[b[i]] for i in range(len(ip))]
+        arabic = [True] * len(tp); need = [1] * len(tp)
     if len(tp) < 2 or sum(need) != len(ip):
         return whole
     out, i = [], 0

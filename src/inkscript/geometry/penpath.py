@@ -87,12 +87,32 @@ def unroll(F: dict, line: dict, y_off: int):
              desc=has & (down >= 0.5 * drop) & (down > stroke), deep=has & (down >= 0.75 * drop) & (down > 2 * stroke),
              thin=has & (top >= b0 - 1) & (bot <= b1 + 1), dots=[])
     sy, sx = np.array([p[0] for p in trunk]), np.array([p[1] for p in trunk])
+    # Every loose bit of ink goes to a letter (`marks`), but only dot-shaped ones are evidence (`dots`): the
+    # fragments of an underline under `لمعجم` were counted as three dots below and vetoed a correct cut.
+    G["marks"] = []
     for (cx, above), k in zip(F["dots"], F["dot_labels"]):
-        cy = np.where(F["lab"] == k)[0].mean(); G["dots"].append((int(np.argmin((sx - cx) ** 2 + 0.25 * (sy - cy) ** 2)), above))
+        yy, xx = np.where(F["lab"] == k); s_at = int(np.argmin((sx - cx) ** 2 + 0.25 * (sy - yy.mean()) ** 2)); G["marks"].append((s_at, above, k))
+        w, h = xx.max() - xx.min() + 1, yy.max() - yy.min() + 1
+        if not (w >= 3 * h and w > 1.5 * stroke): G["dots"].append((s_at, above))
     return G, ink_s, trunk
 
 
-def plan(units: list[str], blobs: list[dict], line: dict | None):
+def units_forms(text: str):
+    """The letters of a piece with each one's form. Usually the piece is one joined run; when two runs touch in
+    the ink (`خلا` + `ل` printed as one blob) the word arrives unsplit, and its letters still lie along one pen
+    path — each keeps the form its own run gives it. None when the text is not purely Arabic runs."""
+    from ..text import pieces, ARABIC_LETTER
+    from .letters import letters_of
+    runs = pieces(text.strip())
+    if not runs or not all(ARABIC_LETTER.search(r) for r in runs):
+        return None
+    units, forms = [], []
+    for r in runs:
+        u = letters_of(r); units += u; forms += [form(k, len(u)) for k in range(len(u))]
+    return units, forms
+
+
+def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str] | None = None):
     """One piece on its pen path, with its candidate cut points; cuts are chosen later by `solve`."""
     if len(units) < 2 or not line or line["rise"] < 10:
         return None
@@ -125,19 +145,30 @@ def plan(units: list[str], blobs: list[dict], line: dict | None):
             if j - x >= 4 * stroke: conn[x + stroke:j - stroke] = True   # a kashida is nobody's shape
             x = j
         else: x += 1
-    p = dict(kind="pen", units=units, n=len(units), F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
+    p = dict(kind="pen", units=units, n=len(units), forms=forms or [form(k, len(units)) for k in range(len(units))], F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
              sc=RISE / line["rise"], base=line["baseline"] - off[1], cache={}, cuts=None)
     p["cuts"] = best_cuts(p, {})
     return p if p["cuts"] is not None else None
 
 
-def _mask(p, a, b, connectors=True):
+def _dot_owner(p, ds, above, cuts=None):
+    """The letter (reading order) a dot's ink goes to: the one whose stretch holds it, unless that letter takes no
+    dot on that side and a neighbour within a stroke does."""
+    iv = intervals(p, cuts); tol = p["G"]["stroke"]; wants = lambda k: (DOTS_ABOVE if above else DOTS_BELOW).get(_base(p["units"][k]), 0) > 0 or (not above and _base(p["units"][k]) == "ي")
+    own = next((k for k, (a, b) in enumerate(iv) if a <= ds < b), 0)
+    if not wants(own):
+        for k in (own - 1, own + 1):
+            if 0 <= k < len(iv) and wants(k) and iv[k][0] - tol <= ds < iv[k][1] + tol: return k
+    return own
+
+
+def _mask(p, a, b, connectors=True, owner=None):
     s = p["ink_s"]; m = (s >= a) & (s < b)
     if not connectors:
         m2 = m & ~p["conn"][np.clip(s, 0, None)]
         if m2.sum() >= 4: m = m2
-    for (ds, above), lab_id in zip(p["G"]["dots"], p["F"]["dot_labels"]):
-        if a <= ds < b: m = m | (p["F"]["lab"] == lab_id)
+    for ds, above, lab_id in p["G"]["marks"]:
+        if (a <= ds < b) if owner is None else (_dot_owner(p, ds, above) == owner): m = m | (p["F"]["lab"] == lab_id)
     return m
 
 
@@ -158,7 +189,7 @@ def likeness(im, ref) -> float:
     return max(float(np.minimum(sh, ref).sum() / max(1e-6, np.maximum(sh, ref).sum())) for sh in (np.roll(im, dx, 1) for dx in (-4, -2, 0, 2, 4)))
 
 
-def key(p, k): return (_base(p["units"][k]), form(k, p["n"]))
+def key(p, k): return (_base(p["units"][k]), p["forms"][k])
 
 
 def intervals(p, cuts=None):
@@ -166,12 +197,16 @@ def intervals(p, cuts=None):
 
 
 def _facts(p, k, a, b):
-    G = p["G"]; c = _base(p["units"][k]); last = k == p["n"] - 1
+    G = p["G"]; c = _base(p["units"][k]); last = p["forms"][k] in ("fin", "iso"); tol = G["stroke"]
     # on the strip a tall stroke that hangs from the trunk occupies ONE position, however wide it is on the page
     want_asc = c in ASC or c.startswith("ل"); asc_ok = G["asc"][a:b].sum() >= 1 if want_asc else G["tall"][a:b].sum() < 2
     want_desc = c in DESC_ANY or (last and c in DESC_END); desc_ok = G["desc"][a:b].sum() >= 1 if want_desc else G["deep"][a:b].sum() < 2
-    da = sum(1 for x, ab in G["dots"] if a <= x < b and ab); db = sum(1 for x, ab in G["dots"] if a <= x < b and not ab)
+    # A dot is placed on the path by the nearest trunk point, which near a cut can be the neighbour's (the dot of
+    # a medial jim sits under the letter before it). Within a stroke of the boundary it counts for the letter
+    # that wants it and not against the one that does not.
     wa = DOTS_ABOVE.get(c, 0); wb = DOTS_BELOW.get(c, 0)
+    cnt = lambda above, want: sum(1 for x, ab in G["dots"] if ab == above and ((a - tol <= x < b + tol) if want else (a + tol <= x < b - tol)))
+    da = cnt(True, wa > 0); db = cnt(False, wb > 0 or c == "ي")
     if c == "ي" and last: wb = db if db in (0, 2) else 2
     near = lambda got, want: got == want or (want >= 2 and 1 <= got <= want)
     return asc_ok, desc_ok, near(da, wa), near(db, wb), (want_asc or want_desc or wa > 0 or wb > 0)
@@ -246,7 +281,10 @@ def accepted(p: dict) -> bool:
         rel = p.get("reliable", {}).get(key(p, k), (True,) * 4)
         if any(r and not ok for r, ok in zip(rel, (asc_ok, desc_ok, da_ok, db_ok))): return False
         positive = positive or pos
-    return positive and all(s is not None and s >= AGREE for s in p.get("scores", [None]))
+    # One letter-form too rare for the atlas (a medial `ئ`) does not veto a piece whose other letters all agree:
+    # its stretch is what the neighbours leave, and its facts held.
+    sc = p.get("scores", [None]); unknown = sum(s is None for s in sc)
+    return positive and unknown <= 1 and unknown < len(sc) - 1 and all(s >= AGREE for s in sc if s is not None)
 
 
 def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
@@ -261,8 +299,8 @@ def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
         # Outlines run through pixel centres, so two letters traced apart leave a one-pixel seam of missing ink
         # across the stroke where they meet (1.1% of a page's ink). Each letter therefore takes one pixel of its
         # neighbour's ink at the seam — inside the piece's ink only, so the outer outline does not move.
-        sub = (cv2.dilate(_mask(p, a, b).astype(np.uint8), np.ones((3, 3), np.uint8)) & (p["ink_s"] >= 0)).astype(np.uint8)
-        sub |= _mask(p, a, b).astype(np.uint8)
+        sub = (cv2.dilate(_mask(p, a, b, owner=k).astype(np.uint8), np.ones((3, 3), np.uint8)) & (p["ink_s"] >= 0)).astype(np.uint8)
+        sub |= _mask(p, a, b, owner=k).astype(np.uint8)
         cs, hier = cv2.findContours(sub, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
         keep = [(c.reshape(-1, 2) + [x_off, y_off], int(hier[0][i][3] >= 0)) for i, c in enumerate(cs)]
         keep = [(pth, h) for pth, h in ((cv2.approxPolyDP(pth.astype(np.int32), 0.0, True).reshape(-1, 2), h) for pth, h in keep) if len(pth) >= 3]
