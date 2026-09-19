@@ -201,7 +201,8 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # every piece's letters to its ink, then learn what each letter-form
     # shows in this document and keep only the plans the document agrees
     # with. The geometry is computed twice; the plans are small.
-    from ..geometry.letters import plan as letter_plan, learn as learn_letters, accepted as letters_accepted, letters_of, line_geometry
+    from ..geometry.letters import letters_of, line_geometry
+    from ..geometry.penpath import plan as letter_plan, solve as solve_letters, accepted as letters_accepted
     import cv2
     from ..geometry.layout import split_word
     from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
@@ -236,10 +237,10 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                         p = letter_plan(units, pc["blobs"], lg) if len(units) >= 2 else None
                         if p:
                             all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
-        majority = learn_letters(all_plans)
+        majority = solve_letters(all_plans)
         kept = {}
         for (pn, li, wi, k), p in letter_plans.items():
-            if letters_accepted(p, majority):
+            if letters_accepted(p):
                 kept.setdefault((pn, li, wi), {})[k] = p
         report["letters"] = dict(planned=len(letter_plans), accepted=sum(len(v) for v in kept.values()), letter_forms=len(majority))
         letter_plans = kept

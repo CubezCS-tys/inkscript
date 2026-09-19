@@ -65,7 +65,11 @@ def piece_mask(blobs: list[dict]):
     m = np.zeros((y1 - y0, x1 - x0), np.uint8)
     for b in blobs:
         for p, hole in zip(b["paths"], b["holes"]):
-            cv2.fillPoly(m, [(np.asarray(p) - [x0, y0]).astype(np.int32)], 0 if hole else 1)
+            pts = (np.asarray(p) - [x0, y0]).astype(np.int32); cv2.fillPoly(m, [pts], 0 if hole else 1)
+            if hole:
+                # a hole's outline runs through the ink pixels around it; filling the polygon erased them, and
+                # every hole of a cut letter came out a pixel wider (0.9% of a page's ink)
+                cv2.polylines(m, [pts], True, 1)
     return m.astype(bool), (x0, y0)
 
 

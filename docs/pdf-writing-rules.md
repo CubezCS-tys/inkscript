@@ -173,6 +173,52 @@ rule records the experiment, not a theory.
 
 ## Letters (selection inside a connected run)
 
+*Since 2026-09-20 the build cuts letters along the pen path
+(`geometry/penpath.py`, experiment 09); the column method below it is
+kept as `geometry/letters.py` and supplies the shared pieces (letter
+signatures, line geometry, piece masks).*
+
+- **A cut is a point on the pen path, not a column of the page.** The
+  piece's ink is thinned to its centre line; the trunk runs from where
+  the first letter meets the baseline to the piece's left end, and every
+  other bit of ink — an arm, an ascender, the far side of a loop, a tail
+  sweeping back — belongs to the trunk point it hangs from. A kaf keeps
+  the arm it throws over its neighbour, which no vertical cut can do.
+  (The start is the rightmost point *near the baseline*: started at the
+  rightmost ink, the path ran down a kaf's arm and cuts fell along it.)
+- **Two witnesses choose the cuts.** The hard facts — a letter's dots,
+  tall stroke and bowl lie in its own stretch of the path — and the
+  document's own alphabet: the mean picture of each letter-form, built
+  from the cut letters, the cuts re-chosen to match it, rebuilt, four
+  rounds, damped (a full swap flip-flopped on a fine typeface). The
+  pictures alone let a large letter swallow a small neighbour; the facts
+  alone leave featureless runs undecided. Pictures are compared
+  softened (2 px): as hard masks a fine typeface's strokes never
+  coincide and its atlas came out empty.
+- **On the strip a hanging tall stroke occupies one position**, however
+  wide it is on the page, so "has an ascender" is one position, not two
+  columns (the two-column rule rejected 61% of pieces). A fact is
+  enforced for a letter-form only if 85% of its occurrences show it.
+- **A letter glyph = the ink hanging from its stretch + a cell that is
+  its stretch of the baseline.** Origin and advance come from the cell;
+  the ink may reach outside it, as a typeset kaf's arm overhangs the
+  next glyph's box. Chrome highlights the cell.
+- **Seams and holes.** Outlines run through pixel centres, so letters
+  traced apart left a one-pixel seam of missing ink (1.1% of a page's
+  ink): each letter takes one pixel of its neighbour at the seam, inside
+  the piece's ink only. Rebuilding a piece's mask from its outlines
+  erased the ink around holes (every `ه` a pixel wider): the hole's
+  outline is drawn back. Cut letters are traced without simplification.
+  Fixture, cut against uncut at 300 dpi: 1.2% of ink pixels differ in
+  edge shading (>64 levels), 0.03% by more than half tone.
+- Fixture: 779 of 1,122 pieces of two or more letters cut (column
+  method: 654), 2,132 letter glyphs; 1,246/1,246 words, 113/113 lines.
+  By eye about 85 of 90 random accepted pieces are cut right
+  (`experiments/09_pen_path/diagnose.py`). Weak still: the fine slanted
+  face of `0690-012-001,012-028`.
+
+### The column method (before the pen path)
+
 - **A piece's letters are aligned to its ink, not detected.** The letters
   are known (the OCR's text, split where the script cannot join), and
   each has signatures visible in any typeface: dots above or below and

@@ -194,14 +194,16 @@ def _letters(w, pcs):
     if not plans:
         return pcs
     from .letters import letter_blobs
+    from .penpath import letter_blobs as pen_letter_blobs
     out = []
     for k, pc in enumerate(pcs):
         p = plans.get(k)
-        lbs = letter_blobs(p, pc["blobs"]) if p else []
+        lbs = (pen_letter_blobs if p.get("kind") == "pen" else letter_blobs)(p, pc["blobs"]) if p else []
         if not p or len(lbs) != len(p["units"]):
             out.append(pc); continue
         for j, (u, bl) in enumerate(zip(p["units"], lbs)):
-            out.append(dict(pc, text=u, blobs=bl, x0=min(b["x"] for b in bl), x1=max(b["x"] + b["w"] for b in bl),
+            cell = bl[0].get("cell")                                  # pen-path letters: the selection box is the letter's stretch of the baseline
+            out.append(dict(pc, text=u, blobs=bl, x0=cell[0] if cell else min(b["x"] for b in bl), x1=cell[1] if cell else max(b["x"] + b["w"] for b in bl), cell=cell,
                             first=pc.get("first", k == 0) and j == 0, split=True, letter=True, shapes=None))
     return out
 

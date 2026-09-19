@@ -209,13 +209,17 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
             code = k + 2
             gx0 = min(p[:, 0].min() for b in w["blobs"] for p in b["paths"]); gx1 = max(p[:, 0].max() for b in w["blobs"] for p in b["paths"])
             gy0 = min(p[:, 1].min() for b in w["blobs"] for p in b["paths"]); gy1 = max(p[:, 1].max() for b in w["blobs"] for p in b["paths"])
+            if w.get("cell"):
+                # A pen-path letter: origin and advance are its stretch of the baseline; its ink may reach outside
+                # (a kaf's arm over the next letter), as a typeset glyph's does.
+                gx0, gx1 = w["cell"]
             adv = (gx1 - gx0) * u
             # Inside a word, a piece's advance runs up to the next piece, so
             # no pen adjustment is needed between them: pdfium turns a kerning
             # adjustment after a narrow glyph into a generated space, which
             # copied `الحكم` out as `ا لحكم` and `362` as `3 6 2`.
             if k + 1 < len(ws) and ws[k + 1]["_wid"] == w["_wid"]:
-                nxt = min(p[:, 0].min() for b in ws[k + 1]["blobs"] for p in b["paths"])
+                nxt = ws[k + 1]["cell"][0] if ws[k + 1].get("cell") else min(p[:, 0].min() for b in ws[k + 1]["blobs"] for p in b["paths"])
                 adv = max(adv, (nxt - gx0) * u)
             cmds = []
             for b in w["blobs"]:
