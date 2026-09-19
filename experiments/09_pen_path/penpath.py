@@ -51,7 +51,13 @@ def unroll(F, line, y_off):
     main = F["main"]; sk = thin(main)
     ys, xs = np.where(sk)
     if len(xs) < 6: return None
-    right = (int(ys[np.argmax(xs)]), int(xs.max())); left = (int(ys[np.argmin(xs)]), int(xs.min()))
+    # The pen path starts where the first letter's body meets the baseline, not at the piece's rightmost ink: in a
+    # typeface whose kaf throws its arm out to the right, the arm's tip became the start, the path ran down the arm,
+    # and cuts were placed along it. An arm, like an ascender, must hang from the trunk.
+    base_row = line["baseline"] - y_off; near = np.abs(ys - base_row) <= 0.35 * line["rise"]
+    right_zone = near                                                 # however far an arm reaches beyond it
+    i = np.where(right_zone)[0][np.argmax(xs[right_zone])] if right_zone.any() else int(np.argmax(xs))
+    right = (int(ys[i]), int(xs[i])); left = (int(ys[np.argmin(xs)]), int(xs.min()))
     _, prev, _ = bfs(sk, [right])
     if left not in prev: return None
     trunk = []; n = left

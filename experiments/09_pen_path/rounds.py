@@ -101,12 +101,15 @@ def best_cuts(g, ref):
 
 
 def build_atlas(got, ref=None):
-    ex = defaultdict(list)
+    ex = defaultdict(list); every = defaultdict(list)
     for g in got:
         for k, (a, b) in enumerate(intervals(g, g["cuts"])):
             im = letter_img(g, a, b)
             if im is None: continue
+            every[key(g, k)].append(im)
             if ref is None or key(g, k) not in ref or score(im, ref[key(g, k)]) >= 0.4: ex[key(g, k)].append(im)
+    for kk, v in every.items():                                       # a form none of whose examples agree yet keeps all of them: it must not drop out
+        if len(ex[kk]) < 5: ex[kk] = v
     return {kk: np.mean(np.stack(v), 0) for kk, v in ex.items() if len(v) >= 5}, {kk: len(v) for kk, v in ex.items()}
 
 
@@ -146,7 +149,9 @@ def main(azure, scan, pages, out, rounds=4):
         for g in got:
             c = best_cuts(g, ref)
             if c is not None and c != list(g["cuts"]): g["cuts"] = c; changed += 1
-        ref, counts = build_atlas(got, ref); print(f"round {r}: {changed} pieces re-cut; " + judge(got, ref))
+        new, counts = build_atlas(got, ref)
+        ref = {kk: 0.5 * ref[kk] + 0.5 * v if kk in ref else v for kk, v in new.items()}   # damped: a full swap made a fine typeface flip between two states
+        print(f"round {r}: {changed} pieces re-cut; " + judge(got, ref))
         if changed == 0: break
     atlas_sheet(ref, counts, f"{out}/atlas_end.png"); piece_sheet(watch, f"{out}/worst60_after.png"); piece_sheet(mid, f"{out}/random60_after.png")
 
