@@ -91,7 +91,7 @@ def picture(F, ink_s, cuts, G, n, up=5):
     return cv2.resize(im, None, fx=up, fy=up, interpolation=cv2.INTER_NEAREST)
 
 
-def main(azure, scan, pages, out, want=56, seed=5):
+def collect(azure, scan, pages):
     words, _, dims = load_azure(Path(azure)); j = json.load(open(azure)); ar = j.get("analyzeResult", j); az = {p["pageNumber"]: p for p in ar["pages"]}
     doc = fitz.open(scan); got = []; tried = 0
     for pn in pages:
@@ -115,7 +115,12 @@ def main(azure, scan, pages, out, want=56, seed=5):
                     G, ink_s, sk, trunk = r; cuts = align(u, G)
                     if cuts is None: continue
                     col = L.plan(u, pc["blobs"], lg)
-                    got.append(dict(text=t, n=len(u), F=F, G=G, ink_s=ink_s, cuts=cuts, column=col is not None))
+                    got.append(dict(text=t, units=u, n=len(u), F=F, G=G, ink_s=ink_s, cuts=cuts, column=col is not None, line=lg, off=off, page=pn))
+    return got, tried
+
+
+def main(azure, scan, pages, out, want=56, seed=5):
+    got, tried = collect(azure, scan, pages)
     print(f"pieces of 2+ letters: {tried}; cut along the pen path: {len(got)}; of those the column method also cut: {sum(g['column'] for g in got)}")
     random.seed(seed); hard = [g for g in got if not g["column"]]; easy = [g for g in got if g["column"]]
     sample = random.sample(hard, min(want // 2, len(hard))) + random.sample(easy, min(want - min(want // 2, len(hard)), len(easy)))
