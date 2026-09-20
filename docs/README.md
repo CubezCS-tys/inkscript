@@ -14,6 +14,7 @@ Start with [`../CLAUDE.md`](../CLAUDE.md). Each fact lives in one place:
 | Every rule for writing the text layer, with the measurement behind it | [pdf-writing-rules.md](pdf-writing-rules.md) |
 | A book's letters as an installable font; restoration | [typeface.md](typeface.md) |
 | Data locations, running sets, memory, the watchdog | [operations.md](operations.md) |
+| Taking the project to a server: what git holds, what must be copied, sizing | [moving-to-a-server.md](moving-to-a-server.md) |
 | What a word means here | [glossary.md](glossary.md) |
 | The first corpus-scale night and what it taught | [night-report-2026-09-18.md](night-report-2026-09-18.md) |
 | Experiments: question → result | [`../experiments/README.md`](../experiments/README.md) |

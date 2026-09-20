@@ -1,6 +1,6 @@
 #!/bin/bash
 # Rebuild the storyboard from this machine's outputs (paths are the owner's; see docs/operations.md).
-cd "$(dirname "$(readlink -f "$0")")/../.."; O=~/Desktop/OCR_gem_json/output; X=experiments
+cd "$(dirname "$(readlink -f "$0")")/../.."; O=${INKSCRIPT_DATA:-$HOME/Desktop/OCR_gem_json/output}; X=experiments
 .venv/bin/python docs/storyboard/build.py --native-dir $X/09_pen_path/out/build \
   --azure-pdf tests/fixtures/0582-004-009-012/azure/0582-004-009-012/0582-004-009-012.pdf \
   --review $O/s3_sample/review/0450-000-022-001.review.json --review-pdf $O/s3_sample/azure/0450-000-022-001/0450-000-022-001.pdf \

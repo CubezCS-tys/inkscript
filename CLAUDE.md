@@ -14,7 +14,7 @@ version needs no image. Why this exists, in the owner's words:
 3. [docs/roadmap.md](docs/roadmap.md) — the milestones the owner wants next, in order.
 4. [docs/pipeline.md](docs/pipeline.md) → [docs/letters.md](docs/letters.md) → [docs/pdf-writing-rules.md](docs/pdf-writing-rules.md) — how it works; every rule with the measurement behind it.
 5. [docs/decisions.md](docs/decisions.md) — why things are the way they are. Read before "fixing" something that looks odd.
-6. [docs/operations.md](docs/operations.md) — running sets on this machine: data locations, memory, the watchdog, resuming.
+6. [docs/operations.md](docs/operations.md) — running sets on this machine: data locations, memory, the watchdog, resuming; [docs/moving-to-a-server.md](docs/moving-to-a-server.md) — what git does not hold and how to take it along.
 7. [docs/glossary.md](docs/glossary.md) — piece, run, pen path, atlas, cell, facts…
 
 The full map of the docs is [docs/README.md](docs/README.md); experiments are
