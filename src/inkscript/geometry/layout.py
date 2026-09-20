@@ -228,33 +228,34 @@ def _split_word(w, lh: float, text: str, whole: list):
     # stays one glyph, so it consumes n ink pieces.
     arabic = [bool(ARABIC_LETTER.match(t[0])) for t in tp]
     need = [1 if a else len(t) for t, a in zip(tp, arabic)]
-    if len(tp) >= 2 and all(arabic) and 2 <= len(ip) < len(tp) and len(tp) - len(ip) <= 2:
-        # Fewer blobs than runs: two runs touch in the ink (`ر` against `بعة`). Which ones is decided by widths —
-        # the runs are grouped into as many consecutive groups as there are blobs, each group as wide as its
-        # letters suggest — and a touching group goes on as one piece, whose letters the pen path can still cut.
-        from itertools import combinations
+    if len(tp) >= 2 and len(ip) >= 2 and sum(need) != len(ip) and abs(sum(need) - len(ip)) <= 4:
+        # Blobs and text pieces do not pair off one to one: two runs touch in the ink (`ر` against `بعة`), or a
+        # letter's ink is broken in the scan, or both in one word. The two sequences are aligned by widths —
+        # one piece to one blob, one piece to several blobs (broken ink; a number is always several), several
+        # pieces of one token to one blob (touching) — and the word splits along that alignment. A touching
+        # group goes on as one piece, whose letters the pen path can still cut; only a broken run stays whole.
         from .letters import letters_of, width_class
-        cls = [sum(width_class(u) for u in letters_of(t)) or 1.0 for t in tp]; wid = [max(1.0, g["x1"] - g["x0"]) for g in ip]
-        unit = sum(wid) / sum(cls); best = None
-        for cutset in combinations(range(1, len(tp)), len(ip) - 1):
-            b = [0, *cutset, len(tp)]; cost = sum(abs(np.log(wid[i] / (unit * sum(cls[b[i]:b[i + 1]])))) for i in range(len(ip)))
-            if best is None or cost < best[0]: best = (cost, b)
-        b = best[1]
-        tp, tok = ["".join(tp[b[i]:b[i + 1]]) for i in range(len(ip))], [tok[b[i]] for i in range(len(ip))]
-        arabic = [True] * len(tp); need = [1] * len(tp)
-    elif len(tp) >= 2 and all(arabic) and len(tp) < len(ip) <= len(tp) + 3:
-        # More blobs than runs: a letter's ink is broken in the scan. Consecutive blobs are grouped into the runs,
-        # again by widths; the word then splits as usual and only the broken run stays one glyph.
-        from itertools import combinations
-        from .letters import letters_of, width_class
-        cls = [sum(width_class(u) for u in letters_of(t)) or 1.0 for t in tp]; best = None
-        span = lambda gs: max(1.0, max(g["x1"] for g in gs) - min(g["x0"] for g in gs))
-        unit = span(ip) / sum(cls)
-        for cutset in combinations(range(1, len(ip)), len(tp) - 1):
-            b = [0, *cutset, len(ip)]; cost = sum(abs(np.log(span(ip[b[i]:b[i + 1]]) / (unit * cls[i]))) for i in range(len(tp)))
-            if best is None or cost < best[0]: best = (cost, b)
-        b = best[1]
-        ip = [dict(x0=min(g["x0"] for g in ip[b[i]:b[i + 1]]), x1=max(g["x1"] for g in ip[b[i]:b[i + 1]]), blobs=[bl for g in ip[b[i]:b[i + 1]] for bl in g["blobs"]]) for i in range(len(tp))]
+        cls = [(sum(width_class(u) for u in letters_of(t)) or 1.0) if a else 0.6 * len(t) if t[0].isalnum() else 0.5 for t, a in zip(tp, arabic)]
+        wid = [max(1.0, g["x1"] - g["x0"]) for g in ip]; unit = sum(wid) / sum(cls)
+        span = lambda j0, j1: max(1.0, max(g["x1"] for g in ip[j0:j1]) - min(g["x0"] for g in ip[j0:j1]))
+        T, B = len(tp), len(ip); INF = 1e9; cost = np.full((T + 1, B + 1), INF); back = {}; cost[0][0] = 0
+        for i in range(T):
+            for j in range(B):
+                if cost[i][j] >= INF: continue
+                for da, db in ((1, 1), (1, 2), (1, 3), (1, 4), (2, 1), (3, 1)):
+                    if i + da > T or j + db > B: continue
+                    if da > 1 and (len(set(tok[i:i + da])) > 1 or not all(arabic[i:i + da])): continue
+                    c = cost[i][j] + abs(np.log(span(j, j + db) / (unit * sum(cls[i:i + da])))) + (0.0 if (da, db) == (1, 1) or (not arabic[i] and db == need[i]) else 0.35)
+                    if c < cost[i + da][j + db]: cost[i + da][j + db] = c; back[(i + da, j + db)] = (i, j)
+        if cost[T][B] < INF:
+            path = [(T, B)]
+            while path[-1] != (0, 0): path.append(back[path[-1]])
+            path.reverse(); ntp, ntok, nip = [], [], []
+            for (i0, j0), (i1, j1) in zip(path, path[1:]):
+                ntp.append("".join(tp[i0:i1])); ntok.append(tok[i0]); gs = ip[j0:j1]
+                nip.append(dict(x0=min(g["x0"] for g in gs), x1=max(g["x1"] for g in gs), blobs=[bl for g in gs for bl in g["blobs"]]))
+            tp, tok, ip = ntp, ntok, nip
+            arabic = [bool(ARABIC_LETTER.match(t[0])) for t in tp]; need = [1] * len(tp)
     if len(tp) < 2 or sum(need) != len(ip):
         return whole
     out, i = [], 0

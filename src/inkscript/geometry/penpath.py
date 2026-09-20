@@ -120,7 +120,7 @@ def bridge(mask: np.ndarray, reach: float):
     never drawn, and it is an obvious place for a cut. None if the blobs are further apart than that."""
     n, lab, st, _ = cv2.connectedComponentsWithStats(mask.astype(np.uint8), connectivity=8)
     big = [k for k in range(1, n) if st[k, cv2.CC_STAT_AREA] > 0.25 * st[1:, cv2.CC_STAT_AREA].max()]
-    if len(big) < 2 or len(big) > 4:
+    if len(big) < 2 or len(big) > 6:
         return None
     out = mask.astype(np.uint8).copy(); big.sort(key=lambda k: st[k, cv2.CC_STAT_LEFT])
     for a, b in zip(big, big[1:]):
@@ -142,7 +142,7 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
         return None
     F = analyse(mask, line, off[1]); real = None
     if F is None:
-        joined = bridge(mask, 0.5 * line["rise"])
+        joined = bridge(mask, 1.5 * line["rise"])                   # the text says these blobs are one joined run
         if joined is None:
             return None
         F = analyse(joined, line, off[1]); real = mask
@@ -387,10 +387,16 @@ def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
     if "letters" in p: return p["letters"]                            # finalized
     x_off, y_off = p["off"]; n = p["n"]; S = p["G"]["W"]; trunk = p["trunk"]; out = []
     ys, xs = np.where(p["ink_s"] >= 0); X = lambda s: int(xs.min()) if s <= 0 else int(xs.max()) + 1 if s >= S else int(trunk[s][1])
+    bounds = [0] + list(p["cuts"]) + [S]; bx = [X(s) for s in bounds]
+    if any(b - a < 2 for a, b in zip(bx, bx[1:])):
+        # The path doubles back here (a tail sweeping under its neighbour), so the cut points are not in page
+        # order. The ink still goes by the path; the cells share the piece's width in proportion to the path.
+        bx = [int(round(bx[0] + (bx[-1] - bx[0]) * s / S)) for s in bounds]
+        if any(b - a < 2 for a, b in zip(bx, bx[1:])):
+            return []
+    cell = dict(zip(bounds, bx))
     for k, (a, b) in enumerate(intervals(p)):
-        cx0, cx1 = X(a), X(b)
-        if cx1 - cx0 < 2:
-            return []                                                # the path doubles back here: no honest cell
+        cx0, cx1 = cell[a], cell[b]
         # Outlines run through pixel centres, so two letters traced apart leave a one-pixel seam of missing ink
         # across the stroke where they meet (1.1% of a page's ink). Each letter therefore takes one pixel of its
         # neighbour's ink at the seam — inside the piece's ink only, so the outer outline does not move.
