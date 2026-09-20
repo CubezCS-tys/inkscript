@@ -14,7 +14,8 @@ from penpath import collect, COLS, picture
 from inkscript.geometry.letters import form, _base
 
 C = 72; BASE = 46; RISE = 26                                          # canvas, baseline row, pixels per line rise
-FONT = "/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf"
+from inkscript.config import arabic_font
+FONT = arabic_font()
 
 
 def letter_masks(g):
@@ -45,7 +46,8 @@ def score(img, ref):
 
 
 def label(text, h=C):
-    d = fitz.open(); p = d.new_page(width=C, height=24); p.insert_text((4, 17), text.split()[0], fontfile=FONT, fontname="ar", fontsize=13); p.insert_text((22, 16), " ".join(text.split()[1:]), fontsize=9)
+    d = fitz.open(); p = d.new_page(width=C, height=24); if FONT: p.insert_text((4, 17), text.split()[0], fontfile=FONT, fontname="ar", fontsize=13)
+    p.insert_text((22, 16), " ".join(text.split()[1:]) if FONT else text, fontsize=9)
     pm = p.get_pixmap(dpi=72, colorspace=fitz.csRGB); return np.frombuffer(pm.samples, np.uint8).reshape(pm.h, pm.w, 3)[:, :C].copy()
 
 

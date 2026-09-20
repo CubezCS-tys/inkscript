@@ -1,6 +1,8 @@
 #!/bin/bash
-# First-time setup on a fresh Ubuntu/Debian server, run from the cloned repo:  bash ops/setup_server.sh
+# First-time setup on a fresh Ubuntu/Debian server WITH root, run from the cloned repo:  bash ops/setup_server.sh
+# No root? Use ops/setup_nosudo.sh instead — nothing here actually needs a system package.
 set -e
+if ! sudo -n true 2>/dev/null; then echo "no sudo — use: bash ops/setup_nosudo.sh"; exit 1; fi
 sudo apt-get update && sudo apt-get install -y python3-venv python3-pip rsync awscli libgl1 libglib2.0-0 fonts-noto-core
 python3 -m venv .venv && .venv/bin/pip install -U pip && .venv/bin/pip install -e ".[dev]" fonttools
 [ -f .env ] || cp .env.example .env

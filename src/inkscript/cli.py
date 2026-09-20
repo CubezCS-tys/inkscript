@@ -154,6 +154,13 @@ def cmd_alphabet(a) -> int:
     return 0
 
 
+def _aws() -> str:
+    """The aws command: the one in this venv first (pip install awscli needs no root), then PATH."""
+    import shutil, sys
+    local = Path(sys.executable).with_name("aws")
+    return str(local) if local.exists() else (shutil.which("aws") or "aws")
+
+
 def cmd_fetch(a) -> int:
     """Pull <id>/<id>.pdf + .json from the corpus bucket into --out/<id>/ (the --azure-dir layout)."""
     import subprocess
@@ -166,7 +173,7 @@ def cmd_fetch(a) -> int:
         d = out / i; d.mkdir(exist_ok=True); got = []
         for ext in ("pdf", "json"):
             if (d / f"{i}.{ext}").exists(): got.append(ext); continue
-            r = subprocess.run(["aws", "s3", "cp", f"s3://{a.bucket}/{i}/{i}.{ext}", str(d / f"{i}.{ext}"), "--quiet"], capture_output=True, text=True)
+            r = subprocess.run([_aws(), "s3", "cp", f"s3://{a.bucket}/{i}/{i}.{ext}", str(d / f"{i}.{ext}"), "--quiet"], capture_output=True, text=True)
             if r.returncode == 0: got.append(ext)
         return i, got
     with ThreadPoolExecutor(a.workers) as ex:

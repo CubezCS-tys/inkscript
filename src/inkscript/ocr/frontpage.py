@@ -9,7 +9,6 @@ from ..text import ARABIC, RTL, MARKS, norm
 from .azure import load_azure
 from .align import page1_text
 
-FONT = "/usr/share/fonts/truetype/noto/NotoNaskhArabic-Regular.ttf"
 
 def for_word(s: str) -> str:
     """make_searchable_pdf.for_text_layer, but script-aware.

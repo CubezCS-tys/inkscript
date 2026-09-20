@@ -58,6 +58,13 @@ watchdog (it stops the run when less than 2.5 GB is available). A script that
 opens many PDFs with pypdfium2 must close each one (`summary.py` once took
 the machine's memory by leaving 227 open).
 
+## Another machine
+
+`docs/moving-to-a-server.md`: what git does not hold (4.6 GB of inputs, the
+keys), how to copy it (`ops/pack_data.sh`), setup with or without root
+(`ops/setup_nosudo.sh`, `ops/setup_server.sh`), and how to size the machine.
+Point `INKSCRIPT_DATA` at the copied data; `config.DATA_ROOT` reads it.
+
 ## Long jobs from an agent session
 
 - Start them detached (`setsid nohup … &`); background tasks of the session

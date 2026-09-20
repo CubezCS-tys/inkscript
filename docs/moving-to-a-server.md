@@ -25,7 +25,7 @@ experiments and are not needed.
 
 ```
 git clone git@github.com:CubezCS-tys/inkscript.git && cd inkscript
-bash ops/setup_server.sh            # python venv, dependencies, awscli, an Arabic font
+bash ops/setup_nosudo.sh            # no root needed (ops/setup_server.sh is the apt version, if you have sudo)
 export INKSCRIPT_DATA=~/inkscript-data
 .venv/bin/pytest -q                 # ~3 min; proves the install
 experiments/09_pen_path/run_set.sh $INKSCRIPT_DATA/s3_night/azure $INKSCRIPT_DATA/s3_night/frontpage - experiments/09_pen_path/out/journals227 4 &
@@ -39,6 +39,29 @@ cores runs 6–7. Disk: 4.6 GB inputs + ~17 MB of output per document built
 corpus (~100,000 documents) would need outputs pushed to a bucket as they are
 made. Use `tmux` or `setsid nohup` so runs survive the SSH session; runs are
 resumable either way ([operations.md](operations.md)).
+
+## No root on the server
+
+Nothing here needs a system package, so a plain user account is enough
+(`ops/setup_nosudo.sh`):
+
+- `pymupdf`, `opencv-python-headless` and `pypdfium2` ship their own
+  libraries in the wheels; the only system library they use is `libz`, which
+  every Linux already has (checked with `ldd`, 2026-09-20). No `libGL`, no
+  `libglib`.
+- `aws` is installed by pip into the venv, and `inkscript fetch` looks for it
+  beside its own interpreter before falling back to `PATH`.
+- A system Arabic font is optional: `config.arabic_font()` searches, and only
+  some experiment scripts label pictures with it — nothing the PDFs need
+  depends on it. Set `INKSCRIPT_ARABIC_FONT` to a `.ttf` of your own, or drop
+  one in `~/.local/share/fonts/`, if you want those labels.
+- LibreOffice is only for `experiments/11_typeface/specimen.py` (typesetting a
+  font specimen). Skip it.
+- If the server's Python is older than 3.10, or `python3 -m venv` fails
+  because `ensurepip` is missing, the script prints the `uv` route: a single
+  binary that installs into `~/.local/bin` and brings its own Python.
+- `ops/pack_data.sh` needs `rsync` at both ends; without it on the server it
+  falls back to one `tar` stream over ssh (which cannot resume).
 
 **Paths.** `docs/operations.md` lists the laptop's paths; on the server the
 same folders sit under `$INKSCRIPT_DATA`. `docs/storyboard/rebuild.sh` and
