@@ -59,6 +59,22 @@ from.
    (OpenType via fontTools) once letter-level pieces exist; until then the
    SVG specimen is the honest form.
 
+## Milestones the user wants to come back to (2026-09-20)
+
+1. **Make the text trustworthy.** The PDFs carry Azure's reading; "words
+   intact" means we preserved it, not that it is right. A second opinion
+   from the book's own letters: not reading blind (experiment 10: 41% of
+   pieces, the cut-before-read problem) but CHECKING — cut by the known
+   word, then ask whether the ink fits a look-alike reading better (dot
+   counts, small marks, `ة`/`ه`). Feed the review-and-correct loop.
+2. **A measure of highlight placement**, from a hand-checked sample: 96%
+   of words have a box per letter, but how many boxes sit right is not
+   measured.
+3. **The typeface export** (experiment 11), and a sharp display atlas.
+4. Known gaps: vowelled words never cut; underlined words; fine slanted
+   faces; tables; Firefox word order; corrections shorter than the glyph
+   count.
+
 ## Todo (2026-09-18, morning)
 
 Parked by the user to carry on with the roadmap; pick up in this order.
