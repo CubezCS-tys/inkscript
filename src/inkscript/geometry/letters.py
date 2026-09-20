@@ -51,6 +51,8 @@ def _base(u: str) -> str:
 
 def width_class(u: str) -> float:
     c = _base(u)
+    if c in "اأإآ":
+        return 0.5                                       # a bare stroke: counted as wide as a `ب`, a light face's alef drew in its neighbours' blobs
     return 2.6 if c in WIDE else 1.6 if c in MEDIUM else 1.0
 
 

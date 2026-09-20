@@ -60,14 +60,22 @@ def _bfs(sk, sources):
     return prev, root
 
 
-def unroll(F: dict, line: dict, y_off: int):
+def unroll(F: dict, line: dict, y_off: int, start: str = "baseline"):
     """The strip: per-ink-pixel trunk position (0 = the left end of the pen path) and the strip's features."""
     main = F["main"]; sk = thin(main); ys, xs = np.where(sk)
     if len(xs) < 6:
         return None
     # The path starts where the first letter's body meets the baseline, not at the rightmost ink: a kaf that
     # throws its arm out to the right made the arm's tip the start, and cuts were placed along the arm.
-    near = np.abs(ys - (line["baseline"] - y_off)) <= 0.35 * line["rise"]
+    # ... and not BELOW the baseline either: in a face that prints `في` with the ya's tail swept back to the right
+    # under the fa, the tail's tip is the rightmost ink, and the two letters came out swapped in every `في` of the
+    # document (395 of them, agreeing with each other perfectly).
+    dyb = ys - (line["baseline"] - y_off); near = (dyb >= -0.35 * line["rise"]) & (dyb <= 0.15 * line["rise"])
+    if not near.any(): near = np.abs(dyb) <= 0.35 * line["rise"]
+    if start == "upper":                                              # see `plan`: the first letter's body, when a later letter's tail owns the baseline's right end
+        up = dyb <= -0.2 * line["rise"]
+        if not up.any(): return None
+        near = up
     i = np.where(near)[0][np.argmax(xs[near])] if near.any() else int(np.argmax(xs))
     right = (int(ys[i]), int(xs[i])); left = (int(ys[np.argmin(xs)]), int(xs.min()))
     prev, _ = _bfs(sk, [right])
@@ -89,12 +97,14 @@ def unroll(F: dict, line: dict, y_off: int):
     G = dict(W=S, stroke=stroke, has=has, asc=has & (up >= 0.6 * rise), tall=has & (up >= 0.8 * rise),
              desc=has & (down >= 0.5 * drop) & (down > stroke), deep=has & (down >= 0.75 * drop) & (down > 2 * stroke),
              thin=has & (top >= b0 - 1) & (bot <= b1 + 1), dots=[])
-    sy, sx = np.array([p[0] for p in trunk]), np.array([p[1] for p in trunk])
+    # a mark goes to the nearest point of the whole centre line, branches included, and takes that point's place on
+    # the path: measured to the trunk alone, the two dots under a ya's swept-back tail went to the letter above it
+    sy, sx = ys, xs; s_at_pix = s_of[ys, xs]
     # Every loose bit of ink goes to a letter (`marks`), but only dot-shaped ones are evidence (`dots`): the
     # fragments of an underline under `لمعجم` were counted as three dots below and vetoed a correct cut.
     G["marks"] = []
     for (cx, above), k in zip(F["dots"], F["dot_labels"]):
-        yy, xx = np.where(F["lab"] == k); s_at = int(np.argmin((sx - cx) ** 2 + 0.25 * (sy - yy.mean()) ** 2)); G["marks"].append((s_at, above, k))
+        yy, xx = np.where(F["lab"] == k); s_at = int(s_at_pix[int(np.argmin((sx - cx) ** 2 + 0.25 * (sy - yy.mean()) ** 2))]); G["marks"].append((s_at, above, k))
         w, h = xx.max() - xx.min() + 1, yy.max() - yy.min() + 1
         if not (w >= 3 * h and w > 1.5 * stroke): G["dots"].append((s_at, above))
     return G, ink_s, trunk
@@ -151,7 +161,29 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
         F = analyse(joined, line, off[1]); real = mask
         if F is None:
             return None
-    r = unroll(F, line, off[1])
+    forms = forms or [form(k, len(units)) for k in range(len(units))]
+    p = _on_path(units, forms, F, line, off, real, "baseline")
+    if p is None or _facts_fail(p):
+        # The path starts at the rightmost ink on the baseline, which is the first letter's — unless a later
+        # letter's tail sweeps back along the baseline past it: a face that prints `في` with the ya's flat tail
+        # running right under the fa gave every `في` (395 in one document) its two letters swapped, each copy
+        # confirming the others in the atlas. The facts can tell: the fa's dot was in the ya. So when a fact
+        # fails, the path is tried again from the first letter's body, and the start the facts prefer is kept.
+        q = _on_path(units, forms, F, line, off, real, "upper")
+        if q is not None and (p is None or _facts_sum(q) > _facts_sum(p)): p = q
+    return p
+
+
+def _facts_fail(p) -> bool:
+    return any(not all(_facts(p, k, a, b)[:4]) for k, (a, b) in enumerate(intervals(p)))
+
+
+def _facts_sum(p) -> float:
+    return sum(facts(p, k, a, b) for k, (a, b) in enumerate(intervals(p)))
+
+
+def _on_path(units, forms, F, line, off, real, start):
+    r = unroll(F, line, off[1], start)
     if r is None:
         return None
     G, ink_s, trunk = r; S = G["W"]; stroke = G["stroke"]
@@ -174,7 +206,7 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
             if j - x >= 4 * stroke: conn[x + stroke:j - stroke] = True   # a kashida is nobody's shape
             x = j
         else: x += 1
-    p = dict(kind="pen", units=units, n=len(units), forms=forms or [form(k, len(units)) for k in range(len(units))], F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
+    p = dict(kind="pen", units=units, n=len(units), forms=forms, F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
              real=real, sc=RISE / line["rise"], base=line["baseline"] - off[1], cache={}, cuts=None)
     p["ink_s"] = p["ink_s"].astype(np.int16)
     p["cuts"] = best_cuts(p, {})
@@ -273,6 +305,10 @@ def facts(p, k, a, b) -> float:
 def _facts_score(p, k, a, b) -> float:
     asc_ok, desc_ok, da_ok, db_ok, _ = _facts(p, k, a, b)
     unit = p["G"]["W"] / sum(width_class(u) for u in p["units"]); w = -0.8 * abs(np.log(max(b - a, 1) / (width_class(p["units"][k]) * unit))) ** 2
+    # No letter is a bare connecting stroke. Without this the atlas of a light typeface settled on a false
+    # `ف`-initial — 395 printings, every one just the stroke after the head, all agreeing with each other at 0.84:
+    # the self-confirming error the atlas is prone to, which only a fact from outside it can break.
+    if p["G"]["thin"][a:b].all(): w -= 8.0
     return w + (1.5 if asc_ok else -6.0) + (1.0 if desc_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
 
 

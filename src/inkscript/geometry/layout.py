@@ -269,7 +269,8 @@ def _split_word(w, lh: float, text: str, whole: list):
         if a:
             letters = max(1, len(TRANSPARENT.sub("", t)))
             per = (x1 - x0) / lh / letters
-            if per < 0.12 or per > 1.4:
+            narrow = all(c in "اأإآ" for c in TRANSPARENT.sub("", t))     # an alef of a light face is a twentieth of the line high wide
+            if per < (0.03 if narrow else 0.12) or per > 1.4:
                 return whole
         out.append(dict(w, text=t, blobs=[b for g in gs for b in g["blobs"]], x0=x0, x1=x1, first=(k == 0), split=True, order=k, tok=ti))
     return out

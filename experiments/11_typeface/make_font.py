@@ -21,6 +21,7 @@ from inkscript.ocr.azure import load_azure
 from inkscript.geometry.trace import page_blobs
 from inkscript.geometry.layout import layout_page, split_word
 
+MAX_PLANS = 3500
 ALEF_OF_EM = 0.62                                                     # an alef stands about this much of the em above the baseline
 LIGS = {"لا": "lamalef", "لأ": "lamalefhamzaabove", "لإ": "lamalefhamzabelow", "لآ": "lamalefmadda"}
 LIG_SECOND = {"لا": "ا", "لأ": "أ", "لإ": "إ", "لآ": "آ"}; LIG_CODE = {"لا": 0xFEFB, "لأ": 0xFEF7, "لإ": 0xFEF9, "لآ": 0xFEF5}
@@ -36,6 +37,7 @@ def collect(azure, scan):
     for pno in range(doc.page_count):
         pn = pno + 1; pw = [w for w in words if w["page"] == pn]
         if not pw or pn not in dims: continue
+        if len(plans) >= MAX_PLANS: break                              # memory: every plan keeps its masks until the glyphs are chosen
         pix = doc[pno].get_pixmap(dpi=300, colorspace=fitz.csGRAY); gray = np.frombuffer(pix.samples, np.uint8).reshape(pix.h, pix.w)
         _, ink = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU); ink = ink > 0
         W_in, H_in = dims[pn]; blobs = page_blobs(gray); lines, _ = layout_page(pw, [w["text"] for w in pw], az[pn].get("lines", []), blobs, gray.shape[1] / W_in, gray.shape[0] / H_in)
@@ -91,20 +93,35 @@ def split_marks(im):
     return body, im - body
 
 
-def restore(examples, form, band):
+def restore(examples, form, band, wants=(True, True)):
     """The letter as the document prints it at its best: the body is the ink most of its best printings agree on
     (a break in one fills in, a blot in one goes), the marks are the best printing's own, and where the form joins
     a neighbour its connecting stroke ends on the document's usual join band, a hair past the cell edge, so that
     typed letters meet."""
     width = float(np.median([(e["cell"][1] - e["cell"][0]) / e["rise"] for e in examples]))
     ims = [render(e, width) for e in examples]; ref_body, ref_marks = split_marks(ims[0]); acc = np.zeros((CH, CW), np.float32)
+    # A fine typeface's strokes are a few pixels wide: printings a pixel apart barely overlap, and a plain vote
+    # erased whole letters (the `ف` of a light face came out as its connecting stroke alone). Each printing is
+    # thickened by R before the vote and the result thinned by R again, so nearby strokes count as the same stroke.
+    R = 3; k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * R + 1, 2 * R + 1))
     for im in ims:
-        body, _ = split_marks(im); best = (-1, 0)
-        for dy in range(-4, 5):                                        # the cell fixes x; only the height is nudged
-            v = int((np.roll(body, dy, 0) & ref_body).sum())
-            if v > best[0]: best = (v, dy)
-        acc += np.roll(body, best[1], 0)
-    body = (cv2.GaussianBlur(acc / len(ims), (0, 0), 1.2) >= 0.5).astype(np.uint8) if len(ims) >= 4 else ref_body
+        body, _ = split_marks(im); best = (-1, 0, 0)
+        for dy in range(-4, 5):
+            for dx in (-2, 0, 2):
+                v = int((np.roll(np.roll(body, dy, 0), dx, 1) & ref_body).sum())
+                if v > best[0]: best = (v, dy, dx)
+        acc += cv2.dilate(np.roll(np.roll(body, best[1], 0), best[2], 1), k)
+    body = ref_body
+    if len(ims) >= 4:
+        voted = cv2.erode((cv2.GaussianBlur(acc / len(ims), (0, 0), 1.0) >= 0.5).astype(np.uint8), k)
+        if 0.7 * ref_body.sum() <= voted.sum() <= 1.4 * ref_body.sum(): body = voted     # a vote that lost or grew the letter is not trusted
+    # marks the letter does not carry are strays from a neighbour (an isolated alef came with a speck beside it)
+    ys = np.where(ref_marks.any(1))[0]
+    if len(ys):
+        n, lab, st, _ = cv2.connectedComponentsWithStats(ref_marks, connectivity=8)
+        for c in range(1, n):
+            above = st[c, cv2.CC_STAT_TOP] + st[c, cv2.CC_STAT_HEIGHT] / 2 < CBASE
+            if not ((above and wants[0]) or (not above and wants[1])): ref_marks[lab == c] = 0
     xl = int(round(XR - width * HI)); jl, jr = JOINS[form]
     if band:
         t, btm = band; reach = int(0.12 * HI)
@@ -144,16 +161,18 @@ def choose(plans, iso, smooth=True):
     for letter, ex in iso.items():
         ex = [e for e in ex if abs(e["rise"] / body - 1) <= 0.15]
         if len(ex) < 2: continue
-        wid = np.array([max(p[:, 0].max() for p in e["paths"]) - min(p[:, 0].min() for p in e["paths"]) for e in ex]); med = float(np.median(wid))
+        wid = np.array([max(p[:, 0].max() for p in e["paths"]) - min(p[:, 0].min() for p in e["paths"]) for e in ex]); med = float(np.percentile(wid, 30))   # strays are wider, never narrower: a piece read as a lone `ا` can hold a whole word's ink
         for e, w in zip(ex, wid):
             x0 = min(p[:, 0].min() for p in e["paths"]); sb = 0.05 * e["rise"] / ALEF_OF_EM
             pool[(letter, "iso")].append(dict(e, score=-abs(w - med), cell=(x0 - sb, x0 + w + 1 + sb)))
     band = join_band(pool); out = {}
     for kk, ex in pool.items():
         # a printing stretched by a kashida, or cut short, is not the form's usual shape whatever it scores
-        w = np.array([(e["cell"][1] - e["cell"][0]) / e["rise"] for e in ex]); med = float(np.median(w)); usual = [e for e, x in zip(ex, w) if abs(x / med - 1) <= 0.2]
+        w = np.array([(e["cell"][1] - e["cell"][0]) / e["rise"] for e in ex]); med = float(np.percentile(w, 30) if kk[1] == "iso" else np.median(w)); usual = [e for e, x in zip(ex, w) if abs(x / med - 1) <= 0.2]
         ex = sorted(usual if len(usual) >= 3 else ex, key=lambda e: -e["score"])[:TOP if smooth else 1]
-        out[kk] = restore(ex, kk[1], band)
+        l = kk[0][-1] if kk[0] in LIGS else kk[0]; free = kk[0] in "كگ"                # kaf carries its own small mark
+        out[kk] = restore(ex, kk[1], band, (free or P.MARK_ABOVE.get(l, 0) > 0 or kk[0] in LIGS and LIG_SECOND[kk[0]] in "أآ", free or P.MARK_BELOW.get(l, 0) > 0 or l == "ي" or kk[0] in LIGS and LIG_SECOND[kk[0]] == "إ"))
+    print("forms with under 4 usual printings:", sorted(f"{l} {f} ({out[(l, f)]['n']})" for (l, f) in out if out[(l, f)]["n"] < 4))
     print(f"join band (canvas px from the baseline): {band}; forms restored from >= 4 printings: {sum(1 for v in out.values() if v['n'] >= 4)} of {len(out)}")
     return out
 
