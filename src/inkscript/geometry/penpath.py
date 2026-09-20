@@ -211,9 +211,28 @@ def letter_img(p, a, b):
     p["cache"][(a, b)] = im; return im
 
 
+def letter_key(p, a, b):
+    """The cached, pre-shifted form of `letter_img` for comparisons."""
+    c = p.setdefault("scache", {})
+    if (a, b) not in c:
+        im = letter_img(p, a, b); c[(a, b)] = None if im is None else _shifts(im)
+    return c[(a, b)]
+
+
+SHIFTS = (-4, -2, 0, 2, 4)
+
+
+def _shifts(im):
+    """The picture at five horizontal offsets, flattened, with its sum: |A ∩ B| / |A ∪ B| needs only the minimum,
+    since the union is sum(A) + sum(B) - the intersection. (Rolling the image at every comparison was 60% of a build.)"""
+    return np.stack([np.roll(im, dx, 1) for dx in SHIFTS]).reshape(len(SHIFTS), -1).astype(np.float32), float(im.sum())
+
+
 def likeness(im, ref) -> float:
     if im is None: return 0.0
-    return max(float(np.minimum(sh, ref).sum() / max(1e-6, np.maximum(sh, ref).sum())) for sh in (np.roll(im, dx, 1) for dx in (-4, -2, 0, 2, 4)))
+    st, tot = im if isinstance(im, tuple) else _shifts(im)
+    r = ref.reshape(-1).astype(np.float32, copy=False); inter = np.minimum(st, r).sum(1)
+    return float((inter / np.maximum(1e-6, tot + float(r.sum()) - inter)).max())
 
 
 def key(p, k): return (_base(p["units"][k]), p["forms"][k])
@@ -240,6 +259,12 @@ def _facts(p, k, a, b):
 
 
 def facts(p, k, a, b) -> float:
+    c = p.setdefault("fcache", {})
+    if (k, a, b) not in c: c[(k, a, b)] = _facts_score(p, k, a, b)
+    return c[(k, a, b)]
+
+
+def _facts_score(p, k, a, b) -> float:
     asc_ok, desc_ok, da_ok, db_ok, _ = _facts(p, k, a, b)
     unit = p["G"]["W"] / sum(width_class(u) for u in p["units"]); w = -0.8 * abs(np.log(max(b - a, 1) / (width_class(p["units"][k]) * unit))) ** 2
     return w + (1.5 if asc_ok else -6.0) + (1.0 if desc_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
@@ -254,7 +279,7 @@ def best_cuts(p, ref):
             if best[i][ai] == NEG: continue
             for bi in range(ai + 1, m):
                 if (i == n - 1) != (bi == m - 1) or pos[bi] - pos[ai] < 3: continue
-                v = best[i][ai] + facts(p, k, pos[ai], pos[bi]) + ATLAS * (likeness(letter_img(p, pos[ai], pos[bi]), r) if r is not None else 0.3)
+                v = best[i][ai] + facts(p, k, pos[ai], pos[bi]) + ATLAS * (likeness(letter_key(p, pos[ai], pos[bi]), r) if r is not None else 0.3)
                 if v > best[i + 1][bi]: best[i + 1][bi] = v; back[i + 1][bi] = ai
     if best[n][m - 1] == NEG:
         return None
