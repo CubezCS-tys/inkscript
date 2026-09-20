@@ -103,7 +103,8 @@ def restore(examples, form, band, wants=(True, True)):
     # A fine typeface's strokes are a few pixels wide: printings a pixel apart barely overlap, and a plain vote
     # erased whole letters (the `ف` of a light face came out as its connecting stroke alone). Each printing is
     # thickened by R before the vote and the result thinned by R again, so nearby strokes count as the same stroke.
-    R = 3; k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * R + 1, 2 * R + 1))
+    # …but only a fine face needs it: on a heavy one the thickening closes the small counters (the eye of `ع`).
+    R = 3 if (band and band[1] - band[0] < 22) else 0; k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * R + 1, 2 * R + 1))
     for im in ims:
         body, _ = split_marks(im); best = (-1, 0, 0)
         for dy in range(-4, 5):

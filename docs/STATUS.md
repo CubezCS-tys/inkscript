@@ -51,5 +51,6 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   `experiments/11_typeface/out/`.
 - Older deliverables: `~/Desktop/native_pdfs/` (30 documents),
   `~/Desktop/s3_native/` (47 documents) — built before pen-path letters.
-- Storyboard artifact (published 2026-09-18; **stale — its numbers predate letters; do not cite**):
-  https://claude.ai/artifact/MjTHoKev4bJLX6vHo4jdk3 — source `docs/storyboard/`.
+- Storyboard artifact (version 4, published 2026-09-20; private to the owner until shared):
+  https://claude.ai/artifact/MjTHoKev4bJLX6vHo4jdk3 — source `docs/storyboard/`, rebuilt by
+  `docs/storyboard/rebuild.sh`, republished by passing that URL.

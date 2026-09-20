@@ -102,10 +102,16 @@ reason is recorded), **open** (voiced, not yet judged).
 
 - **Animation for the owner's father** ("the liquid thing, then the
   geometry"). *built* — `docs/demo/ink_to_text.html`.
-- **Interactive storyboard as documentation** (owner, 2026-09-18). *built,
-  stale* — `docs/storyboard/`; rebuild after corpus runs, republish to the
-  artifact URL in [STATUS.md](STATUS.md). It predates letters, the atlas and
-  the typeface: all three deserve a panel.
+- **Interactive storyboard as documentation** (owner, 2026-09-18; "a lot more
+  visual so me and others can really understand", 2026-09-20). *built* —
+  `docs/storyboard/` (`build.py` + `letters_data.py` + `template.html`,
+  `rebuild.sh`). Fifteen chapters, every picture from real outputs: the idea,
+  a real page, **follow the pen** (eight-step stepper on seven real words),
+  **the atlas** sharpening round by round, **the swapped في**, how Chrome
+  reads, the rules, **every document as a dot** (two runs), **type live in
+  two books' fonts**, reading blind, what it does not do. Still open: a
+  walk-through of one whole page being built, a restored-edition panel once it
+  exists, and phone-width polish.
 
 ## Scale
 

@@ -2,11 +2,11 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&family=Amiri:wght@400;700&display=swap">
 <style>
 :root{
-  --paper:#EEEBE4; --ink:#17150F; --lapis:#2C4B96; --lapis-soft:#8FA5D8; --sel:#BBD4F5; --sel-strong:#7FA7EA; --muted:#6B675F; --rule:#D3CFC5; --panel:#F6F4EF; --panel2:#E6E2D8; --ok:#2F7A4E; --bad:#A63D2F; --warn:#9A6B15;
+  --paper:#EEEBE4; --ink:#17150F; --lapis:#2C4B96; --lapis-soft:#8FA5D8; --sel:#BBD4F5; --sel-strong:#7FA7EA; --muted:#6B675F; --rule:#D3CFC5; --panel:#F6F4EF; --panel2:#E6E2D8; --ok:#2F7A4E; --bad:#A63D2F; --runA:#B5722A; --runB:#2C4B96; --warn:#9A6B15;
   --serif:"Newsreader",Georgia,"Times New Roman",serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace; --ar:"Amiri","Noto Naskh Arabic","Scheherazade New",serif;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}}
-:root[data-theme="dark"]{--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--runB:#6886D8;--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}}
+:root[data-theme="dark"]{--runB:#6886D8;--paper:#15171A;--ink:#E9E6DE;--lapis:#86A2EA;--lapis-soft:#3C5590;--sel:#2C4B7A;--sel-strong:#4E74C4;--muted:#9A9890;--rule:#2E3237;--panel:#1D2024;--panel2:#262A30;--ok:#6CC08E;--bad:#E08A7C;--warn:#D9A64A}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.5;padding-block:0 4rem;padding-inline:20px}
@@ -147,6 +147,88 @@ table.results td .bar i.other{background:var(--muted)}
 .next ol{padding-left:1.2rem;max-width:62ch}
 .next li{margin:.3rem 0}
 footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+
+/* follow the pen */
+.pen{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem}
+.pen .picker{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.8rem}
+.pen .picker button{font-family:var(--ar);font-size:1.25rem;line-height:1.2;padding:.25rem .8rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer;border-radius:2px}
+.pen .picker button.on{background:var(--sel);border-color:var(--lapis);color:#17150F}
+.pen .picker button:focus-visible,.atlas input:focus-visible,.type textarea:focus-visible{outline:2px solid var(--lapis);outline-offset:2px}
+.pen .note{font-style:italic;color:var(--muted);margin:0 0 .7rem;font-size:1rem;min-height:1.5em}
+.pen .canvaswrap{background:#F3F1EB;border:1px solid var(--rule);display:flex;justify-content:center;align-items:center;padding:14px;min-height:280px;overflow:hidden}
+.pen canvas{image-rendering:pixelated;max-width:100%;height:auto}
+.pen .letters{display:flex;flex-direction:row-reverse;justify-content:center;gap:.5rem;margin:.7rem 0 0;min-height:2.6rem;flex-wrap:wrap}
+.pen .letters span{font-family:var(--ar);font-size:1.5rem;line-height:1;padding:.3rem .7rem .45rem;border-radius:2px;color:#fff}
+.steps{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:.9rem}
+.steps button{all:unset;cursor:pointer;display:block;padding:.5rem 0 0;border-top:3px solid var(--rule);font-family:var(--mono);font-size:.66rem;color:var(--muted);letter-spacing:.02em;line-height:1.3}
+.steps button.on{border-top-color:var(--lapis);color:var(--ink)}
+.steps button.done{border-top-color:var(--lapis-soft)}
+.steps button:focus-visible{outline:2px solid var(--lapis);outline-offset:3px}
+/* atlas */
+.atlas{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem}
+.atlas .bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:.9rem}
+.atlas input[type=range]{flex:1;min-width:180px;accent-color:var(--lapis)}
+.atlas .rlabel{font-family:var(--mono);font-size:.8rem;min-width:19ch}
+.atlas .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:6px}
+.atlas .tile{background:#fff;border:1px solid var(--rule);text-align:center;padding-bottom:.2rem}
+.atlas .tile img{display:block;width:100%;height:auto;image-rendering:auto}
+.atlas .tile b{font-family:var(--ar);font-weight:400;font-size:1.05rem;color:#17150F}
+.atlas .tile span{font-family:var(--mono);font-size:.6rem;color:#6B675F;display:block;line-height:1.2}
+.witnesses{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0 0}
+.witnesses .w{border:1px solid var(--rule);background:var(--panel);padding:.9rem 1rem}
+.witnesses h3{margin:0 0 .3rem;font-size:1.05rem;font-weight:500}
+.witnesses p{margin:0;font-size:.95rem;color:var(--muted)}
+/* the fooled atlas */
+.fooled{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fooled figure{margin:0;border:1px solid var(--rule);background:var(--panel);padding:.8rem 1rem}
+.fooled figure.good{border-color:var(--lapis)}
+.fooled canvas{display:block;margin:0 auto;image-rendering:pixelated;background:#F3F1EB;max-width:100%}
+.fooled figcaption{font-size:.95rem;margin-top:.6rem}
+.fooled .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:.2rem}
+.fooled .bad .tag{color:var(--bad)}.fooled .good .tag{color:var(--ok)}
+/* scale chart */
+.chart{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .axis text,.chart .rowlab{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.chart .rowlab{fill:var(--ink);font-size:12px}
+.chart .grid line{stroke:var(--rule)}
+.chart circle{stroke:var(--panel);stroke-width:1}
+.chart circle.a{fill:var(--runA)}.chart circle.b{fill:var(--runB)}
+.chart circle.dim{opacity:.18}
+.chart .link{stroke:var(--ink);stroke-width:1.2;opacity:.7;pointer-events:none}
+.chart .med{stroke:var(--ink);stroke-width:2}
+.tip{position:absolute;pointer-events:none;background:var(--paper);border:1px solid var(--ink);padding:.4rem .6rem;font-family:var(--mono);font-size:.72rem;line-height:1.5;white-space:nowrap;z-index:5;display:none}
+.legend2{display:flex;gap:1.2rem;flex-wrap:wrap;font-family:var(--mono);font-size:.74rem;color:var(--ink);margin:0 0 .6rem}
+.legend2 i{display:inline-block;width:.8em;height:.8em;border-radius:50%;margin-right:.4em;vertical-align:-.05em}
+details.table{margin-top:.8rem;font-size:.9rem}
+details.table summary{cursor:pointer;font-family:var(--mono);font-size:.76rem;color:var(--lapis)}
+details.table table{border-collapse:collapse;margin-top:.5rem;font-family:var(--mono);font-size:.74rem;font-variant-numeric:tabular-nums}
+details.table td,details.table th{padding:.2rem .8rem .2rem 0;text-align:left;border-bottom:1px solid var(--rule)}
+/* typeface */
+.type{border:1px solid var(--rule);background:var(--panel);padding:1rem 1.1rem}
+.type textarea{width:100%;font-family:var(--ar);font-size:1.3rem;direction:rtl;padding:.5rem .7rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);min-height:3rem;line-height:1.6;resize:vertical}
+.type .presets{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0 .2rem}
+.type .out{border-top:1px solid var(--rule);padding:.7rem 0 .3rem;display:grid;grid-template-columns:170px minmax(0,1fr);gap:1rem;align-items:center}
+.type .out .lbl{line-height:1.5}
+.type .out .face{direction:rtl;text-align:right;font-size:2.5rem;line-height:1.5;color:#17150F;background:#F3F1EB;padding:.2rem .8rem;overflow-wrap:anywhere;min-height:3.6rem}
+.vote{display:grid;grid-template-columns:minmax(0,3fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:.8rem;align-items:center;margin-top:1rem}
+.vote .many{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.vote img{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--rule)}
+.vote .arrow{font-size:1.5rem;color:var(--lapis)}
+.vote figure{margin:0}.vote figcaption{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-top:.3rem;text-align:center}
+/* reading blind */
+.bars{display:grid;gap:.5rem;max-width:640px}
+.bars .b{display:grid;grid-template-columns:230px 1fr 3.2rem;gap:.8rem;align-items:center;font-size:.92rem}
+.bars .track{height:14px;background:var(--panel2);position:relative}
+.bars .track i{position:absolute;left:0;top:0;bottom:0;background:var(--lapis);border-radius:0 4px 4px 0}
+.bars .v{font-family:var(--mono);font-size:.8rem;font-variant-numeric:tabular-nums}
+.confusions{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.confusions span{font-family:var(--ar);font-size:1.3rem;border:1px solid var(--rule);background:var(--panel);padding:.15rem .7rem;direction:rtl}
+.confusions span em{font-style:normal;color:var(--bad)}
+.gaps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:.8rem}
+.gaps div{border:1px solid var(--rule);background:var(--panel);padding:.8rem 1rem;font-size:.95rem}
+.gaps b{display:block;font-weight:500;margin-bottom:.2rem}
+@media (max-width:700px){.steps{grid-template-columns:repeat(4,1fr)}.witnesses,.fooled{grid-template-columns:1fr}.type .out{grid-template-columns:1fr}.vote{grid-template-columns:1fr}.vote .arrow{display:none}.bars .b{grid-template-columns:1fr}}
 @media (max-width:900px){.layout{grid-template-columns:1fr;gap:1rem}nav.chapters{position:static;padding-top:1.4rem}nav.chapters ol{display:flex;flex-wrap:wrap;gap:.2rem;border:0}nav.chapters li a{border:1px solid var(--rule);border-radius:2px;padding:.3rem .6rem}nav.chapters li a.on{border-color:var(--lapis)}}
 @media (max-width:700px){.facts{grid-template-columns:1fr 1fr}.pipe{grid-template-columns:1fr}.pipe .meet{flex-direction:row}.pipe .out{grid-template-columns:1fr}.xinfo{grid-template-columns:1fr 1fr}.copies{grid-template-columns:1fr}.witness{grid-template-columns:1fr}.lab .row{grid-template-columns:1fr}.rail button{font-size:.6rem}.caption{grid-template-columns:1fr}.caption .text{grid-column:1}}
 @media (prefers-reduced-motion: reduce){.stage .copied{transition:none}}
@@ -160,14 +242,14 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
 </nav>
 <main>
 <header class="hero">
-  <p class="eyebrow">Storyboard · 2026-09-18</p>
+  <p class="eyebrow">Storyboard · 2026-09-20</p>
   <h1>The page's own ink becomes its font</h1>
-  <p class="lede">Scanned journals are pictures. OCR layers put invisible typed text over them, and copying from that text is a lottery in Arabic. Inkscript traces every printed word's ink into a glyph of its own, tells the viewer what each glyph says, and checks the result the way a reader would: by what Chrome copies out.</p>
+  <p class="lede">Scanned journals are pictures. OCR layers put invisible typed text over them, and copying from that text is a lottery in Arabic. Inkscript traces every printed word's ink into a glyph of its own, cuts joined words into their letters by following the ink like a pen, tells the viewer what each glyph says, and checks the result the way a reader would: by what Chrome copies out.</p>
   <div class="facts">
-    <div><b>99.98%</b><span>of 2,781,570 words copy out intact across 755 documents, 16,074 pages (Chrome's engine)</span></div>
-    <div><b>99.9%</b><span>of 253,026 lines come back in reading order</span></div>
+    <div><b>99.99%</b><span>of 893,203 words copy out intact across 227 journals, 4,440 pages (Chrome's engine, 2026-09-20)</span></div>
+    <div><b>99.95%</b><span>of 82,613 lines come back in reading order</span></div>
+    <div><b>96.8%</b><span>of words have a selection box for <em>every letter</em> — on 194 scanned documents; a day earlier, none</span></div>
     <div><b>0</b><span>pixels substituted: every glyph is the printed occurrence's own outline</span></div>
-    <div><b>3</b><span>engines measured: pdfium (Chrome), MuPDF, poppler — plus Firefox's pdf.js</span></div>
   </div>
 </header>
 
@@ -204,7 +286,7 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
 <section class="chapter" id="c3" data-title="A real page">
   <div class="num">03 · A REAL PAGE</div>
   <h2>Hover a word — or a letter: its glyph is its own ink</h2>
-  <p class="thesis">This is page 1 of a 1970s journal from the test set, and the outlines are read back out of the finished PDF's fonts — not drawn for the demo. Each shape is one glyph; its text is what a viewer copies. Where the document's own evidence agreed on where one letter ends and the next begins, the glyph is a single letter (chapter 05); elsewhere it is the word.</p>
+  <p class="thesis">This is page 1 of a 1970s journal from the test set, and the outlines are read back out of the finished PDF's fonts — not drawn for the demo. Each shape is one glyph; its text is what a viewer copies. Where a joined word was cut along its pen path (next chapter), the glyph is a single letter (chapter 05); elsewhere it is the word.</p>
   <div class="explorer" id="explorer"><img id="xImg" alt="Top of the first page of a scanned Arabic journal article"><svg id="xSvg" aria-hidden="true"></svg></div>
   <div class="xinfo" id="xInfo"><div class="empty">Hover or tap a word on the page.</div></div>
   <div class="controls"><button type="button" class="btn" id="xSelectAll">Simulate Ctrl+A</button><button type="button" class="btn" id="xClear">Clear</button><span class="sp"></span><span class="hint" id="xCount"></span></div>
@@ -212,6 +294,48 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
   <div class="code"><span><b>pdf/type3.py</b> one font per line, glyph space = scan pixels, <code>/InkShapes</code> ids</span><span><b>geometry/layout.py</b> split_word, ink_pieces</span></div>
 </section>
 
+
+<!-- letters -->
+<section class="chapter" id="cPen" data-title="Follow the pen">
+  <div class="num">THE LETTERS</div>
+  <h2>A joined word is one blob of ink. Where does a letter end?</h2>
+  <p class="thesis">A website never has this problem: it places one glyph per letter and knows every box because it put it there. A scan is the reverse — finished ink, the boxes gone. Left uncut, a viewer slices the word into equal parts, which is wrong as soon as letters differ in width. So the ink is followed the way a pen wrote it, and a cut becomes a <em>point on that path</em>, not a line down the page.</p>
+  <div class="pen">
+    <div class="picker" id="penPicker" role="tablist" aria-label="Choose a word"></div>
+    <p class="note" id="penNote"></p>
+    <div class="canvaswrap"><canvas id="penCv" aria-label="A real word's ink, cut into letters step by step"></canvas></div>
+    <div class="letters" id="penLetters"></div>
+    <div class="caption"><span class="cnum" id="penNum">1 / 8</span><h3 class="name" id="penName"></h3><p class="text" id="penText"></p></div>
+    <div class="steps" id="penSteps"></div>
+    <div class="controls"><button type="button" id="penPrev">◀ Prev</button><button type="button" id="penPlay">Play</button><button type="button" id="penNext">Next ▶</button><span class="sp"></span><span class="hint" id="penHint"></span></div>
+  </div>
+  <div class="measured"><span class="lbl">measured</span><p>Cutting at columns of the page was tried first. It put <b>90.9%</b> of cuts on the join; doing nothing — the viewer's equal slices — puts <b>91.6%</b> there. Every method since is compared with that free baseline. The pen path also keeps a kaf's arm with its kaf when the arm hangs over the next letter, which no vertical cut can do.</p></div>
+  <div class="code"><span><b>geometry/penpath.py</b> unroll · plan · letter_blobs</span><span><b>geometry/layout.py</b> split_word — blobs matched to runs by width</span><span><b>docs/letters.md</b> the whole story</span></div>
+</section>
+
+<section class="chapter" id="cAtlas" data-title="The book's own alphabet">
+  <div class="num">THE ATLAS</div>
+  <h2>No typeface is configured. Each book teaches its own.</h2>
+  <p class="thesis">Which of the possible cut points are the right ones? Two witnesses decide. Hard facts that hold in any typeface — a letter's dots, tall stroke and bowl must lie in its own stretch of the path. And the book itself: every cut-out letter goes on a pile with the others of its form, the average of the pile is the book's picture of that letter, the cuts are re-chosen to match the pictures, the pictures rebuilt — four rounds. Drag the slider and watch a 1970s typeface come into focus out of its own pages.</p>
+  <div class="atlas">
+    <div class="bar"><label class="lbl" for="atlasRound">round</label><input type="range" id="atlasRound" min="0" max="4" step="1" value="0"><span class="rlabel" id="atlasLabel"></span><button type="button" class="btn" id="atlasPlay">Play</button></div>
+    <div class="grid" id="atlasGrid"></div>
+  </div>
+  <div class="witnesses">
+    <div class="w"><h3>Witness one: facts</h3><p>ف carries one dot above; ي two below; ل stands tall; final ن drops a bowl below the line; no letter is a bare connecting stroke. A fact is enforced for a letter-form only if 85% of its printings in this book show it.</p></div>
+    <div class="w"><h3>Witness two: the book</h3><p>The pictures above. Alone they let a big letter swallow a small neighbour; the facts alone cannot tell two plain teeth apart. Together: by eye about 50 of 60 random pieces cut right, where half were before.</p></div>
+  </div>
+  <div class="code"><span><b>geometry/penpath.py</b> _facts · build_atlas · solve · apply</span><span><b>experiments/09_pen_path</b> the sketches and the tooling</span></div>
+</section>
+
+<section class="chapter" id="cFooled" data-title="When the atlas fools itself">
+  <div class="num">A FAILURE WORTH KEEPING</div>
+  <h2>395 copies of one word, all wrong, all agreeing</h2>
+  <p class="thesis">One journal prints <span style="font-family:var(--ar);font-size:1.3em">في</span> with the ya's tail running back to the right under the fa. The pen path started at the rightmost ink on the baseline — the tail's tip — so every copy had its two letters swapped. The atlas did not object: all 395 copies agreed with each other. It was found by building that book's font and seeing a blank where ف should be. Now, when a fact fails (the fa's dot was inside the ya), the path is tried again from the first letter's body, and the start the facts prefer is kept.</p>
+  <div class="fooled" id="fooled"></div>
+  <div class="measured"><span class="lbl">the lesson</span><p>A witness learned from the data can confirm its own mistake. Something from outside it has to be able to overrule — here the facts. And the letter-coverage number could not see this at all: every letter <em>had</em> a box; the boxes were on the wrong letters.</p></div>
+  <div class="code"><span><b>geometry/penpath.py</b> plan — second start when a fact fails</span><span><b>experiments/11_typeface</b> peek.py · peek_pieces.py</span></div>
+</section>
 <!-- 4 -->
 <section class="chapter" id="c4" data-title="How Chrome reads">
   <div class="num">04 · HOW CHROME READS A LINE</div>
@@ -262,7 +386,7 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
 <!-- 8 -->
 <section class="chapter" id="c8" data-title="Results">
   <div class="num">08 · RESULTS</div>
-  <h2>Three sets, one reader, final build</h2>
+  <h2>Four sets, one reader</h2>
   <p class="thesis">Chrome's engine, pinned build 7947. "Words intact": each placed word comes back whole. "Lines in order": a line's Arabic words come back contiguous and in reading order, the reference being the words by ink position.</p>
   <div class="tablewrap"><table class="results">
     <thead><tr><th>set</th><th>words intact</th><th>lines in order</th><th>inversions</th><th>pages that lost their image</th></tr></thead>
@@ -271,21 +395,59 @@ footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-fa
   <div class="measured"><span class="lbl">the night before</span><p>The 227-journal sample stood at <b>98.02%</b> with <b>1,299</b> inversions and <b>98</b> documents with blank pages at 01:00. The blank pages (inherited <code>/Resources</code> shadowed by a fresh dictionary), the mirrored documents (an unbalanced <code>cm</code>), the wrong engine build, a run dropped as a fake-bold duplicate, thumbnails handed to Gemini — each was found from a number that looked wrong, never from theory.</p></div>
 </section>
 
-<!-- 9 -->
-<section class="chapter next" id="c9" data-title="What's next">
-  <div class="num">09 · WHAT'S NEXT</div>
-  <h2>Open, in the order I'd take them</h2>
-  <ol>
-    <li>Typeset PDFs whose fonts have no usable encoding: give them a correct ToUnicode from the OCR words — the born-digital variant of this project.</li>
-    <li>Table pages: cells pdfium joins across rows; the OCR's line order there.</li>
-    <li>Letter-level selection inside a connected run — the remaining selection limit.</li>
-    <li>Firefox: pdf.js splits lines at wide gaps and merges tight ones; measured, decision deferred (experiments/06).</li>
-    <li>A larger unattended sample, read the same way.</li>
-  </ol>
-  <div class="code"><span><b>docs/roadmap.md</b></span><span><b>docs/night-report-2026-09-18.md</b></span></div>
+
+<section class="chapter" id="cScale" data-title="At scale">
+  <div class="num">AT SCALE</div>
+  <h2>Every dot is a document: two runs, a morning apart</h2>
+  <p class="thesis">One document from each of 227 journals — as wide a mix of typefaces as the corpus has. The measure is what a reader experiences: the share of a document's words in which <em>every</em> letter has its own selection box in Chrome's engine. Between the two runs, the causes the first run exposed were removed one by one. Hover a dot to follow one document.</p>
+  <div class="chart" id="scaleChart"><div class="legend2"><span><i style="background:var(--runA)"></i>first run (06:49)</span><span><i style="background:var(--runB)"></i>second run (12:17)</span><span style="color:var(--muted)">│ median</span></div><div class="tip" id="scaleTip"></div></div>
+  <details class="table"><summary>The ten weakest documents, as a table</summary><div id="scaleTable"></div></details>
+  <div class="measured"><span class="lbl">what moved it</span><p>Rejecting good cuts (the witnesses' verdict is now reported, not enforced: a wrong cut costs what an uncut word costs). Ink broken in the scan, bridged for the path only. Blobs and text runs that do not pair off, matched by width. The text did not move: <b>99.99%</b> of words intact in both runs. This number says boxes <em>exist</em>; whether each sits exactly right is not measured yet.</p></div>
+  <div class="code"><span><b>experiments/09_pen_path</b> run_set.sh · summary.py · coverage.py · compare_boxes.py</span><span><b>docs/operations.md</b> memory, the watchdog, resuming</span></div>
 </section>
 
-<footer>Built by <code>docs/storyboard/build.py</code> from the pipeline's own outputs · inkscript, 2026-09-18</footer>
+<section class="chapter" id="cType" data-title="Type with the book's font">
+  <div class="num">THE TYPEFACE</div>
+  <h2>The letters, cut out, are a font. Type something.</h2>
+  <p class="thesis">Every letter-form the book prints becomes a glyph, with the joining rules Arabic needs, and the result installs like any font. The text below is set live in fonts built from two scanned journals — nothing here is an image. The restored version is not any one printing: up to fifteen of the best printings of a letter vote on its body, so a break in one fills in and a blot in one disappears.</p>
+  <div class="type">
+    <label class="lbl" for="typeIn">type Arabic here</label>
+    <textarea id="typeIn" rows="2" spellcheck="false">هذا نص جديد مكتوب بخط كتاب قديم</textarea>
+    <div class="presets" id="typePresets"></div>
+    <div class="out"><span class="lbl">a 1970s journal<br>one printing per letter</span><div class="face" id="faceA" style="font-family:'InkA',var(--ar)"></div></div>
+    <div class="out"><span class="lbl">the same journal<br>restored from 15 printings</span><div class="face" id="faceB" style="font-family:'InkB',var(--ar)"></div></div>
+    <div class="out"><span class="lbl">a light modern face<br>restored</span><div class="face" id="faceC" style="font-family:'InkC',var(--ar)"></div></div>
+  </div>
+  <div class="vote" id="vote"></div>
+  <div class="measured"><span class="lbl">the line not crossed</span><p>Restoration lives in the font. The faithful PDF still draws every occurrence with its own ink — drawing one with another's changes a median <b>15%</b> of its pixels. A restored <em>edition</em> of a page would be a third output beside it, never a replacement. Known faults of these fonts: a short document never prints some forms (they borrow a relative), no digits or punctuation, uneven gaps.</p></div>
+  <div class="code"><span><b>experiments/11_typeface</b> make_font.py · specimen.py</span><span><b>docs/typeface.md</b></span></div>
+</section>
+
+<section class="chapter" id="cRead" data-title="Can it read by itself?">
+  <div class="num">AN HONEST EXPERIMENT</div>
+  <h2>Reading a page with no OCR at all: 41%</h2>
+  <p class="thesis">The atlas was taught on four pages and given the fifth blind — no text, not even how many letters. It read lone letters fairly well and joined words badly, for the oldest reason in the field: you must cut before you can match, and match before you can cut. So it is not a reader. It may yet be a <em>checker</em>: cut by the word the OCR gave, then ask whether the ink fits a look-alike word better.</p>
+  <div class="bars" id="readBars"></div>
+  <div class="confusions" id="readConf"></div>
+  <div class="code"><span><b>experiments/10_atlas_reader</b> reader.py</span><span><b>docs/ideas.md</b> "Trusting the text"</span></div>
+</section>
+<!-- 9 -->
+<section class="chapter next" id="c9" data-title="What it does not do">
+  <div class="num">WHAT IT DOES NOT DO, AND WHAT IS NEXT</div>
+  <h2>The text is still the OCR's reading</h2>
+  <p class="thesis">"Words intact" means the OCR's reading was preserved, not that it was right. Everything selects beautifully, including the words Azure misread. That is the largest gap between this and a perfect digital copy, and the next milestone.</p>
+  <div class="gaps">
+    <div><b>Trust the text</b>A second opinion from the book's own letters, as a checker; the review-and-correct tools already exist.</div>
+    <div><b>Measure placement</b>96.8% of words have a box per letter; how many boxes sit exactly right needs a hand-checked sample.</div>
+    <div><b>Vowelled words</b>Never cut into letters: Chrome reorders the pieces of a split vowelled word. Up to 6% of some documents.</div>
+    <div><b>Underlines, tables, slanted faces</b>Underlines glued to ink cut badly; table cells join across rows; an overhanging kaf in a fine face is still weak.</div>
+    <div><b>Other viewers</b>Firefox copies lines word-reversed at our nominal size; the fix costs Chrome 0.1%, so Chrome wins.</div>
+    <div><b>A restored edition</b>The same page with damaged letters redrawn from the restored font — a third output, never a replacement.</div>
+  </div>
+  <div class="code"><span><b>docs/STATUS.md</b> numbers with their dates</span><span><b>docs/roadmap.md</b> the live list</span><span><b>docs/ideas.md</b> every idea and its fate</span></div>
+</section>
+
+<footer>Built by <code>docs/storyboard/build.py</code> from the pipeline's own outputs · inkscript, 2026-09-20</footer>
 </main>
 </div>
 
@@ -428,7 +590,8 @@ const RULES=[
  {k:'17 × 27 px',h:'Gemini sees the page at scan resolution',p:'Ten documents carried a thumbnail as their single embedded image; Gemini read nothing. Pages are rendered unless the image is ≥150 dpi.',w:'ocr/gemini.py · page_images'},
  {k:'5 of 6',h:'Refused covers: masthead, then title only',p:'The recitation filter refuses a verbatim page of a published journal but allows a title-and-author extraction.',w:'ocr/gemini.py · gemini_page1'},
  {k:'65% → 100%',h:'Sideways pages get a turned frame',p:'Tables printed landscape are laid out in a rotated frame and written with a rotated text matrix, so glyphs land on the ink.',w:'pdf/type3.py · Frame'},
- {k:'42%',h:'Letters where the document agrees',p:'A piece’s known letters are aligned to its ink by their signatures (dots, ascender, bowl, width); each letter-form’s usual look is learned from the document itself, and only pieces every letter of which matches it become one glyph per letter. A wrong cut can only move a highlight.',w:'geometry/letters.py'},
+ {k:'0 → 96.8%',h:'Letters along the pen path',p:'A cut is a point on the ink’s centre line, chosen by hard facts and the book’s own alphabet; a letter’s box is its stretch of the baseline and its ink may overhang. A wrong cut can only move a highlight.',w:'geometry/penpath.py'},
+ {k:'5.7 GB → 0.85',h:'The atlas is learned from the first 1,500 pieces',p:'A picture cached for every possible cut of every piece took all of a 15 GB machine. Pictures are cropped, the atlas a running sum, later pieces cut and reduced to outlines at once.',w:'pdf/native.py · penpath.apply, finalize'},
  {k:'40 → 1',h:'Junk-encoded fonts become inert, not invisible',p:'A typeset page whose font extracts as symbols keeps drawing its glyphs, but each text object is wrapped in an /ActualText span holding a space; every engine then reads our layer alone.',w:'pdf/native.py · neutralise_text'},
 ];
 document.getElementById('rules').innerHTML=RULES.map(r=>`<div class="rule"><span class="k">${r.k}</span><h3>${r.h}</h3><p>${r.p}</p><span class="where">${r.w}</span></div>`).join('');
@@ -452,7 +615,107 @@ const RESULTS=[
  {set:'47 corpus documents · 1,007 pages (43 born-digital, 14 sideways)',w:[237723,237741],l:[20213,20224],inv:103,lost:0},
  {set:'227-journal sample · 4,440 pages (903 born-digital, 16 sideways)',w:[912672,912800],l:[84121,84186],inv:398,lost:0},
  {set:'451-document sample · 10,512 pages (4,448 born-digital, 23 sideways)',w:[1595673,1596070],l:[144592,144748],inv:1106,lost:0},
+ {set:'227 journals again, with letters (2026-09-20) · 3.15 million letter glyphs',w:[893113,893203],l:[82574,82613],inv:362,lost:0},
 ];
 document.getElementById('results').innerHTML=RESULTS.map(r=>{const pw=r.w[0]/r.w[1],pl=r.l[0]/r.l[1];return `<tr><td>${r.set}</td><td class="n">${r.w[0].toLocaleString()} / ${r.w[1].toLocaleString()}<br>${(pw*100).toFixed(2)}%<span class="bar"><i style="width:${pw*100}%"></i></span></td><td class="n">${r.l[0].toLocaleString()} / ${r.l[1].toLocaleString()}<br>${(pl*100).toFixed(1)}%<span class="bar"><i style="width:${pl*100}%"></i></span></td><td class="n">${r.inv}</td><td class="n">${r.lost}</td></tr>`}).join('')+
  `<tr><td colspan="5" style="font-size:.85rem;color:var(--muted)">Inversions: consecutive lines in one column whose baseline jumps back up the page; most of the remaining ones are typeset pages with junk-encoded fonts and table pages. 51 Latin-majority lines are counted apart (pdfium reads them left to right by its majority rule, as in any native PDF).</td></tr>`;
+
+/* ---------- chapter numbers follow the order on the page ---------- */
+chapters.forEach((sec,i)=>{const n=sec.querySelector('.num');if(n){const t=n.textContent.replace(/^\d+\s*·\s*/,'');n.textContent=String(i+1).padStart(2,'0')+' · '+t}});
+const LET=STORY.letters;
+const PAL=['#C4372C','#2C6FCB','#2E8B4A','#9A3FB0','#C28A12','#5F6B7A','#0F8C8C','#A8562A'];
+function loadPix(b64){return new Promise(res=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const x=c.getContext('2d');x.drawImage(im,0,0);res(x.getImageData(0,0,im.width,im.height).data)};im.src='data:image/png;base64,'+b64})}
+function u16(b64){const bin=atob(b64);const a=new Uint16Array(bin.length/2);for(let i=0;i<a.length;i++)a[i]=bin.charCodeAt(2*i)|(bin.charCodeAt(2*i+1)<<8);return a}
+async function prep(P){if(P._ready)return P;[P._ink,P._sk,P._own]=await Promise.all([loadPix(P.ink),loadPix(P.skeleton),loadPix(P.owner)]);P._s=u16(P.smap);P._ready=true;return P}
+function hsl(h,s,l){const a=s*Math.min(l,1-l);const f=n=>{const k=(n+h/30)%12;return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))};return [f(0),f(8),f(4)]}
+function hex(c){return [parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16)]}
+/* paint a piece: mode = 'ink' | 'path' (coloured by place on the pen path) | 'letters' */
+function paintPiece(ctx,P,mode,k,inkAlpha=1){const W=P.w,H=P.h;const img=new ImageData(W,H);const d=img.data;
+  for(let i=0;i<W*H;i++){if(P._ink[4*i]<128)continue;let c=[23,21,15];
+    if(mode==='path'){const sv=P._s[i];if(sv!==65535){c=hsl(215+140*(1-sv/P.S),.62,.45)}else c=[120,116,108]}
+    else if(mode==='letters'){const o=P._own[4*i];c=o?hex(PAL[(o-1)%PAL.length]):[120,116,108]}
+    d[4*i]=c[0];d[4*i+1]=c[1];d[4*i+2]=c[2];d[4*i+3]=Math.round(255*inkAlpha)}
+  const off=document.createElement('canvas');off.width=W;off.height=H;off.getContext('2d').putImageData(img,0,0);ctx.imageSmoothingEnabled=false;ctx.drawImage(off,0,0,W*k,H*k)}
+
+/* ---------- follow the pen ---------- */
+(function(){const pens=LET.pens;if(!pens||!pens.length)return;const cv=document.getElementById('penCv'),ctx=cv.getContext('2d');
+  const STEPS=[
+   {n:'The ink',t:'One connected blob. The OCR says which letters it holds, in order — not where one ends and the next begins.'},
+   {n:'Left alone',t:'What any viewer does with an uncut glyph: slice its box into equal parts, one per character. Right only when all letters are equally wide.'},
+   {n:'The centre line',t:'The ink is thinned until one pixel remains everywhere: the line a pen would have followed.'},
+   {n:'The trunk',t:'From where the first letter meets the baseline, on the right, to the left end. This is the order the letters were written in.'},
+   {n:'What hangs where',t:'Every other bit of ink — an arm, a tall stroke, the far side of a loop, a tail — belongs to the trunk point it hangs from. Colour runs along the path from start to end.'},
+   {n:'Places to cut',t:'Thin places along the path, where the ink is little more than a connecting stroke.'},
+   {n:'The cuts chosen',t:'Facts and the book’s own alphabet pick among them. Each letter takes the ink hanging from its stretch of the path — overhangs included — and its dots.'},
+   {n:'Selection boxes',t:'A letter’s box is its stretch of the baseline; its ink may reach outside, as a typeset letter’s does. This is what Chrome highlights.'}];
+  let cur=0,step=0,t0=0,playing=false,raf=null,K=4;
+  const picker=document.getElementById('penPicker');pens.forEach((P,i)=>{const b=document.createElement('button');b.type='button';b.textContent=P.text;b.setAttribute('role','tab');b.addEventListener('click',()=>choose(i));picker.appendChild(b)});
+  const rail=document.getElementById('penSteps');STEPS.forEach((st,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' '+st.n;b.addEventListener('click',()=>{playing=false;sync();go(i)});rail.appendChild(b)});
+  function sync(){document.getElementById('penPlay').textContent=playing?'Pause':'Play'}
+  async function choose(i){cur=i;[...picker.children].forEach((b,j)=>b.classList.toggle('on',j===i));const P=await prep(pens[i]);document.getElementById('penNote').textContent=P.note+(P.word&&P.word!==P.text?'  — from the word '+P.word:'');
+    const wrap=cv.parentElement.clientWidth-32;K=Math.max(2,Math.min(9,Math.floor(wrap/P.w),Math.floor(300/P.h)));cv.width=P.w*K;cv.height=P.h*K;document.getElementById('penHint').textContent=`${P.w}×${P.h} scan pixels at 300 dpi · path ${P.S} px long · ${P.cand.length} possible cuts, ${P.cuts.length} used`;go(step)}
+  function go(i){step=(i+STEPS.length)%STEPS.length;t0=performance.now();[...rail.children].forEach((b,j)=>{b.classList.toggle('on',j===step);b.classList.toggle('done',j<step)});
+    document.getElementById('penNum').textContent=`${step+1} / ${STEPS.length}`;document.getElementById('penName').textContent=STEPS[step].n;document.getElementById('penText').textContent=STEPS[step].t;
+    const P=pens[cur];document.getElementById('penLetters').innerHTML=P.units.map((u,k)=>`<span style="background:${step>=6?PAL[k%PAL.length]:'#6B675F'}">${u}</span>`).join('');cancelAnimationFrame(raf);tick()}
+  function dot(x,y,r,fill,stroke){ctx.beginPath();ctx.arc((x+.5)*K,(y+.5)*K,r,0,7);ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}}
+  function tick(){const P=pens[cur];if(!P._ready)return;const t=reduced?1:Math.min(1,(performance.now()-t0)/1400);ctx.clearRect(0,0,cv.width,cv.height);
+    const faint=step>=2&&step<=5&&step!==4;paintPiece(ctx,P,step===4?'path':step>=6?'letters':'ink',K,faint?.22:1);
+    if(step===1){const n=P.units.length,w=(P.xmax-P.xmin)/n;ctx.strokeStyle='#A63D2F';ctx.lineWidth=2;ctx.setLineDash([6,4]);for(let j=0;j<=n;j++){const x=(P.xmin+j*w)*K;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke()}ctx.setLineDash([])}
+    if(step===2||step===3||step===5){ctx.fillStyle=step===2?'#2C4B96':'rgba(44,75,150,.35)';const lim=step===2?Math.floor(t*P.w):P.w;for(let y=0;y<P.h;y++)for(let x=P.w-1;x>=P.w-lim;x--)if(P._sk[4*(y*P.w+x)]>128)ctx.fillRect(x*K,y*K,K,K)}
+    if(step===3||step===5){const n=step===3?Math.max(2,Math.floor(t*P.trunk.length)):P.trunk.length;ctx.strokeStyle='#C4372C';ctx.lineWidth=Math.max(2,K*.7);ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();P.trunk.slice(0,n).forEach((q,j)=>{const x=(q[0]+.5)*K,y=(q[1]+.5)*K;j?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+      const s=P.trunk[0];dot(s[0],s[1],K*1.1,'#C4372C','#fff');if(step===3&&n>=P.trunk.length){const e=P.trunk[P.trunk.length-1];dot(e[0],e[1],K*.9,'#fff','#C4372C')}}
+    if(step===5){P.cand.forEach(q=>dot(q[0],q[1],K*1.0,'#fff','#17150F'))}
+    if(step===6){P.cand.forEach(q=>dot(q[0],q[1],K*.6,'rgba(255,255,255,.7)','rgba(23,21,15,.4)'));P.cuts.forEach(q=>dot(q[0],q[1],K*1.15,'#17150F','#fff'))}
+    if(step===7){P.cells.forEach((c,j)=>{ctx.fillStyle=PAL[j%PAL.length]+'33';ctx.strokeStyle=PAL[j%PAL.length];ctx.lineWidth=2;const x=c[0]*K,w=(c[1]-c[0])*K;ctx.fillRect(x,2,w,cv.height-4);ctx.strokeRect(x+1,2,w-2,cv.height-4)})}
+    if(t<1){raf=requestAnimationFrame(tick)}else if(playing){raf=setTimeout(()=>{if(playing)go(step+1)},reduced?1800:1500)}}
+  document.getElementById('penPrev').addEventListener('click',()=>{playing=false;sync();go(step-1)});document.getElementById('penNext').addEventListener('click',()=>{playing=false;sync();go(step+1)});
+  document.getElementById('penPlay').addEventListener('click',()=>{playing=!playing;sync();if(playing)go(step+1)});
+  window.addEventListener('resize',()=>choose(cur));choose(1<pens.length?1:0);
+})();
+
+/* ---------- the atlas ---------- */
+(function(){const A=LET.atlas;if(!A)return;const grid=document.getElementById('atlasGrid'),slider=document.getElementById('atlasRound'),label=document.getElementById('atlasLabel');const FORM={iso:'alone',init:'first',med:'middle',fin:'last'};
+  slider.max=A.rounds.length-1;const imgs=A.keys.map((k,i)=>{const t=document.createElement('div');t.className='tile';t.innerHTML=`<img alt="${k.letter} ${FORM[k.form]}"><b>${k.letter}</b><span>${FORM[k.form]} · ${k.n}</span>`;grid.appendChild(t);return t.querySelector('img')});
+  function show(r){imgs.forEach((im,i)=>{const d=A.rounds[r][i]||A.rounds[A.rounds.length-1][i];im.src='data:image/png;base64,'+d});label.textContent=r===0?'before any round: first guess':`after round ${r} · ${A.recut[r-1]} pieces re-cut`}
+  slider.addEventListener('input',()=>show(+slider.value));let timer=null;document.getElementById('atlasPlay').addEventListener('click',()=>{clearInterval(timer);let r=0;slider.value=0;show(0);timer=setInterval(()=>{r++;if(r>=A.rounds.length){clearInterval(timer);return}slider.value=r;show(r)},900)});show(0);
+})();
+
+/* ---------- the fooled atlas ---------- */
+(async function(){const F=LET.fi,el=document.getElementById('fooled');if(!F){document.getElementById('cFooled').querySelector('.fooled').remove();return}
+  const fig=async(P,cls,tag,cap)=>{await prep(P);const f=document.createElement('figure');f.className=cls;const c=document.createElement('canvas');const K=Math.max(3,Math.min(8,Math.floor(300/P.w)));c.width=P.w*K;c.height=P.h*K;paintPiece(c.getContext('2d'),P,'letters',K);
+    f.appendChild(c);const fc=document.createElement('figcaption');fc.innerHTML=`<span class="tag">${tag}</span>${cap}<br><span style="font-family:var(--ar);font-size:1.3rem">${P.units.map((u,k)=>`<span style="color:${PAL[k]}">${u}</span>`).join(' · ')}</span>`;f.appendChild(fc);el.appendChild(f)};
+  await fig(F.before,'bad','before','The path began on the tail’s tip, so the tail was taken for ف and everything else for ي — dot and all.');
+  await fig(F.after,'good','after','A fact failed (ف without its dot), so the path was tried from the first letter’s body. The head and its dot are ف; the bowl, the tail and the two dots are ي.');
+})();
+
+/* ---------- at scale ---------- */
+(function(){const D=LET.scale.docs;if(!D.length)return;const host=document.getElementById('scaleChart'),tip=document.getElementById('scaleTip');const NS='http://www.w3.org/2000/svg';const W=900,H=262,L=92,R=20,x0=40,x1=100;const X=v=>L+(W-L-R)*(Math.max(x0,v)-x0)/(x1-x0);
+  const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.setAttribute('role','img');svg.setAttribute('aria-label','Letter coverage per document, first run against second run');host.appendChild(svg);
+  const el=(n,a,par=svg)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);par.appendChild(e);return e};
+  const g=el('g',{class:'grid'}),ax=el('g',{class:'axis'});for(let v=x0;v<=x1;v+=10){el('line',{x1:X(v),x2:X(v),y1:16,y2:H-46},g);const t=el('text',{x:X(v),y:H-30,'text-anchor':'middle'},ax);t.textContent=v+'%'}
+  const cap=el('text',{x:L,y:H-6,class:'axis'},ax);cap.setAttribute('style','font-family:var(--mono);font-size:11px;fill:var(--muted)');cap.textContent='share of a document’s words in which every letter has its own box';
+  const rows=[{key:'first',cls:'a',y:70,lab:'first run'},{key:'second',cls:'b',y:160,lab:'second run'}];const link=el('line',{class:'link',visibility:'hidden'});const nodes={first:[],second:[]};
+  const jit=i=>{const r=Math.sin(i*12.9898)*43758.5453;return (r-Math.floor(r)-.5)*62};
+  rows.forEach(r=>{const t=el('text',{x:0,y:r.y+4,class:'rowlab'});t.textContent=r.lab;const vals=D.map(d=>d[r.key]).sort((a,b)=>a-b);const med=vals[Math.floor(vals.length/2)];el('line',{class:'med',x1:X(med),x2:X(med),y1:r.y-38,y2:r.y+38});const mt=el('text',{x:X(med)+5,y:r.y-42,class:'rowlab'});mt.textContent=med.toFixed(1)+'%';if(X(med)>W-70){mt.setAttribute('x',X(med)-5);mt.setAttribute('text-anchor','end')}
+    D.forEach((d,i)=>{const c=el('circle',{class:r.cls,cx:X(d[r.key]),cy:r.y+jit(i+(r.key==='first'?0:1000)),r:4.2,tabindex:0});nodes[r.key][i]=c;
+      const on=()=>{for(const k in nodes)nodes[k].forEach((n,j)=>n.classList.toggle('dim',j!==i));const a=nodes.first[i],b=nodes.second[i];link.setAttribute('x1',a.getAttribute('cx'));link.setAttribute('y1',a.getAttribute('cy'));link.setAttribute('x2',b.getAttribute('cx'));link.setAttribute('y2',b.getAttribute('cy'));link.setAttribute('visibility','visible');
+        tip.innerHTML=`<b>${d.stem}</b><br>${d.pages} pages · ${d.words.toLocaleString()} words<br>first run ${d.first}% → second ${d.second}%`;tip.style.display='block';const bb=host.getBoundingClientRect(),cb=c.getBoundingClientRect();let lx=cb.left-bb.left+12;if(lx>bb.width-230)lx=cb.left-bb.left-230;tip.style.left=lx+'px';tip.style.top=(cb.top-bb.top-58)+'px'};
+      const offh=()=>{for(const k in nodes)nodes[k].forEach(n=>n.classList.remove('dim'));link.setAttribute('visibility','hidden');tip.style.display='none'};
+      c.addEventListener('mouseenter',on);c.addEventListener('focus',on);c.addEventListener('mouseleave',offh);c.addEventListener('blur',offh)})});
+  svg.appendChild(link);
+  document.getElementById('scaleTable').innerHTML='<table><tr><th>document</th><th>pages</th><th>words</th><th>first run</th><th>second run</th></tr>'+D.slice(0,10).map(d=>`<tr><td>${d.stem}</td><td>${d.pages}</td><td>${d.words.toLocaleString()}</td><td>${d.first}%</td><td>${d.second}%</td></tr>`).join('')+'</table>';
+})();
+
+/* ---------- the typeface ---------- */
+(function(){const F=LET.fonts;if(!F)return;const st=document.createElement('style');st.textContent=[['InkA',F.single],['InkB',F.restored],['InkC',F.light]].map(([n,d])=>`@font-face{font-family:'${n}';src:url(data:font/ttf;base64,${d}) format('truetype');font-display:block}`).join('');document.head.appendChild(st);
+  const inp=document.getElementById('typeIn');const faces=['faceA','faceB','faceC'].map(id=>document.getElementById(id));const upd=()=>faces.forEach(f=>f.textContent=inp.value);inp.addEventListener('input',upd);upd();
+  const pre=document.getElementById('typePresets');['هذا نص جديد مكتوب بخط كتاب قديم','محمد على سليمان فى بيت كبير','العلم نور والجهل ظلام','من جد وجد ومن زرع حصد'].forEach(t=>{const b=document.createElement('button');b.type='button';b.className='btn';b.style.fontFamily='var(--ar)';b.style.fontSize='1rem';b.textContent=t;b.addEventListener('click',()=>{inp.value=t;upd()});pre.appendChild(b)});
+  const V=LET.vote;if(V){document.getElementById('vote').innerHTML=`<figure><div class="many">${V.printings.map(p=>`<img src="data:image/png;base64,${p}" alt="one printing">`).join('')}</div><figcaption>${V.n} printings of middle <span style="font-family:var(--ar);font-size:1.1rem">${V.letter}</span> from the book, each a little different</figcaption></figure><span class="arrow">→</span><figure><img src="data:image/png;base64,${V.stack}" alt="the printings stacked"><figcaption>stacked: dark where they agree</figcaption></figure><span class="arrow">→</span><figure><img src="data:image/png;base64,${V.restored}" alt="the restored letter"><figcaption>the restored letter: ink most printings agree on, joins on the book’s usual band</figcaption></figure>`}
+})();
+
+/* ---------- reading blind ---------- */
+(function(){const rows=[['first attempt: everything chopped too fine',8.6],['a letter must earn its place',27],['match stored printings, not the blurry average',41.2],['— lone letters',67],['— pieces of two letters',21],['— pieces of three',20],['— pieces of four',15],['— pieces of five or more',0]];
+  document.getElementById('readBars').innerHTML=rows.map(([l,v])=>`<div class="b"><span>${l}</span><span class="track"><i style="width:${v}%"></i></span><span class="v">${v}%</span></div>`).join('');
+  const conf=[['خير','تببر'],['حسب','مممب'],['فا','نتا'],['جم','هم'],['غير','عيير'],['كتب','كننب']];document.getElementById('readConf').innerHTML=conf.map(([a,b])=>`<span>${a} ← <em>${b}</em></span>`).join('')+'<span style="font-family:var(--mono);font-size:.72rem;border:0;background:none;color:var(--muted);direction:ltr">what the page says ← what it read: a slice of almost anything looks like a tooth letter</span>';
+})();
 </script>

@@ -1,7 +1,12 @@
 """Build docs/storyboard/index.html — the interactive storyboard — from real outputs.
 
     python docs/storyboard/build.py --native-dir OUT/native_set --azure-pdf DATA/azure/<stem>/<stem>.pdf \
-        --review OUT/s3_sample/review/0450-000-022-001.review.json --review-pdf DATA/azure/0450.../0450....pdf
+        --review OUT/s3_sample/review/0450-000-022-001.review.json --review-pdf DATA/azure/0450.../0450....pdf \
+        --kaf-doc AZ.json SCAN.pdf --fi-doc AZ.json SCAN.pdf --coverage FIRST/letter_coverage.json SECOND/letter_coverage.json \
+        --fonts Inkscript-0582.ttf Inkscript-0582-Restored.ttf Inkscript-0565-Restored.ttf
+
+The exact command used on the owner's machine is in docs/storyboard/rebuild.sh. The letter, atlas, scale and
+typeface chapters come from letters_data.py (the real cutter's objects, the runs' coverage files, the real fonts).
 
 Everything visual on the page comes from files the pipeline wrote: the demo's
 traced title (docs/demo), a page-1 region of the fixture document with its
@@ -9,10 +14,11 @@ glyph outlines read back out of the PDF's Type 3 fonts, what pdfium (Chrome's
 engine) copies from Azure's PDF and from ours, the document alphabet sheet,
 and one contradiction from the review list with its ink crops.
 """
-import argparse, base64, json, re
+import argparse, base64, json, re, sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
+sys.path.insert(0, str(HERE))
 STEM = "0582-004-009-012"
 
 
@@ -61,6 +67,11 @@ def main():
     ap.add_argument("--native-dir", required=True); ap.add_argument("--azure-pdf", required=True)
     ap.add_argument("--review", required=True); ap.add_argument("--review-pdf", required=True)
     ap.add_argument("--out", default=str(HERE / "index.html"))
+    ap.add_argument("--fixture", default=str(HERE.parent.parent / "tests" / "fixtures" / STEM))
+    ap.add_argument("--kaf-doc", nargs=2, metavar=("AZURE_JSON", "SCAN_PDF"), help="a document whose kaf overhangs its neighbours (0690-012-001,012-028), pages 4")
+    ap.add_argument("--fi-doc", nargs=2, metavar=("AZURE_JSON", "SCAN_PDF"), help="a document that prints في with the ya's tail swept back (0565-000-002-001)")
+    ap.add_argument("--coverage", nargs=2, metavar=("FIRST_JSON", "SECOND_JSON"), help="letter_coverage.json of two runs of the same set")
+    ap.add_argument("--fonts", nargs=3, metavar=("SINGLE_TTF", "RESTORED_TTF", "LIGHT_TTF"))
     a = ap.parse_args()
     native = Path(a.native_dir).expanduser()
     demo = (HERE.parent / "demo" / "ink_to_text.html").read_text(encoding="utf-8")
@@ -72,6 +83,13 @@ def main():
         alphabet_png=base64.b64encode((native / f"{STEM}.alphabet.png").read_bytes()).decode(),
         contradiction=contradiction(Path(a.review).expanduser(), Path(a.review_pdf).expanduser()),
     )
+    if a.kaf_doc and a.fi_doc and a.coverage and a.fonts:
+        import letters_data
+        data["letters"] = letters_data.build(Path(a.fixture), (Path(a.kaf_doc[0]), Path(a.kaf_doc[1]), [4], {"يكن", "تكو", "كل"}, "A kaf that throws its arm over its neighbours: no vertical line can separate them"),
+                                             (Path(a.fi_doc[0]), Path(a.fi_doc[1]), [3, 4], {"في"}, "A face that prints the ya's tail running back under the fa"),
+                                             Path(a.coverage[0]), Path(a.coverage[1]), dict(single=a.fonts[0], restored=a.fonts[1], light=a.fonts[2]))
+    else:
+        data["letters"] = dict(pens=[], atlas=None, fi=None, scale=dict(docs=[]), vote=None, fonts=None)
     tpl = (HERE / "template.html").read_text(encoding="utf-8")
     html = tpl.replace("/*DEMO_DATA*/", demo_data).replace("/*STORY_DATA*/", json.dumps(data, ensure_ascii=False))
     Path(a.out).write_text(html, encoding="utf-8")
