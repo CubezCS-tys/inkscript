@@ -173,6 +173,7 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
         else: x += 1
     p = dict(kind="pen", units=units, n=len(units), forms=forms or [form(k, len(units)) for k in range(len(units))], F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
              real=real, sc=RISE / line["rise"], base=line["baseline"] - off[1], cache={}, cuts=None)
+    p["ink_s"] = p["ink_s"].astype(np.int16)
     p["cuts"] = best_cuts(p, {})
     return p if p["cuts"] is not None else None
 
@@ -199,40 +200,42 @@ def _mask(p, a, b, connectors=True, owner=None):
     return m
 
 
+SHIFTS = (-4, -2, 0, 2, 4)
+
+
 def letter_img(p, a, b):
     """The letter on the atlas canvas: scaled by the line's rise, baseline on a fixed row, softened — two thin
-    strokes a pixel apart are the same shape, and as hard masks a fine typeface's letters never coincide."""
+    strokes a pixel apart are the same shape, and as hard masks a fine typeface's letters never coincide.
+    Kept as (row, column, crop, sum): only the part of the canvas the letter touches. Whole canvases for every
+    possible cut of every piece were tens of gigabytes on a long document (they stopped the machine once)."""
     if (a, b) in p["cache"]: return p["cache"][(a, b)]
-    ys, xs = np.where(_mask(p, a, b, connectors=False)); im = None
+    ys, xs = np.where(_mask(p, a, b, connectors=False)); it = None
     if len(xs) >= 4:
         sc = p["sc"]; cx = (xs.min() + xs.max()) / 2; M = np.float32([[sc, 0, C / 2 - sc * cx], [0, sc, BASE - sc * p["base"]]])
         m = np.zeros(p["ink_s"].shape, np.float32); m[ys, xs] = 1
         im = cv2.GaussianBlur(cv2.warpAffine(m, M, (C, C), flags=cv2.INTER_AREA), (0, 0), 2.0)
-    p["cache"][(a, b)] = im; return im
+        yy, xx = np.where(im > 1e-3)
+        if len(yy):
+            y0, y1, x0, x1 = yy.min(), yy.max() + 1, xx.min(), xx.max() + 1; crop = im[y0:y1, x0:x1].copy()
+            it = (int(y0), int(x0), crop, float(crop.sum()))
+    p["cache"][(a, b)] = it; return it
 
 
-def letter_key(p, a, b):
-    """The cached, pre-shifted form of `letter_img` for comparisons."""
-    c = p.setdefault("scache", {})
-    if (a, b) not in c:
-        im = letter_img(p, a, b); c[(a, b)] = None if im is None else _shifts(im)
-    return c[(a, b)]
+def canvas_of(it) -> np.ndarray:
+    y0, x0, crop, _ = it; im = np.zeros((C, C), np.float32); im[y0:y0 + crop.shape[0], x0:x0 + crop.shape[1]] = crop; return im
 
 
-SHIFTS = (-4, -2, 0, 2, 4)
+def pack(ref: dict) -> dict:
+    """Each reference at the five horizontal offsets, with its sum: the offsets are applied to the reference, once a
+    round, not to every letter (|A ∩ B| / |A ∪ B| needs only the minimum: the union is sum A + sum B - it)."""
+    return {kk: (np.stack([np.roll(v, -dx, 1) for dx in SHIFTS]).astype(np.float32), float(v.sum())) for kk, v in ref.items()}
 
 
-def _shifts(im):
-    """The picture at five horizontal offsets, flattened, with its sum: |A ∩ B| / |A ∪ B| needs only the minimum,
-    since the union is sum(A) + sum(B) - the intersection. (Rolling the image at every comparison was 60% of a build.)"""
-    return np.stack([np.roll(im, dx, 1) for dx in SHIFTS]).reshape(len(SHIFTS), -1).astype(np.float32), float(im.sum())
-
-
-def likeness(im, ref) -> float:
-    if im is None: return 0.0
-    st, tot = im if isinstance(im, tuple) else _shifts(im)
-    r = ref.reshape(-1).astype(np.float32, copy=False); inter = np.minimum(st, r).sum(1)
-    return float((inter / np.maximum(1e-6, tot + float(r.sum()) - inter)).max())
+def likeness(it, packed) -> float:
+    if it is None: return 0.0
+    y0, x0, crop, tot = it; st, rsum = packed; h, w = crop.shape
+    inter = np.minimum(st[:, y0:y0 + h, x0:x0 + w], crop).sum((1, 2))
+    return float((inter / np.maximum(1e-6, tot + rsum - inter)).max())
 
 
 def key(p, k): return (_base(p["units"][k]), p["forms"][k])
@@ -270,16 +273,16 @@ def _facts_score(p, k, a, b) -> float:
     return w + (1.5 if asc_ok else -6.0) + (1.0 if desc_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
 
 
-def best_cuts(p, ref):
+def best_cuts(p, packs):
     n = p["n"]; pos = [0] + p["cand"] + [p["G"]["W"]]; m = len(pos)
     NEG = -1e9; best = np.full((n + 1, m), NEG); back = np.zeros((n + 1, m), int); best[0][0] = 0
     for i in range(n):                                                # i-th letter from the left = reading-order letter n-1-i
-        k = n - 1 - i; r = ref.get(key(p, k))
+        k = n - 1 - i; r = packs.get(key(p, k))
         for ai in range(m - 1):
             if best[i][ai] == NEG: continue
             for bi in range(ai + 1, m):
                 if (i == n - 1) != (bi == m - 1) or pos[bi] - pos[ai] < 3: continue
-                v = best[i][ai] + facts(p, k, pos[ai], pos[bi]) + ATLAS * (likeness(letter_key(p, pos[ai], pos[bi]), r) if r is not None else 0.3)
+                v = best[i][ai] + facts(p, k, pos[ai], pos[bi]) + ATLAS * (likeness(letter_img(p, pos[ai], pos[bi]), r) if r is not None else 0.3)
                 if v > best[i + 1][bi]: best[i + 1][bi] = v; back[i + 1][bi] = ai
     if best[n][m - 1] == NEG:
         return None
@@ -288,29 +291,43 @@ def best_cuts(p, ref):
     return sorted(cuts)
 
 
-def build_atlas(plans, ref=None):
-    ex = defaultdict(list); every = defaultdict(list)
+def build_atlas(plans, packs=None):
+    """Mean picture per letter-form, from the letters that agree with the current atlas (all of them where fewer
+    than five agree, so that no form drops out). Running sums: the pictures are never held together."""
+    good = {}; every = {}
+    def add(acc, kk, it):
+        if kk not in acc: acc[kk] = [np.zeros((C, C), np.float64), 0]
+        y0, x0, crop, _ = it; acc[kk][0][y0:y0 + crop.shape[0], x0:x0 + crop.shape[1]] += crop; acc[kk][1] += 1
     for p in plans:
         for k, (a, b) in enumerate(intervals(p)):
-            im = letter_img(p, a, b)
-            if im is None: continue
-            every[key(p, k)].append(im)
-            if ref is None or key(p, k) not in ref or likeness(im, ref[key(p, k)]) >= 0.4: ex[key(p, k)].append(im)
-    for kk, v in every.items():                                       # a form none of whose examples agree yet keeps all of them
-        if len(ex[kk]) < 5: ex[kk] = v
-    return {kk: np.mean(np.stack(v), 0) for kk, v in ex.items() if len(v) >= 5}
+            it = letter_img(p, a, b)
+            if it is None: continue
+            kk = key(p, k); add(every, kk, it)
+            if packs is None or kk not in packs or likeness(it, packs[kk]) >= 0.4: add(good, kk, it)
+    out = {}
+    for kk, (tot, n) in every.items():
+        g = good.get(kk); use = g if g and g[1] >= 5 else (tot, n)
+        if use[1] >= 5: out[kk] = (use[0] / use[1]).astype(np.float32)
+    return out
+
+
+def score_plan(p, packs, reliable) -> None:
+    p["reliable"] = reliable
+    p["scores"] = [likeness(letter_img(p, a, b), packs[key(p, k)]) if key(p, k) in packs else None for k, (a, b) in enumerate(intervals(p))]
 
 
 def solve(plans: list[dict], rounds: int = ROUNDS) -> dict:
-    """Choose every plan's cuts with the document's atlas, in rounds; leaves p['scores']. Returns the atlas."""
-    ref = build_atlas(plans)
+    """Choose every plan's cuts with the document's atlas, in rounds; leaves p['scores'] and p['reliable'].
+    Returns dict(ref, packs, reliable) — enough to cut further pieces of the same document with `apply`."""
+    ref = build_atlas(plans); packs = pack(ref)
     for _ in range(rounds):
         changed = 0
         for p in plans:
-            c = best_cuts(p, ref)
+            c = best_cuts(p, packs)
             if c is not None and c != p["cuts"]: p["cuts"] = c; changed += 1
-        new = build_atlas(plans, ref)
+        new = build_atlas(plans, packs)
         ref = {kk: 0.5 * ref[kk] + 0.5 * v if kk in ref else v for kk, v in new.items()}   # damped: a full swap flip-flops
+        packs = pack(ref)
         if not changed: break
     # Which facts this typeface actually shows for each letter-form: a final nun whose bowl hovers at the
     # threshold says nothing either way, and must not veto a cut (the same rule as `letters.learn`).
@@ -318,10 +335,21 @@ def solve(plans: list[dict], rounds: int = ROUNDS) -> dict:
     for p in plans:
         for k, (a, b) in enumerate(intervals(p)): seen[key(p, k)].append(_facts(p, k, a, b)[:4])
     reliable = {kk: tuple(len(v) >= 5 and np.mean([f[i] for f in v]) >= RELIABLE for i in range(4)) for kk, v in seen.items()}
-    for p in plans:
-        p["reliable"] = reliable
-        p["scores"] = [likeness(letter_img(p, a, b), ref[key(p, k)]) if key(p, k) in ref else None for k, (a, b) in enumerate(intervals(p))]
-    return ref
+    for p in plans: score_plan(p, packs, reliable)
+    return dict(ref=ref, packs=packs, reliable=reliable)
+
+
+def apply(p: dict, atlas: dict) -> None:
+    """Cut one more piece of a document whose atlas is already learned."""
+    c = best_cuts(p, atlas["packs"])
+    if c is not None: p["cuts"] = c
+    score_plan(p, atlas["packs"], atlas["reliable"])
+
+
+def finalize(p: dict, word=None) -> dict:
+    """What the build keeps of a plan: its letters' outlines and the verdict. The masks, the path and the cached
+    pictures go — several hundred kilobytes a piece, thousands of pieces a document."""
+    return dict(kind="pen", units=p["units"], n=p["n"], verdict=verdict(p), letters=letter_blobs(p, [dict(word=word)]))
 
 
 def accepted(p: dict) -> bool:
@@ -341,6 +369,7 @@ def accepted(p: dict) -> bool:
 
 def verdict(p: dict) -> str:
     """Why a piece is or is not cut, for the build report."""
+    if "verdict" in p: return p["verdict"]
     if accepted(p): return "cut"
     for k, (a, b) in enumerate(intervals(p)):
         rel = p.get("reliable", {}).get(key(p, k), (True,) * 4)
@@ -355,6 +384,7 @@ def verdict(p: dict) -> str:
 def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
     """One list of blob dicts per letter, in reading order: the ink hanging from its stretch of the path (dots
     with it), and its `cell` — its stretch of the baseline in page x — which is the glyph's selection box."""
+    if "letters" in p: return p["letters"]                            # finalized
     x_off, y_off = p["off"]; n = p["n"]; S = p["G"]["W"]; trunk = p["trunk"]; out = []
     ys, xs = np.where(p["ink_s"] >= 0); X = lambda s: int(xs.min()) if s <= 0 else int(xs.max()) + 1 if s >= S else int(trunk[s][1])
     for k, (a, b) in enumerate(intervals(p)):

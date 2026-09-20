@@ -23,6 +23,7 @@ from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 # verification of its own.
 FIX_COVERAGE = 1.01
 LETTERS = True
+LEARN_FROM = 1500      # pieces the document's atlas is learned from
 CUT_ALL = True        # cut every piece the pen path finds cuts for; the two witnesses' verdict is reported, not enforced:
                       # a wrong cut moves a highlight, exactly what the equal slices of an uncut piece do, while
                       # most rejected cuts were right (experiment 09, rejected45 sheet)                                        # letter-level pieces where the document agrees (geometry/letters.py)
@@ -205,13 +206,24 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # shows in this document and keep only the plans the document agrees
     # with. The geometry is computed twice; the plans are small.
     from ..geometry.letters import letters_of, line_geometry
-    from ..geometry.penpath import verdict as letter_verdict, units_forms, plan as letter_plan, solve as solve_letters, accepted as letters_accepted
+    from ..geometry.penpath import verdict as letter_verdict, units_forms, plan as letter_plan, solve as solve_letters, accepted as letters_accepted, apply as apply_letters, finalize as finalize_letters
     import cv2
     from ..geometry.layout import split_word
     from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
     letter_plans = {}; letters_tried = 0
     if LETTERS:
-        all_plans = []
+        # The document's alphabet is learned from its first LEARN_FROM pieces (rounds over all of them at once);
+        # every later piece is cut against that atlas and reduced to its letters' outlines straight away, so a
+        # long document costs no more memory than a short one.
+        live = []; atlas = None
+
+        def learn():
+            a = solve_letters([p for _, p, _ in live])
+            for key_, p, word in live:
+                letter_plans[key_] = finalize_letters(p, word)
+            live.clear()
+            return a
+
         for pno in range(src.page_count):
             pn = pno + 1
             if pn in fixed_pages or (pn not in junk_pages and born_digital(src[pno])):
@@ -236,12 +248,21 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                         uf = units_forms(t)
                         letters_tried += bool(uf and len(uf[0]) >= 2)
                         p = letter_plan(uf[0], pc["blobs"], lg, uf[1]) if uf and len(uf[0]) >= 2 else None
-                        if p:
-                            all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
-        majority = solve_letters(all_plans)
+                        if not p:
+                            continue
+                        word = pc["blobs"][0].get("word")
+                        if atlas is None:
+                            live.append(((pn, li, wi, k), p, word))
+                            if len(live) >= LEARN_FROM:
+                                atlas = learn()
+                        else:
+                            apply_letters(p, atlas); letter_plans[(pn, li, wi, k)] = finalize_letters(p, word)
+        if atlas is None:
+            atlas = learn()
+        majority = atlas["ref"]; all_plans = list(letter_plans.values())
         kept = {}
         for (pn, li, wi, k), p in letter_plans.items():
-            if CUT_ALL or letters_accepted(p):
+            if CUT_ALL or p["verdict"] == "cut":
                 kept.setdefault((pn, li, wi), {})[k] = p
         from collections import Counter
         report["letters_why"] = dict(Counter(letter_verdict(p) for p in all_plans), **{"no pen path": letters_tried - len(all_plans)})
