@@ -28,6 +28,9 @@ C, BASE, RISE = 72, 46, 26                                # atlas canvas, its ba
 ATLAS = 8.0                                               # weight of likeness to the atlas beside the facts
 AGREE = 0.3                                               # every letter of an accepted piece is at least this like its picture
 ROUNDS = 4
+# A hamza or madda is a loose mark like a dot: the letter that carries it wants it. Without this the hamza of a
+# joined `أ` went to a dotted neighbour (`نشأ` typed from the document's font came out `نشا`).
+MARK_ABOVE = dict(DOTS_ABOVE, **{"أ": 1, "آ": 1}); MARK_BELOW = dict(DOTS_BELOW, **{"إ": 1})
 RELIABLE = 0.85                                           # a fact counts for a letter-form when this share of its occurrences show it
 
 
@@ -181,7 +184,7 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
 def _dot_owner(p, ds, above, cuts=None):
     """The letter (reading order) a dot's ink goes to: the one whose stretch holds it, unless that letter takes no
     dot on that side and a neighbour within a stroke does."""
-    iv = intervals(p, cuts); tol = p["G"]["stroke"]; wants = lambda k: (DOTS_ABOVE if above else DOTS_BELOW).get(_base(p["units"][k]), 0) > 0 or (not above and _base(p["units"][k]) == "ي")
+    iv = intervals(p, cuts); tol = p["G"]["stroke"]; wants = lambda k: (MARK_ABOVE if above else MARK_BELOW).get(_base(p["units"][k]), 0) > 0 or (not above and _base(p["units"][k]) == "ي")
     own = next((k for k, (a, b) in enumerate(iv) if a <= ds < b), 0)
     if not wants(own):
         for k in (own - 1, own + 1):
@@ -253,7 +256,7 @@ def _facts(p, k, a, b):
     # A dot is placed on the path by the nearest trunk point, which near a cut can be the neighbour's (the dot of
     # a medial jim sits under the letter before it). Within a stroke of the boundary it counts for the letter
     # that wants it and not against the one that does not.
-    wa = DOTS_ABOVE.get(c, 0); wb = DOTS_BELOW.get(c, 0)
+    wa = MARK_ABOVE.get(c, 0); wb = MARK_BELOW.get(c, 0)
     cnt = lambda above, want: sum(1 for x, ab in G["dots"] if ab == above and ((a - tol <= x < b + tol) if want else (a + tol <= x < b - tol)))
     da = cnt(True, wa > 0); db = cnt(False, wb > 0 or c == "ي")
     if c == "ي" and last: wb = db if db in (0, 2) else 2

@@ -150,7 +150,9 @@ def choose(plans, iso, smooth=True):
             pool[(letter, "iso")].append(dict(e, score=-abs(w - med), cell=(x0 - sb, x0 + w + 1 + sb)))
     band = join_band(pool); out = {}
     for kk, ex in pool.items():
-        ex = sorted(ex, key=lambda e: -e["score"])[:TOP if smooth else 1]
+        # a printing stretched by a kashida, or cut short, is not the form's usual shape whatever it scores
+        w = np.array([(e["cell"][1] - e["cell"][0]) / e["rise"] for e in ex]); med = float(np.median(w)); usual = [e for e, x in zip(ex, w) if abs(x / med - 1) <= 0.2]
+        ex = sorted(usual if len(usual) >= 3 else ex, key=lambda e: -e["score"])[:TOP if smooth else 1]
         out[kk] = restore(ex, kk[1], band)
     print(f"join band (canvas px from the baseline): {band}; forms restored from >= 4 printings: {sum(1 for v in out.values() if v['n'] >= 4)} of {len(out)}")
     return out
