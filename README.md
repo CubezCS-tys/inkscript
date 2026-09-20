@@ -13,7 +13,8 @@ Two halves, one meeting point — see [docs/pipeline.md](docs/pipeline.md):
   Gemini re-reading page 1 where titles and authors are, aligned into Azure's
   boxes even when the two engines read the page in a different order.
 - **Geometry** (`inkscript.geometry`): every mark on the page traced as an
-  outline; a shape alphabet across pages.
+  outline; a shape alphabet across pages; joined words cut into letters along
+  the pen path, judged by the document's own alphabet — [docs/letters.md](docs/letters.md).
 - **PDF** (`inkscript.pdf`): the two combined into Type 3 fonts, written by
   rules verified against Chrome's engine — [docs/pdf-writing-rules.md](docs/pdf-writing-rules.md).
 
@@ -22,7 +23,7 @@ Two halves, one meeting point — see [docs/pipeline.md](docs/pipeline.md):
 ```
 python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 cp .env.example .env        # add GEMINI_API_KEY
-.venv/bin/pytest            # ~30 s, runs the whole pipeline on one bundled document
+.venv/bin/pytest            # ~3 min, runs the whole pipeline on one bundled document
 ```
 
 ## Use
@@ -37,21 +38,20 @@ document (five pages) so the tests and a first run need no data setup.
 
 ## Status
 
-30-document test set, 115 pages (2026-09-18): 34,958 of 34,959 words copy
-out intact in Chrome's engine (100.0%), 99.9% of lines in reading order,
-3 in-column order inversions, every page keeps its image. 227-journal
-sample (4,440 pages): 99.99% of words, 99.9% of lines; a further
-451-document sample (10,512 pages) in `docs/night-report-2026-09-18.md`,
-with the comparison against Azure's PDFs and ocrmypdf. A reading can be
-corrected in a finished PDF without a rebuild (`inkscript correct`).
-Selection snaps to pieces of ink (24% of words
-split at the joins the script dictates; the rest stay whole rather than guess). Every glyph is the
-printed occurrence's own outline, stored in scan pixels; the document's shape
-alphabet is exported beside the PDF and never substituted into it. `experiments/` keeps the
-numbered scripts that established the geometry results, verbatim.
+Measured 2026-09-20 on 227 journals (4,440 pages): 99.99% of words copy out
+intact in Chrome's engine, 99.95% of lines in reading order, and on the
+scanned documents **96.8% of words have a selection box for every letter**.
+The text is the OCR's reading; making it trustworthy is the next milestone.
+Numbers with their dates, and what the PDFs do not do: [docs/STATUS.md](docs/STATUS.md).
 
-`docs/demo/ink_to_text.html` is a self-contained animation of the idea.
-`docs/storyboard/index.html` is the interactive storyboard — the demo, a real
-page with its glyphs, a widget that reads a line the way Chrome does, every
-rule with the number behind it, and the results — built from the pipeline's
-own outputs by `docs/storyboard/build.py` (see its docstring for the inputs).
+## Finding your way
+
+[CLAUDE.md](CLAUDE.md) is the entry point for people and agents alike;
+[docs/README.md](docs/README.md) maps the documentation: the owner's vision,
+every idea and its fate, the decisions and their evidence, how letters are
+cut, the typeface, running at scale, a glossary. `experiments/` holds the
+numbered experiments, each a question with its answer.
+
+`docs/demo/ink_to_text.html` is a self-contained animation of the idea;
+`docs/storyboard/` an interactive storyboard built from real outputs (it
+predates letters and the typeface).

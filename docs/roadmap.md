@@ -7,24 +7,11 @@ from.
 
 ## Where it stands
 
-- Scans in the corpus are Azure's searchable PDFs; born-digital journals
-  exist too and are left alone. Both handled.
-- 30-document test set, 47 corpus documents (1,007 pages), a 227-journal
-  sample (4,440 pages) and a 451-document sample (10,512 pages) build end
-  to end: 100.0% / 100.0% / 99.99% of words intact in Chrome, 99.9% of
-  lines in reading order (2026-09-18 14:33). Numbers and history in
-  `docs/night-report-2026-09-18.md`.
-- Chrome's engine is the verification target; MuPDF and poppler are
-  measured but disagree with it on vowelled text.
-- (2026-09-18, night) Chrome's line reconstruction is now known from
-  pdfium's source and emulated (`text.chrome_reads`); the stored text is
-  its exact inverse, and `--verify` reports words intact, **lines in
-  order**, in-column inversions and pages that lost their image.
-  pypdfium2 is pinned to the build that reads like Chrome (see
-  `docs/pdf-writing-rules.md`, "History"). Two writer defects that the
-  old checks could not see were found and fixed the same night: pages
-  inheriting `/Resources` lost their image (98 of 224 night documents);
-  scanner content ending in an unbalanced `cm` mirrored every word.
+The current numbers, gaps and output locations are kept in
+[STATUS.md](STATUS.md); ideas and their fates in [ideas.md](ideas.md). This
+file keeps the order of work. *(The numbered list below was written
+2026-09-18; items 2–4 and 6 have since been done or started — see the
+milestones section, which is the live one.)*
 
 ## Next, in order
 

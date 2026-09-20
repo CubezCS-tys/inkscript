@@ -211,11 +211,20 @@ signatures, line geometry, piece masks).*
   outline is drawn back. Cut letters are traced without simplification.
   Fixture, cut against uncut at 300 dpi: 1.2% of ink pixels differ in
   edge shading (>64 levels), 0.03% by more than half tone.
-- Fixture: 779 of 1,122 pieces of two or more letters cut (column
-  method: 654), 2,132 letter glyphs; 1,246/1,246 words, 113/113 lines.
-  By eye about 85 of 90 random accepted pieces are cut right
-  (`experiments/09_pen_path/diagnose.py`). Weak still: the fine slanted
-  face of `0690-012-001,012-028`.
+- **Every piece that gets cuts is cut** (`CUT_ALL`); the witnesses' verdict
+  is reported (`letters_why`), not enforced: two thirds of rejected cuts
+  were right, and a wrong cut costs what an uncut piece costs. Broken ink
+  is bridged for the path only; blobs and text pieces that do not pair off
+  are aligned by width; where the path doubles back the cells share the
+  width in proportion to the path.
+- **When a fact fails, the path is tried again from the first letter's
+  body**, and the start the facts prefer is kept: a face that prints `في`
+  with the ya's tail running back along the baseline had both letters
+  swapped in all 395 copies, the atlas agreeing with itself. Marks go to the
+  nearest point of the whole centre line. No letter is a bare connector.
+- Numbers (2026-09-20): reference document 96.2% of words with a box for
+  every letter, 1,246/1,246 words, 113/113 lines; 227 journals 96.8%, text
+  unchanged. Kept current in `docs/STATUS.md`; narrative in `docs/letters.md`.
 
 ### The column method (before the pen path)
 

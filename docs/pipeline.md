@@ -19,6 +19,13 @@
 | Checks | `inkscript.verify` | PDFs | pdfium/MuPDF/poppler numbers |
 | Review | `inkscript.viewer` | outputs | static HTML bundles |
 
+## Letters
+
+Since 2026-09-20 `inkscript native` makes two passes over a document: the first
+cuts every joined piece into letters along its pen path and learns the
+document's letter atlas; the second writes the PDF, one glyph per letter where
+a piece was cut. How, and the tools for looking inside it: [letters.md](letters.md).
+
 ## Typical run
 
 ```
