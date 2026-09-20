@@ -13,13 +13,18 @@ def test_correction_lands_in_chrome_and_nowhere_else(fixture, tmp_path):
     target = next(p for p in shapes["placements"] if p["page"] == 2 and len(p["text"]) >= 4 and p["text"].isalpha())
     before = pdfium.PdfDocument(str(pdf))[1].get_textpage().get_text_range()
     assert target["text"] in before
-    done = apply_corrections(pdf, [dict(page=2, box=target["box"], text="تصحيح")], out / f"{fixture['stem']}.shapes.json")
+    # a word is several glyphs (pieces, letters): a correction at least as long is dealt out over them; a shorter one
+    # cannot be written in place (a glyph with no text reads back as its char code in pdfium) and is declined
+    short = apply_corrections(pdf, [dict(page=2, box=target["box"], text="لا")], None)
+    assert not short[0]["applied"] and "glyphs" in short[0]["reason"]
+    fix = "تصحيح" + "ات" * 3
+    done = apply_corrections(pdf, [dict(page=2, box=target["box"], text=fix)], out / f"{fixture['stem']}.shapes.json")
     assert done[0]["applied"] and done[0]["was"] == target["text"]
     after = pdfium.PdfDocument(str(pdf))[1].get_textpage().get_text_range()
-    assert "تصحيح" in after and after.count(target["text"]) == before.count(target["text"]) - 1
+    assert fix in after and after.count(target["text"]) == before.count(target["text"]) - 1
     assert len(after.split()) == len(before.split())                       # nothing else moved
     shapes2 = json.loads((out / f"{fixture['stem']}.shapes.json").read_text(encoding="utf-8"))
-    assert any(p.get("corrected") and p["text"] == "تصحيح" for p in shapes2["placements"])
+    assert any(p.get("corrected") and p["text"] == fix for p in shapes2["placements"])
     assert (out / f"{fixture['stem']}.corrections.json").exists()
 
 

@@ -22,7 +22,10 @@ from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 # neutralised-junk path is the verified one; the switch waits for a
 # verification of its own.
 FIX_COVERAGE = 1.01
-LETTERS = True                                        # letter-level pieces where the document agrees (geometry/letters.py)
+LETTERS = True
+CUT_ALL = True        # cut every piece the pen path finds cuts for; the two witnesses' verdict is reported, not enforced:
+                      # a wrong cut moves a highlight, exactly what the equal slices of an uncut piece do, while
+                      # most rejected cuts were right (experiment 09, rejected45 sheet)                                        # letter-level pieces where the document agrees (geometry/letters.py)
 
 
 def born_digital(page) -> bool:
@@ -202,11 +205,11 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
     # shows in this document and keep only the plans the document agrees
     # with. The geometry is computed twice; the plans are small.
     from ..geometry.letters import letters_of, line_geometry
-    from ..geometry.penpath import units_forms, plan as letter_plan, solve as solve_letters, accepted as letters_accepted
+    from ..geometry.penpath import verdict as letter_verdict, units_forms, plan as letter_plan, solve as solve_letters, accepted as letters_accepted
     import cv2
     from ..geometry.layout import split_word
     from ..text import MARKS, pieces as text_pieces, ARABIC_LETTER
-    letter_plans = {}
+    letter_plans = {}; letters_tried = 0
     if LETTERS:
         all_plans = []
         for pno in range(src.page_count):
@@ -231,14 +234,17 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                     for k, pc in enumerate(split_word(w, lh)):
                         t = pc["text"].strip()
                         uf = units_forms(t)
+                        letters_tried += bool(uf and len(uf[0]) >= 2)
                         p = letter_plan(uf[0], pc["blobs"], lg, uf[1]) if uf and len(uf[0]) >= 2 else None
                         if p:
                             all_plans.append(p); letter_plans[(pn, li, wi, k)] = p
         majority = solve_letters(all_plans)
         kept = {}
         for (pn, li, wi, k), p in letter_plans.items():
-            if letters_accepted(p):
+            if CUT_ALL or letters_accepted(p):
                 kept.setdefault((pn, li, wi), {})[k] = p
+        from collections import Counter
+        report["letters_why"] = dict(Counter(letter_verdict(p) for p in all_plans), **{"no pen path": letters_tried - len(all_plans)})
         report["letters"] = dict(planned=len(letter_plans), accepted=sum(len(v) for v in kept.values()), letter_forms=len(majority))
         letter_plans = kept
     # One shape alphabet for the whole document. It labels the ink — every

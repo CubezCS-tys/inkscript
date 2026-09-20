@@ -242,6 +242,19 @@ def _split_word(w, lh: float, text: str, whole: list):
         b = best[1]
         tp, tok = ["".join(tp[b[i]:b[i + 1]]) for i in range(len(ip))], [tok[b[i]] for i in range(len(ip))]
         arabic = [True] * len(tp); need = [1] * len(tp)
+    elif len(tp) >= 2 and all(arabic) and len(tp) < len(ip) <= len(tp) + 3:
+        # More blobs than runs: a letter's ink is broken in the scan. Consecutive blobs are grouped into the runs,
+        # again by widths; the word then splits as usual and only the broken run stays one glyph.
+        from itertools import combinations
+        from .letters import letters_of, width_class
+        cls = [sum(width_class(u) for u in letters_of(t)) or 1.0 for t in tp]; best = None
+        span = lambda gs: max(1.0, max(g["x1"] for g in gs) - min(g["x0"] for g in gs))
+        unit = span(ip) / sum(cls)
+        for cutset in combinations(range(1, len(ip)), len(tp) - 1):
+            b = [0, *cutset, len(ip)]; cost = sum(abs(np.log(span(ip[b[i]:b[i + 1]]) / (unit * cls[i]))) for i in range(len(tp)))
+            if best is None or cost < best[0]: best = (cost, b)
+        b = best[1]
+        ip = [dict(x0=min(g["x0"] for g in ip[b[i]:b[i + 1]]), x1=max(g["x1"] for g in ip[b[i]:b[i + 1]]), blobs=[bl for g in ip[b[i]:b[i + 1]] for bl in g["blobs"]]) for i in range(len(tp))]
     if len(tp) < 2 or sum(need) != len(ip):
         return whole
     out, i = [], 0

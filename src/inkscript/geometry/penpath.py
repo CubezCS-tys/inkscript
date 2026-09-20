@@ -109,7 +109,28 @@ def units_forms(text: str):
     units, forms = [], []
     for r in runs:
         u = letters_of(r); units += u; forms += [form(k, len(u)) for k in range(len(u))]
+    if "".join(units) != text.strip():
+        return None                                                  # the letters must spell the piece exactly: `ركبهم ـ` lost its space
     return units, forms
+
+
+def bridge(mask: np.ndarray, reach: float):
+    """A run whose ink is broken in the scan (`على` printed as two blobs) has no single pen path. The big blobs are
+    joined, nearest points first, by a two-pixel line no longer than `reach` — for the PATH only: the bridge is
+    never drawn, and it is an obvious place for a cut. None if the blobs are further apart than that."""
+    n, lab, st, _ = cv2.connectedComponentsWithStats(mask.astype(np.uint8), connectivity=8)
+    big = [k for k in range(1, n) if st[k, cv2.CC_STAT_AREA] > 0.25 * st[1:, cv2.CC_STAT_AREA].max()]
+    if len(big) < 2 or len(big) > 4:
+        return None
+    out = mask.astype(np.uint8).copy(); big.sort(key=lambda k: st[k, cv2.CC_STAT_LEFT])
+    for a, b in zip(big, big[1:]):
+        pa = np.argwhere(lab == a); pb = np.argwhere(lab == b)
+        pa = pa[pa[:, 1] >= pa[:, 1].max() - 12]; pb = pb[pb[:, 1] <= pb[:, 1].min() + 12]     # facing edges
+        d = ((pa[:, None, :] - pb[None, :, :]) ** 2).sum(2); i, j = np.unravel_index(np.argmin(d), d.shape)
+        if d[i, j] ** 0.5 > reach:
+            return None
+        cv2.line(out, (int(pa[i][1]), int(pa[i][0])), (int(pb[j][1]), int(pb[j][0])), 1, 2)
+    return out.astype(bool)
 
 
 def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str] | None = None):
@@ -119,9 +140,14 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
     mask, off = piece_mask(blobs)
     if mask.shape[1] < 4 * len(units) or mask.shape[1] > 1500:
         return None
-    F = analyse(mask, line, off[1])
+    F = analyse(mask, line, off[1]); real = None
     if F is None:
-        return None
+        joined = bridge(mask, 0.5 * line["rise"])
+        if joined is None:
+            return None
+        F = analyse(joined, line, off[1]); real = mask
+        if F is None:
+            return None
     r = unroll(F, line, off[1])
     if r is None:
         return None
@@ -146,7 +172,7 @@ def plan(units: list[str], blobs: list[dict], line: dict | None, forms: list[str
             x = j
         else: x += 1
     p = dict(kind="pen", units=units, n=len(units), forms=forms or [form(k, len(units)) for k in range(len(units))], F=F, G=G, ink_s=ink_s, trunk=trunk, off=off, cand=cand, conn=conn,
-             sc=RISE / line["rise"], base=line["baseline"] - off[1], cache={}, cuts=None)
+             real=real, sc=RISE / line["rise"], base=line["baseline"] - off[1], cache={}, cuts=None)
     p["cuts"] = best_cuts(p, {})
     return p if p["cuts"] is not None else None
 
@@ -164,6 +190,7 @@ def _dot_owner(p, ds, above, cuts=None):
 
 def _mask(p, a, b, connectors=True, owner=None):
     s = p["ink_s"]; m = (s >= a) & (s < b)
+    if p.get("real") is not None: m = m & p["real"]                   # a bridge is path, not ink
     if not connectors:
         m2 = m & ~p["conn"][np.clip(s, 0, None)]
         if m2.sum() >= 4: m = m2
@@ -287,6 +314,19 @@ def accepted(p: dict) -> bool:
     return positive and unknown <= 1 and unknown < len(sc) - 1 and all(s >= AGREE for s in sc if s is not None)
 
 
+def verdict(p: dict) -> str:
+    """Why a piece is or is not cut, for the build report."""
+    if accepted(p): return "cut"
+    for k, (a, b) in enumerate(intervals(p)):
+        rel = p.get("reliable", {}).get(key(p, k), (True,) * 4)
+        for name, r, ok in zip(("tall stroke", "bowl", "dots above", "dots below"), rel, _facts(p, k, a, b)[:4]):
+            if r and not ok: return f"fact: {name}"
+    sc = p.get("scores", [])
+    if sum(s is None for s in sc) > 1 or all(s is None for s in sc): return "letter-forms too rare for the atlas"
+    if any(s is not None and s < AGREE for s in sc): return "unlike the atlas"
+    return "nothing positive to confirm it"
+
+
 def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
     """One list of blob dicts per letter, in reading order: the ink hanging from its stretch of the path (dots
     with it), and its `cell` — its stretch of the baseline in page x — which is the glyph's selection box."""
@@ -299,7 +339,7 @@ def letter_blobs(p: dict, blobs: list[dict]) -> list[list[dict]]:
         # Outlines run through pixel centres, so two letters traced apart leave a one-pixel seam of missing ink
         # across the stroke where they meet (1.1% of a page's ink). Each letter therefore takes one pixel of its
         # neighbour's ink at the seam — inside the piece's ink only, so the outer outline does not move.
-        sub = (cv2.dilate(_mask(p, a, b, owner=k).astype(np.uint8), np.ones((3, 3), np.uint8)) & (p["ink_s"] >= 0)).astype(np.uint8)
+        sub = (cv2.dilate(_mask(p, a, b, owner=k).astype(np.uint8), np.ones((3, 3), np.uint8)) & ((p["ink_s"] >= 0) & (p["real"] if p.get("real") is not None else True))).astype(np.uint8)
         sub |= _mask(p, a, b, owner=k).astype(np.uint8)
         cs, hier = cv2.findContours(sub, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
         keep = [(c.reshape(-1, 2) + [x_off, y_off], int(hier[0][i][3] >= 0)) for i, c in enumerate(cs)]

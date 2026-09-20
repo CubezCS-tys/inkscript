@@ -13,6 +13,7 @@ from pathlib import Path
 import fitz
 from ..text import visual, chrome_reads, latin_majority, RTL
 from .inspect import page_glyphs, set_glyph_text
+from ..geometry.letters import letters_of
 
 
 def _iou(a, b) -> float:
@@ -51,9 +52,21 @@ def apply_corrections(pdf: Path, corrections: list[dict], shapes_json: Path | No
         if not best or score < min_fit:
             done.append(dict(**c, applied=False, reason=f"no glyph overlaps the box (best IoU {score:.2f})")); continue
         line = [g for g in glyphs if g["font"] == best["font"]]
-        was = chrome_reads(best["text"]); stored = stored_form(line, c["text"])
-        set_glyph_text(doc, best, stored); best["text"] = stored
-        done.append(dict(**c, applied=True, was=was, font=best["font"], code=best["code"], iou=round(score, 3)))
+        # A word is often several glyphs now (pieces, letters). Every glyph of the line lying inside the word's box
+        # belongs to it; the corrected text is dealt out over them in reading order, one letter each and the rest
+        # on the last, so the word still copies out whole and each glyph keeps a letter to select.
+        area = lambda b: max(1.0, (b[2] - b[0]) * (b[3] - b[1]))
+        inside = [g for g in line if area(g["box_px"]) <= area(c["box"]) and _fit(g["box_px"], c["box"]) >= 0.8]
+        if best not in inside: inside = [best]
+        rtl = bool(RTL.search(c["text"])); inside.sort(key=lambda g: -(g["box_px"][0] + g["box_px"][2]) if rtl else (g["box_px"][0] + g["box_px"][2]))
+        was = "".join(chrome_reads(g["text"]) for g in inside)
+        units = letters_of(c["text"]) if rtl and "".join(letters_of(c["text"])) == c["text"] else list(c["text"])
+        if len(inside) > 1 and len(units) < len(inside):
+            done.append(dict(**c, applied=False, reason=f"the word is {len(inside)} glyphs and the correction has {len(units)} letters")); continue
+        chunks = [c["text"]] if len(inside) == 1 else units[:len(inside) - 1] + ["".join(units[len(inside) - 1:])]
+        for g, chunk in zip(inside, chunks):
+            stored = stored_form(line, chunk); set_glyph_text(doc, g, stored); g["text"] = stored
+        done.append(dict(**c, applied=True, was=was, font=best["font"], code=best["code"], glyphs=len(inside), iou=round(score, 3)))
     doc.save(pdf, incremental=True, encryption=fitz.PDF_ENCRYPT_KEEP); doc.close()
     if shapes_json and Path(shapes_json).exists():
         s = json.loads(Path(shapes_json).read_text(encoding="utf-8"))
