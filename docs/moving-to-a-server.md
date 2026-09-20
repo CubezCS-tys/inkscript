@@ -10,7 +10,7 @@ clone is enough to develop and run the tests, and not enough to run the sets.
 | What | Size | How | Why not git |
 |---|---|---|---|
 | The repo | 7 MB | `git clone git@github.com:CubezCS-tys/inkscript.git` | — |
-| Inputs: Azure JSON + PDFs, scans, Gemini page-1 readings, id lists (30-doc test set, 47, 227 journals, 451 sample) | ~6 GB | `ops/pack_data.sh user@server:~/inkscript-data` (rsync, resumable) | copyrighted scans; size |
+| Inputs: Azure JSON + PDFs, scans, Gemini page-1 readings, id lists (30-doc test set, 47, 227 journals, 451 sample) | 4.6 GB, 4,173 files | `ops/pack_data.sh user@server:~/inkscript-data` (rsync, resumable) | copyrighted scans; size |
 | Keys: `GEMINI_API_KEY` (`.env`), AWS credentials for `s3://mandumah-source-docs` (`~/.aws/`) | — | type them on the server (`aws configure`; edit `.env`) — never commit, never paste into chat | secrets |
 | Built PDFs of the 227-journal runs (`experiments/09_pen_path/out/`) | 7.4 GB | optional: `rsync -avh experiments/09_pen_path/out/ user@server:~/inkscript/experiments/09_pen_path/out/` | reproducible (~5 h); needed only as the OLD side of `compare_boxes.py` |
 | The agent's private notes (`~/.claude/projects/…/memory/`) | KB | not needed: `CLAUDE.md` and `docs/` are the source of truth | — |
@@ -34,7 +34,7 @@ experiments/09_pen_path/watchdog.sh &
 
 **Sizing.** A worker peaks at 1–2.3 GB and uses one core; a page takes about
 7.6 s. 8 GB RAM / 4 cores runs 3 workers (227 journals in ~5 h); 16 GB / 8
-cores runs 6–7. Disk: 6 GB inputs + ~17 MB of output per document built
+cores runs 6–7. Disk: 4.6 GB inputs + ~17 MB of output per document built
 (PDF + vector PDF + shapes) — 40 GB is comfortable for the samples; the full
 corpus (~100,000 documents) would need outputs pushed to a bucket as they are
 made. Use `tmux` or `setsid nohup` so runs survive the SSH session; runs are

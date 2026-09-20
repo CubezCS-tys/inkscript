@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copy the INPUTS this project needs (not in git, ~6 GB) to another machine, or into one folder.
+# Copy the INPUTS this project needs (not in git, 4.6 GB) to another machine, or into one folder.
 #   ops/pack_data.sh user@server:/home/user/inkscript-data      (rsync over ssh; resumable, rerun to continue)
 #   ops/pack_data.sh /mnt/usb/inkscript-data                    (a local folder)
 # Source: $INKSCRIPT_DATA, default ~/Desktop/OCR_gem_json/output (the owner's laptop).
