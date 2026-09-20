@@ -2,6 +2,12 @@
 
 ## Where the data is (outside the repo; nothing here is committed)
 
+*The paths below are the owner's machine. On any other machine: the bundled
+document in `tests/fixtures/` needs nothing; for more, `inkscript fetch` needs
+the `aws` command-line tool signed in with credentials that can read the
+bucket (the owner's AWS profile — ask; they are not in the repo), and the
+Gemini commands need `GEMINI_API_KEY` in `.env` (`.env.example`).*
+
 | What | Where |
 |---|---|
 | Corpus | `s3://mandumah-source-docs/<id>/<id>.{pdf,json}` — Azure's searchable PDF and its JSON; `inkscript fetch --id-file ids.txt --out DIR` pulls them into the `--azure-dir` layout |
@@ -29,6 +35,14 @@ experiments/09_pen_path/watchdog.sh &
   extra worker by truncating `stems_w0N` and starting a helper on the cut-off
   part (bash reads the list lazily).
 
+## Judging a change to the letter cutter
+
+Build the same documents before and after, then
+`experiments/09_pen_path/compare_boxes.py OLD_DIR NEW_DIR`: per document, the
+share of characters whose box moved, letter coverage before → after, and a
+flag if the copied text changed at all (it should not). This is the open task
+for the fixes made after the 227-journal run ([roadmap.md](roadmap.md), item 5).
+
 ## Memory and time
 
 | | Time | Peak memory |
@@ -40,7 +54,7 @@ experiments/09_pen_path/watchdog.sh &
 The machine has 15 GB and the owner's browser uses several. **Rules:** at most
 3–4 workers; `nice`; check `free -g` first; measure a long document's peak
 with `/usr/bin/time -v` before any multi-worker run; always start the
-watchdog (it stops the run when less than 2.5 GB is available). A scripts that
+watchdog (it stops the run when less than 2.5 GB is available). A script that
 opens many PDFs with pypdfium2 must close each one (`summary.py` once took
 the machine's memory by leaving 227 open).
 

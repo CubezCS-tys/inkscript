@@ -1,4 +1,6 @@
-"""The document's own letters as the reference. Every letter cut along the pen path is drawn on a common
+"""HISTORICAL SKETCH — the live atlas is in src/inkscript/geometry/penpath.py; kept for `sheet`/`label` and the record.
+
+The document's own letters as the reference. Every letter cut along the pen path is drawn on a common
 canvas (scaled by its line's rise, its baseline on a fixed row); the pixel-wise median of a letter-form's
 examples is that form's reference shape; each cut letter is then scored against its reference, and a piece
 by its worst letter. Sheets: the atlas, the worst-scoring pieces, the best-scoring pieces.

@@ -314,8 +314,11 @@ catches a wrong assignment.
 ## Known ceiling
 
 Words whose ink physically touches cannot be split by any layer. Brackets
-mirror as they do in native Arabic PDFs. Selection is per piece; cutting
-inside a connected run of letters is not done.
+mirror as they do in native Arabic PDFs. Selection is per letter where a
+piece was cut along its pen path (96.8% of words at scale, see "Letters"
+above and `docs/STATUS.md`), per piece otherwise; words carrying vowel marks
+are never cut. *(Until 2026-09-19 this section read "cutting inside a
+connected run of letters is not done".)*
 
 ## Numbers (30 documents, 115 pages, pdfium)
 

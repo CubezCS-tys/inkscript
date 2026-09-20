@@ -1,4 +1,6 @@
-"""Cuts chosen by the document's own letters, in rounds. Start from the pen-path cuts; build the atlas; for
+"""HISTORICAL SKETCH — superseded by `solve` in src/inkscript/geometry/penpath.py.
+
+Cuts chosen by the document's own letters, in rounds. Start from the pen-path cuts; build the atlas; for
 each piece try every way of placing its cuts on the candidate points of its pen path and keep the one whose
 letters look most like their atlas pictures; rebuild the atlas from the letters that agree; repeat.
 

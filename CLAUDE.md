@@ -23,14 +23,15 @@ indexed in [experiments/README.md](experiments/README.md).
 ## Commands
 
 ```
-python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"    # fontTools is needed only by experiments/11
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+.venv/bin/pip install fonttools                               # only for experiments/11_typeface (not in the dev extra)
 .venv/bin/pytest -q                                           # ~3 min: builds the bundled 5-page document end to end
 .venv/bin/inkscript native --azure-dir F/azure --scan-dir F/input --frontpage-dir F/frontpage \
     --out OUT --vector --verify                               # F = tests/fixtures/0582-004-009-012
 .venv/bin/python experiments/09_pen_path/coverage.py OUT/<stem>_vector.pdf    # letter coverage of one PDF
 ```
 
-`inkscript --help` lists the ten subcommands. The fixture is a real five-page
+`inkscript --help` lists the ten subcommands; [docs/pipeline.md](docs/pipeline.md) has a table of them and a file-by-file map of `src/`. The fixture is a real five-page
 document, so nothing here needs data or keys (Gemini is only called by
 `frontpage`, `numbers`, `second`; the fixture ships its page-1 reading).
 

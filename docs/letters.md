@@ -70,6 +70,7 @@ goes in the build report as `letters_why`.
 | Why is *this* word not cut? | `experiments/09_pen_path/why_word.py <azure.json> <scan.pdf> <page> <word,word>` |
 | Why do pieces of this document get no letters, ranked? | `experiments/09_pen_path/nopath.py <azure.json> <scan.pdf> <pages>` |
 | Are the cuts any good? (coloured sheets of accepted / doubted pieces) | `experiments/09_pen_path/diagnose.py <azure.json> <scan.pdf>` |
+| Did a change to the cutter move boxes, and in which documents? | `experiments/09_pen_path/compare_boxes.py OLD_DIR NEW_DIR` |
 | Is a letter-form cut systematically wrong in this book? | build its font, look at the glyph: `experiments/11_typeface/peek.py`, `peek_pieces.py` |
 
 The honest gaps: coverage counts boxes, not whether they sit right

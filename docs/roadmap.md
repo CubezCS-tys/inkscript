@@ -1,19 +1,44 @@
 # Roadmap
 
-Written 2026-09-18 after the first corpus-scale test. Ordered by what each
-step buys for the goal: a faithful, natively selectable digital copy of
-every page, with the accuracy of the text improving over the OCR it started
-from.
+**This file has one live list — the next section.** Numbers and gaps are in
+[STATUS.md](STATUS.md); every idea and its fate in [ideas.md](ideas.md).
+Everything under "History" is kept for the record and is done or superseded.
 
-## Where it stands
+## The live list (owner's order, 2026-09-20)
 
-The current numbers, gaps and output locations are kept in
-[STATUS.md](STATUS.md); ideas and their fates in [ideas.md](ideas.md). This
-file keeps the order of work. *(The numbered list below was written
-2026-09-18; items 2–4 and 6 have since been done or started — see the
-milestones section, which is the live one.)*
+1. **Make the text trustworthy.** The PDFs carry Azure's reading; "words
+   intact" means we preserved it, not that it is right. A second opinion
+   from the book's own letters: not reading blind (experiment 10: 41% of
+   pieces, the cut-before-read problem) but CHECKING — cut by the known
+   word, then ask whether the ink fits a look-alike reading better (dot
+   counts, small marks, `ة`/`ه`). Feed the review-and-correct loop.
+2. **A measure of highlight placement**, from a hand-checked sample: 96%
+   of words have a box per letter, but how many boxes sit right is not
+   measured.
+3. **The typeface export** (experiment 11), and a sharp display atlas.
+4. Known gaps: vowelled words never cut; underlined words; fine slanted
+   faces; tables; Firefox word order; corrections shorter than the glyph
+   count.
+5. **Rerun the 227 journals with the fixes made after the run** (swapped
+   `في`, thin alefs, hamza, dots under a swept-back tail) and compare every
+   document's letter boxes before and after:
+   `experiments/09_pen_path/compare_boxes.py OLD_DIR NEW_DIR`. Cheap, runs in
+   the background ([operations.md](operations.md)). Then the 451 sample.
+6. **Typeface polish, then a restored edition** ([typeface.md](typeface.md)).
 
-## Next, in order
+## Standing rules
+
+- Every glyph is the printed occurrence's own outline, stored in scan
+  pixels. No substitution, no simplification.
+- No rule about the text layer is adopted on reasoning alone; each is
+  measured against pdfium, MuPDF and poppler and recorded in
+  `docs/pdf-writing-rules.md` with the number that justified it.
+- The word stays one glyph whenever splitting would require a guess.
+
+## History
+
+### The list of 2026-09-18 (items 2, 3, 4 and 6 done or started since; 1 and 5 carried into the live list or decided)
+
 
 1. **Corpus sample at real scale.** 500–1,000 documents drawn evenly
    across journals, built and checked unattended; read the per-page
@@ -27,7 +52,7 @@ milestones section, which is the live one.)*
 3. **Second reading for numbers and contradictions only.** Send just those
    crops to Gemini (a few per page) and accept a correction only when the
    two readings agree. Cheap, and it targets the errors that matter.
-4. **Letter-level selection inside a connected run.** In the build
+4. **Letter-level selection inside a connected run.** *(Pieces, not words: a different count from the letter coverage in STATUS.md.)* In the build
    along the pen path (2026-09-20, `geometry/penpath.py`, the user's
    idea of following the strokes): cuts are points on the ink's centre
    line, chosen by hard facts plus the document's own letter atlas; 69%
@@ -46,23 +71,7 @@ milestones section, which is the live one.)*
    (OpenType via fontTools) once letter-level pieces exist; until then the
    SVG specimen is the honest form.
 
-## Milestones the user wants to come back to (2026-09-20)
-
-1. **Make the text trustworthy.** The PDFs carry Azure's reading; "words
-   intact" means we preserved it, not that it is right. A second opinion
-   from the book's own letters: not reading blind (experiment 10: 41% of
-   pieces, the cut-before-read problem) but CHECKING — cut by the known
-   word, then ask whether the ink fits a look-alike reading better (dot
-   counts, small marks, `ة`/`ه`). Feed the review-and-correct loop.
-2. **A measure of highlight placement**, from a hand-checked sample: 96%
-   of words have a box per letter, but how many boxes sit right is not
-   measured.
-3. **The typeface export** (experiment 11), and a sharp display atlas.
-4. Known gaps: vowelled words never cut; underlined words; fine slanted
-   faces; tables; Firefox word order; corrections shorter than the glyph
-   count.
-
-## Todo (2026-09-18, morning)
+### Todo (2026-09-18, morning)
 
 Parked by the user to carry on with the roadmap; pick up in this order.
 
@@ -97,13 +106,4 @@ Parked by the user to carry on with the roadmap; pick up in this order.
       on `0470`), but at that coverage the fixed fonts read back worse
       than our layer, so the switch to them waits for ≥99.5% coverage
       (ligature-aware alignment would get there).
-- [ ] Push the repo when the user asks.
-
-## Standing rules
-
-- Every glyph is the printed occurrence's own outline, stored in scan
-  pixels. No substitution, no simplification.
-- No rule about the text layer is adopted on reasoning alone; each is
-  measured against pdfium, MuPDF and poppler and recorded in
-  `docs/pdf-writing-rules.md` with the number that justified it.
-- The word stays one glyph whenever splitting would require a guess.
+- [x] Push the repo when the user asks (pushed 2026-09-18 to github.com/CubezCS-tys/inkscript; pushed after every milestone since).

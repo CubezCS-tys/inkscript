@@ -92,7 +92,7 @@ storyboard's glyph explorer): every glyph of a page back out of its font.
 
 `inkscript native --verify` opens every finished PDF in pdfium — Chrome's
 engine, pinned to the build that reads like Chrome (pypdfium2 5.12.1,
-pdfium 7947; 5.13's 7999 does not, see pdf-writing-rules.md "History") —
+pdfium 7947; 5.13's 7999 does not, see pdf-writing-rules.md, the *History* note under "Glyphs", and decisions.md D5) —
 and reports per document:
 
 - **words intact**: each word placed in the layer comes back whole (marks
@@ -110,8 +110,41 @@ the tests round-trip `visual()` through it.
 
 ## What the geometry does not do yet
 
-- Letter-level glyphs (Arabic joins letters; a blob is a sub-word).
+- Letters of words carrying vowel marks (never cut); see [letters.md](letters.md) for what is cut.
 - Read on its own: labels come from the OCR half. See
   `experiments/04_label_once_purity.py` for the measurement that frames it:
   strict shape groups are 99.8% consistent, but two-thirds of a page's
   words are shapes that appear once.
+
+## The code, file by file
+
+| File | What it does |
+|---|---|
+| `src/inkscript/cli.py` | the ten subcommands (table below) |
+| `src/inkscript/text.py` | Arabic text rules: runs/pieces, marks, `visual` (how text is stored) and `chrome_reads` (pdfium's line reconstruction, emulated) |
+| `src/inkscript/ocr/azure.py`, `align.py`, `gemini.py`, `frontpage.py` | load Azure's JSON; fit Gemini's page-1 text into Azure's boxes; the Gemini calls and fallbacks; the older searchable-PDF path |
+| `src/inkscript/geometry/trace.py` | page → ink blobs as outline polygons; rules separated |
+| `src/inkscript/geometry/layout.py` | blobs → words → lines; `split_word`: a word's ink into pieces (and into letters when plans exist) |
+| `src/inkscript/geometry/penpath.py` | the letter cutter: pen path, facts, atlas, cells ([letters.md](letters.md)) |
+| `src/inkscript/geometry/letters.py` | the earlier column cutter; still supplies letter signatures, line geometry, piece masks |
+| `src/inkscript/geometry/alphabet.py` | the document's shape alphabet (knowledge, never drawing) |
+| `src/inkscript/pdf/native.py` | `build_document`: born-digital detection, the letters pass, the PDF pass, the report |
+| `src/inkscript/pdf/type3.py` | writes the Type 3 fonts and text runs — every rule in pdf-writing-rules.md lives here |
+| `src/inkscript/pdf/inspect.py`, `correct.py`, `fontfix.py` | read glyphs back from a PDF; write a corrected reading in place; rebuild junk fonts' ToUnicode (off) |
+| `src/inkscript/verify/engines.py` | what `--verify` measures in pdfium |
+| `src/inkscript/verify/consistency.py`, `numbers.py`, `second.py`, `review_html.py` | same-ink-different-text contradictions; Gemini second readings; the editable review page |
+| `src/inkscript/viewer/frontpage_compare.py` | static review bundle for front pages |
+
+| Command | Needs | Gives |
+|---|---|---|
+| `inkscript fetch --id-file ids.txt --out DIR` | the `aws` CLI with credentials that can read `s3://mandumah-source-docs` (the owner's AWS profile; not in the repo) | `DIR/<id>/<id>.{pdf,json}` |
+| `inkscript frontpage --azure-dir … --out …` | `GEMINI_API_KEY` in `.env` | page-1 reading per document (`<stem>.gemini.p1.md`) |
+| `inkscript native --azure-dir … [--scan-dir …] --frontpage-dir … --out … [--vector] [--verify] [--resume] [--only ID]` | — | `<stem>.pdf`, `<stem>_vector.pdf`, `shapes.json`, alphabet, `native_pdf_report.json` |
+| `inkscript check OUT --out REVIEW [--html]` | — | contradictions and every number, as a review list |
+| `inkscript numbers`, `inkscript second` | Gemini | second readings; `--apply` writes agreed corrections |
+| `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |
+| `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
+
+Without the bucket or keys, everything still runs on the bundled document
+(`tests/fixtures/0582-004-009-012`). One test: `.venv/bin/pytest -q tests/test_pieces.py`;
+the documentation checks alone: `.venv/bin/pytest -q tests/test_docs.py` (instant).

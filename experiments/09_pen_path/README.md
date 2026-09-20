@@ -23,6 +23,6 @@ narrative in `docs/letters.md`.
 - Found by accident: a per-cut picture cache that took 5.7 GB a process.
 
 **Scripts still in use** (the letter tooling — see `docs/letters.md`):
-`coverage.py`, `summary.py`, `why_word.py`, `nopath.py`, `diagnose.py`,
+`coverage.py`, `summary.py`, `compare_boxes.py`, `why_word.py`, `nopath.py`, `diagnose.py`,
 `run_set.sh`, `watchdog.sh`. `penpath.py`/`atlas.py`/`rounds.py` are the
 historical sketches (`diagnose.py` borrows their drawing helpers).

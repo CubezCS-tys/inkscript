@@ -38,7 +38,8 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 - Fixes made after the 227-journal run and **not yet in those files**: the
   swapped `في` in faces whose ya-tail runs back along the baseline; words of a
   light face not split at the alef; hamza of a joined `أ`; dots under a
-  swept-back tail. A rerun with a per-document box comparison is the open task.
+  swept-back tail. A rerun compared document by document with
+  `experiments/09_pen_path/compare_boxes.py` is the open task (roadmap item 5).
 
 ## In flight / where outputs are (this machine)
 
@@ -50,5 +51,5 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   `experiments/11_typeface/out/`.
 - Older deliverables: `~/Desktop/native_pdfs/` (30 documents),
   `~/Desktop/s3_native/` (47 documents) — built before pen-path letters.
-- Storyboard artifact (published 2026-09-18, stale since):
+- Storyboard artifact (published 2026-09-18; **stale — its numbers predate letters; do not cite**):
   https://claude.ai/artifact/MjTHoKev4bJLX6vHo4jdk3 — source `docs/storyboard/`.

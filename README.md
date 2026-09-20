@@ -3,7 +3,8 @@
 Ink as geometry, geometry as a font, the scanned page as native text.
 
 A scanned Arabic journal page goes in. A PDF comes out in which every printed
-word is a real glyph whose outline is the word's own ink, mapped to its text:
+word — and, within it, every letter — is a real glyph whose outline is its own
+ink, mapped to its text:
 the selection highlight sits on the letters, copy gives the words with their
 vowel marks, search works, and the vector version needs no image at all.
 

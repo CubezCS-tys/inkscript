@@ -1,4 +1,6 @@
-"""Letters along the pen path. The ink of a connected piece is thinned to its centre line; the trunk is the
+"""HISTORICAL SKETCH — the live cutter is src/inkscript/geometry/penpath.py; this file is kept for its drawing helper (`picture`) and the record.
+
+Letters along the pen path. The ink of a connected piece is thinned to its centre line; the trunk is the
 path from the rightmost to the leftmost point of that line; every other bit of ink (an arm, an ascender, the
 far side of a loop, a tail sweeping back) belongs to the trunk position it hangs from. The piece is thereby
 unrolled into a strip indexed by distance along the pen path, and the same alignment as `geometry/letters`
