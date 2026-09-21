@@ -40,7 +40,10 @@ document, so nothing here needs data or keys (Gemini is only called by
 - **Chrome's engine is the judge, measured, never reasoned about.** `--verify`
   reads the PDF back with pdfium. `pypdfium2` is pinned to **5.12.1** (pdfium
   7947, reads right-to-left lines like Chrome); 5.13 bundles a build that does
-  not, and misled a whole day of rules.
+  not, and misled a whole day of rules. Check it (the package exposes no
+  `__version__`):
+  `.venv/bin/python -c "from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO; print(PYPDFIUM_INFO, PDFIUM_INFO)"`
+  → `5.12.1 152.0.7947.0`.
 - **The faithful PDF draws every occurrence with its own ink.** No glyph is
   substituted, simplified or repaired there. Restoration is a separate output
   (see [docs/typeface.md](docs/typeface.md)).
