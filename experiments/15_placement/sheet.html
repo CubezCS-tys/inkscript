@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1b1a17;--mute:#77726a;--line:#e2ded6;--sel:#fff8e1;--selline:#d9a521;--ok:#3f7d20}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14130f;--card:#1d1c18;--ink:#eceae4;--mute:#9a958c;--line:#33312b;--sel:#2a2718;--selline:#8a6f18}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  h1{font-size:15px;margin:0;font-weight:600}
+  .sp{flex:1}
+  .stat{color:var(--mute);font-variant-numeric:tabular-nums;font-size:13px}
+  .stat b{color:var(--ink)}
+  button{font:inherit;padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;cursor:pointer}
+  button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  main{max-width:1150px;margin:0 auto;padding:16px}
+  .help{color:var(--mute);font-size:13px;margin:0 0 14px}
+  .help kbd{background:var(--card);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 6px;font:12px ui-monospace,monospace}
+  .row{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:10px;scroll-margin:74px}
+  .row.sel{background:var(--sel);border-color:var(--selline);box-shadow:0 0 0 1px var(--selline)}
+  .row.done{opacity:.55}
+  .top{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .n{color:var(--mute);font:12px ui-monospace,monospace}
+  .w{font-size:22px;direction:rtl;font-family:"Noto Naskh Arabic","Amiri",serif}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .side{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--bg);text-align:center}
+  .side img{max-width:100%;height:auto;image-rendering:-webkit-optimize-contrast;display:block;margin:0 auto}
+  .cells{display:flex;margin:4px auto 0;font-family:"Noto Naskh Arabic","Amiri",serif}
+  .cells span{font-size:17px;text-align:center;border-top:2px solid;padding-top:1px;overflow:hidden}
+  .cells span:nth-child(odd){border-color:rgb(220,130,70);color:rgb(190,105,45)}
+  .cells span:nth-child(even){border-color:rgb(70,130,220);color:rgb(55,105,190)}
+  .side .tag{color:var(--mute);font:12px ui-monospace,monospace;margin-bottom:5px}
+  .verdict{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--mute);cursor:pointer;user-select:none}
+  .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .chip .k{opacity:.55;font:11px ui-monospace,monospace;margin-left:5px}
+  .saved{color:var(--ok);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>__TITLE__</h1>
+  <span class="stat"><b id="sDone">0</b> judged of <b id="sTot">0</b></span>
+  <span class="sp"></span>
+  <span class="saved" id="saved"></span>
+  <button id="bReset">Clear</button>
+  <button class="primary" id="bExport">Export JSON</button>
+</header>
+<main>
+  <p class="help">Each row is the <b>same word twice</b>, with every letter's selection cell tinted — the bands
+     are what a drag would highlight. One is cut along the pen path, one into equal parts; which is which is a
+     coin flip and is not shown. Judge only <b>whether the bands line up with the letters</b>.<br>
+     <kbd>a</kbd> left is better · <kbd>d</kbd> right is better · <kbd>s</kbd> the same · <kbd>x</kbd> both wrong ·
+     <kbd>j</kbd>/<kbd>k</kbd> move.</p>
+  <div id="rows"></div>
+</main>
+<script>
+const D = __DATA__;
+const KEY = "place:" + D.stem + ":" + D.seed + ":" + D.words.length;
+const rowsEl = document.getElementById("rows");
+const CH = [["left","left is better","a"],["right","right is better","d"],["same","the same","s"],["both_wrong","both wrong","x"]];
+let state = {}, cur = 0;
+try { const s = localStorage.getItem(KEY); if (s) state = JSON.parse(s); } catch (e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); flash("saved"); } catch(e){ flash("not saved in this browser", true); } }
+let ft; function flash(m,w){const el=document.getElementById("saved");el.textContent=m;el.style.color=w?"#b3261e":"var(--ok)";clearTimeout(ft);ft=setTimeout(()=>el.textContent="",1200);}
+
+function cells(cs){
+  if(!cs||!cs.length) return "";
+  return `<div class="cells">` + cs.map(c=>`<span style="flex:0 0 ${c.w}%">${c.ch}</span>`).join("") + `</div>`;
+}
+D.words.forEach((w,i)=>{
+  const r=document.createElement("div"); r.className="row"; r.dataset.i=i;
+  const chips=CH.map(([id,lab,k])=>`<span class="chip" data-c="${id}">${lab}<span class="k">${k}</span></span>`).join("");
+  r.innerHTML=`<div class="top"><span class="n">${i+1}</span><span class="w">${w.text}</span>
+      <span class="n">${w.letters} letters · p${w.page}</span></div>
+    <div class="pair">
+      <div class="side"><div class="tag">left</div><img src="${w.left}" alt="">${cells(w.left_cells)}</div>
+      <div class="side"><div class="tag">right</div><img src="${w.right}" alt="">${cells(w.right_cells)}</div>
+    </div><div class="verdict">${chips}</div>`;
+  r.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",e=>{e.stopPropagation();mark(i,c.dataset.c);}));
+  r.addEventListener("click",()=>select(i));
+  rowsEl.appendChild(r);
+});
+function paint(i){
+  const r=rowsEl.children[i], v=state[i];
+  r.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on", c.dataset.c===v));
+  r.classList.toggle("done", !!v);
+}
+function mark(i,v){ state[i]=v; paint(i); save(); counts(); if(i===cur&&i<D.words.length-1) select(i+1); }
+function counts(){ document.getElementById("sDone").textContent=Object.keys(state).length;
+  document.getElementById("sTot").textContent=D.words.length; }
+function select(i){ i=Math.max(0,Math.min(D.words.length-1,i)); rowsEl.children[cur]?.classList.remove("sel");
+  cur=i; const r=rowsEl.children[i]; r.classList.add("sel"); r.scrollIntoView({block:"center",behavior:"smooth"}); }
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  if(e.key==="j"||e.key==="ArrowDown"){select(cur+1);e.preventDefault();return;}
+  if(e.key==="k"||e.key==="ArrowUp"){select(cur-1);e.preventDefault();return;}
+  const hit=CH.find(c=>c[2]===e.key); if(hit){mark(cur,hit[0]);e.preventDefault();}
+});
+document.getElementById("bReset").addEventListener("click",()=>{ if(!confirm("Clear every judgement?"))return;
+  state={}; try{localStorage.removeItem(KEY);}catch(e){} D.words.forEach((w,i)=>paint(i)); counts(); });
+document.getElementById("bExport").addEventListener("click",()=>{
+  const words=D.words.map((w,i)=>({i, text:w.text, page:w.page, box:w.box, letters:w.letters,
+    ours_side:w.ours, verdict:state[i]||null,
+    winner: !state[i] ? null : state[i]==="same" ? "same" : state[i]==="both_wrong" ? "both_wrong"
+            : (state[i]===w.ours ? "pen path" : "equal slicing")}));
+  const judged=words.filter(w=>w.verdict);
+  const tally={}; judged.forEach(w=>tally[w.winner]=(tally[w.winner]||0)+1);
+  const out={stem:D.stem, seed:D.seed, judged_at:new Date().toISOString(), judged:judged.length, tally, words};
+  const b=new Blob([JSON.stringify(out,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=`${D.stem}_placement.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+D.words.forEach((w,i)=>paint(i)); counts(); select(0);
+</script>
+</body>
+</html>

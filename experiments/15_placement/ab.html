@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which cut is better? — in the real PDFs</title>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1b1a17;--mute:#77726a;--line:#e2ded6;--ok:#3f7d20;--sel:#fff8e1;--selline:#d9a521}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14130f;--card:#1d1c18;--ink:#eceae4;--mute:#9a958c;--line:#33312b;--sel:#2a2718;--selline:#8a6f18}}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:8px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;flex:0 0 auto}
+  h1{font-size:15px;margin:0;font-weight:600}
+  .sp{flex:1}
+  button{font:inherit;padding:5px 11px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer}
+  button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .stat{color:var(--mute);font-variant-numeric:tabular-nums;font-size:13px}
+  .stat b{color:var(--ink)}
+  .saved{color:var(--ok);font-size:12px}
+  .body{flex:1 1 auto;display:grid;grid-template-columns:230px 1fr 1fr;gap:9px;padding:9px;min-height:0}
+  @media (max-width:1000px){.body{grid-template-columns:1fr}}
+  .list{background:var(--card);border:1px solid var(--line);border-radius:9px;overflow:auto;min-height:0}
+  .w{padding:6px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:8px;align-items:baseline}
+  .w:hover{background:var(--bg)}
+  .w.on{background:var(--sel);box-shadow:inset 3px 0 0 var(--selline)}
+  .w .t{font-size:19px;direction:rtl;font-family:"Noto Naskh Arabic","Amiri",serif;flex:1}
+  .w .m{color:var(--mute);font:11px ui-monospace,monospace}
+  .w.done .t{opacity:.45}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:9px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .head{padding:6px 11px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600}
+  iframe{flex:1 1 auto;width:100%;border:0;min-height:0;background:#525659}
+  .bar{padding:8px 14px;background:var(--card);border-top:1px solid var(--line);display:flex;gap:7px;align-items:center;flex:0 0 auto;flex-wrap:wrap}
+  .chip{font-size:13px;padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--bg);cursor:pointer;user-select:none}
+  .chip .k{opacity:.55;font:11px ui-monospace,monospace;margin-left:5px}
+  .hint{color:var(--mute);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Which cut is better?</h1>
+  <span class="stat"><b id="sDone">0</b> judged of <b id="sTot">0</b></span>
+  <span class="hint">click a word → both panes jump to it → drag across it in each → judge</span>
+  <span class="sp"></span>
+  <span class="saved" id="saved"></span>
+  <button id="bFind" class="primary">highlight the word</button>
+  <button id="bReset">Clear</button>
+  <button class="primary" id="bExport">Export JSON</button>
+</header>
+<div class="body">
+  <div class="list" id="list"></div>
+  <div class="pane"><div class="head">A</div><iframe id="fa"></iframe></div>
+  <div class="pane"><div class="head">B</div><iframe id="fb"></iframe></div>
+</div>
+<div class="bar">
+  <span class="chip" data-c="A">A is better<span class="k">a</span></span>
+  <span class="chip" data-c="B">B is better<span class="k">d</span></span>
+  <span class="chip" data-c="same">the same<span class="k">s</span></span>
+  <span class="chip" data-c="both_wrong">both wrong<span class="k">x</span></span>
+  <span class="hint">· <b>j</b>/<b>k</b> next/previous word · neither pane is labelled; which is which is recorded elsewhere</span>
+</div>
+<script>
+const D = __DATA__;
+const KEY = "ab:" + D.stem + ":" + D.seed + ":" + D.words.length;
+let state = {}, cur = 0, searchOn = true;
+try { const s = localStorage.getItem(KEY); if (s) state = JSON.parse(s); } catch (e) {}
+const listEl = document.getElementById("list");
+D.words.forEach((w,i)=>{
+  const el=document.createElement("div"); el.className="w"; el.dataset.i=i;
+  el.innerHTML=`<span class="t">${w.text}</span><span class="m">p${w.page}·${w.letters}</span>`;
+  el.addEventListener("click",()=>go(i));
+  listEl.appendChild(el);
+});
+// Chrome's PDF viewer reads #page/#zoom only on a real navigation: changing the fragment alone is a
+// same-document hash change and the plugin ignores it, so the panes never moved. A differing query makes it
+// a new URL and the fragment is honoured.
+// `#search=` makes Chrome's viewer find and highlight the word, so you can see WHICH word to drag through.
+// Its highlight is a find-match tint, not a selection; your drag replaces it.
+function frag(w,i){
+  const s = searchOn ? `&search=${encodeURIComponent(w.text)}` : "";
+  return `?w=${i}#page=${w.page}&zoom=190,${Math.max(0,w.left)},${Math.max(0,w.top)}${s}`;
+}
+function go(i){
+  i=Math.max(0,Math.min(D.words.length-1,i));
+  listEl.children[cur]?.classList.remove("on"); cur=i;
+  const el=listEl.children[i]; el.classList.add("on"); el.scrollIntoView({block:"nearest"});
+  const w=D.words[i];
+  document.getElementById("fa").src = "A.pdf" + frag(w,i);
+  document.getElementById("fb").src = "B.pdf" + frag(w,i);
+}
+function paint(i){ listEl.children[i].classList.toggle("done", !!state[i]); }
+function counts(){ document.getElementById("sDone").textContent=Object.keys(state).length;
+  document.getElementById("sTot").textContent=D.words.length; }
+let ft; function flash(m,w){const el=document.getElementById("saved");el.textContent=m;el.style.color=w?"#b3261e":"var(--ok)";clearTimeout(ft);ft=setTimeout(()=>el.textContent="",1200);}
+function mark(v){ state[cur]=v; paint(cur);
+  try{localStorage.setItem(KEY,JSON.stringify(state));flash("saved");}catch(e){flash("not saved",true);}
+  counts(); if(cur<D.words.length-1) go(cur+1); }
+document.querySelectorAll(".chip").forEach(c=>c.addEventListener("click",()=>mark(c.dataset.c)));
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT") return;
+  if(e.key==="j"){go(cur+1);e.preventDefault();return;}
+  if(e.key==="k"){go(cur-1);e.preventDefault();return;}
+  const m={a:"A",d:"B",s:"same",x:"both_wrong"}[e.key]; if(m){mark(m);e.preventDefault();}
+});
+document.getElementById("bFind").addEventListener("click",e=>{
+  searchOn=!searchOn; e.target.classList.toggle("primary",searchOn);
+  e.target.textContent = searchOn ? "highlight the word" : "no highlight"; go(cur); });
+document.getElementById("bReset").addEventListener("click",()=>{ if(!confirm("Clear every judgement?"))return;
+  state={}; try{localStorage.removeItem(KEY);}catch(e){} D.words.forEach((w,i)=>paint(i)); counts(); });
+document.getElementById("bExport").addEventListener("click",()=>{
+  const words=D.words.map((w,i)=>({i,text:w.text,page:w.page,letters:w.letters,verdict:state[i]||null}));
+  const out={stem:D.stem,seed:D.seed,judged_at:new Date().toISOString(),
+    judged:words.filter(w=>w.verdict).length,words};
+  const b=new Blob([JSON.stringify(out,null,1)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${D.stem}_ab.json`;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+D.words.forEach((w,i)=>paint(i)); counts(); go(0);
+</script>
+</body>
+</html>
