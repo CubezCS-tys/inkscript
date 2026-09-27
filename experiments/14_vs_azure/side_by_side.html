@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Select in both — Azure vs inkscript</title>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1b1a17;--mute:#77726a;--line:#e2ded6;--az:#b3261e;--us:#1d4ed8}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14130f;--card:#1d1c18;--ink:#eceae4;--mute:#9a958c;--line:#33312b}}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:9px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;flex:0 0 auto}
+  h1{font-size:15px;margin:0;font-weight:600}
+  select,button,input{font:inherit;padding:5px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px}
+  button{cursor:pointer}
+  button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .sp{flex:1}
+  .hint{color:var(--mute);font-size:13px}
+  .panes{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;min-height:0}
+  @media (max-width:900px){.panes{grid-template-columns:1fr}}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .head{padding:7px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;flex:0 0 auto}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .az .dot{background:var(--az)} .us .dot{background:var(--us)}
+  .head b{font-size:14px} .head span{color:var(--mute);font-size:12px}
+  iframe{flex:1 1 auto;width:100%;border:0;min-height:0;background:#525659}
+  .bar{padding:8px 14px;background:var(--card);border-top:1px solid var(--line);flex:0 0 auto;display:flex;gap:10px;align-items:flex-start}
+  .bar textarea{flex:1;min-height:52px;font:14px/1.6 "Noto Naskh Arabic","Amiri",serif;direction:rtl;text-align:right;border:1px solid var(--line);border-radius:6px;padding:6px 9px;background:var(--bg);color:var(--ink);resize:vertical}
+  .bar label{color:var(--mute);font-size:12px;padding-top:6px;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <h1>Select in both</h1>
+  <select id="pick"></select>
+  <label class="hint">page <input id="page" type="number" min="1" value="1" style="width:68px"></label>
+  <button id="bVec">our side: vector edition</button>
+  <span class="sp"></span>
+  <span class="hint">Drag across a word in each pane and look at what highlights — then copy a paragraph from each and paste below.</span>
+</header>
+<div class="panes">
+  <div class="pane az">
+    <div class="head"><i class="dot"></i><b>Azure searchable PDF</b><span>scan + invisible layer</span></div>
+    <iframe id="a_f"></iframe>
+  </div>
+  <div class="pane us">
+    <div class="head"><i class="dot"></i><b>inkscript</b><span id="o_sub">scan + invisible ink glyphs</span></div>
+    <iframe id="o_f"></iframe>
+  </div>
+</div>
+<div class="bar">
+  <label>paste Azure →</label><textarea id="a_t" placeholder="paste what you copied from the left pane"></textarea>
+  <label>paste ours →</label><textarea id="o_t" placeholder="paste what you copied from the right pane"></textarea>
+</div>
+<script>
+const D = __DATA__;
+const pick=document.getElementById("pick");
+D.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${d.stem}  (${d.pages} pages)`;pick.appendChild(o);});
+let cur=0, vec=false;
+const pageBox=document.getElementById("page");
+function load(){
+  const d=D[cur], p=Math.max(1,+pageBox.value||1);
+  const frag=`#page=${p}&zoom=page-fit`;
+  document.getElementById("a_f").src=`azure/${encodeURIComponent(d.stem)}.pdf${frag}`;
+  document.getElementById("o_f").src=`ours/${encodeURIComponent(d.stem)}${vec&&d.vector?"_vector":""}.pdf${frag}`;
+  document.getElementById("o_sub").textContent = vec&&d.vector ? "the ink itself is the text — no scan" : "scan + invisible ink glyphs";
+}
+pick.addEventListener("change",e=>{cur=+e.target.value;pageBox.value=D[cur].start;load();});
+pageBox.addEventListener("change",load);
+document.getElementById("bVec").addEventListener("click",e=>{vec=!vec;e.target.classList.toggle("on",vec);load();});
+pageBox.value=D[0].start; load();
+</script>
+</body>
+</html>

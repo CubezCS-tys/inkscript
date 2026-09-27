@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ink layer vs Azure</title>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1b1a17;--mute:#77726a;--line:#e2ded6;--bad:#b3261e;--good:#3f7d20;--az:#b3261e;--us:#1d4ed8}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14130f;--card:#1d1c18;--ink:#eceae4;--mute:#9a958c;--line:#33312b}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  h1{font-size:15px;margin:0;font-weight:600}
+  select,button{font:inherit;padding:6px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer}
+  button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .sp{flex:1}
+  main{max-width:1400px;margin:0 auto;padding:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+  .pane{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .head{padding:9px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .az .dot{background:var(--az)} .us .dot{background:var(--us)}
+  .head b{font-size:14px} .head span{color:var(--mute);font-size:13px}
+  .pane img{width:100%;display:block;background:#fff}
+  .copy{padding:10px 13px;max-height:420px;overflow:auto;direction:rtl;text-align:right;font-family:"Noto Naskh Arabic","Amiri",serif;font-size:17px;line-height:1.7}
+  .copy div{padding:1px 4px;border-radius:3px}
+  .copy div.miss{background:color-mix(in srgb,var(--bad) 16%,transparent)}
+  .score{font-variant-numeric:tabular-nums}
+  .score b{font-size:17px}
+  .bad{color:var(--bad)} .good{color:var(--good)}
+  .note{color:var(--mute);font-size:13px;margin:10px 0 16px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--mute);font-size:13px;margin-bottom:10px}
+  .sw{display:inline-block;width:22px;height:10px;border:1px solid;vertical-align:middle;margin-left:5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ink layer vs Azure</h1>
+  <select id="pick"></select>
+  <button id="bBox" class="on">character boxes</button>
+  <button id="bVec">vector edition</button>
+  <button id="bCopy">what copy gives you</button>
+  <span class="sp"></span>
+  <span class="score" id="score"></span>
+</header>
+<main>
+  <p class="note" id="note"></p>
+  <div class="legend" id="legend"></div>
+  <div class="grid">
+    <div class="pane az"><div class="head"><i class="dot"></i><b>Azure's searchable PDF</b><span id="a_sub"></span></div>
+      <img id="a_img"><div class="copy" id="a_copy" hidden></div></div>
+    <div class="pane us"><div class="head"><i class="dot"></i><b>inkscript vector</b><span id="o_sub"></span></div>
+      <img id="o_img"><div class="copy" id="o_copy" hidden></div></div>
+  </div>
+</main>
+<script>
+const D = __DATA__;
+const pick=document.getElementById("pick");
+D.forEach((d,i)=>{const o=document.createElement("option");o.value=i;o.textContent=`${d.stem} · page ${d.page}`;pick.appendChild(o);});
+let boxes=true, showCopy=false, showVec=false, cur=0;
+
+function paint(){
+  const d=D[cur];
+  document.getElementById("a_img").src = boxes ? d.a_box : d.a_plain;
+  document.getElementById("o_img").src = showVec ? d.o_vec : (boxes ? d.o_box : d.o_plain);
+  document.getElementById("a_img").hidden = showCopy;
+  document.getElementById("o_img").hidden = showCopy;
+  document.getElementById("a_copy").hidden = !showCopy;
+  document.getElementById("o_copy").hidden = !showCopy;
+  document.getElementById("a_sub").textContent = `${d.a_chars} character boxes`;
+  document.getElementById("o_sub").textContent = `${d.o_chars} character boxes`;
+  const ag=d.n_ref-d.a_bad, og=d.n_ref-d.o_bad;
+  document.getElementById("score").innerHTML =
+    `lines in order — Azure <b class="${d.a_bad?'bad':'good'}">${ag}/${d.n_ref}</b> · ours <b class="${d.o_bad?'bad':'good'}">${og}/${d.n_ref}</b>`;
+  document.getElementById("note").textContent = showCopy
+    ? "This is the text each PDF hands over when you select the page and copy. A red line is one of this page's printed lines that did not come back in reading order."
+    : showVec
+    ? "Right: the vector edition — no scan underneath, the traced ink itself is the text. Left: Azure's page, which is a photograph with an invisible layer over it."
+    : "Both panes show the SAME scan; only the boxes differ. Every box is one character's selection box as the viewer reports it. Azure's are a uniform grid — the same width for every letter of a word, because that layer never knew where the letters are. Ours follow the ink.";
+  document.getElementById("legend").innerHTML = showCopy ? "" :
+    `<span><i class="sw" style="border-color:var(--az)"></i> Azure's character boxes</span>`+
+    `<span><i class="sw" style="border-color:var(--us)"></i> our character boxes</span>`;
+  const fill=(el,lines)=>{el.innerHTML=""; lines.forEach(l=>{const v=document.createElement("div");v.textContent=l;el.appendChild(v);});};
+  fill(document.getElementById("a_copy"), d.a_lines);
+  fill(document.getElementById("o_copy"), d.o_lines);
+}
+pick.addEventListener("change",e=>{cur=+e.target.value;paint();});
+document.getElementById("bBox").addEventListener("click",e=>{boxes=!boxes;e.target.classList.toggle("on",boxes);paint();});
+document.getElementById("bVec").addEventListener("click",e=>{showVec=!showVec;e.target.classList.toggle("on",showVec);paint();});
+document.getElementById("bCopy").addEventListener("click",e=>{showCopy=!showCopy;e.target.classList.toggle("on",showCopy);paint();});
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key==="j"){cur=Math.min(D.length-1,cur+1);pick.value=cur;paint();}
+  if(e.key==="ArrowLeft"||e.key==="k"){cur=Math.max(0,cur-1);pick.value=cur;paint();}
+  if(e.key===" "){boxes=!boxes;document.getElementById("bBox").classList.toggle("on",boxes);paint();e.preventDefault();}
+});
+paint();
+</script>
+</body>
+</html>
