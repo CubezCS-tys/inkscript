@@ -1,0 +1,3350 @@
+{
+ "stem": "0005-032-001-001",
+ "page": 2,
+ "dpi": 300,
+ "rot": 0,
+ "marked_at": "2026-09-21T14:27:07.884Z",
+ "missed_words": 0,
+ "notes": "",
+ "counts": {
+  "correct": 276,
+  "dots": 0,
+  "hamza": 0,
+  "ta": 0,
+  "ya": 0,
+  "lookalike": 0,
+  "wrong": 0,
+  "merged": 0,
+  "split": 0,
+  "invented": 0,
+  "style": 0,
+  "unsure": 1
+ },
+ "words": [
+  {
+   "i": 0,
+   "box": [
+    1489,
+    167,
+    1540,
+    231
+   ],
+   "reading": "بل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 1,
+   "box": [
+    1450,
+    227,
+    1539,
+    293
+   ],
+   "reading": "حيث",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 2,
+   "box": [
+    1465,
+    287,
+    1539,
+    353
+   ],
+   "reading": "كما",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 3,
+   "box": [
+    1389,
+    348,
+    1538,
+    414
+   ],
+   "reading": "الاتحاد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 4,
+   "box": [
+    1411,
+    413,
+    1536,
+    476
+   ],
+   "reading": "بلندن",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 5,
+   "box": [
+    1307,
+    470,
+    1536,
+    538
+   ],
+   "reading": "السيكولوجية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 6,
+   "box": [
+    1426,
+    542,
+    1535,
+    596
+   ],
+   "reading": "لندن",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 7,
+   "box": [
+    1358,
+    598,
+    1535,
+    664
+   ],
+   "reading": "وجامعة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 8,
+   "box": [
+    1403,
+    164,
+    1476,
+    230
+   ],
+   "reading": "لقد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 9,
+   "box": [
+    1396,
+    285,
+    1453,
+    352
+   ],
+   "reading": "كان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 10,
+   "box": [
+    1388,
+    97,
+    1451,
+    165
+   ],
+   "reading": "ولم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 11,
+   "box": [
+    1342,
+    224,
+    1433,
+    291
+   ],
+   "reading": "اختير",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 12,
+   "box": [
+    1392,
+    541,
+    1408,
+    593
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 13,
+   "box": [
+    1361,
+    411,
+    1389,
+    474
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 14,
+   "box": [
+    1320,
+    161,
+    1388,
+    227
+   ],
+   "reading": "امتد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 15,
+   "box": [
+    1297,
+    282,
+    1375,
+    350
+   ],
+   "reading": "خبير",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 16,
+   "box": [
+    1272,
+    94,
+    1372,
+    163
+   ],
+   "reading": "تقفّ",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 17,
+   "box": [
+    1241,
+    536,
+    1371,
+    592
+   ],
+   "reading": "وأدنبره",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 18,
+   "box": [
+    1261,
+    345,
+    1363,
+    411
+   ],
+   "reading": "الدولى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 19,
+   "box": [
+    1247,
+    407,
+    1349,
+    473
+   ],
+   "reading": "وزميل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 20,
+   "box": [
+    1176,
+    591,
+    1341,
+    658
+   ],
+   "reading": "جينزيفيل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 21,
+   "box": [
+    1187,
+    219,
+    1323,
+    287
+   ],
+   "reading": "عضوا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 22,
+   "box": [
+    1195,
+    158,
+    1305,
+    225
+   ],
+   "reading": "النفع",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 23,
+   "box": [
+    1105,
+    465,
+    1282,
+    533
+   ],
+   "reading": "بأرجواى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 24,
+   "box": [
+    1110,
+    278,
+    1274,
+    348
+   ],
+   "reading": "اليونسكو",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 25,
+   "box": [
+    1158,
+    91,
+    1261,
+    160
+   ],
+   "reading": "الافادة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 26,
+   "box": [
+    1139,
+    342,
+    1236,
+    408
+   ],
+   "reading": "لعلم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 27,
+   "box": [
+    1121,
+    404,
+    1228,
+    470
+   ],
+   "reading": "جمعية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 28,
+   "box": [
+    1207,
+    536,
+    1221,
+    588
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 29,
+   "box": [
+    1044,
+    531,
+    1185,
+    587
+   ],
+   "reading": "وتورنتو",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 30,
+   "box": [
+    1027,
+    153,
+    1182,
+    221
+   ],
+   "reading": "والانتفاع",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 31,
+   "box": [
+    1148,
+    218,
+    1175,
+    283
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 32,
+   "box": [
+    1027,
+    587,
+    1161,
+    653
+   ],
+   "reading": "فلوريدا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 33,
+   "box": [
+    1103,
+    90,
+    1147,
+    156
+   ],
+   "reading": "من",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 34,
+   "box": [
+    1003,
+    214,
+    1129,
+    282
+   ],
+   "reading": "اللجنة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 35,
+   "box": [
+    1010,
+    338,
+    1115,
+    405
+   ],
+   "reading": "النفس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 36,
+   "box": [
+    1048,
+    402,
+    1101,
+    467
+   ],
+   "reading": "علم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 37,
+   "box": [
+    1032,
+    88,
+    1092,
+    155
+   ],
+   "reading": "فكر",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 38,
+   "box": [
+    1060,
+    277,
+    1091,
+    343
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 39,
+   "box": [
+    1059,
+    464,
+    1076,
+    529
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 40,
+   "box": [
+    934,
+    274,
+    1040,
+    341
+   ],
+   "reading": "لجان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 41,
+   "box": [
+    956,
+    461,
+    1029,
+    527
+   ],
+   "reading": "كما",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 42,
+   "box": [
+    918,
+    398,
+    1025,
+    465
+   ],
+   "reading": "النفس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 43,
+   "box": [
+    1009,
+    530,
+    1023,
+    583
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 44,
+   "box": [
+    891,
+    85,
+    1016,
+    152
+   ],
+   "reading": "الدكتور",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 45,
+   "box": [
+    851,
+    581,
+    1015,
+    649
+   ],
+   "reading": "وجامعة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 46,
+   "box": [
+    964,
+    151,
+    1014,
+    216
+   ],
+   "reading": "به",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 47,
+   "box": [
+    955,
+    337,
+    994,
+    401
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 48,
+   "box": [
+    772,
+    524,
+    987,
+    582
+   ],
+   "reading": "ومونتريال،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 49,
+   "box": [
+    870,
+    210,
+    986,
+    278
+   ],
+   "reading": "الدولية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 50,
+   "box": [
+    908,
+    150,
+    953,
+    215
+   ],
+   "reading": "الى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 51,
+   "box": [
+    874,
+    459,
+    945,
+    525
+   ],
+   "reading": "ألقى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 52,
+   "box": [
+    809,
+    333,
+    944,
+    400
+   ],
+   "reading": "وعضو",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 53,
+   "box": [
+    805,
+    271,
+    912,
+    338
+   ],
+   "reading": "الشرق",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 54,
+   "box": [
+    670,
+    391,
+    898,
+    462
+   ],
+   "reading": "البريطانية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 55,
+   "box": [
+    738,
+    145,
+    893,
+    213
+   ],
+   "reading": "مجتمعات",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 56,
+   "box": [
+    716,
+    81,
+    875,
+    149
+   ],
+   "reading": "القوصى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 57,
+   "box": [
+    699,
+    206,
+    850,
+    274
+   ],
+   "reading": "لاصلاح",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 58,
+   "box": [
+    680,
+    453,
+    849,
+    522
+   ],
+   "reading": "محاضرات",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 59,
+   "box": [
+    653,
+    576,
+    835,
+    644
+   ],
+   "reading": "مونتفيديو",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 60,
+   "box": [
+    663,
+    268,
+    786,
+    334
+   ],
+   "reading": "والغرب",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 61,
+   "box": [
+    641,
+    329,
+    785,
+    395
+   ],
+   "reading": "الرابطة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 62,
+   "box": [
+    554,
+    518,
+    752,
+    575
+   ],
+   "reading": "ووشنجتون",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 63,
+   "box": [
+    607,
+    142,
+    726,
+    208
+   ],
+   "reading": "دولية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 64,
+   "box": [
+    613,
+    79,
+    699,
+    144
+   ],
+   "reading": "عند",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 65,
+   "box": [
+    565,
+    203,
+    680,
+    269
+   ],
+   "reading": "التعليم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 66,
+   "box": [
+    621,
+    452,
+    654,
+    517
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 67,
+   "box": [
+    619,
+    390,
+    649,
+    454
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 68,
+   "box": [
+    512,
+    264,
+    643,
+    330
+   ],
+   "reading": "ولجان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 69,
+   "box": [
+    471,
+    572,
+    642,
+    639
+   ],
+   "reading": "بأرجواى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 70,
+   "box": [
+    500,
+    325,
+    615,
+    390
+   ],
+   "reading": "الدولية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 71,
+   "box": [
+    463,
+    386,
+    608,
+    453
+   ],
+   "reading": "وزميلا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 72,
+   "box": [
+    476,
+    77,
+    597,
+    142
+   ],
+   "reading": "المجتمع",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 73,
+   "box": [
+    479,
+    139,
+    594,
+    204
+   ],
+   "reading": "عالمية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 74,
+   "box": [
+    535,
+    449,
+    594,
+    515
+   ],
+   "reading": "علم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 75,
+   "box": [
+    374,
+    199,
+    545,
+    265
+   ],
+   "reading": "وتخطيطه",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 76,
+   "box": [
+    520,
+    517,
+    535,
+    569
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 77,
+   "box": [
+    402,
+    446,
+    512,
+    512
+   ],
+   "reading": "النفس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 78,
+   "box": [
+    376,
+    513,
+    498,
+    568
+   ],
+   "reading": "وجامعة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 79,
+   "box": [
+    371,
+    261,
+    493,
+    325
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 80,
+   "box": [
+    358,
+    321,
+    476,
+    385
+   ],
+   "reading": "للتربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 81,
+   "box": [
+    424,
+    138,
+    466,
+    200
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 82,
+   "box": [
+    353,
+    75,
+    460,
+    139
+   ],
+   "reading": "العربى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 83,
+   "box": [
+    273,
+    569,
+    458,
+    635
+   ],
+   "reading": "ونيودلهى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 84,
+   "box": [
+    358,
+    384,
+    453,
+    447
+   ],
+   "reading": "بمركز",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 85,
+   "box": [
+    315,
+    135,
+    414,
+    198
+   ],
+   "reading": "الشرق",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 86,
+   "box": [
+    235,
+    441,
+    377,
+    508
+   ],
+   "reading": "والتربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 87,
+   "box": [
+    199,
+    195,
+    363,
+    260
+   ],
+   "reading": "بأسبانيا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 88,
+   "box": [
+    215,
+    508,
+    358,
+    563
+   ],
+   "reading": "متشجان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 89,
+   "box": [
+    319,
+    260,
+    350,
+    320
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 90,
+   "box": [
+    176,
+    380,
+    341,
+    443
+   ],
+   "reading": "الدراسات",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 91,
+   "box": [
+    216,
+    72,
+    338,
+    137
+   ],
+   "reading": "فحسب",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 92,
+   "box": [
+    177,
+    316,
+    333,
+    380
+   ],
+   "reading": "الحديثة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 93,
+   "box": [
+    177,
+    257,
+    309,
+    318
+   ],
+   "reading": "وعضو",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 94,
+   "box": [
+    177,
+    132,
+    304,
+    195
+   ],
+   "reading": "والغرب",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 95,
+   "box": [
+    176,
+    567,
+    251,
+    630
+   ],
+   "reading": "...",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 96,
+   "box": [
+    176,
+    440,
+    210,
+    502
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 97,
+   "box": [
+    181,
+    72,
+    200,
+    135
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 98,
+   "box": [
+    177,
+    507,
+    194,
+    558
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 99,
+   "box": [
+    181,
+    195,
+    188,
+    256
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 100,
+   "box": [
+    1373,
+    661,
+    1535,
+    726
+   ],
+   "reading": "وغيرها",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 101,
+   "box": [
+    1258,
+    656,
+    1363,
+    720
+   ],
+   "reading": "....",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 102,
+   "box": [
+    1408,
+    979,
+    1531,
+    1046
+   ],
+   "reading": "العلماء",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 103,
+   "box": [
+    1390,
+    1041,
+    1531,
+    1106
+   ],
+   "reading": "لرابطة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 104,
+   "box": [
+    1385,
+    1105,
+    1525,
+    1162
+   ],
+   "reading": "مشاركا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 105,
+   "box": [
+    1350,
+    915,
+    1441,
+    981
+   ],
+   "reading": "واذا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 106,
+   "box": [
+    1332,
+    977,
+    1396,
+    1042
+   ],
+   "reading": "أمام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 107,
+   "box": [
+    1253,
+    1036,
+    1376,
+    1101
+   ],
+   "reading": "خريجى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 108,
+   "box": [
+    1344,
+    1104,
+    1376,
+    1158
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 109,
+   "box": [
+    1286,
+    913,
+    1339,
+    979
+   ],
+   "reading": "كان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 110,
+   "box": [
+    1256,
+    1102,
+    1324,
+    1156
+   ],
+   "reading": "ذلك",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 111,
+   "box": [
+    1203,
+    973,
+    1308,
+    1040
+   ],
+   "reading": "انبهار",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 112,
+   "box": [
+    1169,
+    909,
+    1268,
+    977
+   ],
+   "reading": "هذا",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 113,
+   "box": [
+    1106,
+    1032,
+    1240,
+    1098
+   ],
+   "reading": "معاهد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 114,
+   "box": [
+    1108,
+    1098,
+    1238,
+    1154
+   ],
+   "reading": "رئيسها",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 115,
+   "box": [
+    1062,
+    969,
+    1183,
+    1036
+   ],
+   "reading": "التاريخ",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 116,
+   "box": [
+    1084,
+    906,
+    1158,
+    974
+   ],
+   "reading": "المعلم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 117,
+   "box": [
+    986,
+    1029,
+    1094,
+    1094
+   ],
+   "reading": "وكليات",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 118,
+   "box": [
+    1000,
+    1095,
+    1089,
+    1149
+   ],
+   "reading": "الأول",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 119,
+   "box": [
+    955,
+    903,
+    1064,
+    971
+   ],
+   "reading": "العظيم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 120,
+   "box": [
+    943,
+    965,
+    1039,
+    1031
+   ],
+   "reading": "فاننا",
+   "cls": "unsure",
+   "truth": null
+  },
+  {
+   "i": 121,
+   "box": [
+    873,
+    1092,
+    980,
+    1147
+   ],
+   "reading": "المغفور",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 122,
+   "box": [
+    847,
+    1025,
+    974,
+    1091
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 123,
+   "box": [
+    858,
+    901,
+    936,
+    968
+   ],
+   "reading": "يقف",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 124,
+   "box": [
+    824,
+    962,
+    932,
+    1028
+   ],
+   "reading": "نسجل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 125,
+   "box": [
+    821,
+    1090,
+    856,
+    1143
+   ],
+   "reading": "له",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 126,
+   "box": [
+    775,
+    899,
+    841,
+    966
+   ],
+   "reading": "الآن",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 127,
+   "box": [
+    741,
+    1022,
+    833,
+    1088
+   ],
+   "reading": "بعد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 128,
+   "box": [
+    770,
+    961,
+    804,
+    1025
+   ],
+   "reading": "له",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 129,
+   "box": [
+    671,
+    1087,
+    799,
+    1142
+   ],
+   "reading": "الأستاذ",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 130,
+   "box": [
+    655,
+    896,
+    758,
+    964
+   ],
+   "reading": "رافع",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 131,
+   "box": [
+    679,
+    959,
+    749,
+    1023
+   ],
+   "reading": "بكل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 132,
+   "box": [
+    696,
+    1021,
+    730,
+    1085
+   ],
+   "reading": "أن",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 133,
+   "box": [
+    583,
+    1018,
+    684,
+    1084
+   ],
+   "reading": "أسهم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 134,
+   "box": [
+    552,
+    956,
+    657,
+    1021
+   ],
+   "reading": "اعتزاز",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 135,
+   "box": [
+    502,
+    1083,
+    653,
+    1139
+   ],
+   "reading": "اسماعيل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 136,
+   "box": [
+    533,
+    894,
+    637,
+    961
+   ],
+   "reading": "الرأس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 137,
+   "box": [
+    546,
+    1017,
+    572,
+    1082
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 138,
+   "box": [
+    479,
+    955,
+    533,
+    1018
+   ],
+   "reading": "أنه",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 139,
+   "box": [
+    379,
+    1013,
+    530,
+    1081
+   ],
+   "reading": "انشائها",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 140,
+   "box": [
+    482,
+    893,
+    515,
+    958
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 141,
+   "box": [
+    363,
+    1080,
+    481,
+    1135
+   ],
+   "reading": "القبانى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 142,
+   "box": [
+    355,
+    892,
+    466,
+    957
+   ],
+   "reading": "شموخ",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 143,
+   "box": [
+    393,
+    954,
+    460,
+    1016
+   ],
+   "reading": "كان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 144,
+   "box": [
+    296,
+    952,
+    376,
+    1014
+   ],
+   "reading": "ثانى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 145,
+   "box": [
+    326,
+    1012,
+    369,
+    1077
+   ],
+   "reading": "عام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 146,
+   "box": [
+    166,
+    890,
+    342,
+    955
+   ],
+   "reading": "وتواضع",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 147,
+   "box": [
+    326,
+    1079,
+    341,
+    1132
+   ],
+   "reading": "،",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 148,
+   "box": [
+    201,
+    1009,
+    314,
+    1076
+   ],
+   "reading": "١٩٤٣",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 149,
+   "box": [
+    238,
+    1077,
+    305,
+    1132
+   ],
+   "reading": "كما",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 150,
+   "box": [
+    166,
+    951,
+    276,
+    1011
+   ],
+   "reading": "رئيس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 151,
+   "box": [
+    167,
+    1076,
+    228,
+    1130
+   ],
+   "reading": "كان",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 152,
+   "box": [
+    165,
+    1008,
+    190,
+    1074
+   ],
+   "reading": "م",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 153,
+   "box": [
+    1433,
+    1167,
+    1528,
+    1230
+   ],
+   "reading": "رئيس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 154,
+   "box": [
+    1273,
+    1161,
+    1410,
+    1227
+   ],
+   "reading": "التحرير",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 155,
+   "box": [
+    1087,
+    1155,
+    1257,
+    1222
+   ],
+   "reading": "((لصحيفة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 156,
+   "box": [
+    917,
+    1151,
+    1070,
+    1217
+   ],
+   "reading": "التربية))",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 157,
+   "box": [
+    816,
+    1150,
+    894,
+    1212
+   ],
+   "reading": "...",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 158,
+   "box": [
+    1323,
+    1300,
+    1431,
+    1354
+   ],
+   "reading": "ونذكر",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 159,
+   "box": [
+    1277,
+    1299,
+    1310,
+    1352
+   ],
+   "reading": "له",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 160,
+   "box": [
+    1212,
+    1297,
+    1260,
+    1351
+   ],
+   "reading": "من",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 161,
+   "box": [
+    1077,
+    1295,
+    1197,
+    1349
+   ],
+   "reading": "عملياته",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 162,
+   "box": [
+    897,
+    1292,
+    1060,
+    1346
+   ],
+   "reading": "الانشائية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 163,
+   "box": [
+    767,
+    1290,
+    881,
+    1343
+   ],
+   "reading": "داخل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 164,
+   "box": [
+    675,
+    1289,
+    753,
+    1341
+   ],
+   "reading": "مصر",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 165,
+   "box": [
+    609,
+    1288,
+    660,
+    1339
+   ],
+   "reading": "..",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 166,
+   "box": [
+    1396,
+    1380,
+    1431,
+    1441
+   ],
+   "reading": "١",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 167,
+   "box": [
+    1342,
+    1379,
+    1376,
+    1441
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 168,
+   "box": [
+    1207,
+    1378,
+    1319,
+    1441
+   ],
+   "reading": "انشاء",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 169,
+   "box": [
+    1147,
+    1377,
+    1196,
+    1440
+   ],
+   "reading": "أول",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 170,
+   "box": [
+    1034,
+    1375,
+    1133,
+    1440
+   ],
+   "reading": "عيادة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 171,
+   "box": [
+    912,
+    1374,
+    1024,
+    1440
+   ],
+   "reading": "نفسية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 172,
+   "box": [
+    865,
+    1373,
+    902,
+    1439
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 173,
+   "box": [
+    769,
+    1372,
+    855,
+    1439
+   ],
+   "reading": "العالم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 174,
+   "box": [
+    602,
+    1370,
+    754,
+    1438
+   ],
+   "reading": "العربى.",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 175,
+   "box": [
+    1398,
+    1468,
+    1429,
+    1528
+   ],
+   "reading": "٢",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 176,
+   "box": [
+    1341,
+    1468,
+    1371,
+    1529
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 177,
+   "box": [
+    1187,
+    1466,
+    1319,
+    1531
+   ],
+   "reading": "تعديل",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 178,
+   "box": [
+    1025,
+    1464,
+    1166,
+    1532
+   ],
+   "reading": "وتخطيط",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 179,
+   "box": [
+    921,
+    1462,
+    1003,
+    1532
+   ],
+   "reading": "نظام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 180,
+   "box": [
+    780,
+    1460,
+    894,
+    1531
+   ],
+   "reading": "التعليم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 181,
+   "box": [
+    620,
+    1456,
+    756,
+    1528
+   ],
+   "reading": "ومراحله",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 182,
+   "box": [
+    477,
+    1453,
+    596,
+    1523
+   ],
+   "reading": "الحالية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 183,
+   "box": [
+    420,
+    1452,
+    454,
+    1516
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 184,
+   "box": [
+    1394,
+    1559,
+    1429,
+    1617
+   ],
+   "reading": "٣",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 185,
+   "box": [
+    1339,
+    1558,
+    1370,
+    1617
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 186,
+   "box": [
+    1207,
+    1556,
+    1316,
+    1618
+   ],
+   "reading": "انشاء",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 187,
+   "box": [
+    1112,
+    1555,
+    1195,
+    1618
+   ],
+   "reading": "ادارة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 188,
+   "box": [
+    985,
+    1553,
+    1101,
+    1618
+   ],
+   "reading": "البحوث",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 189,
+   "box": [
+    869,
+    1551,
+    972,
+    1618
+   ],
+   "reading": "الفنية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 190,
+   "box": [
+    740,
+    1549,
+    857,
+    1617
+   ],
+   "reading": "بوزارة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 191,
+   "box": [
+    612,
+    1547,
+    728,
+    1616
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 192,
+   "box": [
+    462,
+    1544,
+    600,
+    1615
+   ],
+   "reading": "والتعليم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 193,
+   "box": [
+    401,
+    1543,
+    450,
+    1612
+   ],
+   "reading": "عام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 194,
+   "box": [
+    274,
+    1540,
+    387,
+    1611
+   ],
+   "reading": "١٩٥٥",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 195,
+   "box": [
+    235,
+    1540,
+    262,
+    1608
+   ],
+   "reading": "م",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 196,
+   "box": [
+    199,
+    1539,
+    224,
+    1607
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 197,
+   "box": [
+    1397,
+    1646,
+    1418,
+    1707
+   ],
+   "reading": "٤",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 198,
+   "box": [
+    1339,
+    1646,
+    1369,
+    1707
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 199,
+   "box": [
+    1206,
+    1644,
+    1317,
+    1707
+   ],
+   "reading": "انشاء",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 200,
+   "box": [
+    1121,
+    1642,
+    1195,
+    1707
+   ],
+   "reading": "مركز",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 201,
+   "box": [
+    985,
+    1641,
+    1106,
+    1707
+   ],
+   "reading": "الوثائق",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 202,
+   "box": [
+    823,
+    1638,
+    974,
+    1706
+   ],
+   "reading": "التربوية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 203,
+   "box": [
+    696,
+    1636,
+    808,
+    1704
+   ],
+   "reading": "بوزارة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 204,
+   "box": [
+    560,
+    1634,
+    679,
+    1703
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 205,
+   "box": [
+    407,
+    1632,
+    545,
+    1700
+   ],
+   "reading": "والتعليم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 206,
+   "box": [
+    354,
+    1631,
+    391,
+    1697
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 207,
+   "box": [
+    1397,
+    1739,
+    1427,
+    1800
+   ],
+   "reading": "٥",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 208,
+   "box": [
+    1334,
+    1738,
+    1371,
+    1800
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 209,
+   "box": [
+    1200,
+    1736,
+    1321,
+    1800
+   ],
+   "reading": "المبادرة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 210,
+   "box": [
+    1021,
+    1732,
+    1186,
+    1799
+   ],
+   "reading": "باستعمال",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 211,
+   "box": [
+    883,
+    1730,
+    1007,
+    1797
+   ],
+   "reading": "الطريقة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 212,
+   "box": [
+    771,
+    1728,
+    869,
+    1795
+   ],
+   "reading": "الكلية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 213,
+   "box": [
+    716,
+    1727,
+    756,
+    1794
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 214,
+   "box": [
+    620,
+    1725,
+    704,
+    1793
+   ],
+   "reading": "تعليم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 215,
+   "box": [
+    485,
+    1722,
+    604,
+    1792
+   ],
+   "reading": "القراءة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 216,
+   "box": [
+    339,
+    1719,
+    472,
+    1789
+   ],
+   "reading": "والكتابة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 217,
+   "box": [
+    298,
+    1718,
+    326,
+    1787
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 218,
+   "box": [
+    1393,
+    1825,
+    1427,
+    1885
+   ],
+   "reading": "٦",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 219,
+   "box": [
+    1338,
+    1824,
+    1369,
+    1885
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 220,
+   "box": [
+    1206,
+    1821,
+    1314,
+    1885
+   ],
+   "reading": "انشاء",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 221,
+   "box": [
+    1116,
+    1820,
+    1194,
+    1883
+   ],
+   "reading": "معهد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 222,
+   "box": [
+    992,
+    1817,
+    1104,
+    1882
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 223,
+   "box": [
+    944,
+    1816,
+    975,
+    1880
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 224,
+   "box": [
+    709,
+    1812,
+    927,
+    1879
+   ],
+   "reading": "الاسكندرية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 225,
+   "box": [
+    665,
+    1811,
+    693,
+    1874
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 226,
+   "box": [
+    1352,
+    1948,
+    1428,
+    2009
+   ],
+   "reading": "كما",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 227,
+   "box": [
+    1249,
+    1946,
+    1339,
+    2009
+   ],
+   "reading": "نشيد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 228,
+   "box": [
+    1185,
+    1945,
+    1227,
+    2009
+   ],
+   "reading": "به",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 229,
+   "box": [
+    1131,
+    1944,
+    1163,
+    2009
+   ],
+   "reading": "فى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 230,
+   "box": [
+    965,
+    1941,
+    1109,
+    2009
+   ],
+   "reading": "الوظائف",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 231,
+   "box": [
+    873,
+    1939,
+    944,
+    2007
+   ],
+   "reading": "التى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 232,
+   "box": [
+    729,
+    1937,
+    850,
+    2006
+   ],
+   "reading": "تولاها",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 233,
+   "box": [
+    675,
+    1936,
+    716,
+    2004
+   ],
+   "reading": "من",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 234,
+   "box": [
+    545,
+    1934,
+    652,
+    2003
+   ],
+   "reading": "مدرس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 235,
+   "box": [
+    335,
+    1931,
+    523,
+    2001
+   ],
+   "reading": "الرياضيات",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 236,
+   "box": [
+    150,
+    1929,
+    316,
+    1996
+   ],
+   "reading": "بمدرسة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 237,
+   "box": [
+    1390,
+    2012,
+    1508,
+    2076
+   ],
+   "reading": "المعلمين",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 238,
+   "box": [
+    1262,
+    2009,
+    1372,
+    2076
+   ],
+   "reading": "الأولية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 239,
+   "box": [
+    1092,
+    2006,
+    1244,
+    2075
+   ],
+   "reading": "بالقاهرة",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 240,
+   "box": [
+    1034,
+    2006,
+    1080,
+    2074
+   ],
+   "reading": "عام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 241,
+   "box": [
+    896,
+    2004,
+    1014,
+    2074
+   ],
+   "reading": "١٩٢٧",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 242,
+   "box": [
+    866,
+    2004,
+    884,
+    2072
+   ],
+   "reading": "م",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 243,
+   "box": [
+    811,
+    2004,
+    841,
+    2071
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 244,
+   "box": [
+    1396,
+    2101,
+    1419,
+    2160
+   ],
+   "reading": "١",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 245,
+   "box": [
+    1336,
+    2100,
+    1365,
+    2160
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 246,
+   "box": [
+    1210,
+    2097,
+    1311,
+    2160
+   ],
+   "reading": "أستاذ",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 247,
+   "box": [
+    1132,
+    2096,
+    1186,
+    2160
+   ],
+   "reading": "علم",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 248,
+   "box": [
+    1000,
+    2094,
+    1106,
+    2160
+   ],
+   "reading": "النفس",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 249,
+   "box": [
+    842,
+    2091,
+    977,
+    2160
+   ],
+   "reading": "التربوى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 250,
+   "box": [
+    724,
+    2089,
+    821,
+    2160
+   ],
+   "reading": "بمعهد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 251,
+   "box": [
+    580,
+    2087,
+    699,
+    2158
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 252,
+   "box": [
+    458,
+    2085,
+    557,
+    2156
+   ],
+   "reading": "العالى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 253,
+   "box": [
+    302,
+    2083,
+    435,
+    2153
+   ],
+   "reading": "للمعلمين",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 254,
+   "box": [
+    235,
+    2083,
+    282,
+    2150
+   ],
+   "reading": "من",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 255,
+   "box": [
+    150,
+    2082,
+    212,
+    2148
+   ],
+   "reading": "عام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 256,
+   "box": [
+    1402,
+    2164,
+    1502,
+    2218
+   ],
+   "reading": "١٩٤٥",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 257,
+   "box": [
+    1350,
+    2164,
+    1381,
+    2219
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 258,
+   "box": [
+    1232,
+    2162,
+    1333,
+    2221
+   ],
+   "reading": "١٩٥٥",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 259,
+   "box": [
+    1187,
+    2161,
+    1213,
+    2221
+   ],
+   "reading": "م",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 260,
+   "box": [
+    1137,
+    2160,
+    1171,
+    2221
+   ],
+   "reading": ".",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 261,
+   "box": [
+    1389,
+    2257,
+    1420,
+    2307
+   ],
+   "reading": "٢",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 262,
+   "box": [
+    1326,
+    2254,
+    1364,
+    2308
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 263,
+   "box": [
+    1232,
+    2251,
+    1309,
+    2310
+   ],
+   "reading": "عميد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 264,
+   "box": [
+    1133,
+    2248,
+    1211,
+    2311
+   ],
+   "reading": "معهد",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 265,
+   "box": [
+    992,
+    2244,
+    1108,
+    2312
+   ],
+   "reading": "التربية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 266,
+   "box": [
+    873,
+    2241,
+    972,
+    2312
+   ],
+   "reading": "العالى",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 267,
+   "box": [
+    717,
+    2237,
+    851,
+    2312
+   ],
+   "reading": "المعلمين",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 268,
+   "box": [
+    530,
+    2234,
+    698,
+    2312
+   ],
+   "reading": "((كلية",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 269,
+   "box": [
+    285,
+    2232,
+    508,
+    2309
+   ],
+   "reading": "التربية))",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 270,
+   "box": [
+    228,
+    2232,
+    272,
+    2304
+   ],
+   "reading": "من",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 271,
+   "box": [
+    145,
+    2232,
+    208,
+    2303
+   ],
+   "reading": "عام",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 272,
+   "box": [
+    1401,
+    2316,
+    1506,
+    2368
+   ],
+   "reading": "١٩٤٨",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 273,
+   "box": [
+    1353,
+    2315,
+    1384,
+    2370
+   ],
+   "reading": "-",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 274,
+   "box": [
+    1237,
+    2313,
+    1338,
+    2372
+   ],
+   "reading": "١٩٥٥",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 275,
+   "box": [
+    1143,
+    2310,
+    1221,
+    2372
+   ],
+   "reading": "م.",
+   "cls": "correct",
+   "truth": null
+  },
+  {
+   "i": 276,
+   "box": [
+    1422,
+    2437,
+    1458,
+    2482
+   ],
+   "reading": "٤",
+   "cls": "correct",
+   "truth": null
+  }
+ ],
+ "corrections": []
+}

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root{--bg:#f7f6f3;--card:#fff;--ink:#1b1a17;--mute:#77726a;--line:#e2ded6;--hit:#b3261e;--ok:#3f7d20;--sel:#fff8e1;--selline:#d9a521}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14130f;--card:#1d1c18;--ink:#eceae4;--mute:#9a958c;--line:#33312b;--sel:#2a2718;--selline:#8a6f18}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  h1{font-size:15px;margin:0;font-weight:600}
+  .sp{flex:1}
+  .stat{color:var(--mute);font-variant-numeric:tabular-nums;font-size:13px}
+  .stat b{color:var(--ink)}
+  button{font:inherit;padding:6px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:6px;cursor:pointer}
+  button.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  main{max-width:1100px;margin:0 auto;padding:16px}
+  details{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:16px}
+  summary{cursor:pointer;font-weight:600}
+  details img{max-width:100%;height:auto;margin-top:10px;border:1px solid var(--line)}
+  .help{color:var(--mute);font-size:13px;margin:8px 0 0}
+  .help kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;font:12px ui-monospace,monospace}
+  .row{display:grid;grid-template-columns:44px 1fr 1fr;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;scroll-margin:70px}
+  .row.sel{background:var(--sel);border-color:var(--selline);box-shadow:0 0 0 1px var(--selline)}
+  .row.bad{border-left:4px solid var(--hit)}
+  .row.style{border-left:4px solid var(--selline)}
+  .n{color:var(--mute);font:12px ui-monospace,monospace;text-align:center}
+  .src{font:12px ui-monospace,monospace;color:var(--mute);margin-bottom:2px}
+  .src b{color:var(--ink);font-weight:600}
+  .alt{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .alt span{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 9px;font-size:20px;direction:rtl;color:var(--ink);font-family:"Noto Naskh Arabic","Amiri",serif}
+  .ink{background:#fff;border:1px solid var(--line);border-radius:4px;padding:6px;display:flex;align-items:center;justify-content:center;min-height:64px;overflow:auto}
+  .ink img{height:110px;width:auto;max-width:100%;display:block;image-rendering:-webkit-optimize-contrast}
+  .row.big .ink img{height:210px}
+  .right{display:flex;flex-direction:column;gap:7px}
+  input.read{font-size:26px;direction:rtl;text-align:right;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;font-family:"Noto Naskh Arabic","Amiri",serif}
+  input.read.changed{border-color:var(--hit);background:color-mix(in srgb,var(--hit) 7%,var(--bg))}
+  .chips{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--mute);cursor:pointer;user-select:none}
+  .chip:hover{border-color:var(--ink)}
+  .chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .chip.on.good{background:var(--ok);border-color:var(--ok);color:#fff}
+  .chip .k{opacity:.55;font:11px ui-monospace,monospace;margin-left:4px}
+  footer{max-width:1100px;margin:0 auto;padding:0 16px 60px}
+  label.fld{display:block;margin:12px 0 4px;font-size:13px;color:var(--mute)}
+  input.num,textarea{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+  textarea{width:100%;min-height:70px}
+  .saved{color:var(--ok);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>__TITLE__</h1>
+  <span class="stat"><b id="sDone">0</b> touched · <b id="sBad">0</b> wrong · <b id="sStyle">0</b> book's style · <b id="sTot">0</b> words</span>
+  <span class="sp"></span>
+  <span class="saved" id="saved"></span>
+  <button id="bReset">Clear</button>
+  <button class="primary" id="bExport">Export JSON</button>
+</header>
+<main>
+  <details>
+    <summary>The whole page — every reading boxed in red</summary>
+    <p class="help">Ink with no red box around it is a word nothing read: it cannot appear as a row below, so this
+       picture is the only place it shows. Count those and put the number at the bottom.</p>
+    <img src="__OVERVIEW__" alt="page overview">
+  </details>
+  <p class="help" id="orphan" hidden></p>
+  <p class="help">Every row starts as <b>correct</b> — only the wrong ones cost a click.
+     <kbd>j</kbd>/<kbd>k</kbd> or arrows move · a class key marks the row and moves on ·
+     <kbd>e</kbd> types what the ink really says · <kbd>z</kbd> enlarges the ink · <kbd>Esc</kbd> leaves the field.</p>
+  <div id="rows"></div>
+  <footer>
+    <label class="fld" for="missed">Words with ink but no reading at all (counted from the picture above)</label>
+    <input class="num" id="missed" type="number" min="0" value="0" style="width:110px">
+    <label class="fld" for="notes">Notes — anything the classes do not cover</label>
+    <textarea id="notes" placeholder="e.g. this book never dots its final ya"></textarea>
+  </footer>
+</main>
+<script>
+const D = __DATA__;
+// The saved marks are keyed to the EXACT word list they were made on. Two sheets of the same page — Azure's
+// reading against Gemini's — used to share a key, so opening the second silently loaded the first one's marks
+// onto different words. A fingerprint of the readings makes that impossible: a sheet only ever reloads its own.
+const FP = (() => { let h = 2166136261; const s = D.words.length + "|" + D.words.map(w => w.text).join("\u0000");
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); })();
+const KEY = "gold:" + D.stem + ":p" + D.page + ":" + FP;
+const rowsEl = document.getElementById("rows");
+let state = {}, cur = 0;
+
+try { const s = localStorage.getItem(KEY); if (s) state = JSON.parse(s); } catch (e) {}
+
+// A rebuilt sheet gets a new fingerprint, so marks made on the previous version do not load. Say so instead
+// of starting silently empty: six marks were nearly lost that way on 2026-09-27.
+let orphan = null;
+try {
+  const pre = "gold:" + D.stem + ":p" + D.page + ":";
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith(pre) && k !== KEY && !k.endsWith(":meta")) {
+      const v = JSON.parse(localStorage.getItem(k) || "{}");
+      const n = Object.keys(v).length;
+      if (n && (!orphan || n > orphan.n)) orphan = {key: k, n, rows: Object.entries(v)
+        .filter(([, s]) => s.cls && s.cls !== "correct").map(([i, s]) => (+i + 1) + ":" + s.cls).join(", ")};
+    }
+  }
+} catch (e) {}
+
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(state)); flash("saved"); }
+  catch (e) { flash("not saved in this browser", true); }
+}
+let ft; function flash(msg, warn){ const el=document.getElementById("saved"); el.textContent=msg; el.style.color=warn?"var(--hit)":"var(--ok)";
+  clearTimeout(ft); ft=setTimeout(()=>el.textContent="",1500); }
+
+function st(i){ return state[i] || (state[i] = {cls:"correct", truth:null}); }   // touching a row records it
+function rd(i){ return state[i] || {cls:"correct", truth:null}; }                 // reading it must not
+
+D.words.forEach((w,i)=>{
+  const r=document.createElement("div"); r.className="row"; r.dataset.i=i;
+  const chips=D.classes.map(c=>`<span class="chip" data-c="${c.id}" title="${c.hint||""}">${c.label}<span class="k">${c.key}</span></span>`).join("");
+  const src = w.src ? `<div class="src"><b>${w.src}</b>${w.why?" · "+w.why:""}</div>` : "";
+  const alt = (w.alt&&w.alt.length) ? `<div class="alt"><span style="all:unset">the same ink is read elsewhere as</span>${w.alt.map(a=>`<span>${a}</span>`).join("")}</div>` : "";
+  r.innerHTML=`<div class="n">${i+1}</div><div class="ink"><img src="${w.img}" alt=""></div>
+    <div class="right">${src}<input class="read" value="${w.text.replace(/"/g,"&quot;")}" spellcheck="false">${alt}<div class="chips">${chips}</div></div>`;
+  r.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click",e=>{ e.stopPropagation(); setCls(i, ch.dataset.c); }));
+  const inp=r.querySelector(".read");
+  inp.addEventListener("input",()=>{ const s=st(i); s.truth = inp.value===w.text ? null : inp.value; paint(i); save(); });
+  inp.addEventListener("keydown",e=>{ if(e.key==="Escape"){ inp.blur(); } e.stopPropagation(); });
+  r.addEventListener("click",()=>select(i));
+  rowsEl.appendChild(r);
+});
+
+function setCls(i,c){ st(i).cls=c; paint(i); save(); counts(); if(i===cur && i<D.words.length-1) select(i+1); }
+
+function paint(i){
+  const r=rowsEl.children[i], s=rd(i), w=D.words[i];
+  r.querySelectorAll(".chip").forEach(ch=>{ const on=ch.dataset.c===s.cls; ch.classList.toggle("on",on); ch.classList.toggle("good",on&&s.cls==="correct"); });
+  r.classList.toggle("bad", s.cls!=="correct" && s.cls!=="style");
+  r.classList.toggle("style", s.cls==="style");
+  const inp=r.querySelector(".read"); if(s.truth!==null && inp.value!==s.truth) inp.value=s.truth;
+  inp.classList.toggle("changed", (s.truth??w.text)!==w.text);
+}
+
+function counts(){
+  const v=Object.values(state);
+  document.getElementById("sTot").textContent=D.words.length;
+  document.getElementById("sDone").textContent=v.length;
+  document.getElementById("sBad").textContent=v.filter(s=>s.cls!=="correct"&&s.cls!=="style").length;
+  document.getElementById("sStyle").textContent=v.filter(s=>s.cls==="style").length;
+}
+
+function select(i){
+  i=Math.max(0,Math.min(D.words.length-1,i));
+  rowsEl.children[cur]?.classList.remove("sel"); cur=i;
+  const r=rowsEl.children[i]; r.classList.add("sel"); r.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  if(e.key==="j"||e.key==="ArrowDown"){ select(cur+1); e.preventDefault(); return; }
+  if(e.key==="k"||e.key==="ArrowUp"){ select(cur-1); e.preventDefault(); return; }
+  if(e.key==="e"){ rowsEl.children[cur].querySelector(".read").focus(); e.preventDefault(); return; }
+  if(e.key==="z"){ rowsEl.children[cur].classList.toggle("big"); e.preventDefault(); return; }
+  const c=D.classes.find(c=>c.key===e.key); if(c){ setCls(cur,c.id); e.preventDefault(); }
+});
+
+document.getElementById("bReset").addEventListener("click",()=>{
+  if(!confirm("Clear every mark on this page?")) return;
+  state={}; try{localStorage.removeItem(KEY);}catch(e){}
+  D.words.forEach((w,i)=>{ rowsEl.children[i].querySelector(".read").value=w.text; paint(i); }); counts();
+});
+
+document.getElementById("bExport").addEventListener("click",()=>{
+  const words=D.words.map((w,i)=>{ const s=state[i]||{cls:"correct",truth:null};
+    return {i, stem:w.stem||D.stem, page:w.page??D.page, box:w.box, reading:w.text, cls:s.cls, truth:s.truth}; });
+  const out={stem:D.stem, page:D.page, sheet:D.sheet||"", fingerprint:FP, dpi:D.dpi, rot:D.rot, marked_at:new Date().toISOString(),
+    missed_words:Number(document.getElementById("missed").value||0), notes:document.getElementById("notes").value,
+    counts:Object.fromEntries(D.classes.map(c=>[c.id, words.filter(w=>w.cls===c.id).length])),
+    words,
+    corrections:words.filter(w=>w.truth!==null&&w.truth!==w.reading).map(w=>({stem:w.stem, page:w.page, box:w.box, text:w.truth}))};
+  const b=new Blob([JSON.stringify(out,null,1)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=`${D.stem}_p${D.page}_${FP}.gold.json`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+
+try{ const s=localStorage.getItem(KEY+":meta"); if(s){const m=JSON.parse(s); document.getElementById("missed").value=m.missed??0; document.getElementById("notes").value=m.notes??"";} }catch(e){}
+["missed","notes"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{
+  try{ localStorage.setItem(KEY+":meta", JSON.stringify({missed:document.getElementById("missed").value, notes:document.getElementById("notes").value})); }catch(e){} }));
+
+if (orphan) {
+  const el = document.getElementById("orphan"); el.hidden = false;
+  el.style.color = "var(--hit)";
+  el.innerHTML = `<b>${orphan.n} marks from an earlier version of this sheet were not loaded</b> — the sheet was
+    rebuilt and its rows changed, so the old row numbers no longer line up. What you had marked:
+    <code>${orphan.rows || "nothing but 'correct'"}</code>. Re-apply them if they still stand.`;
+}
+D.words.forEach((w,i)=>paint(i)); counts(); select(0);
+</script>
+</body>
+</html>
