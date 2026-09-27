@@ -10,6 +10,27 @@ reason is recorded), **open** (voiced, not yet judged).
 
 ## Trusting the text (the biggest gap)
 
+- **A gold set, and the error taxonomy before the checker.** *experiment 12,
+  2026-09-21: tools built, first page marked, method changed.* The first page
+  (`0005` p2, heavy face) came back **277 words, 0 errors** — so whole-page
+  marking cannot collect enough errors to classify (it would take ten thousand
+  words), and the taxonomy now comes from the pools already enriched for error:
+  the 1,399 contradictions and the 50,007 numbers (`candidates.py`). Whole
+  pages are still the only way to measure the *rate*, so one page of the worst
+  document is the next unbiased sample.* Nothing measures whether the
+  reading is RIGHT — only that we preserved it. A page of every face type,
+  every word judged, and each error given a class. The class decides the build:
+  look-alike errors are what a checker can pose a hypothesis about; dropped,
+  merged and invented words are invisible to one and need a coverage test
+  instead (every word's ink accounted for, every piece of ink claimed). Also
+  gives milestone 2 and any checker the ground truth they lack, and the
+  baseline they must beat: *change nothing*.
+- **The book's own orthography is not an error.** *open, from experiment 12.*
+  Many printings never dot a final ya, never write hamza on an initial alef. A
+  checker that corrects those rewrites the book into modern spelling at scale.
+  The rule: learn each document's own practice and flag departures from *it*,
+  never from standard Arabic — the atlas's "the document is the witness",
+  applied to spelling.
 - **A second opinion on Azure from the book's own letters — as a checker, not
   a reader.** *parked, milestone 1.* Cut a word by its known reading (we do
   that well), then ask whether the ink fits a look-alike reading better:
@@ -24,10 +45,23 @@ reason is recorded), **open** (voiced, not yet judged).
   individual stored examples beat mean pictures by far (27% → 41%) — the
   "database" instinct was right. Not a replacement for Azure/Gemini; see the
   checker above.
+- **Scope Gemini to the title and author, not the whole front page.** *open,
+  2026-09-21.* On the one front page scored both ways Azure read the body text
+  better (149/150 against 146/150) while the title and author were identical in
+  both. The owner kept D1 as it is (D16) — a wrong title costs far more than a
+  dots error in prose, and one editorial page is not a cover. What would settle
+  it: a real cover scored both ways (`experiments/12_gold`).
 - **Gemini labels the alphabet's glyphs instead of reading whole pages**
   (owner, 2026-09-19). *open.* Would give labels per shape, but does not solve
   where one letter ends (a geometry problem). Could label the restored
   typeface's glyphs cheaply as a cross-check.
+- **A word whose ink is only partly assigned to it.** *open, found 2026-09-22.*
+  61% of `extension` contradictions are a word whose blob signature covers only
+  part of its ink (the leading `و` of `وعلى` never attached), so the
+  contradiction is an artefact rather than a reading error
+  (`experiments/12_gold`). The reading is right in these cases; the *layout* is
+  wrong. Worth measuring: how often does a word lose a run, and does it cost
+  anything visible in the PDF?
 - **Gemini re-reads only what is doubtful.** *built:* numbers
   (`inkscript numbers`) and contradictions — same ink, different text
   (`inkscript check`, `inkscript second`); two readings against one become a
@@ -56,9 +90,12 @@ reason is recorded), **open** (voiced, not yet judged).
   how to store marks with letter glyphs.
 - **Underlines.** *parked.* Remove the rule from the ink before cutting; the
   rule-separation in `geometry/trace.py` only catches long rules.
-- **Measure placement, not just coverage.** *parked, milestone 2.* A
-  hand-checked sheet of a few hundred pieces, then every change measured
-  against it and against equal slicing.
+- **Measure placement, not just coverage.** *experiment 15, tool built
+  2026-09-27.* A blind paired trial: the same word cut both ways, tinted band by
+  band, the reader says which is better without being told which is which. The
+  bar is 50%, because equal slicing is free (D7). Also counts the words where
+  letter selection is wrong *either* way — the honest ceiling on what
+  letter-level highlighting delivers today.
 - **The owner's hand-marked line** (word → letters selectable yes/no).
   *method, keep using.* One line found four bugs.
 
@@ -70,9 +107,17 @@ reason is recorded), **open** (voiced, not yet judged).
 - **Restore the letters from many printings** (owner: "enhancing the font to
   make up for the broken pieces"). *experiment 11.* Body voted from up to 15
   best printings, marks from the best one, joins on the document's band.
-- **A restored edition of the page.** *parked.* Third output beside the
-  faithful PDFs: same layout, damaged letters (low atlas score, bridged ink)
-  redrawn from the restored font. Never replaces the faithful PDF.
+- **A restored edition of the page.** *prototype built 2026-09-21,
+  experiment 13.* Third output beside the faithful PDFs: same layout, the page
+  set in the book's own restored font. One page of `0582` exists and looks
+  right — 157 KB against the faithful 522 KB, no image at all. It is the answer
+  to the owner's "I want the PDFs to feel like `DuffyCN.pdf`": the faithful PDF
+  never can, because D3 forbids the glyph reuse that makes a native file small.
+  **The remaining piece is the text layer** — a page typeset by a layout engine
+  is read backwards by Chrome (23% of words survive, against the faithful
+  build's 100%), because nothing but this repo stores Arabic the way pdfium
+  inverts it (`text.visual`). Finish it with `pdf/type3.py`'s writer emitting
+  the restored font's glyphs. Never replaces the faithful PDF (D14).
 - **The font as a debugger.** *method.* A wrong glyph means a systematic wrong
   cut in that book (found the swapped `في` and the unsplit alefs).
 - Open font work: final `و` of 0565; forms a short document never prints

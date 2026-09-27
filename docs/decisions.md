@@ -80,3 +80,42 @@ Restored letters live in the typeface and, later, a separate restored edition.
 **D15 · Outputs live in the repo's `out/` folders, gitignored (2026-09-20).**
 The owner's Desktop had filled up; and relative paths were hard to find, so
 paths given to the owner are absolute.
+
+**D16 · Gemini keeps the whole front page; Azure keeps the rest (2026-09-21).**
+The first page scored both ways (`1110-000-001-001` p1, 150 words, hand-marked:
+`experiments/12_gold`) went to **Azure, 149/150, against Gemini's 146/150** —
+Gemini added a dots error and two doubtful words, all of them in body text, while
+the title and author words were identical and correct in both readings. The owner
+kept D1 unchanged anyway, and the reason is the asymmetry rather than the count: a
+wrong title or author is the error that hurts most in a bibliographic archive and
+is unrecoverable without reopening the scan, while a dots error in body prose is
+one word among thousands. The evidence is also thin and unrepresentative — one
+page, and an *editorial* front page (a title line then 400 words of prose), which
+is not the cover D1 was made for. **Do not narrow D1 from this measurement
+alone.** What would justify revisiting it is a real cover page (title, author,
+journal, date) scored both ways; candidates are in
+[../experiments/12_gold/README.md](../experiments/12_gold/README.md).
+
+**D17 · The archive first; the universal document tool later (2026-09-23).**
+The owner wants, eventually, any document digitised — tables, equations,
+figures — at "five sigma" fidelity. The order is settled: finish the Mandumah
+archive first, then widen. Two reasons, both from measurements made on
+2026-09-21/22. First, the archive is nearly done and is *provably* better than
+what is being shipped today: on ten documents drawn at random from the live
+upload, our layer returns 100.0% of words and 100.0% of lines in reading order
+against Azure's 97.9% and 79.3% ([experiments/14_vs_azure](../experiments/14_vs_azure/README.md)).
+Second, the two rules the project is built on do not survive the widening as
+they stand: D3 ("every occurrence its own ink") has no meaning for an equation,
+whose printed form is not its content, and a per-document alphabet is worth
+nothing on a one-page invoice. Widening therefore needs a *new* rule about what
+fidelity means for content that is not ink, and that is a design question to
+open deliberately rather than drift into.
+
+**What "five sigma" would have to mean.** At ~2,000 characters a page over
+~2,000,000 pages, 5σ (1 in 3.5 million) still leaves about 1,100 wrong
+characters in the corpus, and today's reading is nearer 2.8σ. No recognition
+model closes that. The reachable version is not a corpus without errors but a
+corpus where **every uncertain word is marked**, so a reader can trust the
+unmarked text — the trust map in [ideas.md](ideas.md). Accuracy targets in this
+project should be stated that way.
+

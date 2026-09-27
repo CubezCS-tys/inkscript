@@ -40,8 +40,15 @@ experiments/09_pen_path/watchdog.sh &
 Build the same documents before and after, then
 `experiments/09_pen_path/compare_boxes.py OLD_DIR NEW_DIR`: per document, the
 share of characters whose box moved, letter coverage before → after, and a
-flag if the copied text changed at all (it should not). This is the open task
-for the fixes made after the 227-journal run ([roadmap.md](roadmap.md), item 5).
+flag if the copied text changed at all.
+
+**Read that last flag carefully.** It compares each page's whole extracted
+string, so it also fires when only the *line breaks* move — and cutting a word
+differently can move one. On the 2026-09-22 rerun it fired on 73 of 227
+documents, and every document sampled had an identical words-intact count
+before and after: the changes were words that used to be split across a pdfium
+line and now are not. Before treating it as a regression, measure words intact
+against Azure's own words in both builds.
 
 ## Memory and time
 

@@ -4,6 +4,14 @@
 [STATUS.md](STATUS.md); every idea and its fate in [ideas.md](ideas.md).
 Everything under "History" is kept for the record and is done or superseded.
 
+## Scope (owner, 2026-09-23)
+
+**The archive first, the universal document tool later** — see
+[decisions.md](decisions.md), D17. Everything in the live list below serves the
+Mandumah archive. Tables, equations and arbitrary documents are deliberately
+not on it yet, and widening needs a new rule for what fidelity means when the
+content is not ink.
+
 ## The live list (owner's order, 2026-09-20)
 
 1. **Make the text trustworthy.** The PDFs carry Azure's reading; "words
@@ -19,11 +27,9 @@ Everything under "History" is kept for the record and is done or superseded.
 4. Known gaps: vowelled words never cut; underlined words; fine slanted
    faces; tables; Firefox word order; corrections shorter than the glyph
    count.
-5. **Rerun the 227 journals with the fixes made after the run** (swapped
-   `في`, thin alefs, hamza, dots under a swept-back tail) and compare every
-   document's letter boxes before and after:
-   `experiments/09_pen_path/compare_boxes.py OLD_DIR NEW_DIR`. Cheap, runs in
-   the background ([operations.md](operations.md)). Then the 451 sample.
+5. ~~Rerun the 227 journals with the fixes made after the run.~~ **Done
+   2026-09-22**: letter coverage 96.8% → 97.8%, no regression in the copied
+   text ([STATUS.md](STATUS.md)). Next at this scale: the 451 sample.
 6. **Typeface polish, then a restored edition** ([typeface.md](typeface.md)).
 
 ## Standing rules
