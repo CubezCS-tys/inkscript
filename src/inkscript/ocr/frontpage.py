@@ -5,9 +5,14 @@ from __future__ import annotations
 import re, unicodedata
 from pathlib import Path
 
+from ..config import arabic_font
 from ..text import ARABIC, RTL, MARKS, norm
 from .azure import load_azure
 from .align import page1_text
+
+# The font page 1's invisible text layer is drawn in. Restored 2026-09-21: it was
+# removed as "unused" while making system fonts optional, which broke this command.
+FONT = arabic_font()
 
 
 def for_word(s: str) -> str:
