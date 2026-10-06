@@ -40,6 +40,25 @@ NON_ARABIC_LETTERS = re.compile(r"[ٹڈڑںھہےۓگکپچژ]")
 
 
 PERSIAN_TO_ARABIC_DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹", "٠١٢٣٤٥٦٧٨٩")
+URDU_PERSIAN_ONLY = re.compile(r"[ٹڈڑںھہےۓگپچژ]")         # letters an Arabic page never prints (ک and ی are the look-alikes)
+
+
+def fold_letters(word: str) -> str:
+    """Azure's Persian look-alikes on Arabic pages: ک (U+06A9) for ك and ی (U+06CC) for ي/ى. The word looks
+    right but a search typed in Arabic misses it — 0.09% of words, in 69 of 139 scanned documents (experiment
+    19). ی becomes ي where it joins the next letter (Persian dots it there too) and ى at a word's end, where
+    both print it undotted. Callers decide per page (`URDU_PERSIAN_ONLY`): on Urdu/Persian pages they are right."""
+    if "ک" not in word and "ی" not in word:
+        return word
+    out = []
+    for i, c in enumerate(word):
+        if c == "ک":
+            c = "ك"
+        elif c == "ی":
+            nxt = next((d for d in word[i + 1:] if not TRANSPARENT.match(d)), "")      # the next letter, past any marks
+            c = "ي" if nxt and ARABIC_LETTER.match(nxt) else "ى"
+        out.append(c)
+    return "".join(out)
 
 
 def fold_digits(text: str) -> str:

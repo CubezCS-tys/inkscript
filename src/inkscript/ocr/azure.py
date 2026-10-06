@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from ..text import URDU_PERSIAN_ONLY, fold_letters
+
 def bbox(poly: list[float]) -> tuple[float, float, float, float]:
     """Axis-aligned box of Azure's 4-corner polygon. The scans are skewed, so the
     polygon is not axis-aligned and its corners must not be read pairwise."""
@@ -22,11 +24,13 @@ def load_azure(path: Path) -> tuple[list[dict], list[dict], dict]:
     for pg in ar.get("pages", []):
         n = pg.get("pageNumber", len(dims) + 1)
         dims[n] = (pg.get("width") or 1, pg.get("height") or 1)
+        arabic_page = not any(URDU_PERSIAN_ONLY.search(w.get("content", "")) for w in pg.get("words", []))
         for w in pg.get("words", []):
             if not w.get("polygon"):
                 continue
             sp = w.get("span") or {}
-            words.append({"text": w.get("content", ""), "page": n,
+            text = w.get("content", "")
+            words.append({"text": fold_letters(text) if arabic_page else text, "page": n,
                           "box": bbox(w["polygon"]),
                           "off": sp.get("offset", -1), "len": sp.get("length", 0),
                           "conf": w.get("confidence")})

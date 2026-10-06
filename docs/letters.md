@@ -26,6 +26,13 @@ stroke, the far side of a loop, a tail sweeping back — belongs to the trunk
 point it hangs from. The piece is thereby unrolled into a strip indexed by
 distance along the path. Broken ink is bridged *for the path only*.
 
+The trunk **ends where the last letter meets the baseline**, not at the top of a final
+alef (`penpath.stem_foot`): a stem leaning left at the top made its top the leftmost
+point, the path ran down the stem, and the alef's selection box was a sliver at its
+foot — right 5 times in 56. The stem now hangs from its foot like any tall stroke
+(experiment 21: highlights on the right letter 70.2% → 76.7% on unseen pages, joined
+alefs 4 → 39 of 54).
+
 If a hard fact fails with that start (next section), the path is tried again
 from the first letter's body above the baseline, and the start the facts
 prefer is kept: some faces print `في` with the ya's flat tail running back to

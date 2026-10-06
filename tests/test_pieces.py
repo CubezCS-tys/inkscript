@@ -71,3 +71,11 @@ def test_storage_is_what_chrome_reads_back():
     # forward after Latin text.
     assert chrome_reads(" ".join(visual(w, True) for w in reversed("(Kose) في".split()))) == "(Kose )في"
     assert chrome_reads(" ".join(visual(w, True) for w in reversed("بالرمز (a-1) وتحت".split()))) == "بالرمز (a-1 )وتحت"
+
+
+def test_persian_lookalikes_fold_on_arabic_pages():
+    from inkscript.text import fold_letters
+    assert fold_letters("کتاب") == "كتاب"
+    assert fold_letters("فی") == "فى"                  # at the word's end: undotted, as printed
+    assert fold_letters("فیه") == "فيه"                # joined to the next letter
+    assert fold_letters("على") == "على"                # Arabic untouched

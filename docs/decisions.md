@@ -130,3 +130,13 @@ the stream, would keep Latin lines right but changes every run and the pen
 logic; the flag is one key and the pin agrees with Chromium under it. Latin-
 majority lines pay (words swapped). Taken as the quick fix the owner asked for;
 the pin stays for `--verify`, but feel is measured in Chromium.
+
+**D19 · The feeler's job is the cuts, not the reading (2026-10-06).** Where the
+pen-path reader and Azure disagree, a calibrated Gemini 3.1 Pro judge sided with
+Azure 789 times in 800 (experiment 17); across the archive Azure misreads 0.61% of
+printed Arabic words on scans (experiment 19). So disagreement with the feeler is not
+an uncertain-word flag (it would mark 28% of pieces to find ~1 error in 300). The
+uncertain-word layer starts from Azure's own confidence (< 0.8 flags 7% of words and
+catches 73% of errors) and exact checks (Quran quotations, experiment 20); the
+feeler and the cutter serve letter placement, measured by the blind judge (18, 21).
+

@@ -104,3 +104,12 @@ Not measured yet: whether the feeler is right where Azure is wrong (needs the go
 The visual report: `python make_report.py out/means.json combo_best` → `out/report.html` (with
 `report_data.py` and `make_live.py` → `out/feel_best.html`, both run with `out/torchenv/bin/python`).
 
+## More books, a bigger reader (2026-10-06)
+
+`notes/scale.md`. 93 more scanned books (one per journal, up to 8 pages each, 317k pieces) and a reader grown
+to 1.5M parameters (`methods/model_scale.py`): **82.6%** of held-out test pieces read as Azure reads them
+(0582 85.4, 0618 84.3, 1036 79.5, 0772 81.1; letters 88.2%), against 79.0% for `model_ctc_ft`. The small reader
+did not gain from more books (it was full); the bigger one trained on the four books alone overfit (76.3% dev):
+the gain needs both. On books never trained on, going from 4 to 19 typefaces added 11 points and was still
+climbing at 60.
+

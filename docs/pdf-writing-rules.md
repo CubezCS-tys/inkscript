@@ -117,6 +117,11 @@ rule records the experiment, not a theory.
   (the image and line art untouched, checked pixel-identical). Redaction
   was not enough: MuPDF left 19 of 34 runs it could not measure, and every
   engine then read two layers — lines merged, thousands of order inversions.
+- **Persian look-alike letters are folded on Arabic pages** (`text.fold_letters`, in
+  `ocr.azure.load_azure`): Azure writes ک for ك and ی for ي/ى in 0.09% of words, in
+  69 of 139 scanned documents (experiment 19) — the word looks right and a search typed
+  in Arabic misses it. ی becomes ي where it joins the next letter and ى at a word's end
+  (both print it undotted there). A page with any Urdu/Persian-only letter is left alone.
 - **Gemini's page-1 read is stripped of Markdown** (`# …`, `---`, `**…**`)
   before alignment; it decorates some pages despite the prompt.
 - **Born-digital pages are left untouched.** A page whose text is set in

@@ -19,6 +19,9 @@
 
 An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 
+| Letter highlight on the right letter (blind Gemini judge, strict) | 76.7% of letters on unseen pages after the alef fix (was 70.2%; Chrome's equal slicing 53.9%); fixture 62.2% (was 56.2%, equal slicing 58.2%) | 230 words, 981 letters (`experiments/18_boxes`, `21_better_boxes`) | 2026-10-06 |
+| Azure's reading, judged on the ink | 1.55% of words wrong on scans [0.62–2.79], printed Arabic misread 0.61%; pre-2000 2.8%, after 0.65%; 42% of documents born-digital | 240 random documents, 2,971 words (`experiments/19_azure_map`) | 2026-10-06 |
+| Reading from the pen path alone (the feeler) | 82.6% of unseen pieces read as Azure reads them (bigger reader, 97 books) | 4 books, held-out pages (`experiments/16_feel`) | 2026-10-06 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
 
 ## What they do not do (known gaps)
