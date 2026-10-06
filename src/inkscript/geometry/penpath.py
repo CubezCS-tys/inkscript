@@ -32,6 +32,14 @@ ROUNDS = 4
 # joined `أ` went to a dotted neighbour (`نشأ` typed from the document's font came out `نشا`).
 MARK_ABOVE = dict(DOTS_ABOVE, **{"أ": 1, "آ": 1}); MARK_BELOW = dict(DOTS_BELOW, **{"إ": 1})
 RELIABLE = 0.85                                           # a fact counts for a letter-form when this share of its occurrences show it
+# A HEAD — the filled round head of و, the head of ف/ق, the eye of م/ه — hangs from ONE point of the pen path: the pen
+# arrives from the previous letter, circles the head and leaves into the tail from the same point, so the shortest
+# path skips the circle. Whoever owns that point owns the whole head, and nothing stopped the previous letter owning
+# it: the atlas then learned that a final و is a bare tail (its font glyph was a dotless ز) and confirmed it in every
+# copy. A letter with no head must not own one (experiment 25).
+HEADED = set("وؤفقمهةصضطظ"); HEADED_JOINING = set("عغ")   # the second: closed only in the initial and medial forms
+HEADLESS = set("اأإآدذرزلكبتثنيىسشئ")
+LUMP = 1.6                                                # a head: ink at least this many times a stroke's thickness
 
 
 def thin(img: np.ndarray) -> np.ndarray:
@@ -120,13 +128,22 @@ def stem_foot(trunk, rise) -> int:
     """Index of the foot of a tall stroke the path climbs down at its left end (a final alef), or 0: from its left
     end the path runs down, mostly vertically, by at least 0.6 x the line's rise, to near the row the rest of the
     path runs along (its median row, within a fifth of the rise)."""
-    t = np.array(trunk); y, x = t[:, 0], t[:, 1]; j = 0
-    flat = lambda j: (lambda e: x[e] - x[j] >= 2 and y[e] - y[j] <= 1)(min(j + 3, len(t) - 1))
-    while j + 1 < len(t) and y[j + 1] >= y[j] and not flat(j): j += 1          # down the stroke, until the path turns flat
-    drop = y[j] - y[0]; base = np.median(y[j:])
-    if drop >= 0.6 * rise and abs(int(x[j]) - int(x[0])) <= 0.5 * drop and y[j] >= base - 0.2 * rise and j < len(t) - 6:
-        return j
-    return 0
+    t = np.array(trunk); y, x = t[:, 0], t[:, 1]; n = len(t)
+    ok = lambda j: (lambda drop: drop >= 0.6 * rise and abs(int(x[j]) - int(x[0])) <= 0.5 * drop and y[j] >= np.median(y[j:]) - 0.2 * rise and j < n - 6)(y[j] - y[0])
+    j = 0
+    flat = lambda j: (lambda e: x[e] - x[j] >= 2 and y[e] - y[j] <= 1)(min(j + 3, n - 1))
+    while j + 1 < n and y[j + 1] >= y[j] and not flat(j): j += 1                # down the stroke, until the path turns flat
+    if ok(j): return j
+    # A stem that wiggles, or carries a flag at its top (the alef of أ), stopped that walk at its first pixel step to
+    # the right, and a final أ kept the whole stroke back to its neighbour. Look a quarter of a rise ahead instead,
+    # stop where the path ahead runs more across than down, and take the lowest point just after (experiment 25).
+    w = max(3, int(0.25 * rise)); j = 0
+    while j + 1 < n:
+        e = min(j + w, n - 1); dy, dx = y[e] - y[j], abs(x[e] - x[j])
+        if dy <= 0 or dx > dy: break
+        j += 1
+    j += int(np.argmax(y[j:min(j + w, n - 1) + 1]))
+    return j if ok(j) else 0
 
 
 def units_forms(text: str):
@@ -328,7 +345,25 @@ def _facts_score(p, k, a, b) -> float:
     # `ف`-initial — 395 printings, every one just the stroke after the head, all agreeing with each other at 0.84:
     # the self-confirming error the atlas is prone to, which only a fact from outside it can break.
     if p["G"]["thin"][a:b].all(): w -= 8.0
+    # A head's ink belongs to the letter that has one (see HEADED): rewarded there, and a letter without a head that
+    # holds one is wrong. On 0772 this gave the final و back its head in its font (it was a dotless ز) and the
+    # final ق its head; the cells barely move (experiment 25).
+    c = _base(p["units"][k]); head = any(a <= x < b for x in lumps(p))
+    if c in HEADED or (c in HEADED_JOINING and p["forms"][k] in ("init", "med")): w += 1.5 if head else 0.0
+    elif c in HEADLESS and head: w -= 4.0
     return w + (1.5 if asc_ok else -6.0) + (1.0 if desc_ok else -2.0) + (2.0 if da_ok else -5.0) + (2.0 if db_ok else -5.0)
+
+
+def lumps(p):
+    """Path positions whose own ink is a lump (a filled head): its thickest point at least LUMP x the piece's usual
+    stroke, both measured by the distance to the paper."""
+    if "lumps" not in p:
+        ink = p["ink_s"]; S = p["G"]["W"]; main = (ink >= 0).astype(np.uint8)
+        dt = cv2.distanceTransform(np.pad(main, 1), cv2.DIST_L2, 5)[1:-1, 1:-1]
+        ys, xs = np.where(ink >= 0); m = np.zeros(S); np.maximum.at(m, ink[ys, xs], dt[ys, xs])
+        st = float(np.median(m[m > 0])) if (m > 0).any() else 1.0
+        p["lumps"] = [int(i) for i in range(S) if m[i] >= LUMP * st]
+    return p["lumps"]
 
 
 def best_cuts(p, packs):

@@ -33,6 +33,14 @@ foot — right 5 times in 56. The stem now hangs from its foot like any tall str
 (experiment 21: highlights on the right letter 70.2% → 76.7% on unseen pages, joined
 alefs 4 → 39 of 54).
 
+**A letter without a head may not own a thick lump of ink** (hard fact, experiment 25):
+the pen circles a filled head (`و ق ف`) and leaves into the tail from the point it hangs
+on, so a cut just below that point gave the letter before the whole head and a final
+`و` kept only its tail, in every copy. Headless letters (`ا ر ل ن ب ي ى س` …) may not
+own the lump; headed ones are rewarded for it. Stacked letters' own ink: 52 → 76 of 95
+right by eye; the book fonts' final `و` and `ق` became right. Highlights barely move
+(the head's root sits above the tail).
+
 If a hard fact fails with that start (next section), the path is tried again
 from the first letter's body above the baseline, and the start the facts
 prefer is kept: some faces print `في` with the ya's flat tail running back to
