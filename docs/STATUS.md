@@ -39,7 +39,7 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   must beat — *change nothing* — is **99.1%**, and three of the five doubtful
   words were marked unsure from the ink itself, which no checker can settle
   either. Azure on the body text of a difficult face is still unmeasured.
-- **Letter boxes exist; their placement is not measured.** By eye about 85–90%
+- **Letter boxes: first measurement 2026-10-06 (experiment 18).** A blind Gemini judge (strict: accepts 49/60 boxes right by construction, 0/60 moved a letter) puts the cutter's highlight on the right letter for 70.2% of letters on unseen pages against 53.9% for Chrome's equal slicing, but not on the fixture (56.2% vs 58.2%); corrected for the judge's strictness about 83–86%. Weak spot: a joined final alef gets a sliver of a box (5/56 right). *Earlier:* **Letter boxes exist; their placement is not measured.** By eye about 85–90%
   of cuts sit right on the reference document; doubted cuts (about a third of
   them wrong) are still cut, because an uncut piece is no better. A
   hand-checked sample is milestone 2.
