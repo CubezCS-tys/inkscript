@@ -8,6 +8,7 @@ build/
 dist/
 output/
 data/
+!src/inkscript/data/
 *.zip
 .pytest_cache/
 experiments/*/out/

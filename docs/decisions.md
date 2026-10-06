@@ -140,3 +140,51 @@ uncertain-word layer starts from Azure's own confidence (< 0.8 flags 7% of words
 catches 73% of errors) and exact checks (Quran quotations, experiment 20); the
 feeler and the cutter serve letter placement, measured by the blind judge (18, 21).
 
+
+**D20 · The document file is JATS for the article and ALTO for the page; the
+Quran text ships with the code (2026-10-06).** The owner: "if I want to
+recreate the documents that I'm trying to digitise, the biggest publishers in
+the world use XML and I think it would be good to follow that." Publishers'
+XML for journal articles is **JATS** (NISO Z39.96; version 1.4, 2024); its
+*Archiving and Interchange* tag set is the one meant for digitised back
+content, and it is what PubMed Central and Crossref take in. Experiment 20 had
+chosen **TEI P5** because JATS has no standard place for a word's box on the
+page, which is true: JATS describes the article, not the page. Libraries'
+standard for exactly that missing half — OCR text with coordinates — is
+**ALTO** (Library of Congress, v4.4). So each document now gets two files that
+together hold what the TEI prototype held, each in the format its readers
+expect:
+
+- `<stem>.jats.xml` (JATS 1.4 Archiving DTD): front matter (Mandumah id,
+  rubric, title, author, volume/issue as the id spells them, printed page
+  range, page count, where every part came from), the body in reading order
+  with sections, the footnotes linked from their markers, a reference list when
+  a section is headed المراجع/المصادر, and every Quran quotation marked up and
+  linked to `https://tanzil.net/#S:A`, with a closing list of the verses
+  (Tanzil's text, credited) and how the print differs.
+- `<stem>.alto.xml` (ALTO 4.4 XSD): every page, block, line and word with its
+  box in scan pixels, Azure's confidence (`WC`), the trust mark and its reasons
+  and the quotation as `TAGREFS`, the other reader's text as `ALTERNATIVE`,
+  `BASEDIRECTION="rtl"` on Arabic lines. Word ids (`p3w0042`) are also written
+  into the build's `shapes.json` placements, which hold each glyph's page and
+  box in the same frame; each block points to its element of the JATS file
+  (`xlink:href`, same id).
+
+What TEI's prototype taught and kept: per-word ids stable for a given Azure
+reading; three trust marks (verified / agreed / flagged) with named reasons;
+paragraph roles by position rules, said to be guesses; stand-off Quran links;
+the Azure text-element offset conversion. What it showed to avoid: one file
+that is neither a publisher's article nor a library's page file. TEI with
+word zones is a digital-edition format; publishers' pipelines expect JATS and
+libraries' OCR tools (newspaper archives, Transkribus, eScriptorium exports)
+expect ALTO, so two standard files reach more readers than one custom one. JATS has no direction attribute: the article is `xml:lang="ar"` with
+text in logical order (custom-meta says so); ALTO has `BASEDIRECTION`. Both
+validate against the official schemas, fetched at validation time into
+`~/.cache/inkscript/schemas` (`enrich/schemas.py`).
+
+The Quran text (Tanzil, CC BY 3.0, 0.5 MB gzipped) **ships in
+`src/inkscript/data/quran/`** rather than being downloaded on first use: the
+licence permits verbatim copies with the notice (kept, `NOTICE.md`); the text
+is fixed (v1.1); the build must give the same result offline and on a server
+(moving-to-a-server.md) and the tests must run without network. Downloading
+would add a network failure mode for no gain.

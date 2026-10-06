@@ -192,6 +192,41 @@ rule records the experiment, not a theory.
   tracing error. The alphabet is exported beside the PDF instead
   (`<stem>.shapes.json`, `<stem>.alphabet.svg`, `<stem>.alphabet.png`).
 
+## The trust copy (`<stem>_trust.pdf`, since 2026-10-06)
+
+The faithful PDF is never altered in what it draws (D14). The uncertain-word
+marks therefore go into a *copy*, written by `enrich/trustpdf.py`:
+
+- **An incremental update, not a rewrite.** The copy is the faithful file's
+  bytes followed by an appended revision holding the annotations. Measured on
+  the fixture (`tests/test_enrich.py`): the faithful file is a byte-for-byte
+  prefix of the copy, for both `<stem>.pdf` and `<stem>_vector.pdf`.
+- **Highlight annotations, not page content.** One `/Highlight` per flagged
+  word, a pale amber quad on Azure's four corners (opacity 0.45), with a
+  pop-up note. Annotations are not text: pdfium gives the same text and the
+  same character boxes on every page of the copy as of the original (fixture:
+  1,246/1,246 words intact, 113/113 lines in order, on both copies; experiment
+  22 also checked 7,691 character boxes). In a real Chromium 153 a drag across
+  a highlighted word still selects it letter by letter (experiment 22).
+- **One optional-content layer, "Uncertain words".** Every highlight is in it,
+  so a viewer with a layers panel switches all marks off at once; any viewer
+  can hide annotations.
+- **Notes in English, without the word.** Chromium's note pop-up draws no
+  Arabic (the word came out blank in experiment 22), so a note gives the
+  reason ("Azure is unsure of this word (Azure's confidence 0.62)", "differs
+  from the Quran verse (Quran 2:255, tanzil.net)") and leaves the word, which
+  is under the highlight anyway.
+- **`/Direction /R2L` is kept** (D18): it lives in the original catalogue,
+  which the update does not replace.
+- **No marks on born-digital pages.** Their text in the PDF is the
+  publisher's, not Azure's, so Azure's doubts do not apply to it.
+- **No link annotations.** A verse link over a quotation would turn a drag
+  into a click in Chrome; the links live in the JATS and ALTO files instead.
+
+`inkscript native --verify --trust` checks all of this per document
+(`enrich.verify` → `trustpdf.check`: prefix identical, same text and character
+boxes on every page, layer and `/R2L` present).
+
 ## Letters (selection inside a connected run)
 
 *Since 2026-09-20 the build cuts letters along the pen path

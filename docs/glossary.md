@@ -72,3 +72,14 @@ with `/ActualText`.
 **Fixture / reference document** — `tests/fixtures/0582-004-009-012`, five
 pages of a heavy old face; the document most things were tuned on, so its
 numbers flatter.
+
+**Trust mark** — one per word with a letter or digit (`enrich/trust.py`):
+*verified* (a Quran verse or a second reader agrees), *flagged* with reasons
+(low confidence, speck, ornament, Latin, Persian letter, Quran difference,
+Gemini disagrees), or *agreed* (no signal). Written in the ALTO file and shown
+in the `_trust.pdf`.
+
+**JATS / ALTO** — the two document files `--xml` writes (D20): the article as
+publishers keep it (JATS 1.4, `<stem>.jats.xml`) and every page, line and word
+with its box as libraries keep OCR (ALTO 4.4, `<stem>.alto.xml`). Word ids are
+`p<page>w<nnnn>`, block ids `p<page>b<n>`, shared by both files.

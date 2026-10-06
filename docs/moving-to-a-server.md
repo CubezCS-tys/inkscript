@@ -13,6 +13,7 @@ clone is enough to develop and run the tests, and not enough to run the sets.
 | Inputs: Azure JSON + PDFs, scans, Gemini page-1 readings, id lists (30-doc test set, 47, 227 journals, 451 sample) | 4.6 GB, 4,173 files | `ops/pack_data.sh user@server:~/inkscript-data` (rsync, resumable) | copyrighted scans; size |
 | Keys: `GEMINI_API_KEY` (`.env`), AWS credentials for `s3://mandumah-source-docs` (`~/.aws/`) | — | type them on the server (`aws configure`; edit `.env`) — never commit, never paste into chat | secrets |
 | Built PDFs of the 227-journal runs (`experiments/09_pen_path/out/`) | 7.4 GB | optional: `rsync -avh experiments/09_pen_path/out/ user@server:~/inkscript/experiments/09_pen_path/out/` | reproducible (~5 h); needed only as the OLD side of `compare_boxes.py` |
+| The official XML schemas (JATS 1.4 DTD, ALTO 4.4 XSD) in `~/.cache/inkscript/schemas` | 2 MB | nothing: fetched on the first `--xml --verify` or test run (needs network once) | third-party files, refetchable |
 | The agent's private notes (`~/.claude/projects/…/memory/`) | KB | not needed: `CLAUDE.md` and `docs/` are the source of truth | — |
 
 The Azure inputs can also be re-fetched on the server (`inkscript fetch

@@ -10,6 +10,33 @@ reason is recorded), **open** (voiced, not yet judged).
 
 ## Trusting the text (the biggest gap)
 
+- **Every uncertain word marked: the trust map.** *built 2026-10-06*
+  (`src/inkscript/enrich/trust.py`, `--xml`/`--trust`; measured in
+  `experiments/22_trust`, set in `experiments/24_product`). Each word is
+  verified, agreed or flagged with reasons: Azure confidence < 0.8 plus specks,
+  ornaments, Latin on Arabic pages, Persian letters left in the text, Quran
+  differences and (page 1) Gemini disagreeing. 7.6% flagged, 0.43% of
+  unflagged words wrong on experiment 22's sample. *Parked:* the *strict*
+  option (old prints at 0.9, hamza in hamza-omitting prints: 11.3% flagged,
+  0.10% left wrong), and a second reader for confident misreadings (the added
+  hamza at 0.99 escapes every free signal); paying a judge per flag (≈ $0.0026
+  a word) on demand, not archive-wide.
+- **The Quran as a free second reader.** *built 2026-10-06*
+  (`src/inkscript/enrich/quran.py`; experiment 20). Quotations found, linked to
+  sura:verse (tanzil.net), checked word for word; an equal word is *verified*,
+  a differing one *flagged* (20 of 24 such words on the ink were Azure
+  misreadings). *Open:* turn each differing word into a yes/no question on the
+  ink ("does the print say لَحَٰفِظُونَ?") feeding `inkscript correct`.
+- **The document as data: JATS for the article, ALTO for the page.** *built
+  2026-10-06* (`src/inkscript/enrich/jats.py`, `alto.py`; D20). Replaces the
+  TEI prototype of experiments 20/22 (*dropped* as the product format: neither
+  publishers' nor libraries' tools read it; what it taught is kept, D20).
+  *Open:* paragraph roles from Azure `prebuilt-layout` instead of position
+  rules; titles and authors from Gemini's title file; journal title, year and
+  page range from the catalogue (MARC metadata, experiment 19's `meta.py`);
+  references split into fields (`element-citation`); a Crossref export from
+  the JATS front matter.
+
 - **Three layers: ink deterministic, reading by a small model trained on the
   archive, trust by disagreement.** *open, 2026-10-05; owner: "save this, we
   will come back to it".* The ink stays exact and rule-based (tracing, text

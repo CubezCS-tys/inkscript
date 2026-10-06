@@ -346,7 +346,8 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                         pos = "m" if b["h"] >= 0.3 * lh_w else ("a" if b["cy"] < mid - 0.1 * lh_w else "b" if b["cy"] > mid + 0.1 * lh_w else "m")
                         tags.append(f"{b['shape']}{pos}")
                     placements.append(dict(page=pn, text=w["text"].strip() or w["az"], shapes=w["shapes"], sig="+".join(tags),
-                                           box=[int(w["x0"]), int(w["y0"]), int(w["x1"]), int(w["y1"])], rot=rot))
+                                           box=[int(w["x0"]), int(w["y0"]), int(w["x1"]), int(w["y1"])], rot=rot,
+                                           off=w.get("off")))   # Azure span offset: ties the glyph to its Azure word (enrich/)
         M = ~page.transformation_matrix
         n_lines = sum(1 for L in lines if any(w["blobs"] for w in L))
         content, glyphs, pstats = write_text_layer(src, page, M, lines, f"P{pn}", invisible=True, frame=frame)

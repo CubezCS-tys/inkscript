@@ -17,6 +17,7 @@
 | Geometry | `inkscript.geometry` | scans | outline polygons, shape alphabet, blob→word layout |
 | Meeting point | `inkscript.pdf` | both | ink-glyph PDFs |
 | Checks | `inkscript.verify` | PDFs | pdfium/MuPDF/poppler numbers |
+| What we know beyond the ink | `inkscript.enrich` | Azure JSON, scan, build outputs | JATS + ALTO XML, trust marks, Quran links, `_trust.pdf` |
 | Review | `inkscript.viewer` | outputs | static HTML bundles |
 
 ## Letters
@@ -52,6 +53,42 @@ Inside the PDF each glyph stream carries `/InkShapes [ids]`. The alphabet is
 knowledge about the ink; the page always draws each occurrence's own outline
 (see pdf-writing-rules.md, "Exactness"). Different type weights are different
 alphabets; that is correct, not a defect.
+
+## The document as data: `--xml` and `--trust` (since 2026-10-06)
+
+`inkscript native ... --xml` writes two files beside the PDFs (D20):
+
+- `<stem>.jats.xml` — the article as publishers keep it (JATS 1.4, Journal
+  Archiving and Interchange DTD): front matter, body in reading order with
+  sections, footnotes linked from their markers, references, every Quran
+  quotation linked to its verse.
+- `<stem>.alto.xml` — every page, line and word with its box as libraries keep
+  OCR (ALTO 4.4): Azure's confidence, the trust mark and its reasons, the
+  other reader's text, ids that link each word to its JATS element (through
+  its block) and to its glyphs (the same id in `shapes.json` placements, as
+  `"word"`).
+
+`--trust` writes `<stem>_trust.pdf` (and `<stem>_vector_trust.pdf` with
+`--vector`): the faithful PDF with one amber highlight per flagged word, in a
+layer "Uncertain words" that a viewer can hide, appended as an incremental
+update so the original bytes come first, unchanged (pdf-writing-rules.md,
+"The trust copy").
+
+Every word gets one trust mark (experiment 22's default rule,
+`enrich/trust.py`): **verified** (a Quran verse or Gemini's page-1 reading
+agrees), **flagged** with reasons (Azure confidence < 0.8, speck, ornament or
+display type, Latin on an Arabic page, Persian letter left in the text, differs
+from the Quran verse, Gemini reads it differently), or **agreed** (no signal).
+Quran quotations are found and checked word for word against the Tanzil text
+that ships in `src/inkscript/data/quran/` (CC BY 3.0, `NOTICE.md`).
+
+With `--verify`, both XML files are validated against the official schemas
+(fetched once into `~/.cache/inkscript/schemas`; without network the build
+says "not validated" and carries on) and each trust PDF is checked against its
+faithful PDF in pdfium (same bytes first, same text and character boxes on
+every page). Neither flag changes anything else: without them the outputs are
+as before. The extra time is small (a few seconds on the fixture's ~35 s build:
+rendering each scan page once for the ink signal, the Quran index ~1 s).
 
 ## Checking a document against itself
 
@@ -134,12 +171,19 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/verify/engines.py` | what `--verify` measures in pdfium |
 | `src/inkscript/verify/consistency.py`, `numbers.py`, `second.py`, `review_html.py` | same-ink-different-text contradictions; Gemini second readings; the editable review page |
 | `src/inkscript/viewer/frontpage_compare.py` | static review bundle for front pages |
+| `src/inkscript/enrich/__init__.py` | `enrich()`: run after a build by `--xml`/`--trust`; `verify()`: schemas and trust-PDF checks |
+| `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted |
+| `src/inkscript/enrich/quran.py` | Quran quotations found, linked to sura:verse, checked word for word (experiment 20); the Tanzil text in `src/inkscript/data/quran/` |
+| `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule) |
+| `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
+| `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, incremental update; its check |
+| `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
 
 | Command | Needs | Gives |
 |---|---|---|
 | `inkscript fetch --id-file ids.txt --out DIR` | the `aws` CLI with credentials that can read `s3://mandumah-source-docs` (the owner's AWS profile; not in the repo) | `DIR/<id>/<id>.{pdf,json}` |
 | `inkscript frontpage --azure-dir … --out …` | `GEMINI_API_KEY` in `.env` | page-1 reading per document (`<stem>.gemini.p1.md`) |
-| `inkscript native --azure-dir … [--scan-dir …] --frontpage-dir … --out … [--vector] [--verify] [--resume] [--only ID]` | — | `<stem>.pdf`, `<stem>_vector.pdf`, `shapes.json`, alphabet, `native_pdf_report.json` |
+| `inkscript native --azure-dir … [--scan-dir …] --frontpage-dir … --out … [--vector] [--verify] [--xml] [--trust] [--resume] [--only ID]` | — | `<stem>.pdf`, `<stem>_vector.pdf`, `shapes.json`, alphabet, `native_pdf_report.json`; `--xml`: `<stem>.jats.xml`, `<stem>.alto.xml`; `--trust`: `<stem>_trust.pdf`, `<stem>_vector_trust.pdf` |
 | `inkscript check OUT --out REVIEW [--html]` | — | contradictions and every number, as a review list |
 | `inkscript numbers`, `inkscript second` | Gemini | second readings; `--apply` writes agreed corrections |
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |

@@ -83,6 +83,26 @@ def cmd_native(a) -> int:
                 line += f"  !! pdfium joins lines: {lp} for {ll} written"     # boxes of neighbouring lines overlap somewhere
             r["lost_image"] = lost = pages_missing_image(out / f"{stem}.pdf", scan(stem))
             if lost: line += f"  !! {len(lost)} pages lost their image: {lost[:6]}"
+        if a.xml or a.trust:
+            from .enrich import enrich, verify as verify_enrich
+            try:
+                r["enrich"] = e = enrich(stem, ad / stem / f"{stem}.json", scan(stem), out, r, xml=a.xml, trust=a.trust)
+            except Exception as ex:          # the PDFs are built; a failure here must not lose the build's report
+                import traceback
+                r["enrich"] = dict(error=f"{type(ex).__name__}: {ex}", traceback=traceback.format_exc())
+                print(line + f"\n{'':<24} !! enrich failed: {type(ex).__name__}: {ex}", flush=True); reports.append(r)
+                continue
+            t = e["trust"]
+            line += (f"\n{'':<24} trust: {t['flagged']}/{t['words']} words flagged ({t['flagged'] / max(1, t['words']):.1%}), "
+                     f"{t['verified']} verified; Quran: {e['quotes']['found']} quotations, {e['quotes']['equal']} equal to the verse")
+            if a.xml:
+                line += f"; wrote {stem}.jats.xml, {stem}.alto.xml"
+            if a.trust:
+                line += "; " + ", ".join(f"{n} ({v['annotations']} marks)" for n, v in e["trust_pdf"].items())
+            if a.verify:
+                probs = verify_enrich(stem, out, e)
+                line += ("\n" + "".join(f"{'':<24} !! {p}\n" for p in probs)).rstrip() if probs else \
+                        "  | " + ", ".join([f"XML valid (JATS 1.4, ALTO 4.4)"] * bool(a.xml) + ["trust PDFs: same bytes first, same text in pdfium"] * bool(a.trust))
         print(line, flush=True); reports.append(r)
     out.mkdir(parents=True, exist_ok=True)
     if a.resume and (out / "native_pdf_report.json").exists():      # keep earlier documents' reports
@@ -274,6 +294,8 @@ def main(argv=None) -> int:
     p.add_argument("--verify", action="store_true", help="check the result in pdfium (Chrome's engine)")
     p.add_argument("--resume", action="store_true", help="skip documents whose PDF and shapes.json already exist")
     p.add_argument("--only", action="append", help="build only this document id (repeatable)")
+    p.add_argument("--xml", action="store_true", help="also write <stem>.jats.xml (the article, JATS 1.4) and <stem>.alto.xml (every word with its box and trust mark, ALTO 4.4)")
+    p.add_argument("--trust", action="store_true", help="also write <stem>_trust.pdf (and <stem>_vector_trust.pdf): the PDF plus hideable highlights on uncertain words, the original bytes untouched")
     p.set_defaults(fn=cmd_native)
 
     p = sub.add_parser("compare", help="static review bundle: front page three ways")

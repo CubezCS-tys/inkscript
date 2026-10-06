@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-05. Update this file whenever a headline number or a
+*Last updated 2026-10-06. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -22,6 +22,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 | Letter highlight on the right letter (blind Gemini judge, strict) | 76.7% of letters on unseen pages after the alef fix (was 70.2%; Chrome's equal slicing 53.9%); fixture 62.2% (was 56.2%, equal slicing 58.2%) | 230 words, 981 letters (`experiments/18_boxes`, `21_better_boxes`) | 2026-10-06 |
 | Azure's reading, judged on the ink | 1.55% of words wrong on scans [0.62–2.79], printed Arabic misread 0.61%; pre-2000 2.8%, after 0.65%; 42% of documents born-digital | 240 random documents, 2,971 words (`experiments/19_azure_map`) | 2026-10-06 |
 | Reading from the pen path alone (the feeler) | 82.6% of unseen pieces read as Azure reads them (bigger reader, 97 books) | 4 books, held-out pages (`experiments/16_feel`) | 2026-10-06 |
+| Document files beside the PDF (`--xml`): JATS 1.4 article + ALTO 4.4 page file | valid against the official schemas 20/20 + 20/20; title found 14/20, author 8/20, printed page range 18/20 (position rules) | 20 scanned documents, 321 pages, 1960–2018 (`experiments/24_product`) | 2026-10-06 |
+| Uncertain words marked (`--xml`/`--trust`, experiment 22's rule) | 7.9% of words flagged (pre-2000 prints 11.4%, from 2000 on 4.8%); on 22's judged sample the rule leaves 0.43% of unflagged words wrong | same set | 2026-10-06 |
+| Quran quotations found and checked | 387, all linked to sura:verse; 235 equal to the verse, 152 differ (their words flagged) | same set | 2026-10-06 |
+| `_trust.pdf` (hideable highlights, incremental update) | the original bytes first and the same text and character boxes in pdfium, 20/20; fixture 1,246/1,246 words, 113/113 lines on both copies | same set; `tests/test_enrich.py` | 2026-10-06 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
 
 ## What they do not do (known gaps)
@@ -30,7 +34,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   Chrome, the price of marking the document right-to-left (D18). Chromium also
   highlights the whole last line of a multi-line drag.
 
-- **The text is Azure's reading.** "Words intact" means we preserved it, not
+- **The text is Azure's reading** — since 2026-10-06 with every uncertain word
+  marked (`--xml`/`--trust`; 7.9% of words on the product set), but nothing is
+  corrected and confident misreadings (an added hamza at 0.99) stay unmarked.
+  "Words intact" means we preserved it, not
   that it is right. Page 1 is Gemini's. Making the text trustworthy is
   milestone 1 in [roadmap.md](roadmap.md). *First measurements, 2026-09-21
   (`experiments/12_gold`):* three sheets hand-marked word by word — `0005` p2
@@ -65,6 +72,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   was identical old and new in every document sampled.
 
 ## In flight / where outputs are (this machine)
+
+- **The product set (2026-10-06)**: 20 documents built with `--vector --verify
+  --xml --trust` in `experiments/24_product/out/set/w0..w2/`; numbers in
+  `summary.json`, the owner's page `experiments/24_product/out/showcase.html`.
 
 - **The rerun of the 227 journals is running now** (started 2026-09-21,
   roadmap item 5): 3 workers into
