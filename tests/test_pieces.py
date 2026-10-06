@@ -59,6 +59,12 @@ def test_storage_is_what_chrome_reads_back():
         stored = " ".join(visual(w, True, ltr) for w in (words if ltr else reversed(words)))
         assert chrome_reads(stored) == line, line
     assert chrome_reads("Kose Dagh") == "Kose Dagh"                       # a Latin line is not reversed
+    # In a document marked right-to-left every line is read right to left
+    # and stored so (type3.R2L): Arabic lines come back whole; a Latin line
+    # keeps each word but swaps their order, the known limit for Latin.
+    for line in ["362 هـ - وهو وان لم يكن فى الحقيقة", "معجم Lisan العرب", "٣٣٥ -", "379هـ)"]:
+        assert chrome_reads(" ".join(visual(w, True) for w in reversed(line.split())), r2l=True) == line, line
+    assert chrome_reads(" ".join(visual(w, True) for w in "Kose Dagh".split()), r2l=True) == "Dagh Kose"   # printed left to right: swapped
     # Known limit: a bracketed Latin word inside an Arabic line comes back
     # with the space on the wrong side of the closing bracket, because the
     # space glyph and the bracket form one neutral segment pdfium keeps

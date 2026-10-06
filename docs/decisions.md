@@ -119,3 +119,14 @@ corpus where **every uncertain word is marked**, so a reader can trust the
 unmarked text — the trust map in [ideas.md](ideas.md). Accuracy targets in this
 project should be stated that way.
 
+**D18 · Mark every output right-to-left; judge selection in a real Chromium
+(2026-10-05).** On a new machine the owner's Chrome 154 jumped word to word and
+copied lines backwards, while the pinned engine said 100%. A real Chromium 153,
+driven by a script (drag, screenshot, copy), showed why: it no longer chooses a
+line's direction, and reads every line left to right unless the document says
+`/Direction /R2L` — typeset Arabic PDFs included. With the flag, selection is
+letter by letter. The alternative, writing each line's glyphs right to left in
+the stream, would keep Latin lines right but changes every run and the pen
+logic; the flag is one key and the pin agrees with Chromium under it. Latin-
+majority lines pay (words swapped). Taken as the quick fix the owner asked for;
+the pin stays for `--verify`, but feel is measured in Chromium.

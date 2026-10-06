@@ -44,6 +44,10 @@ document, so nothing here needs data or keys (Gemini is only called by
   `__version__`):
   `.venv/bin/python -c "from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO; print(PYPDFIUM_INFO, PDFIUM_INFO)"`
   → `5.12.1 152.0.7947.0`.
+  **Since 2026-10-05 the pin alone is not Chrome.** Chromium 153+ no longer
+  picks each line's direction: every output is now marked `/Direction /R2L`
+  (`type3.R2L`), which the pin and Chromium 153 read the same way. Anything
+  about selection *feel* is judged in a real Chromium (D18), not the pin.
 - **The faithful PDF draws every occurrence with its own ink.** No glyph is
   substituted, simplified or repaired there. Restoration is a separate output
   (see [docs/typeface.md](docs/typeface.md)).

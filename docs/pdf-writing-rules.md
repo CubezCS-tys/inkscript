@@ -53,6 +53,22 @@ rule records the experiment, not a theory.
 
 ## Lines
 
+- **The document is marked right-to-left** (`/ViewerPreferences << /Direction
+  /R2L >>`, `native.mark_r2l`), and every line is stored the right-to-left way
+  (`type3.R2L`, `text.chrome_reads(..., r2l=True)`). Chromium 153 (pdfium
+  ~8010; the owner's Chrome and Edge were 154 on 2026-10-05) no longer picks a
+  line's direction by majority: unmarked, it read every line left to right.
+  Measured in a real Chromium 153 on `0618-021-002-004` p3: unmarked, a line
+  copied out word-reversed (`…هذه استقرت وكيف`), a typeset Arabic PDF (`0642`)
+  likewise, and a drag jumped word to word; marked, the drag selects letter by
+  letter in reading order and three lines copy out exactly. The pin (7947)
+  reads the marked file the same way, so `--verify` still judges it: fixture
+  1,246/1,246 words, 113/113 lines; `0618` 3,929/3,929, 363/363. Cost: a
+  Latin-majority line keeps its words but comes back with them swapped (`0618`
+  p17), as a Latin phrase inside an Arabic line always did. Chromium also
+  highlights the whole last line of a multi-line drag (the copied text is
+  right); its highlight of a typeset Arabic PDF across lines is wrong too.
+
 - **One text run per line, words in visual order**, a real space glyph
   between words, never wider than the smallest gap on the line (poppler
   drops a space glyph that overlaps a word). A space *character* inside each

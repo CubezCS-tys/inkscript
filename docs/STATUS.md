@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-09-20. Update this file whenever a headline number or a
+*Last updated 2026-10-05. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -19,7 +19,13 @@
 
 An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 
+| Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
+
 ## What they do not do (known gaps)
+
+- **Latin-majority lines copy out with their words swapped** in current
+  Chrome, the price of marking the document right-to-left (D18). Chromium also
+  highlights the whole last line of a multi-line drag.
 
 - **The text is Azure's reading.** "Words intact" means we preserved it, not
   that it is right. Page 1 is Gemini's. Making the text trustworthy is

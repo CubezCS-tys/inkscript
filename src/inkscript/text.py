@@ -176,11 +176,14 @@ def visual(s: str, in_rtl_line: bool = False, ltr_line: bool = False) -> str:
     return "".join(out)
 
 
-def chrome_reads(line: str) -> str:
+def chrome_reads(line: str, r2l: bool = False) -> str:
     """What pdfium (Chrome 144, branch 7559; also 7665–7947 and main) makes
     of a line's stored text: CPDF_TextPage::CloseTempLine with
     CFX_BidiString's automatic overall direction. Kept here as the
-    reference the storage is verified against; `visual` is its inverse."""
+    reference the storage is verified against; `visual` is its inverse.
+    `r2l`: the document is marked /Direction /R2L, and every line is read
+    right to left whatever its majority (pinned 7947 and Chromium 153 alike;
+    unmarked, Chromium 153 reads every line left to right)."""
     segs = []                                              # [start, count, class]
     for i, c in enumerate(line):
         d = _class(c)
@@ -190,7 +193,7 @@ def chrome_reads(line: str) -> str:
             segs.append([i, 1, d])
     nR = sum(1 for x in segs if x[2] == "R"); nL = sum(1 for x in segs if x[2] == "L")
     cur = "L"
-    if nR > 0 and nR >= nL:
+    if r2l or (nR > 0 and nR >= nL):                       # r2l: the document says /Direction /R2L
         segs = segs[::-1]; cur = "R"
     out = []
     for st, n, d in segs:

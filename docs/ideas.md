@@ -10,6 +10,24 @@ reason is recorded), **open** (voiced, not yet judged).
 
 ## Trusting the text (the biggest gap)
 
+- **Three layers: ink deterministic, reading by a small model trained on the
+  archive, trust by disagreement.** *open, 2026-10-05; owner: "save this, we
+  will come back to it".* The ink stays exact and rule-based (tracing, text
+  layer, letters). The reading stays Azure's, checked by a small line reader
+  (Kraken-style CTC) trained per typeface family on Azure's readings bound to
+  the ink — free training lines. A word is flagged where Azure, that reader and
+  the letter-by-letter ink fit disagree; "perfect" becomes "every uncertain
+  word marked" (D17). No VLM in the loop. Web research behind it (agent
+  report, sources not all re-read): cutting before reading has never worked on
+  real print — *Sayre's paradox*, the wall experiment 10 hit; Kraken on the
+  20th-century journal al-Abhath reached 97–98.5% of Arabic letters from
+  ~1,000 lines per typeface, better trained across typefaces
+  (arxiv.org/abs/2402.10943); VLMs silently "correct" misspelled words, up to
+  59% in one study (English, Chinese and Korean; arxiv.org/abs/2607.21617); no
+  benchmark covers Mandumah-like scans, so the gold set (experiment 12) is the
+  measure. First step: train Kraken on one typeface from Azure's readings,
+  test whether it catches Azure's errors on gold-set pages.
+
 - **A gold set, and the error taxonomy before the checker.** *experiment 12,
   2026-09-21: tools built, first page marked, method changed.* The first page
   (`0005` p2, heavy face) came back **277 words, 0 errors** — so whole-page
@@ -75,6 +93,27 @@ reason is recorded), **open** (voiced, not yet judged).
 - **Follow the pen** (owner, 2026-09-19/20: "a human can do OCR with their
   eyes closed… feel the strokes"). *built* — `geometry/penpath.py`,
   [letters.md](letters.md). 96.8% letter coverage at scale.
+- **Read the word by feeling it: recognition from the pen path alone**
+  (owner, 2026-10-05: someone writes a word on your back with a stick; without
+  looking you track it, know the word, and know where each letter starts and
+  ends). *experiment 16, 2026-10-05: 50.7% of pieces read blind from the
+  path alone against 41% from the picture (exp. 10); isolated 76%, two
+  letters 40%, five or more 0; a live page shows the pen, the feeling and the
+  reading ([experiments/16_feel](../experiments/16_feel/README.md)). 2026-10-06, four books, held-out
+  test: a small trained reader of the path (CTC, 714k parameters) reads 79.0% of pieces as Azure does,
+  single letters 96%, five or more letters 36%; hand-built matching reached 65%.* The machine version: unroll the ink into its pen path (as
+  `penpath.unroll` already does), then hand a blind sequence model only the
+  path — position, direction, curvature along it, dots as events — and let it
+  output the letters *and* where each falls on the path. This is online
+  handwriting recognition (the kind phones do from a stylus), which is far
+  easier than reading a picture, fed with a path recovered from print. It
+  does not break Sayre's paradox so much as dissolve it: cut and reading come
+  out of one pass over the path. Hard parts: print has no true writing order
+  (loops, retracing, where to start), and the back-reader also knows the
+  language. Training data: every piece's path with Azure's reading. Bars to
+  beat: experiment 10's 41% blind, and equal slicing for the cuts (D7). Also
+  Thomas Milo's model of the script (DecoType: rasm, then dots, joins as their
+  own stroke, the nib's dot as the unit) — tug.org/TUGboat/tb24-3/milo.pdf.
 - **An atlas of pen paths rather than pictures.** *open.* Store each
   letter-form's typical centre line and match line against line; would
   tolerate stretching and slant where pictures do not. The data exists (every
@@ -135,6 +174,17 @@ reason is recorded), **open** (voiced, not yet judged).
 - **"What if I don't care about size?"** (owner). Scale-normalised matching:
   the alphabet saturates within a document and resets between type weights —
   different weights are different alphabets (`experiments/03`).
+- **Mark every PDF right-to-left (`/ViewerPreferences << /Direction /R2L >>`).**
+  *built 2026-10-05 (D18).* Chromium 153 (pdfium ~8010; the owner's
+  Chrome and Edge are 154) no longer guesses each line's direction: it read our
+  lines and a typeset Arabic PDF (`0642`) with the words reversed, and a drag
+  jumped word to word. With the flag, a real Chromium drag on `0618` p3 selects
+  letter by letter in reading order. Cost: Latin-majority lines then come back
+  word-reversed (`0618` p17) until they are stored the right-to-left way; the
+  pinned 7947 reads the flagged file the same way, so `--verify` can still
+  judge it. The pin no longer stands in for current Chrome — CLAUDE.md's rule
+  needs revisiting with it. Test copy:
+  `experiments/14_vs_azure/out/tryout_2026-10-05/native_r2l/`.
 - **Firefox / pdf.js.** *decided: 8 pt stays.* A larger nominal size fixes half
   the lines there and costs pdfium 0.1% (`experiments/06`).
 - **Junk-encoded typeset fonts → rebuild their ToUnicode from Azure**

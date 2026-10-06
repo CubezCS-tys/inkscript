@@ -50,8 +50,9 @@ fi
 
 .venv/bin/python - <<'PYEOF'
 import cv2, pymupdf, pypdfium2, numpy, fontTools
+from pypdfium2.version import PYPDFIUM_INFO, PDFIUM_INFO
 from inkscript.config import arabic_font
-print(f"opencv {cv2.__version__} · pymupdf {pymupdf.__doc__.split()[1] if pymupdf.__doc__ else 'ok'} · pypdfium2 {pypdfium2.V_PYPDFIUM2} · numpy {numpy.__version__}")
+print(f"opencv {cv2.__version__} · pymupdf {pymupdf.__doc__.split()[1] if pymupdf.__doc__ else 'ok'} · pypdfium2 {PYPDFIUM_INFO} (pdfium {PDFIUM_INFO}) · numpy {numpy.__version__}")
 print("arabic font for diagnostics:", arabic_font() or "none found (fine — only some experiment labels use one)")
 PYEOF
 

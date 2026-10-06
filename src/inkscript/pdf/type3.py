@@ -26,6 +26,16 @@ BAND_SORT = True                                    # same-band runs left to rig
 # the gap: boxes that merely touch (under 1pt apart) were read as one line.
 GAP_FRAC = 0.30
 
+# The document is marked right-to-left (/ViewerPreferences /Direction /R2L,
+# written by native.py). Chromium 153 and later (pdfium ~8010) no longer pick
+# each line's direction by majority: unmarked, every line was read left to
+# right — our lines and a typeset Arabic PDF's came back word-reversed and a
+# drag jumped word to word. Marked, pdfium reads every line right to left,
+# so every line is stored that way, Latin-majority ones included (their
+# words then come back swapped, the old limit for a Latin phrase inside an
+# Arabic line). Measured in a real Chromium 153, 2026-10-05.
+R2L = True
+
 
 def hex16(s: str) -> str:
     return s.encode("utf-16-be").hex().upper()
@@ -172,8 +182,8 @@ def write_text_layer(doc, pg, M, lines, tag, invisible, frame: "Frame | None" = 
         # laid out in visual order; a word's pieces carry its id so that the
         # space glyph goes between words only.
         lh_line = max(1.0, g["bot"] - g["top"])
-        rtl_line = any(RTL.search(w["text"]) for w in L)
-        ltr_line = rtl_line and latin_majority(" ".join(w["text"] for w in L))   # pdfium reads it left to right
+        rtl_line = R2L or any(RTL.search(w["text"]) for w in L)
+        ltr_line = not R2L and rtl_line and latin_majority(" ".join(w["text"] for w in L))   # pdfium reads it left to right
         ws = []
         for wid, w in enumerate(sorted((w for w in L if w["blobs"]), key=lambda w: w["x0"])):
             pcs = split_word(w, lh_line)

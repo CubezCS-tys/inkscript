@@ -12,6 +12,7 @@ from ..ocr.align import page1_text
 from ..text import fold_digits, strip_markdown
 from ..geometry.trace import page_blobs, DPI
 from ..geometry.layout import layout_page
+from . import type3
 from .type3 import write_text_layer, stray_paths, append_content, Frame
 from ..geometry.alphabet import Alphabet, prepare, to_json, to_svg, to_sheet
 
@@ -367,6 +368,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         report["pages"].append(dict(info, lines=n_lines,
                                     glyphs=glyphs, blobs=n_blobs, stray=n_stray, pieces=pstats, placed=placed_texts, runs=run_texts))
     out_dir.mkdir(parents=True, exist_ok=True)
+    mark_r2l(src)
     src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
     if len(A):
         for pr in A.protos:                                # export needs the outlines, not the rasters
@@ -378,5 +380,22 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         report["alphabet"] = dict(shapes=len(A), blobs=sum(A.counts),
                                   repeated=sum(c for c in A.counts if c > 1))
     if vec is not None:
+        mark_r2l(vec)
         vec.save(out_dir / f"{stem}_vector.pdf", garbage=3, deflate=True); vec.close()
     return report
+
+
+def mark_r2l(doc) -> None:
+    """Declare the document right-to-left, the reading direction current
+    Chrome needs to be told (type3.R2L). Kept with any viewer preferences
+    the source PDF already had."""
+    if not type3.R2L:
+        return
+    cat = doc.pdf_catalog()
+    kind, val = doc.xref_get_key(cat, "ViewerPreferences")
+    if kind == "xref":
+        doc.xref_set_key(int(val.split()[0]), "Direction", "/R2L")
+    elif kind == "dict":
+        doc.xref_set_key(cat, "ViewerPreferences/Direction", "/R2L")
+    else:
+        doc.xref_set_key(cat, "ViewerPreferences", "<< /Direction /R2L >>")
