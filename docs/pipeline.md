@@ -61,7 +61,17 @@ alphabets; that is correct, not a defect.
 - `<stem>.jats.xml` — the article as publishers keep it (JATS 1.4, Journal
   Archiving and Interchange DTD): front matter, body in reading order with
   sections, footnotes linked from their markers, references, every Quran
-  quotation linked to its verse.
+  quotation linked to its verse. The structure is read by `enrich/structure.py`
+  (experiment 26, D21): page furniture by repetition and place (kept out of the
+  text); notes as the small lines at the foot of a page that open with a number,
+  each linked from its marker in that page's text (glued "عاصم(٢).", alone
+  "(٢)", or raised) — endnotes in order through the text; headings by size,
+  bold ink (stroke width measured on the scan), numbering, colon and space, a
+  run of short numbered lines being a list; title and authors from Gemini's
+  title file when `<stem>.gemini.title.json` sits beside the Azure JSON or in
+  `--frontpage-dir` (aligned to Azure's words, whose ids the JATS lists), else
+  from page 1's layout; volume/issue from the id (000 = none, `041,042` =
+  41-42, 999 = special).
 - `<stem>.alto.xml` — every page, line and word with its box as libraries keep
   OCR (ALTO 4.4): Azure's confidence, the trust mark and its reasons, the
   other reader's text, ids that link each word to its JATS element (through
@@ -175,6 +185,7 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted |
 | `src/inkscript/enrich/quran.py` | Quran quotations found, linked to sura:verse, checked word for word (experiment 20); the Tanzil text in `src/inkscript/data/quran/` |
 | `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule) |
+| `src/inkscript/enrich/structure.py` | the article's structure: furniture, title/authors (Gemini's title file aligned to the ink, or page 1's layout), headings, notes and their markers, journal name and year; `read_meta`, `id_parts` |
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
 | `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |

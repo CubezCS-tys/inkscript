@@ -31,11 +31,19 @@ reason is recorded), **open** (voiced, not yet judged).
   2026-10-06* (`src/inkscript/enrich/jats.py`, `alto.py`; D20). Replaces the
   TEI prototype of experiments 20/22 (*dropped* as the product format: neither
   publishers' nor libraries' tools read it; what it taught is kept, D20).
-  *Open:* paragraph roles from Azure `prebuilt-layout` instead of position
-  rules; titles and authors from Gemini's title file; journal title, year and
-  page range from the catalogue (MARC metadata, experiment 19's `meta.py`);
-  references split into fields (`element-citation`); a Crossref export from
-  the JATS front matter.
+  *Structure read like a reader: built 2026-10-06* (experiment 26,
+  `src/inkscript/enrich/structure.py`, D21): titles and authors from Gemini's
+  title file aligned to Azure's words (else page 1's layout), headings from
+  size + bold ink + numbering + space, notes linked from their markers,
+  furniture by repetition. *Open:* Gemini title files exist for only 7 of the
+  20 set documents — a title file for every document (one cheap call, or the
+  catalogue's MARC title/author, experiment 19's `meta.py`) would remove the
+  layout guess where it is weakest (an author printed above the title, a rubric
+  glued to the title); markers Azure never read (a raised "9" lost) could be
+  re-found on the ink beside the line; boxed inserts (an advertisement
+  "إعلان" under an article) are still taken for a section; Azure
+  `prebuilt-layout` roles remain untried; references split into fields
+  (`element-citation`); a Crossref export from the JATS front matter.
 
 - **Three layers: ink deterministic, reading by a small model trained on the
   archive, trust by disagreement.** *open, 2026-10-05; owner: "save this, we
