@@ -95,6 +95,6 @@ disagreements), so a flag must be precise to be worth showing. The judge itself 
 one-mark look-alikes) is a better instrument for finding them than the feeler — on a sample, not every word.
 
 Not done: the owner has not checked any verdict; `experiments/README.md` and `docs/` were not edited (rule of
-this task). Suggested index line: `| [17](17_judge/README.md) | Where the feeler and Azure disagree, who is
+this task). Suggested index line: `| 17 | Where the feeler and Azure disagree, who is
 right? | Azure 98.6% of 800 (Gemini 3.1 Pro judge, 119/120 on gold look-alikes); the feeler right in 5, ~3 real
 Azure letter errors | the feeler's value is cuts, not reading |`.
