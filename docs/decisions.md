@@ -230,3 +230,23 @@ changes only what a glyph *maps to*:
   (`src/inkscript/data/lexicon/`, 22k keys, 89 KB). Tried and not taken: title
   words only below 0.5 (no gain, loses a handwriting error), the same word
   read confidently elsewhere in the document (6.3%, loses فى/في).
+
+**D22 · The article's structure is read from several things a reader sees,
+and Gemini's existing title file wins over the layout for title and authors
+(2026-10-06).** Experiment 24's position rules (one rule per role) found a
+title in 14 of 20 documents and an author in 8, invented a section from an
+advertisement and linked 0 of the markers on the pages read by hand. Three
+alternatives were open: Azure `prebuilt-layout` (a new paid call per page and
+untested on these prints), the catalogue's MARC record (title and author only,
+not tied to the ink), or reading the page as a reader does. Chosen: the third,
+plus the Gemini title file *already in the bucket* (free; D1's asymmetry — a
+wrong title is the worst error — applies), aligned to Azure's words so the
+JATS lists the ink's word ids. Each decision combines cues (size, stroke width
+from the scan, numbering, colon, space above, repetition across pages, place),
+and every one was scored on a hand-read truth (experiment 26): 10 documents
+for tuning, 4 held out and read afterwards. Gemini title files exist for 7 of
+the 20 set documents; where none exists the layout decides and is weakest
+(an author printed above the title stays a "rubric"). Notes must open with a
+number and markers must match that number on the same page (or, for an
+endnote list, in order through the text), so a link is rarely wrong: 0 wrong
+links on either truth set; what is missed is mostly markers Azure never read.

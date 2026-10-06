@@ -87,7 +87,8 @@ def cmd_native(a) -> int:
         if a.xml or a.trust:
             from .enrich import enrich, verify as verify_enrich
             try:
-                r["enrich"] = e = enrich(stem, ad / stem / f"{stem}.json", scan(stem), out, r, xml=a.xml, trust=a.trust)
+                r["enrich"] = e = enrich(stem, ad / stem / f"{stem}.json", scan(stem), out, r, xml=a.xml, trust=a.trust,
+                                              meta_dirs=[fd] if fd else [])
             except Exception as ex:          # the PDFs are built; a failure here must not lose the build's report
                 import traceback
                 r["enrich"] = dict(error=f"{type(ex).__name__}: {ex}", traceback=traceback.format_exc())
