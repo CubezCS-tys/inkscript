@@ -227,6 +227,32 @@ marks therefore go into a *copy*, written by `enrich/trustpdf.py`:
 (`enrich.verify` → `trustpdf.check`: prefix identical, same text and character
 boxes on every page, layer and `/R2L` present).
 
+## A corrected reading (`inkscript correct`, `inkscript fix`, since 2026-10-06)
+
+A correction changes what glyphs *map to*, never what they draw (D14, D21;
+experiment 27):
+
+- **Only ToUnicode entries change, in an incremental save.** The original
+  file is the corrected file's prefix, and pdfium renders every page with a
+  correction pixel-identical before and after (`pdf/correct.verify_ink`; 147
+  corrections in 15 documents, both PDFs: identical). Nothing is saved when
+  nothing changed; a correction the glyphs already carry is not written again.
+- **A glyph belongs to the word when its middle lies inside Azure's box.** A
+  letter's declared box often reaches past the word box (a final ر, an initial
+  ف); the earlier rule (80% inside) left such letters out, and the corrected
+  word then read رزفير for زفير, وكناا for وكنا (found on `0656-014-010-014`).
+- **The glyphs must read the printed word first.** `fix` passes the reading
+  the PDF carries (`was`); if the glyphs under the box do not read it (and no
+  run of the line's glyphs near the box does), the correction is declined
+  rather than written over the wrong glyphs (1 on the set).
+- **Dealt letter by letter; a space rides on the letter before it.** A merge
+  (إلا ما شاء for one box) gives no glyph a bare space. A correction with fewer
+  letters than the word has glyphs is still declined (D13; 4 on the set).
+- **The trust copy follows.** It is re-made from the corrected faithful PDF,
+  so it reads the same in pdfium; corrected words get a pale green highlight
+  in a second optional-content layer, "Corrected words", with an English note
+  naming the verse and the judge.
+
 ## Letters (selection inside a connected run)
 
 *Since 2026-09-20 the build cuts letters along the pen path

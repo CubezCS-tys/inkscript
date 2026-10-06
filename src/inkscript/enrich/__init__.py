@@ -12,6 +12,9 @@
   trustpdf.py   <stem>_trust.pdf  the faithful PDF plus hideable highlights on flagged words, appended as an
                                   incremental update (the original bytes come first, unchanged)
   schemas.py    the official schemas, cached, and validation
+  corrections.py  `inkscript fix` (experiment 27): corrections proposed from Quran verses, judged on the ink, applied
+                to the text only; <stem>.corrections.json; applied ones are written in again and laid over the reading
+  judge.py      the ink judge: Gemini, blind A/B on the scan's crop, cached, spend-capped
 """
 from __future__ import annotations
 
@@ -33,6 +36,7 @@ def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: d
     from .document import load
     from .quran import check_document
     from .trust import assess, summary
+    from .corrections import applied_entries, overlay, reapply
     out_dir = Path(out_dir)
     pages = report.get("pages", [])
     gemini_pages = {p["page"] for p in pages if p.get("text") == "gemini"}
@@ -41,10 +45,17 @@ def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: d
     doc = load(azure_json, shapes if shapes.exists() else None, gemini_pages)
     quotes = check_document(doc)
     marks = assess(doc, quotes, scan_pdf)
+    # corrections accepted on the ink (`inkscript fix`, experiment 27): written into the faithful PDFs again (a
+    # rebuild drops them; otherwise nothing changes), then into the reading the XML and trust PDFs are made from
+    fixes = applied_entries(out_dir, stem)
+    reapplied = reapply(out_dir, stem, fixes) if fixes else {}
+    n_fixed = overlay(doc, marks, fixes, quotes)
     res = dict(trust=summary(marks), quotes=dict(found=len(quotes), equal=sum(q["differs"] == 0 for q in quotes),
                                                  differ=sum(q["differs"] > 0 for q in quotes),
                                                  refs=[q["ref"] for q in quotes]),
                words_linked_to_glyphs=sum(1 for w in doc["words"] if w["glyphs"]), words=len(doc["words"]))
+    if fixes:
+        res["corrections"] = dict(applied=n_fixed, pdfs=reapplied)
     res["trust"]["flagged_on_born_digital_pages"] = sum(
         1 for w in doc["words"] if w["page"] in born_digital and getattr(marks.get(w["idx"]), "mark", "") == "flagged")
     if xml:
