@@ -1,0 +1,19 @@
+--- a/src/inkscript/pdf/inspect.py
++++ b/src/inkscript/pdf/inspect.py
+@@ -25,11 +25,14 @@
+         widths = [float(x) for x in re.search(r"/Widths\s*\[(.*?)\]", obj, re.S).group(1).split()]
+         names = re.search(r"/Differences\s*\[\s*1\s*(.*?)\]", obj, re.S).group(1).split()
+         procs = dict(re.findall(r"/(\w+) (\d+) 0 R", re.search(r"/CharProcs\s*<<(.*?)>>", obj, re.S).group(1)))
+-        m = re.search(r"BT /%s ([\d.]+) Tf ([-\d. ]+) Tm \[(.*?)\] TJ ET" % re.escape(fn), c, re.S)
++        # A line is one BT ... ET; a stacked letter is drawn in its own copy of the line's font (same glyphs,
++        # its own FontBBox) in its own TJ, so the line may hold several `/font size Tf [...] TJ`.
++        m = re.search(r"BT /%s ([\d.]+) Tf ([-\d. ]+) Tm (.*?) ET" % re.escape(fn), c, re.S)
+         if not m:
+             continue
+         size = float(m.group(1)); tmv = [float(x) for x in m.group(2).split()]; ox, oy = tmv[4], tmv[5]; k = fm * size; pen = ox
+-        for tok in re.findall(r"<([0-9A-F]{2})>|(-?[\d.]+)", m.group(3)):
++        arrays = " ".join(re.findall(r"\[(.*?)\] TJ", m.group(3), re.S))
++        for tok in re.findall(r"<([0-9A-F]{2})>|(-?[\d.]+)", arrays):
+             if tok[0]:
+                 code = int(tok[0], 16); nm = names[code - 1].lstrip("/"); w = widths[code - 1] * k
+                 if not nm.startswith("sp"):
