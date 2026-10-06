@@ -101,7 +101,7 @@ reason is recorded), **open** (voiced, not yet judged).
   letters 40%, five or more 0; a live page shows the pen, the feeling and the
   reading ([experiments/16_feel](../experiments/16_feel/README.md)). 2026-10-06, four books, held-out
   test: a small trained reader of the path (CTC, 714k parameters) reads 79.0% of pieces as Azure does,
-  single letters 96%, five or more letters 36%; hand-built matching reached 65%.* The machine version: unroll the ink into its pen path (as
+  single letters 96%, five or more letters 36%; hand-built matching reached 65%. Experiment 17 (2026-10-06): where it disagrees with Azure, a Gemini 3.1 Pro judge sides with Azure 98.6% of 800 times — the feeler's reading is not a checker of Azure; its value is the cuts.* The machine version: unroll the ink into its pen path (as
   `penpath.unroll` already does), then hand a blind sequence model only the
   path — position, direction, curvature along it, dots as events — and let it
   output the letters *and* where each falls on the path. This is online
