@@ -125,6 +125,37 @@ word: `--page 3 --box 535,2709,550,2744 --text "..."`.
 `inkscript.pdf.inspect.page_glyphs` is the reader behind it (and behind the
 storyboard's glyph explorer): every glyph of a page back out of its font.
 
+**From exact sources, judged on the ink (`inkscript fix`, experiment 27, D21).**
+
+```
+inkscript fix OUT/<stem> --azure-dir AZ [--scan-dir SCANS] --apply      # or OUT for every document in it
+```
+
+1. *Propose* (`enrich/corrections.propose`): each word of a Quran quotation
+   that differs from its verse word by dots or letters gets the verse's word
+   (its short vowels too when Azure's reading was vowelled; the word's
+   punctuation kept). Not proposed: the author's wording, the print's
+   spelling, quotation edges, splits (see D21). A merge (إلاماشاء) is proposed
+   as one word's text with spaces (إلا ما شاء).
+2. *Judge* (`enrich/judge.py`): Gemini 3.8 Flash sees the word's line on the
+   300-dpi scan (paper behind the word tinted, nothing on the ink) and the
+   printed reading and the proposal as A and B, blind; if it picks the
+   proposal, Gemini 3.1 Pro is asked the same; both must agree. Answers are
+   cached, every request's cost logged, nothing sent past `--cap`.
+3. *Apply* (`--apply`): the accepted text goes into `<stem>.pdf` and
+   `<stem>_vector.pdf` as above (the glyphs must read the printed reading
+   first, or the correction is declined), the pages are rendered before and
+   after and compared pixel for pixel, then `enrich` rewrites the ALTO (CONTENT
+   corrected, the earlier reading an `ALTERNATIVE PURPOSE="azure-reading"`,
+   `TAGREFS trust.corrected`, a Processing step), the JATS text and the trust
+   PDFs (a green highlight in a "Corrected words" layer).
+
+Statuses in `<stem>.corrections.json`: proposed → candidate → accepted →
+applied, or rejected (the first judge kept the printed reading, saw neither,
+or could not tell), disputed (Pro disagreed), declined (the PDF cannot take
+it, D13). A rerun judges nothing twice and writes nothing twice; a rebuild
+followed by `--xml`/`--trust` writes the applied corrections in again.
+
 ## Checking against the viewer
 
 `inkscript native --verify` opens every finished PDF in pdfium — Chrome's
@@ -157,7 +188,7 @@ the tests round-trip `visual()` through it.
 
 | File | What it does |
 |---|---|
-| `src/inkscript/cli.py` | the ten subcommands (table below) |
+| `src/inkscript/cli.py` | the eleven subcommands (table below) |
 | `src/inkscript/text.py` | Arabic text rules: runs/pieces, marks, `visual` (how text is stored) and `chrome_reads` (pdfium's line reconstruction, emulated) |
 | `src/inkscript/ocr/azure.py`, `align.py`, `gemini.py`, `frontpage.py` | load Azure's JSON; fit Gemini's page-1 text into Azure's boxes; the Gemini calls and fallbacks; the older searchable-PDF path |
 | `src/inkscript/geometry/trace.py` | page → ink blobs as outline polygons; rules separated |
@@ -174,7 +205,9 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/enrich/__init__.py` | `enrich()`: run after a build by `--xml`/`--trust`; `verify()`: schemas and trust-PDF checks |
 | `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted |
 | `src/inkscript/enrich/quran.py` | Quran quotations found, linked to sura:verse, checked word for word (experiment 20); the Tanzil text in `src/inkscript/data/quran/` |
-| `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule) |
+| `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule; a common word at confidence ≥ 0.6 is not flagged for its confidence alone, experiment 27, list in `src/inkscript/data/lexicon/`) / corrected |
+| `src/inkscript/enrich/corrections.py` | `inkscript fix`: corrections proposed from Quran verses, judged, applied; `<stem>.corrections.json`; `overlay` puts applied ones into the reading the XML is written from (experiment 27, D21) |
+| `src/inkscript/enrich/judge.py` | the ink judge: Gemini, blind A/B on the scan's crop (experiment 17's marking), cached, spend-capped |
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
 | `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
@@ -187,6 +220,7 @@ the tests round-trip `visual()` through it.
 | `inkscript check OUT --out REVIEW [--html]` | — | contradictions and every number, as a review list |
 | `inkscript numbers`, `inkscript second` | Gemini | second readings; `--apply` writes agreed corrections |
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |
+| `inkscript fix OUT/<stem>\|OUT --azure-dir … [--judge gemini\|none] [--apply] [--cap 1.0]` | `GEMINI_API_KEY` (unless `--judge none`) | `<stem>.corrections.json` (every proposal, verdict and write); with `--apply` the accepted ones in both PDFs' text, the ALTO, JATS and trust PDFs |
 | `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
 
 Without the bucket or keys, everything still runs on the bundled document

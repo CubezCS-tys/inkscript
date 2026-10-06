@@ -188,3 +188,45 @@ licence permits verbatim copies with the notice (kept, `NOTICE.md`); the text
 is fixed (v1.1); the build must give the same result offline and on a server
 (moving-to-a-server.md) and the tests must run without network. Downloading
 would add a network failure mode for no gain.
+
+**D21 · Corrections: exact sources, two judges on the ink, the text only
+(2026-10-06).** The owner wants the text right without the faithful PDF ever
+drawing anything else (D3, D14). `inkscript fix` (experiment 27) therefore
+changes only what a glyph *maps to*:
+
+- **Only exact sources propose.** A word of a Quran quotation that differs
+  from its verse word by dots or letters is proposed the verse's word. The
+  author's own wording (و/ف where the quotation starts, a word added, left out
+  or changed, a confident reading that differs by a particle or ending), the
+  print's spelling (ة/ت, ى/ي, داود/داوود, hamza seats) and the quotation's
+  edges are *not* proposed: correcting them would rewrite what the author
+  printed. Of the 290 differing words and gaps on the 20-document set, 194
+  were proposed, 93 not (wording 73, spelling 18, edge 2), 3 were taken into
+  merges.
+- **Two judges, blind, on the scan.** Gemini 3.8 Flash first (cheap), then
+  Gemini 3.1 Pro must agree. Calibrated on the set: printed word against a
+  look-alike 36/36 both, "neither" 11/12 both; and the other direction — the
+  print is the author's wording, not the verse — Pro 28/28, Flash 25/28 (it
+  read only the part of a word the tint covered, a و outside it). A judge that
+  leans to the Quran's word would pass the first test and fail the second; the
+  pair is accepted only when both pick the verse.
+- **Merges are corrected, splits are not.** One box Azure read as إلاماشاء can
+  carry إلا ما شاء: the text is dealt over the word's glyphs with each space on
+  the letter before it (the print's own letters are kept when they are right).
+  Two boxes for one verse word stay as they are: joining them would take away a
+  space the ink has, and a glyph cannot be given no text (D13). A correction
+  with fewer letters than the word has glyphs is still declined (D13): 4 on the
+  set, logged, left flagged.
+- **One code path for the XML.** The corrections live in
+  `<stem>.corrections.json`; `enrich` writes the applied ones into the faithful
+  PDFs again (a no-op unless the PDF was rebuilt) and into the reading the
+  ALTO, JATS and trust PDF are made from. Patching the XML files in place was
+  the alternative; it would have been a second writer to keep in step with the
+  first, and a rebuild would have lost the corrections.
+- **Fewer false flags from a common-word list.** A word flagged for Azure's
+  confidence alone is not flagged when it was read confidently in ≥ 5 of 400
+  corpus documents and its confidence is ≥ 0.6: flags 7.5% → 5.0% of words, no
+  judged error lost (50/61). The list ships with the code
+  (`src/inkscript/data/lexicon/`, 22k keys, 89 KB). Tried and not taken: title
+  words only below 0.5 (no gain, loses a handwriting error), the same word
+  read confidently elsewhere in the document (6.3%, loses فى/في).

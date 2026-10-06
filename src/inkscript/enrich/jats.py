@@ -222,8 +222,9 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
     meta("faithful-pdf", f"{stem}.pdf (each word drawn with its own printed ink)")
     if alto_name:
         meta("alto-file", alto_name)
-    meta("trust", f"{ts['verified']} words verified, {ts['agreed']} agreed, {ts['flagged']} flagged "
-         "(per-word marks in the ALTO file)")
+    meta("trust", f"{ts['verified']} words verified, {ts['agreed']} agreed, {ts['flagged']} flagged"
+         + (f", {ts['corrected']} corrected from a Quran verse after a judge on the ink ({stem}.corrections.json)"
+            if ts.get("corrected") else "") + " (per-word marks in the ALTO file)")
     meta("quran-quotations", f"{len(quotes)} found, {sum(q['differs'] == 0 for q in quotes)} equal to the verse")
 
     body = E(art, "body")
@@ -389,6 +390,8 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
             _append(sp, " ")
             E(sp, "named-content", qt["verse"], content_type="quran-verse", specific_use="tanzil-simple-1.1")
             status = "يطابق نص الآية" if qt["differs"] == 0 else f"{qt['differs']} موضع يختلف عن نص الآية"
+            if qt.get("corrected"):                  # experiment 27: words corrected to the verse after a judge on the ink
+                status += f" (صُحّح {qt['corrected']} موضع بعد مراجعة الحبر)"
             _append(sp, f" — {status}")
             for o in qt["ops"]:
                 if not o.get("verdict"):

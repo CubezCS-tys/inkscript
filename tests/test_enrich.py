@@ -195,7 +195,7 @@ def test_trust_pdf_reads_like_the_faithful_one(enriched, fixture):
     out, rep = enriched
     stem = fixture["stem"]
     flagged = rep["enrich"]["trust"]["flagged"]
-    assert flagged == 62
+    assert flagged == 37        # 62 under experiment 22's rule; 25 common words at conf >= 0.6 no longer flagged (experiment 27)
     for base in (f"{stem}.pdf", f"{stem}_vector.pdf"):
         t = out / base.replace(".pdf", "_trust.pdf")
         c = check(out / base, t)

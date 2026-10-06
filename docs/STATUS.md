@@ -24,6 +24,8 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 | Reading from the pen path alone (the feeler) | 82.6% of unseen pieces read as Azure reads them (bigger reader, 97 books) | 4 books, held-out pages (`experiments/16_feel`) | 2026-10-06 |
 | Document files beside the PDF (`--xml`): JATS 1.4 article + ALTO 4.4 page file | valid against the official schemas 20/20 + 20/20; title found 14/20, author 8/20, printed page range 18/20 (position rules) | 20 scanned documents, 321 pages, 1960–2018 (`experiments/24_product`) | 2026-10-06 |
 | Uncertain words marked (`--xml`/`--trust`, experiment 22's rule) | 7.9% of words flagged (pre-2000 prints 11.4%, from 2000 on 4.8%); on 22's judged sample the rule leaves 0.43% of unflagged words wrong | same set | 2026-10-06 |
+| Uncertain words marked, with experiment 27's common-word refinement (now the rule) | **5.3%** of words flagged on the same set (was 7.9%); on 19's judged words 7.5% → 5.0% flagged, errors caught 50 → 50 of 61, 1 flag in 7.4 a real error (was 8.9), 0.42% of unflagged words wrong | same set; `experiments/27_corrections` | 2026-10-06 |
+| Corrections from Quran verses (`inkscript fix`), judged on the ink by two blind judges | 194 proposed, 156 accepted, **147 written** into both PDFs' text, the ALTO, JATS and trust PDFs; the drawing pixel-identical; quotations equal to the verse 235 → 290 of 387; $0.80 for the set | same set (`experiments/27_corrections`) | 2026-10-06 |
 | Quran quotations found and checked | 387, all linked to sura:verse; 235 equal to the verse, 152 differ (their words flagged) | same set | 2026-10-06 |
 | `_trust.pdf` (hideable highlights, incremental update) | the original bytes first and the same text and character boxes in pdfium, 20/20; fixture 1,246/1,246 words, 113/113 lines on both copies | same set; `tests/test_enrich.py` | 2026-10-06 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
@@ -35,8 +37,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   highlights the whole last line of a multi-line drag.
 
 - **The text is Azure's reading** — since 2026-10-06 with every uncertain word
-  marked (`--xml`/`--trust`; 7.9% of words on the product set), but nothing is
-  corrected and confident misreadings (an added hamza at 0.99) stay unmarked.
+  marked (`--xml`/`--trust`; 5.3% of words on the product set since experiment
+  27), and only words of Quran quotations corrected (`inkscript fix`: 147 on 20
+  documents, each judged on the ink); everything else stays as Azure read it,
+  and confident misreadings (an added hamza at 0.99) stay unmarked.
   "Words intact" means we preserved it, not
   that it is right. Page 1 is Gemini's. Making the text trustworthy is
   milestone 1 in [roadmap.md](roadmap.md). *First measurements, 2026-09-21

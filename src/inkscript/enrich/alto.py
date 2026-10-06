@@ -107,9 +107,17 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
              "Google", "Gemini", "")
     step("Processing", "inkscript", "Faithful PDF (each word drawn with its own ink), paragraph roles by position "
          "(experiment 20), trust marks (experiment 22's default rule), this file.", "inkscript", "inkscript",
-         version, "trust: conf<0.8 + speck + ornament + Latin on Arabic page + Persian letter + Quran difference")
+         version, "trust: conf<0.8 (not a common word at conf>=0.6) + speck + ornament + Latin on Arabic page + Persian letter + Quran difference")
     step("Processing", "tanzil", f"Quran quotations matched against the canonical text: {TANZIL_CREDIT}.",
          "Tanzil Project", "Tanzil Quran Text (Simple Clean / Simple)", "1.1")
+    fixed = [w for w in words if w.get("corrected")]
+    if fixed:                                      # experiment 27: corrections from exact sources, judged on the ink
+        judges = sorted({w["corrected"].get("judge") or "?" for w in fixed})
+        step("Processing", "corrections", f"{len(fixed)} word(s) corrected from an exact source (Quran verse) after a "
+             f"blind judge on the scan's ink picked the source's word ({', '.join(judges)}); CONTENT is the corrected "
+             f"reading, the ALTERNATIVE azure-reading the earlier one, TAGREFS trust.corrected; details in "
+             f"{stem}.corrections.json. The faithful PDF's drawing is unchanged.", "inkscript", "inkscript fix",
+             version)
 
     tags = A(root, "Tags")
     for r in ROLES:
@@ -199,7 +207,7 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
                     A(sh, "Polygon", POINTS=" ".join(f"{poly[i]:.0f},{poly[i + 1]:.0f}" for i in range(0, len(poly), 2)))
                     if m and m.other and m.other != w["out"]:
                         A(st, "ALTERNATIVE", m.other, PURPOSE="azure-reading")
-                    if k in verse_word:
+                    if k in verse_word and not (m and m.mark == "corrected"):
                         A(st, "ALTERNATIVE", verse_word[k], PURPOSE="quran-verse")
                     n_strings += 1
     etree.indent(root, space=" ")

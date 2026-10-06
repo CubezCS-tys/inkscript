@@ -5,6 +5,7 @@
   inkscript compare     static review bundle for front pages                (viewer)
   inkscript trace       one page -> outlines, fidelity, geometry JSON       (geometry)
   inkscript alphabet    shape dictionary across pages: does it saturate?    (geometry)
+  inkscript fix         corrections from Quran verses, judged on the ink, into the text only   (enrich)
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -131,6 +132,44 @@ def cmd_correct(a) -> int:
     shapes = Path(a.shapes).expanduser() if a.shapes else pdf.with_suffix(".shapes.json")
     for d in apply_corrections(pdf, corrections, shapes):
         print(f"page {d['page']} {d['box']}: " + (f"{d['was']!r} -> {d['text']!r} ({d['font']} code {d['code']}, overlap {d['iou']})" if d["applied"] else f"not applied: {d['reason']}"))
+    return 0
+
+
+def cmd_fix(a) -> int:
+    from .enrich.corrections import fix
+    ad = Path(a.azure_dir).expanduser()
+    sd = Path(a.scan_dir).expanduser() if a.scan_dir else None
+    targets = []
+    for t in a.targets:
+        t = Path(t).expanduser()
+        if t.is_dir():                                   # a whole output dir: every built document in it
+            targets += [(t, sj.name[:-len(".shapes.json")]) for sj in sorted(t.glob("*.shapes.json"))]
+        else:
+            targets.append((t.parent, t.name.removesuffix(".pdf")))
+    tot = {}
+    for out, stem in targets:
+        aj = ad / stem / f"{stem}.json"
+        scan = sd / f"{stem}.pdf" if sd and (sd / f"{stem}.pdf").exists() else ad / stem / f"{stem}.pdf"
+        if not aj.exists() or not scan.exists():
+            print(f"{stem}: no Azure reading or scan under {ad}", file=sys.stderr); continue
+        r = fix(out, stem, aj, scan, judge=a.judge, model=a.model, confirm=None if a.confirm == "none" else a.confirm,
+                apply=a.apply, cap=a.cap, spend_log=Path(a.spend_log).expanduser() if a.spend_log else out / "gemini_spend.jsonl",
+                cache=Path(a.cache).expanduser() if a.cache else out / "judge_cache.jsonl")
+        run = r["run"]
+        for k, v in run["statuses"].items():
+            tot[k] = tot.get(k, 0) + v
+        ink = run.get("ink", {})
+        line = (f"{stem:<24} {run['proposed']} proposed ({', '.join(f'{v} {k}' for k, v in sorted(run['statuses'].items()))})"
+                + (f"; {run['applied_now']} written now" if a.apply else "") + (f"; ${run['spend']:.3f}" if run["spend"] else ""))
+        if ink:
+            line += "; ink " + ", ".join(f"{n} {'identical' if v['ink_identical'] and v['prefix_identical'] else 'CHANGED'}" for n, v in ink.items())
+        if run.get("enrich_problems"):
+            line += "; !! " + "; ".join(run["enrich_problems"])
+        print(line, flush=True)
+        for c in r["entries"]:
+            if c["status"] in ("accepted", "applied") or a.verbose:
+                print(f"    {c['id']} {c['status']:<9} {c['was']} -> {c['text']}  ({c['source']} {c['ref']}, {c['kind']})")
+    print(f"\nall: {', '.join(f'{v} {k}' for k, v in sorted(tot.items()))}")
     return 0
 
 
@@ -333,6 +372,20 @@ def main(argv=None) -> int:
     p.add_argument("--text"); p.add_argument("--file", help="JSON list of {page, box, text} instead")
     p.add_argument("--shapes", help="<stem>.shapes.json to update too (default: beside the PDF)")
     p.set_defaults(fn=cmd_correct)
+
+    p = sub.add_parser("fix", help="propose corrections from exact sources (Quran verses), judge them on the ink (Gemini, blind), apply the accepted ones to the text only")
+    p.add_argument("targets", nargs="+", help="OUT/<stem> (or OUT/<stem>.pdf), or an output dir for every document in it")
+    p.add_argument("--azure-dir", required=True, help="dir of <stem>/<stem>.json (+ the scan <stem>.pdf), as for native")
+    p.add_argument("--scan-dir", help="original scans <stem>.pdf; default: the PDF beside each Azure JSON")
+    p.add_argument("--judge", choices=["gemini", "none"], default="gemini", help="none: propose only (nothing is accepted)")
+    p.add_argument("--model", default="gemini-3.8-flash", help="the judge (calibrated in experiment 27: 47/48, as Pro)")
+    p.add_argument("--confirm", default="gemini-3.1-pro-preview", help="a second judge must agree before a proposal is accepted ('none' to skip)")
+    p.add_argument("--apply", action="store_true", help="write accepted corrections into the PDFs' text, the ALTO, JATS and trust PDFs")
+    p.add_argument("--cap", type=float, default=1.0, help="dollars: no Gemini request is sent that would take the spend log over this")
+    p.add_argument("--spend-log", help="jsonl of every request's cost (default OUT/gemini_spend.jsonl)")
+    p.add_argument("--cache", help="jsonl of the judge's answers (default OUT/judge_cache.jsonl)")
+    p.add_argument("-v", "--verbose", action="store_true", help="list every proposal, not only the accepted ones")
+    p.set_defaults(fn=cmd_fix)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")
     p.add_argument("pdfs", nargs="+"); p.add_argument("--pages", type=int, default=0, help="first N pages of each")

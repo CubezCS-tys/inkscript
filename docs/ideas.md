@@ -20,13 +20,28 @@ reason is recorded), **open** (voiced, not yet judged).
   option (old prints at 0.9, hamza in hamza-omitting prints: 11.3% flagged,
   0.10% left wrong), and a second reader for confident misreadings (the added
   hamza at 0.99 escapes every free signal); paying a judge per flag (≈ $0.0026
-  a word) on demand, not archive-wide.
+  a word) on demand, not archive-wide. *Fewer false flags, built 2026-10-06
+  (experiment 27):* a word flagged for its confidence alone is not flagged when
+  it is common in the corpus (read confidently in ≥ 5 of 400 documents) and its
+  confidence is ≥ 0.6 — flags 7.5% → 5.0%, no judged error lost. *Tried, not
+  taken:* title words flagged only below 0.5 (no gain); the same word read
+  confidently elsewhere in the document (smaller gain, loses an error).
+  *Untested:* two independent readers agreeing — Gemini's page 1 already
+  verifies (in the rule since experiment 22), but experiment 19's sample has
+  no second reading, and the feeler agrees with Azure mostly where Azure is
+  right (D19).
 - **The Quran as a free second reader.** *built 2026-10-06*
   (`src/inkscript/enrich/quran.py`; experiment 20). Quotations found, linked to
   sura:verse (tanzil.net), checked word for word; an equal word is *verified*,
   a differing one *flagged* (20 of 24 such words on the ink were Azure
-  misreadings). *Open:* turn each differing word into a yes/no question on the
-  ink ("does the print say لَحَٰفِظُونَ?") feeding `inkscript correct`.
+  misreadings). *Built 2026-10-06 (experiment 27, `inkscript fix`, D21):* each
+  differing word that is not the author's wording or the print's spelling is a
+  blind A/B question on the ink (Gemini Flash, then Pro must agree); on the
+  20-document set 194 proposed, 156 accepted, 147 written into the text (PDFs,
+  ALTO, JATS, trust PDF), ink pixel-identical. *Open:* other exact sources —
+  hadith collections, the document's own repeated phrases, a cited reference
+  list; the 4 shorter corrections D13 declines (a glyph may not be empty: a
+  zero-width character would need a Chrome search test); splits.
 - **The document as data: JATS for the article, ALTO for the page.** *built
   2026-10-06* (`src/inkscript/enrich/jats.py`, `alto.py`; D20). Replaces the
   TEI prototype of experiments 20/22 (*dropped* as the product format: neither
