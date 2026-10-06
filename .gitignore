@@ -12,3 +12,4 @@ data/
 *.zip
 .pytest_cache/
 experiments/*/out/
+.claude/worktrees/

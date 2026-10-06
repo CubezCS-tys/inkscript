@@ -31,9 +31,9 @@ python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
 .venv/bin/python experiments/09_pen_path/coverage.py OUT/<stem>_vector.pdf    # letter coverage of one PDF
 ```
 
-`inkscript --help` lists the ten subcommands; [docs/pipeline.md](docs/pipeline.md) has a table of them and a file-by-file map of `src/`. The fixture is a real five-page
+`inkscript --help` lists the eleven subcommands; [docs/pipeline.md](docs/pipeline.md) has a table of them and a file-by-file map of `src/`. The fixture is a real five-page
 document, so nothing here needs data or keys (Gemini is only called by
-`frontpage`, `numbers`, `second`; the fixture ships its page-1 reading).
+`frontpage`, `numbers`, `second` and `fix`; the fixture ships its page-1 reading).
 
 ## Rules that have each cost a day when broken
 
