@@ -1,0 +1,35 @@
+--- a/src/inkscript/geometry/penpath.py	2026-10-06 15:12:24.412100811 +0100
++++ b/src/inkscript/geometry/penpath.py	2026-10-06 15:12:24.460420458 +0100
+@@ -83,6 +83,12 @@
+         return None
+     trunk = []; n = left
+     while n is not None: trunk.append(n); n = prev[n]                 # left end first
++    # ... and it ENDS where the last letter meets the baseline, not at the top of a final alef: a stem leaning left
++    # at the top made the top its leftmost point, the path ran down the stem, the cut fell part-way down it, and
++    # the alef's selection box was a sliver at its foot (right 5 times in 56; experiment 21). The stem now hangs
++    # from its foot, like any other tall stroke.
++    j = stem_foot(trunk, line["rise"])
++    if j: trunk = trunk[j:]
+     S = len(trunk); pos = {p: k for k, p in enumerate(trunk)}
+     _, root = _bfs(sk, trunk)
+     s_of = np.full(sk.shape, -1, int)
+@@ -110,6 +116,19 @@
+     return G, ink_s, trunk
+ 
+ 
++def stem_foot(trunk, rise) -> int:
++    """Index of the foot of a tall stroke the path climbs down at its left end (a final alef), or 0: from its left
++    end the path runs down, mostly vertically, by at least 0.6 x the line's rise, to near the row the rest of the
++    path runs along (its median row, within a fifth of the rise)."""
++    t = np.array(trunk); y, x = t[:, 0], t[:, 1]; j = 0
++    flat = lambda j: (lambda e: x[e] - x[j] >= 2 and y[e] - y[j] <= 1)(min(j + 3, len(t) - 1))
++    while j + 1 < len(t) and y[j + 1] >= y[j] and not flat(j): j += 1          # down the stroke, until the path turns flat
++    drop = y[j] - y[0]; base = np.median(y[j:])
++    if drop >= 0.6 * rise and abs(int(x[j]) - int(x[0])) <= 0.5 * drop and y[j] >= base - 0.2 * rise and j < len(t) - 6:
++        return j
++    return 0
++
++
+ def units_forms(text: str):
+     """The letters of a piece with each one's form. Usually the piece is one joined run; when two runs touch in
+     the ink (`خلا` + `ل` printed as one blob) the word arrives unsplit, and its letters still lie along one pen
