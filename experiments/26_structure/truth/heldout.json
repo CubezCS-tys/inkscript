@@ -1,0 +1,69 @@
+{
+ "_about": "Held-out truth for experiment 26: four documents of the set read from the page images on 2026-10-06 AFTER the rules were tuned on truth.json, and never used to tune them. Same fields as truth.json.",
+ "docs": {
+  "2021-020-006-019": {
+   "pages": [1, 2, 3, 4],
+   "title": "القيم الأخلاقية وأثرها في تحقيق الأمن النفسي دراسة من منظور السنة النبوية",
+   "authors": ["فاتن عبد القادر بابكر"],
+   "rubric": null,
+   "headings": [{"page": 3, "text": "ملخص البحث"}, {"page": 4, "text": "Research Summary"}],
+   "headings_optional": [],
+   "footnote_links": [],
+   "furniture": [],
+   "notes": "Title page: basmala, the title over three lines, 'الدكتورة فاتن عبد القادر بابكر', the date 1440هـ - 2018م; p2 blank; p3 and p4 the Arabic and English abstracts."
+  },
+  "1580-005-010-029": {
+   "pages": [1, 2, 3, 4],
+   "title": "الإعلام الإسلامي الفضائيات: تجربة في الميزان",
+   "authors": ["عماد عيسى التميمي"],
+   "rubric": null,
+   "headings": [
+    {"page": 1, "text": "تمهيد"},
+    {"page": 3, "text": "المبحث الأول: أهمية الإعلام باعتباره وسيلة من أهم وسائل الدعوة في العصر الحاضر"},
+    {"page": 3, "text": "أولاً: الدليل من القرآن الكريم"},
+    {"page": 4, "text": "ثانياً: الدليل من السنة النبوية"}
+   ],
+   "headings_optional": [
+    {"page": 2, "text": "المبحث الأول: أهمية الإعلام باعتباره وسيلة من أهم وسائل الدعوة في العصر الحاضر"},
+    {"page": 2, "text": "المبحث الثاني: أهمية الإعلام الفضائي، واستهدافه المنطقة العربية"},
+    {"page": 2, "text": "المبحث الثالث: واقع الإعلام الفضائي العربي والحاجة لوجود قنوات إسلامية هادفة"},
+    {"page": 2, "text": "المبحث الرابع: تقييم تجربة بعض الفضائيات الإسلامية"},
+    {"page": 3, "text": "مقدمة في تعريف الدعوة إلى الله وبيان حكمها"}
+   ],
+   "footnote_links": [
+    {"page": 1, "note": "1"}, {"page": 3, "note": "2"}, {"page": 3, "note": "3"},
+    {"page": 4, "note": "4"}, {"page": 4, "note": "5"}, {"page": 4, "note": "6"}
+   ],
+   "furniture": ["د. عماد عيسى التميمي", "الإعلام الإسلامي: الفضائيات تجربة في الميزان", "الموسم الثقافي الخامس",
+                 "رمضان و.ر - مسيحي", "مجلة الجامعة الأسمرية", "العدد السنة"],
+   "notes": "p2's four 'المبحث' lines are the plan of the article (optional). The author's note '*' (his university) is not numbered and not counted."
+  },
+  "6795-000-000-014": {
+   "pages": [1, 2],
+   "title": "دعوة الاسلام الى الحوار والتعايش والاعتراف بالآخر",
+   "authors": ["الصادق كرشيد"],
+   "rubric": null,
+   "headings": [{"page": 2, "text": "عالمية الإسلام :"}],
+   "headings_optional": [],
+   "footnote_links": [
+    {"page": 1, "note": "1"},
+    {"page": 2, "note": "2"}, {"page": 2, "note": "3"}, {"page": 2, "note": "4"}, {"page": 2, "note": "5"},
+    {"page": 2, "note": "6"}, {"page": 2, "note": "7"}, {"page": 2, "note": "8"}, {"page": 2, "note": "9"},
+    {"page": 2, "note": "10"}
+   ],
+   "furniture": [],
+   "notes": "Byline 'الأستاذ الصادق كرشيد (*)'; notes labelled '1)' '2)' ... with raised markers (1) in the text."
+  },
+  "8009-000-000-014": {
+   "pages": [1, 2],
+   "title": "البيان الختامي للمؤتمر",
+   "authors": [],
+   "rubric": null,
+   "headings": [],
+   "headings_optional": [],
+   "footnote_links": [],
+   "furniture": ["مؤتمر «الإسلام في أمريكا اللاتينية: حضارة وثقافة»"],
+   "notes": "A conference's closing statement: title page, then the text under a running head naming the conference; the basmala is not a heading."
+  }
+ }
+}

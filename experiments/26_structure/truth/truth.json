@@ -1,0 +1,527 @@
+{
+ "_about": "Hand-made truth for experiment 26, read from the page images (out/pages/*.png) on 2026-10-06. For each document: the pages read; the title, authors and rubric as printed; every section heading on those pages (page, text as printed); every note marker in the body text of those pages that has a note at the foot of its page (page, the note's printed label; 'marker' when the printed marker differs from the note's label); text that is page furniture (running heads, footers) and must not be article text. 'headings_optional' are lines a reader could call either way (not counted either way). Headings and links are scored only on the pages read. 'endnote_links': markers whose note is in the list at the end of the article (scored on 'endnote_pages').",
+ "docs": {
+  "0290-000-005-003": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "توجيه القراءات",
+   "authors": [
+    "عبد العزيز احمد اسماعيل"
+   ],
+   "rubric": null,
+   "headings": [],
+   "headings_optional": [],
+   "footnote_links": [
+    {
+     "page": 3,
+     "note": "1"
+    },
+    {
+     "page": 3,
+     "note": "2"
+    },
+    {
+     "page": 3,
+     "note": "4"
+    },
+    {
+     "page": 3,
+     "note": "5"
+    },
+    {
+     "page": 4,
+     "note": "6"
+    },
+    {
+     "page": 4,
+     "note": "7"
+    },
+    {
+     "page": 4,
+     "note": "8"
+    },
+    {
+     "page": 4,
+     "note": "10"
+    },
+    {
+     "page": 4,
+     "note": "11"
+    },
+    {
+     "page": 4,
+     "note": "12"
+    },
+    {
+     "page": 4,
+     "note": "13"
+    },
+    {
+     "page": 4,
+     "note": "14"
+    },
+    {
+     "page": 4,
+     "note": "15"
+    },
+    {
+     "page": 4,
+     "note": "16"
+    },
+    {
+     "page": 4,
+     "note": "17"
+    }
+   ],
+   "furniture": [],
+   "notes": "p1 is a title page (calligraphic title, author 'د/ عبد العزيز احمد اسماعيل' and his post). p3: the marker (٣) has its note printed with the label (٤) (a misprint), so it is not counted; p4: note (٩) has no marker in the text. 'إحداهما' / 'ثانيتهما' on p2 are run-in labels, not headings."
+  },
+  "0387-000-006-004": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "هاء الكناية والدرس الصوتي المطبق في القرآن الكريم",
+   "authors": [
+    "التهامي الراجي"
+   ],
+   "rubric": null,
+   "headings": [
+    {
+     "page": 1,
+     "text": "1 - التعريف بهاء الكناية"
+    },
+    {
+     "page": 1,
+     "text": "2 - أشكال هاء الكناية"
+    },
+    {
+     "page": 2,
+     "text": "3 - صور هاء الكناية"
+    },
+    {
+     "page": 2,
+     "text": "4 - قراءتها"
+    },
+    {
+     "page": 2,
+     "text": "1.4 - الموصولة بمد"
+    },
+    {
+     "page": 3,
+     "text": "2.4 - موصولة بغير مد"
+    },
+    {
+     "page": 3,
+     "text": "3.4 - غير موصولة"
+    },
+    {
+     "page": 3,
+     "text": "4.4 - ساكنة"
+    },
+    {
+     "page": 3,
+     "text": "5 - حالات الشكل ١"
+    },
+    {
+     "page": 3,
+     "text": "1.5 - استثمار الشكل ١"
+    },
+    {
+     "page": 4,
+     "text": "2.5 - تفصيل حالات الشكل ١"
+    }
+   ],
+   "headings_optional": [
+    {
+     "page": 2,
+     "text": "1 - موصولة بمد"
+    },
+    {
+     "page": 2,
+     "text": "2 - موصولة بغير مد"
+    },
+    {
+     "page": 2,
+     "text": "3 - غير موصولة"
+    },
+    {
+     "page": 2,
+     "text": "4 - ساكنة"
+    }
+   ],
+   "footnote_links": [],
+   "endnotes": true,
+   "furniture": [],
+   "notes": "Title set as a banner over two lines ('هاء الكناية' large at the right); byline 'للدكتور التهامي الراجي' in a frame. The notes are endnotes (markers (1)..(19) on pp1-4, no note at the foot of these pages), so no footnote link is counted; the endnote links are scored on pp1 and 3, where the markers read clearly: (1)..(6) on p1, (8)..(16) on p3. The list items on p2 (1 - موصولة بمد ...) are a list, not headings.",
+   "endnote_links": [
+    {
+     "page": 1,
+     "note": "1"
+    },
+    {
+     "page": 1,
+     "note": "2"
+    },
+    {
+     "page": 1,
+     "note": "3"
+    },
+    {
+     "page": 1,
+     "note": "4"
+    },
+    {
+     "page": 1,
+     "note": "5"
+    },
+    {
+     "page": 1,
+     "note": "6"
+    },
+    {
+     "page": 3,
+     "note": "8"
+    },
+    {
+     "page": 3,
+     "note": "9"
+    },
+    {
+     "page": 3,
+     "note": "10"
+    },
+    {
+     "page": 3,
+     "note": "11"
+    },
+    {
+     "page": 3,
+     "note": "12"
+    },
+    {
+     "page": 3,
+     "note": "13"
+    },
+    {
+     "page": 3,
+     "note": "14"
+    },
+    {
+     "page": 3,
+     "note": "15"
+    },
+    {
+     "page": 3,
+     "note": "16"
+    }
+   ],
+   "endnote_pages": [
+    1,
+    3
+   ]
+  },
+  "0599-000-123-004": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "الإيمان بالله وأسمائه وصفاته وتقوية المراقبة الإلهية",
+   "authors": [
+    "عبد السلام الأحمر"
+   ],
+   "rubric": "دراسات شرعية",
+   "headings": [
+    {
+     "page": 2,
+     "text": "أسماء الله وكيف تقوى بها المراقبة:"
+    },
+    {
+     "page": 2,
+     "text": "الصفات الإلهية وتقوية المراقبة:"
+    },
+    {
+     "page": 3,
+     "text": "أولاً: الوحدانية:"
+    }
+   ],
+   "headings_optional": [],
+   "footnote_links": [
+    {
+     "page": 1,
+     "note": "1"
+    },
+    {
+     "page": 1,
+     "note": "2"
+    },
+    {
+     "page": 4,
+     "note": "1"
+    }
+   ],
+   "furniture": [
+    "البيان",
+    "العدد",
+    "الإيمان بالله وصفاته وأسمائه"
+   ],
+   "notes": "Journal البيان, issue 123 (footer on every page: '• البيان • 30' and '• العدد • 123'). The rubric 'دراسات شرعية' is white on a grey tab at the right edge; the vertical tab on even pages repeats the title (a running head)."
+  },
+  "0631-006-002-013": {
+   "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "title": "الاستحسان والمصالح المرسلة",
+   "authors": [],
+   "rubric": null,
+   "headings": [],
+   "headings_optional": [],
+   "footnote_links": [],
+   "furniture": [],
+   "notes": "No byline anywhere in the article (the basmala under the title is not an author). No headings, no notes; page numbers 5195-5200 at the foot."
+  },
+  "0652-000-001-004": {
+   "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "title": "الإسلام في مواجهته للماديين في قضية الألوهية",
+   "authors": [
+    "محمد أبو الغيط الفرت"
+   ],
+   "rubric": null,
+   "headings": [
+    {
+     "page": 1,
+     "text": "تقديم :"
+    },
+    {
+     "page": 6,
+     "text": "مبدأ السببية وحدوث العالم:"
+    }
+   ],
+   "headings_optional": [],
+   "footnote_links": [],
+   "furniture": [],
+   "notes": "Byline 'بقلم الدكتور / محمد أبو الغيط الفرت / الأستاذ المساعد بكلية أصول الدين بالقاهرة' over three centred lines; page numbers at the top (- 80 - ...)."
+  },
+  "0656-014-010-014": {
+   "pages": [
+    1,
+    2,
+    3
+   ],
+   "title": "من صور الاشقياء والسعداء",
+   "authors": [
+    "احمد محمد جمال"
+   ],
+   "rubric": "على مائدة القرآن",
+   "headings": [],
+   "headings_optional": [],
+   "footnote_links": [],
+   "furniture": [],
+   "notes": "Two columns. Page 3 ends the article; the framed box 'إعلان' under it is an advertisement, not a section of the article. '* * *' separators are not headings."
+  },
+  "0787-011-001-003": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "العربية المفترى عليها",
+   "authors": [
+    "محمد أبو المكارم قنديل"
+   ],
+   "rubric": null,
+   "headings": [],
+   "headings_optional": [],
+   "footnote_links": [
+    {
+     "page": 3,
+     "note": "1"
+    },
+    {
+     "page": 3,
+     "note": "2"
+    },
+    {
+     "page": 4,
+     "note": "1"
+    }
+   ],
+   "furniture": [
+    "مجلة كلية الدراسات الإسلامية والعربية للبنات",
+    "الممسوحة ضوئيا بـ CamScanner"
+   ],
+   "notes": "Page 1 is a decorated title page ('العربية' / 'المفترى عليها' on two lines, 'الأستاذ الدكتور محمد أبو المكارم قنديل'); pp2-3 repeat title and author at the top of the text (not headings). Running head: the journal's name."
+  },
+  "0792-019-010-005": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "الدواعي الصحية لتنظيم النسل",
+   "authors": [
+    "محمود ناظم نسيمي"
+   ],
+   "rubric": null,
+   "headings": [
+    {
+     "page": 1,
+     "text": "الزمرة الاولى :"
+    },
+    {
+     "page": 2,
+     "text": "١ - أمراض القلب :"
+    },
+    {
+     "page": 2,
+     "text": "٢ - القصور الكلوي المزمن :"
+    },
+    {
+     "page": 2,
+     "text": "٣ - ارتفاع الضغط الدموي الشديد :"
+    },
+    {
+     "page": 3,
+     "text": "٤ - السل الرئوي المترقي :"
+    },
+    {
+     "page": 3,
+     "text": "٥ - الداء الافرنجي عند الزوجة :"
+    },
+    {
+     "page": 3,
+     "text": "الزمرة الثانية"
+    },
+    {
+     "page": 4,
+     "text": "الزمرة الثالثة :"
+    },
+    {
+     "page": 4,
+     "text": "الزمرة الرابعة :"
+    }
+   ],
+   "headings_optional": [],
+   "footnote_links": [
+    {
+     "page": 1,
+     "note": "1"
+    },
+    {
+     "page": 1,
+     "note": "2"
+    },
+    {
+     "page": 2,
+     "note": "3",
+     "marker": "2"
+    },
+    {
+     "page": 4,
+     "note": "4"
+    }
+   ],
+   "furniture": [],
+   "notes": "p1 marker 2 is printed '٢)' (no opening bracket); p2's marker for note (٣) is printed (٢) — a misprint, kept in the truth: a reader would follow it to note 3."
+  },
+  "1005-000-001-002": {
+   "pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "title": "السلطة في الإسلام دراسة في نشوء الخلافة",
+   "authors": [
+    "رضوان السيد"
+   ],
+   "rubric": null,
+   "headings": [
+    {
+     "page": 3,
+     "text": "I"
+    },
+    {
+     "page": 5,
+     "text": "II"
+    }
+   ],
+   "headings_optional": [],
+   "footnote_links": [
+    {
+     "page": 5,
+     "note": "1"
+    },
+    {
+     "page": 5,
+     "note": "2"
+    },
+    {
+     "page": 5,
+     "note": "3"
+    },
+    {
+     "page": 6,
+     "note": "4"
+    },
+    {
+     "page": 6,
+     "note": "5"
+    },
+    {
+     "page": 6,
+     "note": "6"
+    }
+   ],
+   "furniture": [],
+   "notes": "p1 is a half-title (title and author), p2 blank, p3 repeats title and author over the text. Sections are numbered with Roman numerals alone on a line."
+  },
+  "1090-001-004-011": {
+   "pages": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "title": "رسالة المسجد في الإسلام",
+   "authors": [
+    "مصطفى كمال التارزي"
+   ],
+   "rubric": "خطبة منبرية",
+   "headings": [],
+   "headings_optional": [
+    {
+     "page": 1,
+     "text": "اما بعد ."
+    }
+   ],
+   "footnote_links": [],
+   "furniture": [],
+   "notes": "A sermon in three columns: rubric 'خطبة منبرية' in calligraphy at the top right, the title in large calligraphy, the byline 'الشيخ مصطفى كمال التارزي' in a frame; the name is repeated as a signature at the end (p4)."
+  }
+ }
+}

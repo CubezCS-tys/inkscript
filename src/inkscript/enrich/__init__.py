@@ -3,6 +3,8 @@
     enrich(stem, azure_json, scan_pdf, out_dir, report, xml=True, trust=True) -> summary for the build report
 
   document.py   Azure's reading: pages, paragraphs (with position roles), lines, words with ids and boxes
+  structure.py  the article's structure: furniture, title / authors (Gemini's title file aligned to the ink, or
+                the layout), headings (size, bold ink, numbering, space), notes and the markers that point at them
   quran.py      Quran quotations found, linked to sura:verse and checked word for word (Tanzil text, shipped)
   trust.py      one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule)
   jats.py       <stem>.jats.xml   the article: front matter, body in reading order, footnotes, references,
@@ -28,7 +30,7 @@ def _version() -> str:
 
 
 def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: dict,
-           xml: bool = True, trust: bool = True) -> dict:
+           xml: bool = True, trust: bool = True, meta_dirs=()) -> dict:
     from . import alto, jats, trustpdf
     from .document import load
     from .quran import check_document
@@ -48,6 +50,11 @@ def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: d
     res["trust"]["flagged_on_born_digital_pages"] = sum(
         1 for w in doc["words"] if w["page"] in born_digital and getattr(marks.get(w["idx"]), "mark", "") == "flagged")
     if xml:
+        from .structure import read_meta
+        # the article's structure (experiment 26): Gemini's title file if one sits beside the Azure reading or in
+        # a frontpage dir (never a new Gemini call), stroke widths from the scan; both writers use it
+        meta = read_meta(stem, [Path(azure_json).parent, *meta_dirs])
+        jats.structure_of(doc, meta, scan_pdf)
         jn, an = f"{stem}.jats.xml", f"{stem}.alto.xml"
         res["jats"] = jats.write(doc, quotes, marks, stem, out_dir / jn, an)
         ids = res["jats"].pop("_ids")
