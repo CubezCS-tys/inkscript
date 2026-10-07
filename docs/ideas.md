@@ -50,11 +50,18 @@ reason is recorded), **open** (voiced, not yet judged).
   `src/inkscript/enrich/structure.py`, D22): titles and authors from Gemini's
   title file aligned to Azure's words (else page 1's layout), headings from
   size + bold ink + numbering + space, notes linked from their markers,
-  furniture by repetition. *Open:* Gemini title files exist for only 7 of the
-  20 set documents — a title file for every document (one cheap call, or the
-  catalogue's MARC title/author, experiment 19's `meta.py`) would remove the
-  layout guess where it is weakest (an author printed above the title, a rubric
-  glued to the title); markers Azure never read (a raised "9" lost) could be
+  furniture by repetition. *The catalogue as front matter: built 2026-10-07*
+  (experiment 29, `src/inkscript/enrich/catalogue.py`, D25): Mandumah's MARC
+  record gives title, people, journal, ISSN, dates, pages, abstracts and
+  keywords for 204 of 205 documents, aligned to the ink (202 titles, 195/214
+  names). *Open from it:* where the check says "disagrees", fall back to the
+  page instead of the record (no case yet); where the catalogue's title is the
+  rubric and the page prints another, keep the printed one as an `alt-title`;
+  an author's "(*)" note at the foot often holds the affiliation — follow the
+  marker; a byline name with «و» glued («وهلموت») loses to an exact mention
+  elsewhere — prefer matches near the title; send back to Mandumah the
+  names/titles their record spells differently from the print; a Crossref
+  export now has every field it needs. Markers Azure never read (a raised "9" lost) could be
   re-found on the ink beside the line; boxed inserts (an advertisement
   "إعلان" under an article) are still taken for a section; Azure
   `prebuilt-layout` roles remain untried; references split into fields
