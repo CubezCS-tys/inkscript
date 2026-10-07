@@ -27,7 +27,7 @@ inkscript = "inkscript.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-inkscript = ["data/quran/*", "data/lexicon/*"]   # the Tanzil Quran text (CC BY 3.0, verbatim; see data/quran/NOTICE.md); the confident-word list (experiment 27)
+inkscript = ["data/quran/*", "data/lexicon/*", "viewer/app/*"]   # the Tanzil Quran text (CC BY 3.0, verbatim; see data/quran/NOTICE.md); the confident-word list (experiment 27); the viewer app (experiment 31)
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

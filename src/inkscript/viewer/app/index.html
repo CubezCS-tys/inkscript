@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inkscript viewer</title>
+<link rel="stylesheet" href="app.css">
+<!--STATIC-->
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/" title="all documents">ink<b>script</b></a>
+  <div class="doctitle" id="doctitle" dir="rtl"></div>
+  <nav class="views" id="views" hidden>
+    <button data-view="page">Page</button>
+    <button data-view="both" class="wide-only">Both</button>
+    <button data-view="article">Article</button>
+    <button data-view="xml">XML</button>
+  </nav>
+  <button class="theme" id="theme" title="light / dark">◐</button>
+</header>
+<main id="main"></main>
+<div class="pop" id="pop" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
