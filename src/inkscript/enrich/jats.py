@@ -13,7 +13,9 @@ What goes where (docs/decisions.md D20, D21); the structure comes from structure
            first and last page numbers, the page count, and custom-meta: where the text and the structure came
            from, the word ids of the title and of each name in the ALTO file, the trust counts, the direction.
   body     Azure's paragraphs in reading order, page furniture and notes left out (they stay in the ALTO file
-           with their roles). A heading opens a <sec>. Quran quotations are <named-content content-type="quran">
+           with their roles). A heading opens a <sec>. A paragraph in a block marked vowelled, handwritten or
+           decorative (experiment 30, trust.regions) says so in content-type, and custom-meta reading-<mark> lists
+           those blocks with what the mark means. Quran quotations are <named-content content-type="quran">
            linked to https://tanzil.net/#S:A; each note marker found in the text (glued "عاصم(٢).", alone "(٢)",
            raised) is an <xref ref-type="fn"> to its note, the word's letters kept outside the link.
   back     the notes (<fn-group>, one <fn> per note at the foot of a page or in the list at the end, label =
@@ -45,7 +47,7 @@ from lxml import etree
 from .document import is_real
 from .quran import TANZIL_CREDIT, norm
 from .structure import NOTE_LABEL_HEAD, id_parts, key
-from .trust import summary
+from .trust import region_meta, summary
 
 XLINK = "http://www.w3.org/1999/xlink"
 MML = "http://www.w3.org/1998/Math/MathML"
@@ -169,6 +171,7 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
     fr = st["front"]
     idp = st["id"] or id_parts(stem)
     bids = block_ids(doc)
+    region_type = {i: " ".join(ms) for i, ms in ((doc.get("regions") or {}).get("blocks") or {}).items()}
     claimed = set()
 
     def claim(bid):
@@ -279,6 +282,8 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
     meta_("trust", f"{ts['verified']} words verified, {ts['agreed']} agreed, {ts['flagged']} flagged"
           + (f", {ts['corrected']} corrected from a Quran verse after a judge on the ink ({stem}.corrections.json)"
              if ts.get("corrected") else "") + " (per-word marks in the ALTO file)")
+    for name, value in region_meta(doc, marks, bids):    # experiment 30: vowelled / handwritten / decorative blocks
+        meta_(name, value)
     meta_("quran-quotations", f"{len(quotes)} found, {sum(q['differs'] == 0 for q in quotes)} equal to the verse")
     for name, value, _ in ink_meta:
         meta_(name, value)
@@ -439,7 +444,7 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
             inline(e, ks, refs=False)
             stats["endnotes"] += 1
             continue
-        e = E(cur, "p", id=bid, xml_lang=lang)
+        e = E(cur, "p", id=bid, xml_lang=lang, content_type=region_type.get(i))
         inline(e, ks)
         stats["paragraphs"] += 1
 

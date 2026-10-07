@@ -9,7 +9,8 @@ Nothing here is a single position rule. Each decision looks at several things a 
 
   furniture   page numbers (digits alone at the top or bottom), running heads and footers (short text at the
               top or bottom that repeats on other pages, the journal's masthead), text turned on its side in the
-              outer margin (a side tab), and short text in the top 8% / bottom 6%.
+              outer margin (a side tab), and short text in the top 8% / bottom 6% set apart from the text; never a
+              table's cell, a note, a caption or the page's first or last line (experiment 30, _furniture).
   notes       the block of small lines at the foot of a page (letters at most 86% of the body's height, read from
               the bottom up until a body-size line), accepted only when one of its lines opens with a bracketed
               number "(3)", "3)", "[3]"; each line that opens with a number starts a note, the others continue it.
@@ -249,43 +250,7 @@ def analyse(doc: dict, meta: dict | None = None, scan_pdf=None) -> dict:
     info = [pinfo(p) for p in paras]
 
     # ------------------------------------------------ furniture
-    def fkey(t):
-        return key(re.sub(r"[\d٠-٩۰-۹]", "", t))
-
-    zone_keys = {}                              # short paragraphs in the top / bottom 16% of the page
-    for i, (pg, ws, b, H, Wd, txt) in enumerate(info):
-        if len(ws) <= 15 and (b[3] < 0.16 * H or b[1] > 0.84 * H):
-            k = fkey(txt)
-            if len(k) >= 3 and not NUMBERED.match(txt):     # "3 - ..." at the top is a heading, not a running head
-                edge = b[3] < 0.13 * H or b[1] > 0.87 * H
-                zone_keys[i] = (pg, "top" if b[3] < 0.16 * H else "bottom", k, edge)
-    repeats = set()
-    for i, (pg, z, k, edge) in zone_keys.items():
-        others = {pg2 for j, (pg2, z2, k2, e2) in zone_keys.items()
-                  if j != i and pg2 != pg and z2 == z
-                  and (k2 == k or difflib.SequenceMatcher(None, k, k2, autojunk=False).ratio() >= 0.8)}
-        if len(others) >= (1 if edge else 2):   # at the very edge, once more elsewhere; a little inside, twice
-            repeats.add(i)
-    first_page = min(pages) if pages else 1
-    for i, (pg, ws, b, H, Wd, txt) in enumerate(info):
-        if paras[i].get("role") in ("pageHeader", "pageFooter", "pageNumber"):
-            kinds[i], why[i] = paras[i]["role"], "azure"
-        elif NUMONLY.match(txt) and len(txt) <= 9 and (b[3] < 0.13 * H or b[1] > 0.87 * H):
-            kinds[i], why[i] = "pageNumber", "digits alone at the top or bottom"
-        elif i in repeats:
-            kinds[i] = "pageHeader" if b[3] < 0.5 * H else "pageFooter"
-            why[i] = "repeats at the same place on other pages"
-        elif (b[3] < 0.2 * H or (b[3] < 0.25 * H and "مجلة" in txt)) and len(ws) <= 20 and MAST.search(txt) \
-                and DIGIT.search(txt):
-            kinds[i], why[i] = "pageHeader", "the journal's masthead"
-        elif b[3] < 0.08 * H and len(ws) <= 12 and pg != first_page:   # on page 1 it may be the rubric
-            kinds[i], why[i] = "pageHeader", "short text in the top 8%"
-        elif b[1] > 0.94 * H and len(ws) <= 12:
-            kinds[i], why[i] = "pageFooter", "short text in the bottom 6%"
-        elif len(ws) <= 8 and (b[3] - b[1]) > 2.5 * (b[2] - b[0]) and (b[2] < 0.16 * Wd or b[0] > 0.84 * Wd):
-            kinds[i], why[i] = "pageHeader", "text on its side in the outer margin"
-        elif NUMONLY.match(txt) and len(txt) <= 3 and _h(ws) < 0.5 * body_h:
-            kinds[i], why[i] = "pageFooter", "a speck read as a digit"   # stray mark, not article text
+    _furniture(doc, info, kinds, why, body_h)
     furniture = {i for i in range(npar) if kinds[i] in ("pageHeader", "pageFooter", "pageNumber")}
     furn_words = {k for i in furniture for k in paras[i]["words"]}
 
@@ -481,6 +446,193 @@ def analyse(doc: dict, meta: dict | None = None, scan_pdf=None) -> dict:
                 note_word=note_word, markers=markers, journal=journal, year=year, furniture=furniture,
                 head_words={i: v for i, v in head_words.items() if kinds[i] == "sectionHeading"},
                 front_words=front_words, id=meta.get("id") or {}, gemini=bool(meta.get("gemini")))
+
+
+LEAD_NUM = re.compile(r"^\s*([0-9٠-٩۰-۹]{1,4})\s*[-–_.)]?\s*(?=[^\W\d_])")
+FURNITURE_TRACE = None                          # a dict to receive, per paragraph, what the furniture test saw
+CAPTION = ("جدول", "الجدول", "شكل", "الشكل", "المصدر", "رسم", "الرسم", "مخطط", "لوحه", "صوره")
+MAST_WORD = re.compile(r"(?<![\w])(?:مجلة|العدد|السنة|المجلد|عدد)(?![\w])")
+
+
+def _segments(doc) -> dict:
+    """Per page, every run of words that share an Azure line and a paragraph: (box, para, text)."""
+    W = doc["words"]
+    groups = {}
+    for w in W:
+        groups.setdefault((w["page"], w["line"], w["para"]), []).append(w)
+    out = {}
+    for (pg, li, pi), ws in groups.items():
+        out.setdefault(pg, []).append((_box(ws), pi, " ".join(w["out"] for w in ws)))
+    return out
+
+
+def _band(segs, b, i):
+    """The paragraphs other than i with a line beside box b (sharing at least half the smaller height)."""
+    h = b[3] - b[1]
+    return {pi for sb, pi, t in segs if pi != i and min(b[3], sb[3]) - max(b[1], sb[1]) >= 0.5 * min(h, sb[3] - sb[1])}
+
+
+def _furniture(doc, info, kinds, why, body_h) -> None:
+    """Running heads and footers, page numbers, side tabs, the journal's masthead and stray marks; sets kinds/why.
+
+    Experiment 26's rules took 470 blocks with letters in 105 of experiment 28's 205 documents for furniture by
+    their place alone, and 2,847 small numbers anywhere on the page for specks; on a hand-read sample of 140
+    (experiment 30, truth/furniture_truth.json) 60 were content. Since experiment 30 a block is furniture only if,
+    besides its place:
+      * it is not in a table: 2+ other paragraphs beside it on its line, 3+ on the next line toward the middle of
+        the page, and some text between it and the page's edge (table headers and cells);
+      * it does not open as a note "(3)" or a caption (جدول, شكل, المصدر...): notes, captions, a table's source;
+        nor end with a colon (a heading, a line of the text); in the lower half, a text that opens with a bare
+        number is a note unless it is the outermost text and its words come back on other pages, with the number
+        following the page ("٤٨ - تاريخ العرب والعالم") or the same words on 2+ pages ("١٢٣ العدد", the issue);
+      * a repeat is the same text, digits aside; nearly the same (>= 0.8) counts for a short text (under 14
+        letters) only when it comes back on a quarter of the pages ("الضابط الثالث" / "الضابط السادس" are
+        headings); on the first page, a repeat in large letters (>= 1.1x the body) with text above it is the
+        title, repeated as the running head later;
+      * short text in the top 8% / bottom 6% by place alone: only when it is the outermost text on its side of
+        the page, alone on its line and a line or more apart from the text, or beside the page number half a line
+        apart (otherwise it is the page's first or last line, a heading opening the page, a glossary's entry);
+      * the masthead names مجلة, or two of العدد / السنة / المجلد / عدد as words ("متوسط عدد ساعات" is not one);
+      * on its side in the margin: outside the extent of the upright text between the top and bottom 13%, on a
+        page with at most 3 such sideways paragraphs (a rotated table has many);
+      * a lone digit read from a speck: nothing beside it on its line (a table's cell has its row)."""
+    paras, pages = doc["paras"], doc["pages"]
+    segs = _segments(doc)
+    furn_kinds = ("pageHeader", "pageFooter", "pageNumber")
+
+    def fkey(t):
+        return key(re.sub(r"[\d٠-٩۰-۹]", "", t))
+
+    def lines_of(i, pg):
+        return [sb for sb, pi, t in segs.get(pg, []) if pi == i]
+
+    def neighbours(i, pg, b, H):
+        """(other paragraphs beside it, beside the next line toward the middle, text between it and the edge,
+        gap to the next text toward the middle in body heights)."""
+        ss = segs.get(pg, [])
+        beside = _band(ss, b, i)
+        top = (b[1] + b[3]) / 2 < 0.5 * H
+        mine = lines_of(i, pg)
+        inward = [(sb, pi) for sb, pi, t in ss if pi != i and pi not in beside
+                  and (sb[1] >= b[3] - 0.3 * body_h if top else sb[3] <= b[1] + 0.3 * body_h)]
+        outward = [(sb, pi) for sb, pi, t in ss if pi != i and pi not in beside and re.search(r"\w", t)
+                   and (sb[3] <= b[1] + 0.3 * body_h if top else sb[1] >= b[3] - 0.3 * body_h)
+                   and not any(sb == m for m in mine)]
+        nxt_band, gap = set(), 9.0
+        if inward:
+            sb, pi = min(inward, key=lambda x: (x[0][1] - b[3]) if top else (b[1] - x[0][3]))
+            nxt_band = _band(ss, sb, -1)
+            over = [x for x in inward if min(b[2], x[0][2]) - max(b[0], x[0][0]) > 0]
+            if over:
+                g = min((x[0][1] - b[3]) if top else (b[1] - x[0][3]) for x in over)
+                gap = max(0.0, g) / body_h
+        return beside, nxt_band, bool(outward), gap
+
+    def in_table(i, pg, b, H):
+        beside, nxt, outward, gap = neighbours(i, pg, b, H)
+        return len(beside) >= 2 and len(nxt) >= 3 and outward
+
+    zone_keys = {}                              # short paragraphs in the top / bottom 16% of the page
+    for i, (pg, ws, b, H, Wd, txt) in enumerate(info):
+        if len(ws) <= 15 and (b[3] < 0.16 * H or b[1] > 0.84 * H):
+            k = fkey(txt)
+            if len(k) >= 3 and not NUMBERED.match(txt):     # "3 - ..." at the top is a heading, not a running head
+                edge = b[3] < 0.13 * H or b[1] > 0.87 * H
+                zone_keys[i] = (pg, "top" if b[3] < 0.16 * H else "bottom", k, edge)
+    repeats, same_pages = set(), {}
+    n_pages = max(1, len(pages))
+    for i, (pg, z, k, edge) in zone_keys.items():
+        same, near = set(), set()
+        for j, (pg2, z2, k2, e2) in zone_keys.items():
+            if j == i or pg2 == pg or z2 != z:
+                continue
+            if k2 == k:
+                same.add(pg2)
+            elif difflib.SequenceMatcher(None, k, k2, autojunk=False).ratio() >= 0.8:
+                near.add(pg2)
+        # nearly the same text (a running head Azure reads a little differently each time): for a short text
+        # ("الضابط الثالث" / "الضابط السادس" are headings) only when it comes back on a quarter of the pages
+        if len(k) < 14 and len(same | near) < max(2, 0.25 * n_pages):
+            near = set()
+        if len(same | near) >= (1 if edge else 2):   # at the very edge, once more elsewhere; a little inside, twice
+            repeats.add(i)
+        same_pages[i] = len(same)
+    # a footer that opens with the page number ("٤٨ - تاريخ العرب والعالم") keeps its words and the distance between
+    # that number and the page on other pages; a note ("27 نفس المصدر.") does not
+    lead_seen = Counter()
+    for j, (pg2, ws2, b2, H2, Wd2, txt2) in enumerate(info):
+        m = LEAD_NUM.match(txt2)
+        if m and b2[1] > 0.84 * H2:
+            lead_seen[(fkey(txt2), int(m.group(1).translate(_DIG)) - pg2)] += 1
+    first_page = min(pages) if pages else 1
+    sideways = {}                               # per page: paragraphs set on their side (a rotated table has many)
+    for pg, ss in segs.items():
+        sideways[pg] = {pi for sb, pi, t in ss if (sb[3] - sb[1]) > 2.5 * (sb[2] - sb[0]) and re.search(r"[^\W\d_]{2}", t)}
+
+    def page_number(i, pg, b, H, txt):
+        return NUMONLY.match(txt) and len(txt) <= 9 and (b[3] < 0.13 * H or b[1] > 0.87 * H)
+
+    numbers = set()
+    for i, (pg, ws, b, H, Wd, txt) in enumerate(info):
+        if page_number(i, pg, b, H, txt) and not in_table(i, pg, b, H):
+            numbers.add(i)
+    for i, (pg, ws, b, H, Wd, txt) in enumerate(info):
+        trace = {}
+        if paras[i].get("role") in furn_kinds:
+            kinds[i], why[i] = paras[i]["role"], "azure"
+            continue
+        k0 = norm(ws[0]["out"].strip(":.،-")) if ws else ""
+        lead = LEAD_NUM.match(txt)
+        if (NOTE_LABEL_HEAD.match(txt) and re.search(r"[^\W\d_]{2}", txt)) or k0 in CAPTION:
+            trace["kept"] = "a note, a caption or a table's source"
+        elif txt.rstrip(" .").endswith(":") and re.search(r"[^\W\d_]{2}", txt):
+            trace["kept"] = "ends with a colon: a heading or a line of the text"
+        elif lead and b[1] > 0.5 * H and (neighbours(i, pg, b, H)[2] or (
+                lead_seen[(fkey(txt), int(lead.group(1).translate(_DIG)) - pg)] < 2 and same_pages.get(i, 0) < 2)):
+            trace["kept"] = "opens with a number that does not follow the pages: a note"
+        elif i in numbers:
+            kinds[i], why[i] = "pageNumber", "digits alone at the top or bottom"
+        elif page_number(i, pg, b, H, txt):
+            trace["kept"] = "digits in a table"
+        elif i in repeats:
+            beside, nxt, outward, gap = neighbours(i, pg, b, H)
+            trace.update(beside=len(beside), next=len(nxt), outward=outward, gap=round(gap, 2))
+            if len(beside) >= 2 and len(nxt) >= 3 and outward:
+                trace["kept"] = "in a table"
+            elif pg == first_page and _h(ws) >= 1.1 * body_h and outward:
+                trace["kept"] = "the title on page 1, repeated as the running head later"
+            else:
+                kinds[i] = "pageHeader" if b[3] < 0.5 * H else "pageFooter"
+                why[i] = "repeats at the same place on other pages"
+        elif (b[3] < 0.2 * H or (b[3] < 0.25 * H and "مجلة" in txt)) and len(ws) <= 20 and DIGIT.search(txt) \
+                and ("مجلة" in txt or len(set(MAST_WORD.findall(txt))) >= 2):
+            kinds[i], why[i] = "pageHeader", "the journal's masthead"
+        elif (b[3] < 0.08 * H and len(ws) <= 12 and pg != first_page) or (b[1] > 0.94 * H and len(ws) <= 12):
+            beside, nxt, outward, gap = neighbours(i, pg, b, H)
+            trace.update(beside=len(beside), next=len(nxt), outward=outward, gap=round(gap, 2),
+                         by_number=bool(beside & numbers))
+            top = b[3] < 0.5 * H
+            if (not outward and gap >= 1.0 and not beside - numbers) or (beside & numbers and gap >= 0.5):
+                kinds[i] = "pageHeader" if top else "pageFooter"   # outermost and set apart, or beside the page number
+                why[i] = f"short text in the {'top 8%' if top else 'bottom 6%'}, set apart or by the page number"
+            else:
+                trace["kept"] = "the page's first or last line"
+        elif len(ws) <= 8 and (b[3] - b[1]) > 2.5 * (b[2] - b[0]) and (b[2] < 0.16 * Wd or b[0] > 0.84 * Wd):
+            flat = [sb for sb, pi, t in segs.get(pg, []) if pi != i and pi not in sideways.get(pg, ())
+                    and re.search(r"[^\W\d_]{2}", t) and 0.13 * H < (sb[1] + sb[3]) / 2 < 0.87 * H]
+            outside = flat and (b[0] >= max(sb[2] for sb in flat) - 0.01 * Wd or b[2] <= min(sb[0] for sb in flat) + 0.01 * Wd)
+            trace.update(sideways=len(sideways.get(pg, ())), outside=bool(outside))
+            if outside and len(sideways.get(pg, ())) <= 3:
+                kinds[i], why[i] = "pageHeader", "text on its side in the outer margin"
+            else:
+                trace["kept"] = "on its side inside the text or in a rotated table"
+        elif NUMONLY.match(txt) and len(txt) <= 3 and _h(ws) < 0.5 * body_h:
+            if not _band(segs.get(pg, []), b, i):
+                kinds[i], why[i] = "pageFooter", "a speck read as a digit"   # stray mark, not article text
+            else:
+                trace["kept"] = "a small number with its row (a table's cell, a raised marker)"
+        if FURNITURE_TRACE is not None and (trace or kinds[i] in furn_kinds):
+            FURNITURE_TRACE[i] = dict(trace, kind=kinds[i], why=why[i])
 
 
 def _fold_numbers(ls, body_h):
