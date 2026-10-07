@@ -1,0 +1,17 @@
+--- a/src/inkscript/pdf/native.py	2026-10-07 02:45:33.961227062 +0100
++++ b/src/inkscript/pdf/native.py	2026-10-07 02:45:34.013016245 +0100
+@@ -307,9 +307,12 @@
+         # not measure — so every text object is cut out of the content
+         # streams directly; the image and any line art are untouched.
+         strip_text_objects(src, page)
+-        jf = set(junk_fonts(src, page)) | set(junk_named.get(pn, ()))
++        # Every real font left on a page we rebuild from the scan goes out of the text too (experiment 28): Azure
++        # read the page as rendered, so a stamped running head or a typeset caption is already in our layer, and
++        # its own text beside ours was read twice — often in a broken encoding the junk test passes ("واالربعون").
++        jf = {f[4] for f in page.get_fonts(full=True) if f[3] != "Dummy"} | set(junk_named.get(pn, ()))
+         if jf:
+-            neutralise_text(src, page, jf)                 # symbol junk beside our layer would be a second text
++            neutralise_text(src, page, jf)                 # drawn as before; only our layer is text
+ 
+         pwords = [w for w in words if w["page"] == pn]
+         info = dict(page=pn, words=len(pwords), text="azure")

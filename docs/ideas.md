@@ -267,3 +267,15 @@ reason is recorded), **open** (voiced, not yet judged).
 - **Speed.** About 7.6 s a page single-threaded, most of it the letter
   cutter's Python loops. Untouched: vectorising `best_cuts`, caching page
   geometry between the two passes.
+  *2026-10-07 (experiment 28):* with `--xml --trust` a page takes 18.6 s (median
+  document); on the slowest, 65% of the time is `save(garbage=3)`, not the cutter.
+  `garbage=1` gives identical PDFs 40% faster (`experiments/28_scale/patches/`).
+- **The whole product at scale** (experiment 28, 2026-10-07). *done once; patches
+  proposed.* 205 documents, every decade: the faithful PDF holds; what broke is the
+  source fonts' text left on rebuilt pages, titles without a title file, content
+  set aside as furniture. Open from it, each needing a judged sample first:
+  - **Furniture by the text block's frame, not the page's edge** — a lone block
+    that is heading-sized, bold, a note, or inside a table stays content;
+  - **Flags on vowelled text** — judge flagged vowelled words on the ink and set
+    their confidence threshold from it (over 50% vowelled → 60% flagged now);
+  - **A page-level "handwritten" mark** instead of hundreds of word flags.

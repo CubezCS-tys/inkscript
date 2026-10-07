@@ -1,0 +1,15 @@
+--- a/src/inkscript/enrich/jats.py	2026-10-07 05:46:18.399135691 +0100
++++ b/src/inkscript/enrich/jats.py	2026-10-07 05:46:18.423089778 +0100
+@@ -492,6 +492,12 @@
+                 _append(sp, f"؛ المطبوع «{rd}» والآية «{vs}»")
+             if qt.get("citation"):
+                 _append(sp, f"؛ العزو في النص: {qt['citation']['text']}")
++    for g in back.findall("fn-group"):          # a notes heading with no notes after it (experiment 28): JATS wants
++        if g.find("fn") is None:                # (fn | x)+ in a group, so the heading becomes the block's anchor
++            t = g.find("title")
++            if t is not None:
++                meta_("notes-heading", t.text or "", t.get("id"))
++            back.remove(g)
+     if not len(back):
+         art.remove(back)
+     if not len(body):

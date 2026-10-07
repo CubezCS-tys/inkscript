@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-06. Update this file whenever a headline number or a
+*Last updated 2026-10-07. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -29,9 +29,18 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 | Corrections from Quran verses (`inkscript fix`), judged on the ink by two blind judges | 194 proposed, 156 accepted, **147 written** into both PDFs' text, the ALTO, JATS and trust PDFs; the drawing pixel-identical; quotations equal to the verse 235 → 290 of 387; $0.80 for the set | same set (`experiments/27_corrections`) | 2026-10-06 |
 | Quran quotations found and checked | 387, all linked to sura:verse; 235 equal to the verse, 152 differ (their words flagged) | same set | 2026-10-06 |
 | `_trust.pdf` (hideable highlights, incremental update) | the original bytes first and the same text and character boxes in pdfium, 20/20; fixture 1,246/1,246 words, 113/113 lines on both copies | same set; `tests/test_enrich.py` | 2026-10-06 |
+| **The whole product at scale** (`--vector --verify --xml --trust`, then `fix --apply`) | 205/205 built, 0 crashes, 0 timeouts; words intact 99.98% (868,741 / 868,897), lines in order 99.94%, letters selectable **97.75%** (median document 98.6%), flagged 4.89%, trust PDFs right 205/205, ALTO valid 205/205, JATS 204/205; title matching the MARC catalogue 148/204 (69/75 with a Gemini title file, 79/129 from the layout), catalogue authors found 107/214; 242 Quran quotations, 31 corrections proposed, 18 written, $0.125; 18.6 s a page (median document), peak 2.19 GB, 7 h 40 min on 3 workers | 205 scanned documents, 3,254 pages, 1932–2025, 172 journals, none of them tuning any rule (`experiments/28_scale`, `out/showcase.html`) | 2026-10-07 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
 
 ## What they do not do (known gaps)
+
+- **Found at scale (experiment 28, 2026-10-07; patches proposed in `experiments/28_scale/patches/`, not applied):**
+  on scans that carry a typeset header or caption, the source font's text stays beside ours (23 of 205
+  documents; copied twice, often garbled; 70% of the set's order inversions); without a Gemini title file the
+  title is right in 79 of 129 documents; about 270 blocks of content (headings opening a page, captions,
+  footnotes, table cells) are set aside as page furniture and missing from the JATS text; vowelled text, verse
+  and handwriting flood the trust copy (over 50% vowelled: 60% of words flagged); `save(garbage=3)` is 65% of
+  the slowest build; one JATS file had an empty `<fn-group>`.
 
 - **Latin-majority lines copy out with their words swapped** in current
   Chrome, the price of marking the document right-to-left (D18). Chromium also
@@ -77,6 +86,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   was identical old and new in every document sampled.
 
 ## In flight / where outputs are (this machine)
+
+- **The scale run (2026-10-07)**: 205 documents built with everything on and fixed in
+  `experiments/28_scale/out/set/w0..w2/`; numbers in `summary.json`, the owner's page
+  `experiments/28_scale/out/showcase.html`. Nothing is running.
 
 - **The product set (2026-10-06)**: 20 documents built with `--vector --verify
   --xml --trust` in `experiments/24_product/out/set/w0..w2/`; numbers in

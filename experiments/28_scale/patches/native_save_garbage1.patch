@@ -1,0 +1,20 @@
+--- a/src/inkscript/pdf/native.py	2026-10-07 04:27:55.702865488 +0100
++++ b/src/inkscript/pdf/native.py	2026-10-07 04:27:55.710843912 +0100
+@@ -370,7 +370,7 @@
+                                     glyphs=glyphs, blobs=n_blobs, stray=n_stray, pieces=pstats, placed=placed_texts, runs=run_texts))
+     out_dir.mkdir(parents=True, exist_ok=True)
+     mark_r2l(src)
+-    src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
++    src.save(out_dir / f"{stem}.pdf", garbage=1, deflate=True); src.close()
+     if len(A):
+         for pr in A.protos:                                # export needs the outlines, not the rasters
+             for k in ("fill", "edge", "dist"):
+@@ -382,7 +382,7 @@
+                                   repeated=sum(c for c in A.counts if c > 1))
+     if vec is not None:
+         mark_r2l(vec)
+-        vec.save(out_dir / f"{stem}_vector.pdf", garbage=3, deflate=True); vec.close()
++        vec.save(out_dir / f"{stem}_vector.pdf", garbage=1, deflate=True); vec.close()
+     return report
+ 
+ 
