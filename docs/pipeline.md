@@ -18,7 +18,7 @@
 | Meeting point | `inkscript.pdf` | both | ink-glyph PDFs |
 | Checks | `inkscript.verify` | PDFs | pdfium/MuPDF/poppler numbers |
 | What we know beyond the ink | `inkscript.enrich` | Azure JSON, scan, build outputs | JATS + ALTO XML, trust marks, Quran links, `_trust.pdf` |
-| Review | `inkscript.viewer` | outputs | static HTML bundles |
+| Review | `inkscript.viewer` | outputs | `inkscript view` (the XML files in a browser, linked to the scan); static HTML bundles |
 
 ## Letters
 
@@ -99,6 +99,42 @@ faithful PDF in pdfium (same bytes first, same text and character boxes on
 every page). Neither flag changes anything else: without them the outputs are
 as before. The extra time is small (a few seconds on the fixture's ~35 s build:
 rendering each scan page once for the ink signal, the Quran index ~1 s).
+
+## Looking at the outputs: `inkscript view` (since 2026-10-07)
+
+```
+inkscript view OUT                         # http://127.0.0.1:8765/ — every document under OUT (any depth)
+inkscript view OUT --doc ID --open         # straight to one document, in the browser
+inkscript view OUT --host 0.0.0.0          # to read it on a phone on the same network
+inkscript view OUT --static DIR --doc ID   # a folder that opens from disk (index.html), no server
+```
+
+A small web app (Python's own `http.server`, no library, nothing sent
+anywhere; experiment 31) over the files `--xml` writes:
+
+- **the list** of documents: title, authors, journal, year, pages, flagged and
+  corrected words, Quran quotations; filter and sort;
+- **Page**: the scan (rendered from `<stem>.pdf` — the faithful PDF, whose
+  background is the scan — with pymupdf, cached in `~/.cache/inkscript/view`)
+  with every ALTO word as a box. Pointing at a word shows its text, Azure's
+  confidence, its trust mark and reasons, the other reading or the correction
+  (the ALTERNATIVE), its Quran verse, its ids and its glyph in `shapes.json`.
+  Switches tint flagged / corrected / verified words and draw lines, blocks or
+  block roles (title, author, heading, footnote, page furniture);
+- **Article**: the JATS as a right-to-left article — title, authors, rubric,
+  facts, headings, paragraphs, note markers linked to the notes (and back),
+  quotations with their sura:verse, references, the custom-meta;
+- **Both**: the two side by side and linked. A click on a word of the article
+  puts its box in the middle of the page and lights it; a click on a box puts
+  the article's word in the middle. JATS has no word ids, so the viewer matches
+  each block's words in reading order to the ALTO words of that block (the
+  block ids link the two files, D20): 99.85% of the article's words on
+  experiment 28's 205 documents, every non-furniture block placed;
+- **XML**: both files as written, folded, with "go to id" (a word's card opens
+  its `<String>` or its JATS element).
+
+It is fast on long documents: a page and its words are drawn only when they
+come near the view (48 pages: open 0.9 s, jump to page 40 in 0.2 s).
 
 ## Checking a document against itself
 
@@ -198,7 +234,7 @@ the tests round-trip `visual()` through it.
 
 | File | What it does |
 |---|---|
-| `src/inkscript/cli.py` | the eleven subcommands (table below) |
+| `src/inkscript/cli.py` | the twelve subcommands (table below) |
 | `src/inkscript/text.py` | Arabic text rules: runs/pieces, marks, `visual` (how text is stored) and `chrome_reads` (pdfium's line reconstruction, emulated) |
 | `src/inkscript/ocr/azure.py`, `align.py`, `gemini.py`, `frontpage.py` | load Azure's JSON; fit Gemini's page-1 text into Azure's boxes; the Gemini calls and fallbacks; the older searchable-PDF path |
 | `src/inkscript/geometry/trace.py` | page → ink blobs as outline polygons; rules separated |
@@ -212,6 +248,7 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/verify/engines.py` | what `--verify` measures in pdfium |
 | `src/inkscript/verify/consistency.py`, `numbers.py`, `second.py`, `review_html.py` | same-ink-different-text contradictions; Gemini second readings; the editable review page |
 | `src/inkscript/viewer/frontpage_compare.py` | static review bundle for front pages |
+| `src/inkscript/viewer/outputs.py`, `serve.py`, `app/` | `inkscript view`: reads a build's ALTO/JATS/PDF (pages, words, the article as HTML with each word linked to its ALTO id); the local server and `--static` bundle; the app (one HTML, one JS, one CSS, no library) |
 | `src/inkscript/enrich/__init__.py` | `enrich()`: run after a build by `--xml`/`--trust`; `verify()`: schemas and trust-PDF checks |
 | `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted |
 | `src/inkscript/enrich/quran.py` | Quran quotations found, linked to sura:verse, checked word for word (experiment 20); the Tanzil text in `src/inkscript/data/quran/` |
@@ -232,6 +269,7 @@ the tests round-trip `visual()` through it.
 | `inkscript numbers`, `inkscript second` | Gemini | second readings; `--apply` writes agreed corrections |
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |
 | `inkscript fix OUT/<stem>\|OUT --azure-dir … [--judge gemini\|none] [--apply] [--cap 1.0]` | `GEMINI_API_KEY` (unless `--judge none`) | `<stem>.corrections.json` (every proposal, verdict and write); with `--apply` the accepted ones in both PDFs' text, the ALTO, JATS and trust PDFs |
+| `inkscript view OUT [--doc ID] [--port N] [--static DIR]` | — | the outputs in a browser: scan with every ALTO word, the JATS as an article, linked; both XML files |
 | `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
 
 Without the bucket or keys, everything still runs on the bundled document
