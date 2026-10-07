@@ -74,7 +74,8 @@ def load(azure_json: Path, shapes_json: Path | None = None, gemini_pages=()) -> 
     page, pi (index in Azure's page word list), off/len (code points), aoff (Azure's offset), text (Azure's),
     out (the text our PDF carries: Gemini's on a Gemini page 1, Persian look-alikes folded as the build folds
     them), poly/box (px), conf, line (index into doc["lines"][page]), para (index into doc["paras"]),
-    glyphs (indices of shapes.json placements drawn for it), n/k (Quran matching keys)."""
+    glyphs (indices of shapes.json placements drawn for it), n/k (Quran matching keys), hw (the confidence of
+    the handwritten style span Azure puts it in, 0.0 if none; experiment 30)."""
     j = json.loads(Path(azure_json).read_text(encoding="utf-8"))
     ar = j.get("analyzeResult", j)
     content = ar.get("content", "")
@@ -121,6 +122,17 @@ def load(azure_json: Path, shapes_json: Path | None = None, gemini_pages=()) -> 
         w["n"] = norm(w["text"])
         w["k"] = noalef(w["n"])
     offs = [w["off"] for w in words]
+    # Azure's handwriting style (experiment 30): the confidence of the handwritten span a word sits in, 0 if none
+    aoffs = [w["aoff"] for w in words]                  # Azure's raw offsets, in the same order as offs
+    for w in words:
+        w["hw"] = 0.0
+    for st in ar.get("styles") or []:
+        if not st.get("isHandwritten"):
+            continue
+        for sp in st.get("spans") or []:
+            a = sp.get("offset", -1)
+            for k in range(bisect.bisect_left(aoffs, a), bisect.bisect_left(aoffs, a + sp.get("length", 0))):
+                words[k]["hw"] = max(words[k]["hw"], st.get("confidence") or 0.0)
 
     def words_in(a, ln, page=None):
         i0, i1 = bisect.bisect_left(offs, a), bisect.bisect_left(offs, a + ln)

@@ -30,6 +30,15 @@ caught 50 -> 50 of 61, 1 flag in 8.9 -> 1 in 7.4 a real error.
   quran     part of a Quran quotation and differs from the verse by dots or letters (on the ink, an Azure
             misreading 20 times in 24, experiment 20)
   gemini    page 1: Gemini's reading (the one the PDF carries) differs from Azure's
+
+Page and block marks (experiment 30, `regions`): where Azure's reading is less reliable as a whole — a handwritten
+page, decorative lettering, vowelled text — a flag on most words says nothing about any one of them (60% of words
+flagged on the most vowelled documents of experiment 28, 68-91% on handwritten pages). There the block carries the
+mark (ALTO TextBlock TAGREFS region.*, PAGECLASS handwritten, JATS custom-meta reading-*, a page note in the trust
+PDF) and a word keeps its own flag only when something points at it (`in_region`): a Quran difference, Gemini's
+other reading, a Persian letter, a speck, a Latin word, or a confidence under half its block's median and in the
+block's lowest tenth. On experiment 19's judged words: in marked blocks 35 -> 11 of 102 words flagged, 3 of their 8
+errors still flagged word by word and all 8 inside a marked block; on all judged words flagged 5.0% -> 4.3%.
 """
 from __future__ import annotations
 
@@ -71,7 +80,9 @@ MARKS = {
     "verified": "A second, independent source agrees with the reading: the word is part of a Quran quotation and "
                 "equals the verse after normalisation, or Gemini's page-1 reading (which the PDF carries) is the same.",
     "agreed": "No free signal raised a doubt. Not checked by a second source; on the measured sample such words are "
-              "wrong 0.42% of the time (experiment 27; 0.43% under experiment 22's rule, 95% interval 0.05-0.97%).",
+              "wrong 0.42% of the time (experiment 27; 0.43% under experiment 22's rule, 95% interval 0.05-0.97%). "
+              "In a block marked vowelled, handwritten or decorative (its TextBlock's region.* tag) it means only that "
+              "nothing points at this word in particular: the block's mark covers it (experiment 30).",
     "flagged": "At least one signal says the reading may be wrong; check it on the ink. On the measured sample about "
                "1 flagged word in 7 is wrong (experiment 27).",
     "corrected": "The reading was corrected from an exact source (a Quran verse) after a judge looking at the scan's ink "
@@ -87,6 +98,7 @@ class Mark:
     verse: str | None = None                    # the verse's word(s), for a Quran difference
     other: str | None = None                    # the other reader's text (Azure's, where the PDF carries Gemini's)
     source: str | None = None                   # a correction's source ("quran 11:106")
+    region: list[str] = field(default_factory=list)   # its block's marks (experiment 30): vowelled, handwritten...
 
 
 def _ink(scan_pdf, doc) -> dict[int, float]:
@@ -199,9 +211,102 @@ def refine(why: list[str], s: dict, ctx: dict, lex: dict | None = None,
     return [] if lex.get(ctx.get("key") or "", 0) >= min_docs else why
 
 
+HW_WORD, HW_PAGE, HW_BLOCK = 0.9, 0.5, 0.6     # experiment 30: Azure's handwriting confidence; page / block share
+VOWEL_BLOCK, VOWEL_MIN = 0.3, 3                 # a third of a block's Arabic words vowelled; at least 3 of them
+
+
+def regions(doc: dict) -> dict:
+    """Page- and block-level marks (experiment 30): where Azure's reading is less reliable as a whole, so that a
+    flag on most words would say nothing about any one of them.
+
+      handwritten  a page of at least 10 words of which half or more sit in a span Azure styles as handwritten with
+                   confidence >= 0.9 (on the 205 documents of experiment 28: the 9 manuscript pages of 0679, median
+                   word confidence 0.22-0.76; printed pages reach 0.07 at most); every block on it carries the mark
+      decorative   on a printed page, a block of 3+ words 60% of which Azure styles as handwritten (>= 0.9), not
+                   vowelled: looked at, a script or display typeface (running heads, headings, a byline), a
+                   handwritten note or tick, a screenshot; Azure's reading of such lettering is weaker
+      vowelled     a block whose Arabic words carry vowel marks in a third or more of them (at least 3 Arabic words;
+                   a smaller block takes its page's share): Azure's confidence drops on vowel marks (conf < 0.8 on
+                   4.7% of words in unvowelled blocks, 23-70% in blocks a third to fully vowelled)
+
+    -> dict(pages={page: "handwritten"}, blocks={para idx: ["handwritten" | "decorative", "vowelled"]})"""
+    W = doc["words"]
+    by_page = {}
+    for w in W:
+        by_page.setdefault(w["page"], []).append(w)
+    pages = {}
+    page_vowels = {}
+    for pn, ws in by_page.items():
+        if len(ws) >= 10 and sum(w.get("hw", 0.0) >= HW_WORD for w in ws) >= HW_PAGE * len(ws):
+            pages[pn] = "handwritten"
+        ar = [w for w in ws if ARABIC.search(w["text"])]
+        page_vowels[pn] = sum(bool(HARAKAT.search(w["text"])) for w in ar) / len(ar) if ar else 0.0
+    blocks = {}
+    for p in doc["paras"]:
+        ws = [W[k] for k in p["words"]]
+        if not ws:
+            continue
+        marks = []
+        pn = ws[0]["page"]
+        ar = [w for w in ws if ARABIC.search(w["text"])]
+        share = (sum(bool(HARAKAT.search(w["text"])) for w in ar) / len(ar)) if len(ar) >= VOWEL_MIN \
+            else page_vowels.get(pn, 0.0)
+        if pn in pages:
+            marks.append("handwritten")
+        elif len(ws) >= 3 and sum(w.get("hw", 0.0) >= HW_WORD for w in ws) >= HW_BLOCK * len(ws) \
+                and share < VOWEL_BLOCK:            # vowelled print is styled handwritten too (0412's verse)
+            marks.append("decorative")
+        if share >= VOWEL_BLOCK and ar:
+            marks.append("vowelled")
+        if marks:
+            blocks[p["idx"]] = marks
+    return dict(pages=pages, blocks=blocks)
+
+
+def _block_conf(doc: dict, reg: dict, para: int) -> tuple:
+    """(n, median, lower quartile, lowest tenth) of Azure's confidences in a block, cached in reg."""
+    cache = reg.setdefault("_conf", {})
+    if para not in cache:
+        W = doc["words"]
+        confs = sorted(W[k]["conf"] for k in doc["paras"][para]["words"] if W[k]["conf"] is not None)
+        q = (lambda f: confs[min(len(confs) - 1, int(f * len(confs)))]) if confs else (lambda f: None)
+        cache[para] = (len(confs), q(0.5), q(0.25), q(0.1))
+    return cache[para]
+
+
+def context(doc: dict, reg: dict, w: dict) -> dict:
+    """What the block-level rule looks at for one word: its block's marks and how sure Azure is of the block."""
+    n, med, q25, q10 = _block_conf(doc, reg, w["para"])
+    return dict(marks=reg["blocks"].get(w["para"], []), page_mark=reg["pages"].get(w["page"]), block_n=n,
+                block_med=med, block_q25=q25, block_q10=q10, vowelled=bool(HARAKAT.search(w["text"])))
+
+
+SPECIFIC = ("quran", "gemini", "persian", "speck", "latin")
+REL_CONF = 0.5
+
+
+def in_region(why: list[str], s: dict, ctx: dict, rel: float = REL_CONF, specific=SPECIFIC,
+              tail: bool = True) -> list[str]:
+    """Experiment 30: inside a block marked vowelled or handwritten the mark speaks for the block; a word keeps its
+    own flag only for something that points at that word — a Quran difference, Gemini's other reading, a Persian
+    letter, a speck (not on a handwritten page), a Latin word — or a confidence far below its own block's: under
+    half the block's median and among the block's lowest tenth."""
+    if not ctx.get("marks"):
+        return why
+    if "handwritten" in ctx["marks"]:          # a pen's strokes give small, narrow boxes everywhere: not specific
+        specific = tuple(r for r in specific if r != "speck")
+    keep = [r for r in why if r in specific]
+    med, q10 = ctx.get("block_med"), ctx.get("block_q10")
+    if "conf" in why and s["conf"] is not None and med is not None and s["conf"] < min(CONF, rel * med) \
+            and (not tail or q10 is None or s["conf"] <= q10):
+        keep.insert(0, "conf")
+    return keep
+
+
 def assess(doc: dict, quotes: list[dict], scan_pdf=None) -> dict[int, Mark]:
-    """One mark per word that has a letter or digit."""
+    """One mark per word that has a letter or digit; the page and block marks (regions) go into doc["regions"]."""
     sig = signals(doc, quotes, scan_pdf)
+    reg = doc["regions"] = regions(doc)
     marks = {}
     for w in doc["words"]:
         if not is_real(w["text"]):
@@ -216,17 +321,89 @@ def assess(doc: dict, quotes: list[dict], scan_pdf=None) -> dict[int, Mark]:
             else:
                 why.append("gemini")
                 other = w["text"]
+        ctx = context(doc, reg, w)
+        why = in_region(why, s, ctx)
         if verified and "gemini" not in why:
-            marks[w["idx"]] = Mark("verified")
+            marks[w["idx"]] = Mark("verified", region=ctx["marks"])
         elif why:
-            marks[w["idx"]] = Mark("flagged", why, verse=s["quran"][1], other=other)
+            marks[w["idx"]] = Mark("flagged", why, verse=s["quran"][1], other=other, region=ctx["marks"])
         else:
-            marks[w["idx"]] = Mark("agreed")
+            marks[w["idx"]] = Mark("agreed", region=ctx["marks"])
     return marks
 
 
 def summary(marks: dict[int, Mark]) -> dict:
     from collections import Counter
     c = Counter(m.mark for m in marks.values())
-    return dict(words=len(marks), verified=c["verified"], agreed=c["agreed"], flagged=c["flagged"],
-                corrected=c["corrected"], why=dict(Counter(r for m in marks.values() for r in m.why).most_common()))
+    out = dict(words=len(marks), verified=c["verified"], agreed=c["agreed"], flagged=c["flagged"],
+               corrected=c["corrected"], why=dict(Counter(r for m in marks.values() for r in m.why).most_common()))
+    reg = Counter(r for m in marks.values() for r in m.region)
+    if reg:                                       # words in marked blocks, and how many of them still flagged
+        out["in_marked_blocks"] = dict(reg)
+        out["flagged_in_marked_blocks"] = sum(1 for m in marks.values() if m.region and m.mark == "flagged")
+    return out
+
+
+REGIONS = {   # id -> (short label for notes, full description for the XML headers)
+    "handwritten": ("handwritten page",
+                    "A handwritten page (Azure styles half or more of its words as handwritten with confidence >= 0.9): "
+                    "Azure's reading of handwriting is unreliable throughout; its words are flagged only for a "
+                    "specific reason, so an unflagged word here is not vouched for."),
+    "decorative": ("decorative lettering",
+                   "On a printed page, a block Azure takes for handwriting: a script or display typeface, calligraphy, "
+                   "a handwritten note: Azure's reading is less reliable here; words are flagged only for a specific "
+                   "reason."),
+    "vowelled": ("vowelled text",
+                 "A third or more of the block's Arabic words carry vowel marks: Azure's confidence drops on vowel marks "
+                 "(below 0.8 on 23-70% of such words against 5% elsewhere), so its reading is less reliable here as a "
+                 "whole and words are flagged only for a specific reason: a Quran difference, Gemini's other reading, a "
+                 "Persian letter, a speck, a Latin word, or a confidence under half the block's median and in its "
+                 "lowest tenth (experiment 30)."),
+}
+
+
+def region_summary(doc: dict, marks: dict[int, Mark] | None = None) -> dict:
+    """{mark: dict(blocks=[para idx], pages=[page], words=n, flagged=n)} for the marks set by assess (doc["regions"])."""
+    reg = doc.get("regions") or {}
+    out = {}
+    for i, ms in sorted((reg.get("blocks") or {}).items()):
+        p = doc["paras"][i]
+        for m in ms:
+            e = out.setdefault(m, dict(blocks=[], pages=[], words=0, flagged=0))
+            e["blocks"].append(i)
+            e["words"] += len(p["words"])
+            if marks:
+                e["flagged"] += sum(1 for k in p["words"] if getattr(marks.get(k), "mark", "") == "flagged")
+            pg = doc["words"][p["words"][0]]["page"]
+            if pg not in e["pages"]:
+                e["pages"].append(pg)
+    return out
+
+
+def _pages_text(pages: list[int]) -> str:
+    runs, out = [], []
+    for p in sorted(pages):
+        if runs and p == runs[-1][1] + 1:
+            runs[-1][1] = p
+        else:
+            runs.append([p, p])
+    for a, b in runs:
+        out.append(str(a) if a == b else f"{a}-{b}")
+    return ", ".join(out)
+
+
+def region_meta(doc: dict, marks: dict[int, Mark], bids: dict | None = None) -> list[tuple[str, str]]:
+    """(name, value) for the JATS custom-meta: one per mark present, with its pages and the ids of its blocks."""
+    out = []
+    hw_pages = sorted((doc.get("regions") or {}).get("pages", {}))
+    for m, e in region_summary(doc, marks).items():
+        label, desc = REGIONS[m]
+        ids = []
+        if bids:
+            for i in e["blocks"]:
+                ids += [b for pg, b in bids.get(i, [])]
+        pages = hw_pages if m == "handwritten" and hw_pages else e["pages"]
+        out.append((f"reading-{m}", f"{label}: {len(e['blocks'])} block(s), {e['words']} words, {e['flagged']} of them "
+                                    f"flagged, on page(s) {_pages_text(pages)}. {desc}"
+                    + (f" Blocks: {' '.join(ids)}." if ids else "")))
+    return out

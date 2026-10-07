@@ -9,11 +9,14 @@ Layout:
                 and one Processing step each for Gemini's page 1 (when used), inkscript and the Tanzil check.
   Tags          StructureTags for paragraph roles (body, title, author, sectionHeading, footnote, pageHeader,
                 pageFooter, pageNumber), OtherTags for the trust marks (trust.verified/agreed/flagged) and their
-                reasons (why.conf, why.speck…), and one OtherTag per Quran quotation (TYPE quran-quotation,
-                LABEL sura and verse, URI https://tanzil.net/#S:A).
+                reasons (why.conf, why.speck…), for the block marks used (region.vowelled / handwritten /
+                decorative, TYPE reading-reliability, experiment 30), and one OtherTag per Quran quotation (TYPE
+                quran-quotation, LABEL sura and verse, URI https://tanzil.net/#S:A).
   Layout        Page (ID page<n>, PHYSICAL_IMG_NR, PRINTED_IMG_NR when the page number was found, PAGECLASS
-                born-digital for pages whose text in the PDF is the publisher's) > PrintSpace > TextBlock (one per
-                Azure paragraph and page, ID p<page>b<n>, TAGREFS its role, xlink:href <stem>.jats.xml#<id>, the
+                born-digital for pages whose text in the PDF is the publisher's, handwritten for a handwritten page:
+                ALTO 4.4 gives Page no TAGREFS, PAGECLASS is its "user-defined class") > PrintSpace > TextBlock (one
+                per Azure paragraph and page, ID p<page>b<n>, TAGREFS its role and its block marks region.*,
+                xlink:href <stem>.jats.xml#<id>, the
                 place of its words in the JATS file; IDNEXT chains a paragraph that continues on the next page)
                 > TextLine (Azure's lines, BASEDIRECTION rtl for Arabic lines) > String.
   String        ID p<page>w<nnnn> (reading order on the page), CONTENT = the text the faithful PDF carries for
@@ -38,7 +41,7 @@ from .document import ARABIC, LATIN
 from .jats import block_ids, front_matter
 from .jats import printed_pages
 from .quran import TANZIL_CREDIT
-from .trust import MARKS, REASONS
+from .trust import MARKS, REASONS, REGIONS
 
 NS = "http://www.loc.gov/standards/alto/ns-v4#"
 XLINK = "http://www.w3.org/1999/xlink"
@@ -107,7 +110,9 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
              "Google", "Gemini", "")
     step("Processing", "inkscript", "Faithful PDF (each word drawn with its own ink), paragraph roles by position "
          "(experiment 20), trust marks (experiment 22's default rule), this file.", "inkscript", "inkscript",
-         version, "trust: conf<0.8 (not a common word at conf>=0.6) + speck + ornament + Latin on Arabic page + Persian letter + Quran difference")
+         version, "trust: conf<0.8 (not a common word at conf>=0.6) + speck + ornament + Latin on Arabic page + Persian letter + Quran difference;"
+         " in a block marked vowelled/handwritten/decorative (TextBlock TAGREFS region.*, Page PAGECLASS handwritten)"
+         " only quran/gemini/persian/speck/latin, or conf under half the block's median and in its lowest tenth")
     step("Processing", "tanzil", f"Quran quotations matched against the canonical text: {TANZIL_CREDIT}.",
          "Tanzil Project", "Tanzil Quran Text (Simple Clean / Simple)", "1.1")
     fixed = [w for w in words if w.get("corrected")]
@@ -127,6 +132,12 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
         A(tags, "OtherTag", ID=f"trust.{m}", TYPE="trust", LABEL=m, DESCRIPTION=d)
     for r, (label, d) in REASONS.items():
         A(tags, "OtherTag", ID=f"why.{r}", TYPE="trust-reason", LABEL=label, DESCRIPTION=d)
+    reg = doc.get("regions") or {}               # experiment 30: block and page marks, set by trust.assess
+    used = sorted({m for ms in (reg.get("blocks") or {}).values() for m in ms})
+    for r in used:
+        A(tags, "OtherTag", ID=f"region.{r}", TYPE="reading-reliability", LABEL=REGIONS[r][0], DESCRIPTION=REGIONS[r][1])
+    region_of = reg.get("blocks") or {}
+    hw_pages = reg.get("pages") or {}
     qword = {}
     for n, qt in enumerate(quotes, 1):
         status = "equals the verse" if qt["differs"] == 0 else f"{qt['differs']} word(s) differ from the verse"
@@ -163,7 +174,7 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
     n_strings = 0
     for pn, pg in sorted(doc["pages"].items()):
         page = A(layout, "Page", ID=f"page{pn}", PHYSICAL_IMG_NR=str(pn), PRINTED_IMG_NR=printed.get(pn),
-                 PAGECLASS="born-digital" if pn in born_digital else None,
+                 PAGECLASS="born-digital" if pn in born_digital else hw_pages.get(pn),
                  WIDTH=_f(pg["w"]), HEIGHT=_f(pg["h"]))
         pw = [w for w in words if w["page"] == pn]
         ps_attrs = _box({}, _union([w["box"] for w in pw])) if pw else dict(HPOS="0", VPOS="0", WIDTH=_f(pg["w"]), HEIGHT=_f(pg["h"]))
@@ -172,7 +183,8 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, jat
             ks = [k for k in p["words"] if words[k]["page"] == pn]
             txt = " ".join(words[k]["text"] for k in ks)
             rtl = len(ARABIC.findall(txt)) >= len(LATIN.findall(txt))
-            tb = A(ps, "TextBlock", **_box(dict(ID=bid, TAGREFS=f"role.{role_of[p['idx']]}", IDNEXT=nxt,
+            tref = " ".join([f"role.{role_of[p['idx']]}"] + [f"region.{r}" for r in region_of.get(p["idx"], [])])
+            tb = A(ps, "TextBlock", **_box(dict(ID=bid, TAGREFS=tref, IDNEXT=nxt,
                                                 LANG="ar" if rtl else None, BASEDIRECTION="rtl" if rtl else "ltr"),
                                            _union([words[k]["box"] for k in ks])),
                    **({"xlink_href": f"{jats_name}#{first}", "xlink_type": "simple"}

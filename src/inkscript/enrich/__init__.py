@@ -6,7 +6,9 @@
   structure.py  the article's structure: furniture, title / authors (Gemini's title file aligned to the ink, or
                 the layout), headings (size, bold ink, numbering, space), notes and the markers that point at them
   quran.py      Quran quotations found, linked to sura:verse and checked word for word (Tanzil text, shipped)
-  trust.py      one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule)
+  trust.py      one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule), and
+                page / block marks where Azure's reading is less reliable as a whole (vowelled, handwritten,
+                decorative; experiment 30)
   jats.py       <stem>.jats.xml   the article: front matter, body in reading order, footnotes, references,
                                   quotations linked (JATS 1.4 Archiving)
   alto.py       <stem>.alto.xml   every page, line and word with its box, confidence, trust mark, and ids that
@@ -58,6 +60,11 @@ def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: d
                words_linked_to_glyphs=sum(1 for w in doc["words"] if w["glyphs"]), words=len(doc["words"]))
     if fixes:
         res["corrections"] = dict(applied=n_fixed, pdfs=reapplied)
+    from .trust import region_summary
+    regs = region_summary(doc, marks)           # experiment 30: vowelled / handwritten / decorative blocks
+    if regs:
+        res["regions"] = {m: dict(blocks=len(e["blocks"]), pages=e["pages"], words=e["words"], flagged=e["flagged"])
+                          for m, e in regs.items()}
     res["trust"]["flagged_on_born_digital_pages"] = sum(
         1 for w in doc["words"] if w["page"] in born_digital and getattr(marks.get(w["idx"]), "mark", "") == "flagged")
     if xml:
