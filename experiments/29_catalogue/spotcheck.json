@@ -1,0 +1,17 @@
+{
+ "0005-055-003-004": "Right: title over two lines, the name with «دكتور» as prefix. The catalogue's name adds a fourth name («إبراهيم») the page does not print; the JATS keeps the catalogue's form, the printed form beside it.",
+ "0189-013-006-010": "Right. Before, the running heads gave the author's name as the journal; now «عالم الكتب» from the catalogue, pages 670-675, both years.",
+ "0331-000-122-014": "Title right. The author «عصام العياش» is not printed on page 1 (the closest words, «العربى عام», came within 0.74: at the old 0.6 threshold they were taken for the name; 0.75 refuses them). Listed from the catalogue, marked not found on the page.",
+ "0418-000-001-005": "The PDF opens mid-article; the catalogue's «كلمة العدد» (a rubric) is not on these pages, nor is Gemini's «تقديم», which before was laid on a word of the text. Now no title words — right — and the check says 'partly'.",
+ "0499-026-119-022": "Right title. Before, the first line of the text was taken for an author; now هيئة التحرير (the catalogue's body as author), not printed, so no ink — right.",
+ "0596-033-004-021": "Title «الفتاوى» right (the ornamental word in the minaret). Author: the catalogue's body «لجنة الفتوى»; before, «يجيب عليها» was taken for a name.",
+ "0664-019-008-020": "Right: the decorated title, the name, «للأستاذ» as prefix.",
+ "0701-001-003-011": "Right: the catalogue's «جعفر عبدالمجيد العبد» found as printed «جعفر العبد» (first name + surname, at the stricter 0.85). His post («وكيل الوزارة…») is printed at the foot of the next column and is not taken as the affiliation.",
+ "0751-015-006-011": "Right; the catalogue spells «حمزة المصطفى», the page «حمزة مصطفى». Pages 83-85 added (the page prints none).",
+ "0870-017-001-003": "Right; «للدكتور» as prefix; the affiliation «مدرس القانون الدولى العام» now read from the line under the name (before: none). Catalogue lpage 311, the page's numbering 312.",
+ "0955-000-030-010": "Title right (a decorated block mid-page under «لقاء كل شهر» and a picture). Author «حازم هاشم محمد» not printed on page 1 — listed from the catalogue, no ink.",
+ "1036-000-158-009": "Right: title (the rubric «المنتدى المفتوح» kept apart), first author with «بقلم» not as a prefix; the translator «حمدي الزيات» found at the foot of the page (set aside before). The second author is found in the box about the authors, not in the byline «وهلموت هابيرل» under the first name (the box's spelling matches exactly; the byline's has «و» glued).",
+ "1398-002-002-005": "Before: nothing (no title found). Now title and author both on the ink, journal, year.",
+ "1769-014-002-002": "Right; the affiliation «كلية السياحة والفنادق - جامعة قناة السويس» from the line under the name. Before, a figure caption «شكل رقم» was the journal; now the catalogue's journal.",
+ "2483-000-007-006": "Right: title, «الدكتوره/» as prefix, the affiliation over two lines (المدرس بكلية… / جامعة حلوان)."
+}

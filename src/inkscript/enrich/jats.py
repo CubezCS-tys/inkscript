@@ -12,6 +12,11 @@ What goes where (docs/decisions.md D20, D21); the structure comes from structure
            running heads, volume and issue as the id spells them (000 = none, "41,042" = 41-42), the printed
            first and last page numbers, the page count, and custom-meta: where the text and the structure came
            from, the word ids of the title and of each name in the ALTO file, the trust counts, the direction.
+           With Mandumah's catalogue record (experiment 29, catalogue.py, D23) the record comes first: journal
+           title / ISSN / publisher, DOI and record number, field and kind, title + subtitle + English title,
+           each person as name (surname, given names; Latin form; the printed honorific as prefix) with role
+           and authority id, both calendars' dates, volume / issue / pages, self-uri, abstracts, keywords, and
+           custom-meta saying where each element came from and whether the record fits the page.
   body     Azure's paragraphs in reading order, page furniture and notes left out (they stay in the ALTO file
            with their roles). A heading opens a <sec>. Quran quotations are <named-content content-type="quran">
            linked to https://tanzil.net/#S:A; each note marker found in the text (glued "عاصم(٢).", alone "(٢)",
@@ -193,32 +198,53 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
     furniture = st["furniture"]
 
     nsmap = {"xlink": XLINK, "mml": MML}
+    rec = fr.get("catalogue")                      # the library catalogue's record (experiment 29), or None
+    from . import catalogue as cat_
     art = etree.Element("article", nsmap=nsmap, attrib={"article-type": "research-article",
                                                         "dtd-version": DTD_VERSION, f"{{{XMLNS}}}lang": "ar"})
     front = E(art, "front")
     jm = E(front, "journal-meta")
     E(jm, "journal-id", idp.get("journal") or stem.split("-")[0], journal_id_type="mandumah")
     head = st.get("journal") or running_head(doc)
-    if head:
+    if rec and rec.get("journal", {}).get("title"):
+        cat_.jats_journal_meta(E, jm, rec)         # the catalogue's journal title wins over the running heads
+    elif head:
         jtg = E(jm, "journal-title-group")
         E(jtg, "journal-title", head, specific_use="found-in-running-heads")
+        if rec:
+            cat_.jats_journal_meta(E, jm, rec)
     am = E(front, "article-meta")
     E(am, "article-id", stem, pub_id_type="other", assigning_authority="Mandumah")
+    if rec:
+        cat_.jats_article_ids(E, am, rec)
     ink_meta = []                                  # (name, value, id) for custom-meta
-    if fr.get("rubric_words"):
+    sources = []                                   # where each element came from (custom-meta front-sources)
+    if fr.get("rubric_words") or rec:
         ac = E(am, "article-categories")
-        sg = E(ac, "subj-group", subj_group_type="heading")
-        E(sg, "subject", _text(doc, fr["rubric_words"]), id=claim(bid_of(fr["rubric_words"][0])))
-        ink_meta.append(("rubric-words", _ids(doc, fr["rubric_words"]), None))
+        if fr.get("rubric_words"):
+            sg = E(ac, "subj-group", subj_group_type="heading")
+            E(sg, "subject", _text(doc, fr["rubric_words"]), id=claim(bid_of(fr["rubric_words"][0])))
+            ink_meta.append(("rubric-words", _ids(doc, fr["rubric_words"]), None))
+        if rec:
+            cat_.jats_categories(E, ac, rec)
+        if not len(ac):
+            am.remove(ac)
     tg = E(am, "title-group")
-    if fr.get("title_words"):
-        tw = fr["title_words"]
-        printed = _text(doc, tw)
-        E(tg, "article-title", fr["title"], id=claim(bid_of(tw[0])))
-        if fr.get("title_source", "").startswith("gemini") and key_differs(printed, fr["title"]):
+    if fr.get("title_words") or (rec and fr.get("title")):
+        tw = fr.get("title_words") or []
+        printed = _text(doc, tw) if tw else ""
+        E(tg, "article-title", fr["title"], id=claim(bid_of(tw[0])) if tw else None)
+        if fr.get("subtitle"):
+            E(tg, "subtitle", fr["subtitle"], specific_use="catalogue")
+        if rec:
+            cat_.jats_trans_title(E, tg, rec)
+        if tw and (fr.get("title_source", "").startswith(("gemini", "catalogue"))) \
+                and key_differs(printed, fr["title"]) and key_differs(printed, f"{fr['title']} {fr.get('subtitle', '')}"):
             E(tg, "alt-title", printed, alt_title_type="azure-reading-of-the-ink")
-        ink_meta.append(("title-words", _ids(doc, tw), None))
+        if tw:
+            ink_meta.append(("title-words", _ids(doc, tw), None))
         ink_meta.append(("title-source", fr.get("title_source", ""), None))
+        sources.append(f"title: {fr.get('title_source', '')}")
     else:
         E(tg, "article-title")
     authors = [a for a in fr.get("authors", []) if a.get("name")]
@@ -226,34 +252,68 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
         cg = E(am, "contrib-group")
         for n, a in enumerate(authors, 1):
             aw = a.get("prefix_words", []) + a["words"]
-            c = E(cg, "contrib", contrib_type="author", id=claim(bid_of(aw[0])) if aw else f"contrib{n}")
-            sn = E(c, "string-name")
-            if a.get("prefix"):
-                E(sn, "prefix", a["prefix"])
-                _append(sn, " " + a["name"])
+            cid = claim(bid_of(aw[0])) if aw else f"contrib{n}"
+            if a.get("catalogue"):
+                cat_.jats_contrib(E, cg, a, n, cid, _append)
             else:
-                sn.text = a["name"]
-            if a.get("aff"):
-                E(c, "aff", a["aff"])
+                c = E(cg, "contrib", contrib_type="author", id=cid)
+                sn = E(c, "string-name")
+                if a.get("prefix"):
+                    E(sn, "prefix", a["prefix"])
+                    _append(sn, " " + a["name"])
+                else:
+                    sn.text = a["name"]
+                if a.get("aff"):
+                    E(c, "aff", a["aff"])
             if a["words"]:
                 ink_meta.append((f"author-{n}-words", _ids(doc, a["words"]), None))
             ink_meta.append((f"author-{n}-source", a.get("source", ""), None))
+            if a.get("aff_source"):
+                ink_meta.append((f"author-{n}-affiliation-source", a["aff_source"], None))
+            sources.append(f"author {n}: {a.get('source', '')}")
     yr = st.get("year")
-    if yr:
+    if rec and cat_.jats_dates(E, am, rec):
+        sources.append("date: catalogue (MARC 260 $c, $m, $g)")
+    elif yr:
         pd = E(am, "pub-date", publication_format="print", date_type="pub",
                calendar="islamic" if yr[0] == "hijri" else "gregorian")
         E(pd, "year", str(yr[1]))
-    if idp.get("volume"):
-        E(am, "volume", idp["volume"], content_type="from-mandumah-id")
-    if idp.get("issue"):
-        E(am, "issue", idp["issue"], content_type="from-mandumah-id")
-    elif idp.get("issue_special"):
-        E(am, "issue", "special", content_type="from-mandumah-id")
+        if rec:
+            sources.append("date: the year printed in the running heads")
+    j = (rec or {}).get("journal", {})
+    vol, iss = cat_.num(j.get("volume", "")), cat_.num(j.get("issue", ""))
+    if rec and (vol or iss):
+        if vol:
+            E(am, "volume", vol, content_type="catalogue")
+        if iss and iss != "999":
+            E(am, "issue", iss, content_type="catalogue")
+        elif iss == "999":
+            E(am, "issue", "special", content_type="catalogue")
+        sources.append("volume and issue: catalogue (MARC 773 $v, $l)")
+    else:
+        if idp.get("volume"):
+            E(am, "volume", idp["volume"], content_type="from-mandumah-id")
+        if idp.get("issue"):
+            E(am, "issue", idp["issue"], content_type="from-mandumah-id")
+        elif idp.get("issue_special"):
+            E(am, "issue", "special", content_type="from-mandumah-id")
     printed_p = printed_pages(doc)
-    if printed_p:
+    rng = cat_.page_range(rec.get("pages", "")) if rec else None
+    if rng:
+        E(am, "fpage", str(rng[0]), content_type="catalogue")
+        E(am, "lpage", str(rng[1]), content_type="catalogue")
+        sources.append("pages: catalogue (MARC 300)")
+        if printed_p:
+            pf = printed_p[min(printed_p)] - (min(printed_p) - 1)
+            if pf != rng[0]:
+                ink_meta.append(("pages-printed-on-the-page", f"first page numbered {pf} in the print, "
+                                 f"{rng[0]} in the catalogue", None))
+    elif printed_p:
         first, last = printed_p[min(printed_p)], printed_p[max(printed_p)]
         E(am, "fpage", str(first - (min(printed_p) - 1)))
         E(am, "lpage", str(last + (len(doc["pages"]) - max(printed_p))))
+    if rec:
+        cat_.jats_after_pages(E, am, rec)
     cnt = E(am, "counts")
     E(cnt, "page-count", count=len(doc["pages"]))
     cmg = E(am, "custom-meta-group")
@@ -269,8 +329,13 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
     meta_("structure-source", "inkscript enrich (experiment 26): furniture by repetition and place; notes by "
           "small lines at the foot of a page opening with a number, linked to the marker in that page's text; "
           "headings by size, bold ink, numbering, colon and space; title and authors "
-          + ("from Gemini's title file aligned to the printed words" if st.get("gemini")
+          + ("from Mandumah's library catalogue (MARC), aligned to the printed words (experiment 29)" if rec
+             else "from Gemini's title file aligned to the printed words" if st.get("gemini")
              else "from page 1's layout") + ". Not checked by a person.")
+    if rec:
+        for name, value in cat_.jats_custom(rec, fr.get("catalogue_check"), fr.get("catalogue_desc", "")):
+            meta_(name, value)
+        meta_("front-sources", "; ".join(sources))
     if idp.get("seq"):
         meta_("article-sequence-in-issue", idp["seq"] + " (from the Mandumah id)")
     meta_("faithful-pdf", f"{stem}.pdf (each word drawn with its own printed ink)")

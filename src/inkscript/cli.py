@@ -86,9 +86,14 @@ def cmd_native(a) -> int:
             if lost: line += f"  !! {len(lost)} pages lost their image: {lost[:6]}"
         if a.xml or a.trust:
             from .enrich import enrich, verify as verify_enrich
+            from .enrich.catalogue import open_catalogue
+            if not hasattr(a, "_catalogue"):     # once per run: the index given, else the cached one if it exists
+                a._catalogue = open_catalogue(a.catalogue) if a.xml else None
+                if a._catalogue:
+                    print(f"front matter from {a._catalogue.describe()}", flush=True)
             try:
                 r["enrich"] = e = enrich(stem, ad / stem / f"{stem}.json", scan(stem), out, r, xml=a.xml, trust=a.trust,
-                                              meta_dirs=[fd] if fd else [])
+                                              meta_dirs=[fd] if fd else [], catalogue=a._catalogue)
             except Exception as ex:          # the PDFs are built; a failure here must not lose the build's report
                 import traceback
                 r["enrich"] = dict(error=f"{type(ex).__name__}: {ex}", traceback=traceback.format_exc())
@@ -336,6 +341,7 @@ def main(argv=None) -> int:
     p.add_argument("--only", action="append", help="build only this document id (repeatable)")
     p.add_argument("--xml", action="store_true", help="also write <stem>.jats.xml (the article, JATS 1.4) and <stem>.alto.xml (every word with its box and trust mark, ALTO 4.4)")
     p.add_argument("--trust", action="store_true", help="also write <stem>_trust.pdf (and <stem>_vector_trust.pdf): the PDF plus hideable highlights on uncertain words, the original bytes untouched")
+    p.add_argument("--catalogue", default=None, help="with --xml: Mandumah's MARC catalogue for the JATS front matter, as its index (.sqlite) or the MARC XML (.xml.gz, indexed into ~/.cache/inkscript/catalogue on first use); default: the cached index if it exists ($INKSCRIPT_CATALOGUE); 'none' to use the page alone")
     p.set_defaults(fn=cmd_native)
 
     p = sub.add_parser("compare", help="static review bundle: front page three ways")

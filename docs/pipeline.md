@@ -72,6 +72,24 @@ alphabets; that is correct, not a defect.
   `--frontpage-dir` (aligned to Azure's words, whose ids the JATS lists), else
   from page 1's layout; volume/issue from the id (000 = none, `041,042` =
   41-42, 999 = special).
+  **Since experiment 29 (D23) the front matter comes from Mandumah's own MARC
+  catalogue first** (`enrich/catalogue.py`), when its index exists
+  (`~/.cache/inkscript/catalogue/catalogue.sqlite`, built once with
+  `python -m inkscript.enrich.catalogue build`; `--catalogue FILE` points at
+  another index or MARC XML, `--catalogue none` or `INKSCRIPT_CATALOGUE=none`
+  turns it off): title and subtitle (245), people with roles, authority ids
+  and Latin forms (100/700/110), journal title, English title and ISSN (773),
+  volume and issue (773 $v $l), Gregorian and Hijri dates with months (260),
+  pages (300), abstracts (520), subject terms and keywords (653, 692), field of
+  study (773 $4 $6), DOI and record number. The catalogue's title and names are
+  aligned to Azure's words like Gemini's title file (names at ≥ 0.75 letter
+  similarity), so the JATS still lists their word ids; the honorific printed
+  before a name becomes `<prefix>`, the affiliation under it comes from the
+  page. Each element says where it came from (`specific-use="catalogue"`,
+  `title-source`, `author-n-source`, `front-sources`), and `catalogue-check`
+  says whether the record fits the page (title match, names found, page count)
+  — a wrong record would read "doubtful" or "disagrees". Precedence: catalogue
+  > Gemini's title file > layout.
 - `<stem>.alto.xml` — every page, line and word with its box as libraries keep
   OCR (ALTO 4.4): Azure's confidence, the trust mark and its reasons, the
   other reader's text, ids that link each word to its JATS element (through
@@ -219,6 +237,7 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/enrich/corrections.py` | `inkscript fix`: corrections proposed from Quran verses, judged, applied; `<stem>.corrections.json`; `overlay` puts applied ones into the reading the XML is written from (experiment 27, D21) |
 | `src/inkscript/enrich/judge.py` | the ink judge: Gemini, blind A/B on the scan's crop (experiment 17's marking), cached, spend-capped |
 | `src/inkscript/enrich/structure.py` | the article's structure: furniture, title/authors (Gemini's title file aligned to the ink, or page 1's layout), headings, notes and their markers, journal name and year; `read_meta`, `id_parts` |
+| `src/inkscript/enrich/catalogue.py` | Mandumah's MARC catalogue (experiment 29, D23): the index (build, open, look up by PDF id), the record read into fields, the front matter from it aligned to the ink (`front`, called by `structure._front`), its JATS pieces; `python -m inkscript.enrich.catalogue build|show ID` |
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
 | `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
@@ -227,7 +246,7 @@ the tests round-trip `visual()` through it.
 |---|---|---|
 | `inkscript fetch --id-file ids.txt --out DIR` | the `aws` CLI with credentials that can read `s3://mandumah-source-docs` (the owner's AWS profile; not in the repo) | `DIR/<id>/<id>.{pdf,json}` |
 | `inkscript frontpage --azure-dir … --out …` | `GEMINI_API_KEY` in `.env` | page-1 reading per document (`<stem>.gemini.p1.md`) |
-| `inkscript native --azure-dir … [--scan-dir …] --frontpage-dir … --out … [--vector] [--verify] [--xml] [--trust] [--resume] [--only ID]` | — | `<stem>.pdf`, `<stem>_vector.pdf`, `shapes.json`, alphabet, `native_pdf_report.json`; `--xml`: `<stem>.jats.xml`, `<stem>.alto.xml`; `--trust`: `<stem>_trust.pdf`, `<stem>_vector_trust.pdf` |
+| `inkscript native --azure-dir … [--scan-dir …] --frontpage-dir … --out … [--vector] [--verify] [--xml [--catalogue FILE or none]] [--trust] [--resume] [--only ID]` | — | `<stem>.pdf`, `<stem>_vector.pdf`, `shapes.json`, alphabet, `native_pdf_report.json`; `--xml`: `<stem>.jats.xml`, `<stem>.alto.xml`; `--trust`: `<stem>_trust.pdf`, `<stem>_vector_trust.pdf` |
 | `inkscript check OUT --out REVIEW [--html]` | — | contradictions and every number, as a review list |
 | `inkscript numbers`, `inkscript second` | Gemini | second readings; `--apply` writes agreed corrections |
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |

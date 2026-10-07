@@ -16,6 +16,9 @@ Nothing here is a single position rule. Each decision looks at several things a 
   markers     for each note, the place in that page's text that points at it: the number in brackets glued to a
               word ("عاصم(٢)."), alone ("(٢)", "٢)"), or a bare number raised above its line; when several, the
               one in order after the previous note's marker, never a verse or page number ("الآية (١٣)").
+  catalogue   when read_meta is given the catalogue (experiment 29), its record's title and names come first,
+              aligned to the words the same way (catalogue.front); Gemini's file and the layout below are then
+              the page's own reading, kept for the comparison and the affiliation.
   title       Gemini's title (the title file already in the bucket), aligned to Azure's words on the first pages
               so the title points at its ink; without it, the largest letters on page 1 before the text begins,
               adjacent lines of nearly the same size joined (a title set over two lines).
@@ -97,10 +100,16 @@ def id_parts(stem: str) -> dict:
     return out
 
 
-def read_meta(stem: str, dirs=()) -> dict:
+def read_meta(stem: str, dirs=(), catalogue=None) -> dict:
     """Gemini's title file (<stem>.gemini.title.json: {"title", "authors"}), looked for in each dir and in
-    dir/<stem>/, plus the id's parts. Never calls Gemini."""
+    dir/<stem>/, plus the id's parts, plus the library catalogue's record when a catalogue (catalogue.Catalogue)
+    is given and has the document. Never calls Gemini."""
     meta = dict(id=id_parts(stem))
+    if catalogue is not None:
+        rec = catalogue.get(stem)
+        if rec:
+            meta["catalogue"] = rec
+            meta["catalogue_desc"] = catalogue.describe()
     for d in dirs:
         if not d:
             continue
@@ -568,17 +577,54 @@ def _gap_above(info, i, kinds, body_h) -> float:
 
 
 def _front(doc, info, kinds, furniture, note_word, body_h, meta) -> dict:
+    """The front matter: the library catalogue's record first when there is one (experiment 29, catalogue.front:
+    its title and names, aligned to the ink), else Gemini's title file, else the layout."""
+    if not meta.get("catalogue"):
+        return _front_page(doc, info, kinds, furniture, note_word, body_h, meta)
+    from .catalogue import front
+    early = [w for w in doc["words"] if w["page"] <= 3 and w["idx"] not in note_word
+             and w["para"] not in furniture][:260]
+    return front(doc, early, meta, lambda m: _front_page(doc, info, kinds, furniture, note_word, body_h, m),
+                 _align_authors)
+
+
+def _align_authors(early, tw, names, source, least: float = 0.6) -> list[dict]:
+    """Each name aligned to the first pages' words outside the title (tw), with the honorific / byline words
+    printed just before it."""
+    authors = []
+    rest = [w for w in early if w["idx"] not in tw]
+    for a in names:
+        pref, name = _split_honorific(a)
+        run = _align(rest, name or a, least)
+        pw = []
+        if run:                                 # the honorific / byline words just before the name
+            pos = next(j for j, w in enumerate(rest) if w["idx"] == run[0])
+            while pos > 0 and rest[pos - 1]["para"] == rest[pos]["para"] \
+                    and (_honorific_word(rest[pos - 1]["out"])
+                         or not re.sub(r"[\W_]", "", rest[pos - 1]["out"])) and len(pw) < 4:
+                pos -= 1
+                pw.insert(0, rest[pos]["idx"])
+        authors.append(dict(name=name or a, prefix=pref, words=run or [], prefix_words=pw, source=source))
+        if run:
+            rest = [w for w in rest if w["idx"] not in set(run) | set(pw)]
+    return authors
+
+
+def _front_page(doc, info, kinds, furniture, note_word, body_h, meta) -> dict:
+    """Title, rubric and authors from the page: Gemini's title file aligned to the ink, else the layout. A caller
+    that has already found the title's words passes them as meta["gemini"]["title_words"] (with a "source")."""
     W = doc["words"]
     paras = doc["paras"]
     gem = meta.get("gemini") or {}
+    src = gem.get("source", "gemini-title-file")
     out = {}
     # the first pages' words in reading order, outside furniture and notes: where a title can be
     early = [w for w in W if w["page"] <= 3 and w["idx"] not in note_word
              and w["para"] not in furniture][:260]
     if gem.get("title"):
-        run = _align(early, gem["title"])
+        run = gem.get("title_words") or _align(early, gem["title"])
         if run:
-            out.update(title=gem["title"], title_words=run, title_source="gemini-title-file")
+            out.update(title=gem["title"], title_words=run, title_source=src)
     if "title" not in out:
         out.update(_front_by_layout(doc, info, kinds, furniture, note_word, body_h)
                    or _front_by_lines(doc, info, kinds, furniture, note_word, body_h))
@@ -586,24 +632,7 @@ def _front(doc, info, kinds, furniture, note_word, body_h, meta) -> dict:
         return out
     tw = set(out["title_words"])
     if gem.get("authors"):
-        authors = []
-        rest = [w for w in early if w["idx"] not in tw]
-        for a in gem["authors"]:
-            pref, name = _split_honorific(a)
-            run = _align(rest, name or a)
-            pw = []
-            if run:                                 # the honorific / byline words just before the name
-                pos = next(j for j, w in enumerate(rest) if w["idx"] == run[0])
-                while pos > 0 and rest[pos - 1]["para"] == rest[pos]["para"] \
-                        and (_honorific_word(rest[pos - 1]["out"])
-                                   or not re.sub(r"[\W_]", "", rest[pos - 1]["out"])) and len(pw) < 4:
-                    pos -= 1
-                    pw.insert(0, rest[pos]["idx"])
-            authors.append(dict(name=name or a, prefix=pref, words=run or [], prefix_words=pw,
-                                source="gemini-title-file"))
-            if run:
-                rest = [w for w in rest if w["idx"] not in set(run) | set(pw)]
-        out["authors"] = authors
+        out["authors"] = _align_authors(early, tw, gem["authors"], src, gem.get("least", 0.6))
     elif "authors" not in out:
         out["authors"] = []
     # rubric: short lines above the title on its page (layout pass sets it; with Gemini, look again)

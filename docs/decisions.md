@@ -250,3 +250,26 @@ the 20 set documents; where none exists the layout decides and is weakest
 number and markers must match that number on the same page (or, for an
 endnote list, in order through the text), so a link is rarely wrong: 0 wrong
 links on either truth set; what is missed is mostly markers Azure never read.
+
+**D23 · The library catalogue is the front matter's first source; the page
+gives its ink (2026-10-07).** Experiment 28 measured the page alone: without a
+Gemini title file the layout's title was right in 79 of 129 documents and the
+running heads named the journal right in half. Mandumah's MARC catalogue holds,
+for 204 of the 205 set documents (1.56M records in all), the title, people,
+journal, ISSN, dates in both calendars, pages, abstracts and keywords, made by
+people from the article. D22 had set it aside because it is "not tied to the
+ink"; experiment 29 ties it: its title and names are aligned to Azure's words
+exactly as Gemini's title file is, so the JATS keeps their word ids (202 titles,
+195 of 214 names). Precedence: catalogue > Gemini's title file > layout, for the
+text; the page still gives the ink, the honorific (`<prefix>`) and the
+affiliation (no record has one). Every element says its source, and a check
+(title match, names found, page count) says whether the record fits its PDF —
+calibrated by giving each document its neighbour's record: 0 of 204 accepted,
+while 197 + 1 of the 204 right records agree. Kept even where the page does not
+print the catalogue's title (a rubric used as the title): the record is what the
+library and its users search by; the check and `title-source` say so. Not
+chosen: correcting the catalogue from the page, or falling back to the page
+when the check says "disagrees" (no such case in the set; open in ideas.md).
+The index lives in `~/.cache/inkscript/catalogue/` (1.1 GB SQLite, 1 ms a
+lookup, nothing in memory), not in git: Mandumah's data, rebuildable from the
+bucket in minutes, like the cached schemas (D20).

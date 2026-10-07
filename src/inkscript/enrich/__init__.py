@@ -5,6 +5,8 @@
   document.py   Azure's reading: pages, paragraphs (with position roles), lines, words with ids and boxes
   structure.py  the article's structure: furniture, title / authors (Gemini's title file aligned to the ink, or
                 the layout), headings (size, bold ink, numbering, space), notes and the markers that point at them
+  catalogue.py  Mandumah's MARC catalogue (experiment 29): its index in ~/.cache/inkscript/catalogue, the record as
+                the front matter's first source, aligned to the ink; enrich(catalogue=...) default: the index if it exists
   quran.py      Quran quotations found, linked to sura:verse and checked word for word (Tanzil text, shipped)
   trust.py      one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule)
   jats.py       <stem>.jats.xml   the article: front matter, body in reading order, footnotes, references,
@@ -33,7 +35,7 @@ def _version() -> str:
 
 
 def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: dict,
-           xml: bool = True, trust: bool = True, meta_dirs=()) -> dict:
+           xml: bool = True, trust: bool = True, meta_dirs=(), catalogue="default") -> dict:
     from . import alto, jats, trustpdf
     from .document import load
     from .quran import check_document
@@ -64,10 +66,16 @@ def enrich(stem: str, azure_json: Path, scan_pdf: Path, out_dir: Path, report: d
         from .structure import read_meta
         # the article's structure (experiment 26): Gemini's title file if one sits beside the Azure reading or in
         # a frontpage dir (never a new Gemini call), stroke widths from the scan; both writers use it
-        meta = read_meta(stem, [Path(azure_json).parent, *meta_dirs])
+        if catalogue == "default":         # the cached index when one exists (experiment 29), else none
+            from .catalogue import open_catalogue
+            catalogue = open_catalogue()
+        meta = read_meta(stem, [Path(azure_json).parent, *meta_dirs], catalogue=catalogue)
         jats.structure_of(doc, meta, scan_pdf)
         jn, an = f"{stem}.jats.xml", f"{stem}.alto.xml"
         res["jats"] = jats.write(doc, quotes, marks, stem, out_dir / jn, an)
+        fr = doc["structure"]["front"]
+        if fr.get("catalogue"):
+            res["catalogue"] = dict(record=fr["catalogue"].get("id", ""), **fr.get("catalogue_check", {}))
         ids = res["jats"].pop("_ids")
         res["alto"] = alto.write(doc, quotes, marks, stem, out_dir / an, jn, born_digital, _version(), ids)
         if doc["placements"]:                 # the ALTO word id beside each glyph of the build's shapes.json
