@@ -6,6 +6,7 @@
   inkscript trace       one page -> outlines, fidelity, geometry JSON       (geometry)
   inkscript alphabet    shape dictionary across pages: does it saturate?    (geometry)
   inkscript fix         corrections from Quran verses, judged on the ink, into the text only   (enrich)
+  inkscript view        the outputs in a browser: scan + ALTO words, JATS article, linked  (viewer)
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -177,6 +178,11 @@ def cmd_fix(a) -> int:
 def cmd_compare(a) -> int:
     from .viewer.frontpage_compare import build
     return build(a)
+
+
+def cmd_view(a) -> int:
+    from .viewer.serve import main as view
+    return view(a)
 
 
 def cmd_trace(a) -> int:
@@ -387,6 +393,16 @@ def main(argv=None) -> int:
     p.add_argument("--cache", help="jsonl of the judge's answers (default OUT/judge_cache.jsonl)")
     p.add_argument("-v", "--verbose", action="store_true", help="list every proposal, not only the accepted ones")
     p.set_defaults(fn=cmd_fix)
+
+    p = sub.add_parser("view", help="look at a build's outputs in the browser: the scan with every ALTO word, the JATS as an article, linked; both XML files")
+    p.add_argument("out_dir", help="an output dir of `native --xml` (searched at any depth for <id>.alto.xml + <id>.jats.xml)")
+    p.add_argument("--doc", action="append", help="open this document id (with --static: export only these; repeatable)")
+    p.add_argument("--port", type=int, default=8765); p.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to open it from a phone on the same network")
+    p.add_argument("--scan-dir", help="draw the pages from these scans <id>.pdf (default: the faithful <id>.pdf beside the XML)")
+    p.add_argument("--dpi", type=int, default=150, help="page image resolution")
+    p.add_argument("--static", metavar="DIR", help="write a self-contained folder that opens from disk instead of serving")
+    p.add_argument("--open", action="store_true", help="open the browser")
+    p.set_defaults(fn=cmd_view)
 
     p = sub.add_parser("alphabet", help="shape dictionary across pages: does it saturate?")
     p.add_argument("pdfs", nargs="+"); p.add_argument("--pages", type=int, default=0, help="first N pages of each")

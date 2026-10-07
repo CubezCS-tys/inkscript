@@ -250,3 +250,17 @@ the 20 set documents; where none exists the layout decides and is weakest
 number and markers must match that number on the same page (or, for an
 endnote list, in order through the text), so a link is rarely wrong: 0 wrong
 links on either truth set; what is missed is mostly markers Azure never read.
+
+**D23 · The outputs are looked at in a viewer of our own, small and offline, not in a library's or
+publisher's viewer stack (2026-10-07).** What libraries use for ALTO is an IIIF viewer with a text-overlay
+plugin (Mirador 3/4 with `mirador-textoverlay`, the Universal Viewer), which needs an image server, a IIIF
+manifest per document and a JavaScript build; publishers render JATS with XSLT (NCBI's JATS Preview
+Stylesheets) or a reader like eLife Lens (article beside its figures and references). Neither links an article's
+words to boxes on a scan, which is the one thing the owner needs to see (is this word what the ink says?), and
+neither reads our trust marks. Taken from them: the page with a transparent box per word, scaled to the image
+(Mirador's overlay); the article and its resources side by side, a click in one moving the other (Lens);
+JATS4R's habit of rendering `xml:lang` and direction rather than guessing. Chosen: `inkscript view`
+(experiment 31), Python's `http.server` and one HTML/JS/CSS file, no library, also writable as a static folder.
+Its cost: the JATS has no word ids, so the viewer matches words within each block (99.85% linked on 205
+documents); if a reader of the files ever needs that link, the JATS writer could carry the ALTO word ids
+(e.g. `<named-content content-type="alto-word">`), at the price of a much heavier article file.

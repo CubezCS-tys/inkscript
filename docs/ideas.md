@@ -257,6 +257,14 @@ reason is recorded), **open** (voiced, not yet judged).
   two books' fonts**, reading blind, what it does not do. Still open: a
   walk-through of one whole page being built, a restored-edition panel once it
   exists, and phone-width polish.
+- **A viewer for the document files** (owner, 2026-10-07). *built* —
+  `inkscript view` (experiment 31, D23): the scan with every ALTO word on it,
+  the JATS as an article, the two linked by click, both XML files folded.
+  *Open:* search across a document (and across the set) that lights the boxes,
+  as newspaper libraries do; a "next flagged word" key to review a document
+  word by word, writing a decision back (a corrections file `inkscript fix`
+  could read); the letters' own boxes from `shapes.json` drawn inside a word;
+  the trust PDF and vector PDF opened at the same place.
 
 ## Scale
 
