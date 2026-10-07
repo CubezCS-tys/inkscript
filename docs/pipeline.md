@@ -63,7 +63,8 @@ alphabets; that is correct, not a defect.
   sections, footnotes linked from their markers, references, every Quran
   quotation linked to its verse. The structure is read by `enrich/structure.py`
   (experiment 26, D22): page furniture by repetition and place (kept out of the
-  text); notes as the small lines at the foot of a page that open with a number,
+  text; since experiment 30, D23, never a table's cell, a note, a caption or a
+  page's first line); notes as the small lines at the foot of a page that open with a number,
   each linked from its marker in that page's text (glued "عاصم(٢).", alone
   "(٢)", or raised) — endnotes in order through the text; headings by size,
   bold ink (stroke width measured on the scan), numbering, colon and space, a
@@ -89,6 +90,12 @@ Every word gets one trust mark (experiment 22's default rule,
 agrees), **flagged** with reasons (Azure confidence < 0.8, speck, ornament or
 display type, Latin on an Arabic page, Persian letter left in the text, differs
 from the Quran verse, Gemini reads it differently), or **agreed** (no signal).
+Where Azure's reading is weaker as a whole — a **vowelled** block, a
+**handwritten** page (Azure's handwriting style), **decorative** lettering on a
+printed page — the block carries the mark instead (experiment 30, D23:
+`trust.regions`; ALTO `region.*` tags and PAGECLASS, JATS `reading-*`
+custom-meta, a "Reading marks" layer in the trust PDF) and a word in it is
+flagged only for a specific reason.
 Quran quotations are found and checked word for word against the Tanzil text
 that ships in `src/inkscript/data/quran/` (CC BY 3.0, `NOTICE.md`).
 
@@ -213,14 +220,14 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/verify/consistency.py`, `numbers.py`, `second.py`, `review_html.py` | same-ink-different-text contradictions; Gemini second readings; the editable review page |
 | `src/inkscript/viewer/frontpage_compare.py` | static review bundle for front pages |
 | `src/inkscript/enrich/__init__.py` | `enrich()`: run after a build by `--xml`/`--trust`; `verify()`: schemas and trust-PDF checks |
-| `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted |
+| `src/inkscript/enrich/document.py` | Azure's reading as the enrich step sees it: words with ids (`p<page>w<n>`), boxes in scan pixels, the text the PDF carries, lines, paragraphs and their position roles; text-element offsets converted; Azure's handwriting style per word (`hw`) |
 | `src/inkscript/enrich/quran.py` | Quran quotations found, linked to sura:verse, checked word for word (experiment 20); the Tanzil text in `src/inkscript/data/quran/` |
-| `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule; a common word at confidence ≥ 0.6 is not flagged for its confidence alone, experiment 27, list in `src/inkscript/data/lexicon/`) / corrected |
+| `src/inkscript/enrich/trust.py` | one mark per word: verified / agreed / flagged with reasons (experiment 22's default rule; a common word at confidence ≥ 0.6 is not flagged for its confidence alone, experiment 27, list in `src/inkscript/data/lexicon/`) / corrected; page and block marks — vowelled, handwritten, decorative — with word flags inside only for a specific reason (`regions`, `in_region`, experiment 30) |
 | `src/inkscript/enrich/corrections.py` | `inkscript fix`: corrections proposed from Quran verses, judged, applied; `<stem>.corrections.json`; `overlay` puts applied ones into the reading the XML is written from (experiment 27, D21) |
 | `src/inkscript/enrich/judge.py` | the ink judge: Gemini, blind A/B on the scan's crop (experiment 17's marking), cached, spend-capped |
 | `src/inkscript/enrich/structure.py` | the article's structure: furniture, title/authors (Gemini's title file aligned to the ink, or page 1's layout), headings, notes and their markers, journal name and year; `read_meta`, `id_parts` |
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
-| `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, incremental update; its check |
+| `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, block outlines and page notes in a second ("Reading marks"), incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
 
 | Command | Needs | Gives |

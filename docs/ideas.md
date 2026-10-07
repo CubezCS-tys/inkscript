@@ -274,8 +274,16 @@ reason is recorded), **open** (voiced, not yet judged).
   proposed.* 205 documents, every decade: the faithful PDF holds; what broke is the
   source fonts' text left on rebuilt pages, titles without a title file, content
   set aside as furniture. Open from it, each needing a judged sample first:
-  - **Furniture by the text block's frame, not the page's edge** — a lone block
-    that is heading-sized, bold, a note, or inside a table stays content;
-  - **Flags on vowelled text** — judge flagged vowelled words on the ink and set
-    their confidence threshold from it (over 50% vowelled → 60% flagged now);
-  - **A page-level "handwritten" mark** instead of hundreds of word flags.
+  - **Furniture by the text block's frame, not the page's edge** — *done
+    2026-10-07 (experiment 30, D23):* not in a table, not a note/caption, the
+    same text repeated, the edge band only when outermost and set apart; content
+    kept 56/60 of a judged sample, furniture 71/78, held out 33/38 right.
+    *Open:* logos read as tables (7894), a table at the very top of a page.
+  - **Flags on vowelled text** — *done differently (experiment 30, D23):* not a
+    threshold per word but a **block mark** "vowelled", word flags kept only
+    for a specific reason (over 50% vowelled 60% → 12% flagged; no judged error
+    outside a marked block lost). *Open:* judge flagged vowelled words on the ink
+    to tune the in-block threshold (only 102 judged words sit in marked blocks).
+  - **A page-level "handwritten" mark** — *done (experiment 30):* from Azure's
+    handwriting style; plus "decorative" for script lettering on printed pages
+    (handwritten pages 77% → 11% flagged).

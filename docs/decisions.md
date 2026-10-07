@@ -250,3 +250,34 @@ the 20 set documents; where none exists the layout decides and is weakest
 number and markers must match that number on the same page (or, for an
 endnote list, in order through the text), so a link is rarely wrong: 0 wrong
 links on either truth set; what is missed is mostly markers Azure never read.
+
+**D23 · Furniture needs more than its place; a doubt that covers a block is said
+once, for the block (2026-10-07).** Experiment 28 found content set aside as
+page furniture by place alone (a heading opening a page, a table's header row,
+a note, every small number in a table) and word flags flooding vowelled and
+handwritten pages (60% and 68–91% of words). Two choices were made on a
+hand-read sample of 140 old furniture blocks plus 60 held out (experiment 30):
+
+- **Furniture.** Kept the cues of D22 (repetition, place, masthead words, side
+  tabs) but each must now be backed: not in a table (other paragraphs beside it
+  and beside the next line inward), not a note or a caption, not ending with a
+  colon, a repeat of the same text (a near match only for long texts or when it
+  comes back on a quarter of the pages), the top/bottom band only for the
+  outermost text set apart from the rest. Content kept 56/60, furniture 71/78;
+  held out 33/38 of the released blocks are content. Using the text block's
+  frame alone (anything outside the body column is furniture) was the other
+  candidate; it fails on tables and figures, which extend the frame.
+- **Marks.** Calibrating a lower confidence threshold for vowelled words was
+  the alternative (experiment 28's proposal). It would still flag a third of a
+  vowelled story's words and nothing on a handwritten page where every word is
+  doubtful. Chosen: the doubt is said once for the block or page (ALTO
+  TextBlock TAGREFS `region.*`, Page PAGECLASS `handwritten`, JATS custom-meta
+  `reading-*` and `<p content-type>`, a page note in the trust PDF's own
+  layer), and a word keeps its own flag only for something that points at it —
+  a Quran difference, Gemini's other reading, a Persian letter, a speck (not on
+  handwritten pages), a Latin word, or a confidence under half its block's
+  median in the block's lowest tenth. No judged error outside a marked block
+  lost; inside, the errors that lost their word flag are covered by the mark.
+  "decorative" (Azure's handwriting style on a printed page's block) was named
+  after looking at them: script typefaces, calligraphic heads, a byline, one
+  handwritten note.

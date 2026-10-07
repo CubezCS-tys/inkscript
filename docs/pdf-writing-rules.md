@@ -229,6 +229,14 @@ marks therefore go into a *copy*, written by `enrich/trustpdf.py`:
   publisher's, not Azure's, so Azure's doubts do not apply to it.
 - **No link annotations.** A verse link over a quotation would turn a drag
   into a click in Chrome; the links live in the JATS and ALTO files instead.
+- **Block marks in a layer of their own, "Reading marks"** (since 2026-10-07,
+  experiment 30). A block marked vowelled / handwritten / decorative gets a
+  thin dashed blue `/Square` outline, and its page one `/Text` note in the top
+  corner (English) saying what the mark means; the words inside are flagged
+  only for a specific reason. Like the highlights they are annotations, not
+  text: the copies of 0657, 0408 and 0679 pass `trustpdf.check` (prefix
+  identical, same text and character boxes in pdfium); the fixture test still
+  passes.
 
 `inkscript native --verify --trust` checks all of this per document
 (`enrich.verify` → `trustpdf.check`: prefix identical, same text and character

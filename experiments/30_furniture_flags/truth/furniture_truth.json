@@ -1,0 +1,2245 @@
+{
+ "note": "Judged by eye on the page images (out/look/furniture_NN.png, furniture_sample.py), 2026-10-07: is the block set aside as page furniture really furniture (running head/footer, page number, side tab, masthead artwork, noise) or article content? 'unsure' counts neither way.",
+ "blocks": [
+  {
+   "n": 0,
+   "doc": "7894-000-000-002",
+   "page": 3,
+   "box": [
+    1380,
+    253,
+    1462,
+    317
+   ],
+   "text": "ـى والتقويم",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 1,
+   "doc": "0189-013-006-010",
+   "page": 5,
+   "box": [
+    829,
+    49,
+    1525,
+    113
+   ],
+   "text": "الورد الصافي من علمي العروض والقوافي",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 2,
+   "doc": "1106-025-001-001",
+   "page": 14,
+   "box": [
+    1491,
+    169,
+    1823,
+    254
+   ],
+   "text": "تَجَةُ الََّانَاتُ الْلَامِيَّةُ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 3,
+   "doc": "0495-109-002-003",
+   "page": 13,
+   "box": [
+    1933,
+    380,
+    2082,
+    435
+   ],
+   "text": "أكبر قيمة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 4,
+   "doc": "1900-003-003,004-006",
+   "page": 9,
+   "box": [
+    219,
+    173,
+    466,
+    240
+   ],
+   "text": "الفَيْضَلُ الأَدَيَّة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 5,
+   "doc": "1315-005-009-003",
+   "page": 1,
+   "box": [
+    652,
+    332,
+    1484,
+    417
+   ],
+   "text": "مستقبل الاستقرار السياسي في العراق",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "the article's title"
+  },
+  {
+   "n": 6,
+   "doc": "1900-003-003,004-006",
+   "page": 2,
+   "box": [
+    1608,
+    125,
+    1859,
+    194
+   ],
+   "text": "الفَيَضِ الأَدْبيَّة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 7,
+   "doc": "7894-000-000-002",
+   "page": 11,
+   "box": [
+    1549,
+    365,
+    1635,
+    433
+   ],
+   "text": "ء مشهرة برقم",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 8,
+   "doc": "0868-047-186-028",
+   "page": 4,
+   "box": [
+    133,
+    142,
+    352,
+    184
+   ],
+   "text": "د. خالد حنفى على",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 9,
+   "doc": "0562-028-109-009",
+   "page": 72,
+   "box": [
+    1405,
+    343,
+    1577,
+    401
+   ],
+   "text": "أ- مع التوريد",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 10,
+   "doc": "0422-004-006-018",
+   "page": 1,
+   "box": [
+    444,
+    262,
+    677,
+    306
+   ],
+   "text": "القرارات والفتاوى",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 11,
+   "doc": "0557-010-003-004",
+   "page": 5,
+   "box": [
+    285,
+    178,
+    890,
+    240
+   ],
+   "text": "تقديراً دراسة لآراء معلمى المرحلة الثانوية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 12,
+   "doc": "6943-002-000-004",
+   "page": 17,
+   "box": [
+    1367,
+    226,
+    1721,
+    298
+   ],
+   "text": "الضابط الثالث",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 13,
+   "doc": "0827-000-051-002",
+   "page": 8,
+   "box": [
+    498,
+    2441,
+    1777,
+    2493
+   ],
+   "text": "المصدر: اعداد الباحثان بالاعتماد على مخرجات البرنامج الاحصائي 20.SMART.V",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "caption or a table's source"
+  },
+  {
+   "n": 14,
+   "doc": "0495-109-002-003",
+   "page": 13,
+   "box": [
+    608,
+    386,
+    760,
+    434
+   ],
+   "text": "المتغيرات",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 15,
+   "doc": "7894-000-000-002",
+   "page": 18,
+   "box": [
+    358,
+    214,
+    415,
+    260
+   ],
+   "text": "الجمعيـ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 16,
+   "doc": "0596-031-001-013",
+   "page": 1,
+   "box": [
+    357,
+    2542,
+    792,
+    2585
+   ],
+   "text": "العدد الأول السنة الواحدة والثلاثون",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 17,
+   "doc": "1106-025-001-001",
+   "page": 2,
+   "box": [
+    1490,
+    169,
+    1824,
+    255
+   ],
+   "text": "تَجَةُ الدِّرَاشَاتُ الأَسْلامِيَّةُ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 18,
+   "doc": "6943-002-000-004",
+   "page": 29,
+   "box": [
+    1359,
+    236,
+    1728,
+    312
+   ],
+   "text": "الضابط السادس",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 19,
+   "doc": "1156-000-077-011",
+   "page": 23,
+   "box": [
+    1418,
+    367,
+    1541,
+    417
+   ],
+   "text": "الروضة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 20,
+   "doc": "0412-002-004-003",
+   "page": 13,
+   "box": [
+    333,
+    2832,
+    993,
+    2888
+   ],
+   "text": "(١٣٣) اللسان (سمعد) ٢٢٤/٤ .",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "note"
+  },
+  {
+   "n": 21,
+   "doc": "1106-025-001-001",
+   "page": 1,
+   "box": [
+    1490,
+    167,
+    1823,
+    254
+   ],
+   "text": "تَجَلَةُ الَّرَاسَاتُ الإسْلامِيَّةُ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 22,
+   "doc": "0331-000-054-001",
+   "page": 5,
+   "box": [
+    175,
+    235,
+    413,
+    288
+   ],
+   "text": "● كلمة المحرر •",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "unsure",
+   "what": "a short heading-like line at the top of a page: running section title or heading"
+  },
+  {
+   "n": 23,
+   "doc": "2051-000-006-005",
+   "page": 7,
+   "box": [
+    1933,
+    3039,
+    2150,
+    3155
+   ],
+   "text": "مَلَفَكَرُون العدد (6) 2015",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 24,
+   "doc": "0876-027-093-001",
+   "page": 1,
+   "box": [
+    1361,
+    49,
+    1872,
+    152
+   ],
+   "text": "الافتتاحية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "rubric on page 1"
+  },
+  {
+   "n": 25,
+   "doc": "0474-008-013-001",
+   "page": 44,
+   "box": [
+    430,
+    190,
+    561,
+    436
+   ],
+   "text": "المفردة تحت الدراسة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 26,
+   "doc": "0827-000-051-002",
+   "page": 21,
+   "box": [
+    978,
+    2632,
+    1040,
+    2652
+   ],
+   "text": "Islamic Unite",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "caption or a table's source"
+  },
+  {
+   "n": 27,
+   "doc": "1634-000-010,011-013",
+   "page": 5,
+   "box": [
+    323,
+    222,
+    649,
+    385
+   ],
+   "text": "من الكل مـ Discourse ledge. Peace &PTO",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 28,
+   "doc": "0266-006-002-001",
+   "page": 27,
+   "box": [
+    634,
+    2443,
+    1720,
+    2507
+   ],
+   "text": "(١٠٦) الحاتمي، الرسالة الموضحة، ص ١٨١؛ صبحي، نظرية، ص٣٣.",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "note"
+  },
+  {
+   "n": 29,
+   "doc": "7894-000-000-002",
+   "page": 1,
+   "box": [
+    272,
+    374,
+    404,
+    444
+   ],
+   "text": "ء مشهرة برقم ٣٣٣٣",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 30,
+   "doc": "1156-000-077-011",
+   "page": 22,
+   "box": [
+    1915,
+    367,
+    2022,
+    418
+   ],
+   "text": "الحرف",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 31,
+   "doc": "0629-024-012-004",
+   "page": 4,
+   "box": [
+    1110,
+    103,
+    1695,
+    185
+   ],
+   "text": "صوت الأمة، ديسمبر ١٩٩٢ م",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 32,
+   "doc": "7894-000-000-002",
+   "page": 18,
+   "box": [
+    1488,
+    326,
+    1643,
+    419
+   ],
+   "text": "مشهرة برقم ٣٣٣٣ / menth Evaluat",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 33,
+   "doc": "0629-024-012-004",
+   "page": 2,
+   "box": [
+    1174,
+    117,
+    1710,
+    193
+   ],
+   "text": "صوت الأمة ، ديسمبر ١٩٩٢م",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 34,
+   "doc": "0266-006-002-001",
+   "page": 29,
+   "box": [
+    859,
+    2515,
+    1719,
+    2582
+   ],
+   "text": "(١١٥) القاضي الجرجاني، الوساطة، ص ص٢١٤-٢١٥.",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "content",
+   "what": "note"
+  },
+  {
+   "n": 35,
+   "doc": "0943-015-005,006-007",
+   "page": 8,
+   "box": [
+    943,
+    154,
+    1638,
+    239
+   ],
+   "text": "مجلة الجامعة السلفية - ماير ، يونيو ١٩٨٣م",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 36,
+   "doc": "1900-003-003,004-006",
+   "page": 6,
+   "box": [
+    1634,
+    205,
+    1882,
+    274
+   ],
+   "text": "الفَيَصِلُ الأَلَّيَّةُ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 37,
+   "doc": "0422-004-006-018",
+   "page": 3,
+   "box": [
+    448,
+    228,
+    686,
+    266
+   ],
+   "text": "القرارات والفتاوى",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 38,
+   "doc": "7894-000-000-002",
+   "page": 18,
+   "box": [
+    149,
+    212,
+    205,
+    265
+   ],
+   "text": "لتقويم",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 39,
+   "doc": "7894-000-000-002",
+   "page": 15,
+   "box": [
+    147,
+    258,
+    232,
+    325
+   ],
+   "text": "ـى والتقويم",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-lone",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 40,
+   "doc": "0682-000-092-014",
+   "page": 12,
+   "box": [
+    920,
+    225,
+    1373,
+    304
+   ],
+   "text": "د/ مي حسن أحمد طوبار",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 41,
+   "doc": "7894-000-000-002",
+   "page": 14,
+   "box": [
+    291,
+    288,
+    363,
+    314
+   ],
+   "text": "AAME",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 42,
+   "doc": "0595-031-008-008",
+   "page": 3,
+   "box": [
+    1340,
+    226,
+    1626,
+    297
+   ],
+   "text": "البعث الاسلامى",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 43,
+   "doc": "0737-001-020-003",
+   "page": 10,
+   "box": [
+    1071,
+    100,
+    1180,
+    155
+   ],
+   "text": "الرواية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 44,
+   "doc": "0858-016-062-004",
+   "page": 14,
+   "box": [
+    1260,
+    174,
+    1671,
+    246
+   ],
+   "text": "د. عبد الرحمن زكي إبراهيم",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 45,
+   "doc": "1156-000-077-011",
+   "page": 27,
+   "box": [
+    287,
+    3181,
+    875,
+    3261
+   ],
+   "text": "العدد السابع والسبعون 2013",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 46,
+   "doc": "2095-000-015-009",
+   "page": 16,
+   "box": [
+    890,
+    204,
+    1705,
+    263
+   ],
+   "text": "التكليف بالمحال وما يتعلق به ((دراسة أصولية)»",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 47,
+   "doc": "0562-028-109-009",
+   "page": 70,
+   "box": [
+    929,
+    156,
+    1081,
+    201
+   ],
+   "text": "نوع العملية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 48,
+   "doc": "0692-000-009-023",
+   "page": 6,
+   "box": [
+    917,
+    115,
+    1466,
+    208
+   ],
+   "text": "قولهم : \" كان مما يفعل كذا \"",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 49,
+   "doc": "0266-006-002-001",
+   "page": 28,
+   "box": [
+    806,
+    290,
+    1135,
+    336
+   ],
+   "text": "محمد بن عبدالرحمن الهدلق",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 50,
+   "doc": "0495-109-002-003",
+   "page": 12,
+   "box": [
+    1979,
+    146,
+    2233,
+    207
+   ],
+   "text": "أكتوبر ٢٠٢٥م",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 51,
+   "doc": "0495-109-002-003",
+   "page": 5,
+   "box": [
+    1979,
+    146,
+    2234,
+    205
+   ],
+   "text": "أكتوبر ٢٠٢٥م",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 52,
+   "doc": "1865-000-143-005",
+   "page": 5,
+   "box": [
+    232,
+    2623,
+    781,
+    2676
+   ],
+   "text": "الأدب العلمي / العدد: ١٤٣ / تموز / ٢٠٢٥",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 53,
+   "doc": "1548-011-001-031",
+   "page": 17,
+   "box": [
+    1155,
+    2632,
+    1658,
+    2678
+   ],
+   "text": "عبد القادر دبون، جليلة بن العمودي",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 54,
+   "doc": "0266-006-002-001",
+   "page": 23,
+   "box": [
+    789,
+    320,
+    1190,
+    376
+   ],
+   "text": "الثقافة النقدية لأبي الطيب المتنبي",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 55,
+   "doc": "0924-012-005-007",
+   "page": 5,
+   "box": [
+    829,
+    53,
+    1138,
+    118
+   ],
+   "text": "مجلة المحاماة",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 56,
+   "doc": "2262-000-008-004",
+   "page": 17,
+   "box": [
+    920,
+    161,
+    1666,
+    222
+   ],
+   "text": "نظام الإنتاج المحلى كآلية للتنمية الصناعية المحلية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 57,
+   "doc": "0964-011-036-029",
+   "page": 25,
+   "box": [
+    278,
+    315,
+    382,
+    364
+   ],
+   "text": "العدد ج٢",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 58,
+   "doc": "0626-018-071,072-004",
+   "page": 7,
+   "box": [
+    909,
+    262,
+    1410,
+    314
+   ],
+   "text": "التحيز فى الأنظمة الغربية لتصنيف المكتبات",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 59,
+   "doc": "7894-000-000-002",
+   "page": 6,
+   "box": [
+    1572,
+    252,
+    1676,
+    319
+   ],
+   "text": "الجمعية العربـ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "logo or masthead artwork"
+  },
+  {
+   "n": 60,
+   "doc": "0691-043-001,004-038",
+   "page": 19,
+   "box": [
+    926,
+    251,
+    1134,
+    321
+   ],
+   "text": "مازن المبارك",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 61,
+   "doc": "0357-022-043-011",
+   "page": 6,
+   "box": [
+    902,
+    89,
+    1742,
+    152
+   ],
+   "text": "أمل - العدد 43 - من تاريخ الاقتصاد بالمغرب، مظاهر وقضايا",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 62,
+   "doc": "2262-000-008-004",
+   "page": 11,
+   "box": [
+    922,
+    164,
+    1667,
+    217
+   ],
+   "text": "نظام الإنتاج المحلى كآلية للتنمية الصناعية المحلية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 63,
+   "doc": "0557-010-003-004",
+   "page": 45,
+   "box": [
+    350,
+    209,
+    852,
+    268
+   ],
+   "text": "دراسة لآراء معلمى المرحلة الثانوية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 64,
+   "doc": "1911-002-002-004",
+   "page": 16,
+   "box": [
+    1596,
+    329,
+    2046,
+    383
+   ],
+   "text": "مجلة جامعة كركوكـ",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 65,
+   "doc": "0827-000-051-002",
+   "page": 21,
+   "box": [
+    908,
+    2661,
+    1110,
+    2690
+   ],
+   "text": "ISNN 1997-6208",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 66,
+   "doc": "1315-005-009-003",
+   "page": 22,
+   "box": [
+    278,
+    166,
+    857,
+    244
+   ],
+   "text": "مستقبل الاستقرار السياسي فى العراق",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 67,
+   "doc": "0694-000-023-013",
+   "page": 15,
+   "box": [
+    498,
+    459,
+    1657,
+    515
+   ],
+   "text": "THEMATIC CONDUCIVENESSES TO THE INVISIBLE. ..",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 68,
+   "doc": "1541-009-002-008",
+   "page": 67,
+   "box": [
+    1254,
+    300,
+    1593,
+    352
+   ],
+   "text": "مجلة البحوث المحاسبية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 69,
+   "doc": "0484-042-263-003",
+   "page": 3,
+   "box": [
+    404,
+    193,
+    1245,
+    240
+   ],
+   "text": "الدكتور حلمى بهجت بدوى بك - برنامج المعاونات الفنية",
+   "rule": "repeats at the same place on other pages",
+   "stratum": "rep-repeated",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 70,
+   "doc": "0701-010-004-013",
+   "page": 5,
+   "box": [
+    166,
+    183,
+    297,
+    226
+   ],
+   "text": "Layout",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a label in a figure or glossary"
+  },
+  {
+   "n": 71,
+   "doc": "0562-028-109-009",
+   "page": 69,
+   "box": [
+    374,
+    132,
+    1640,
+    215
+   ],
+   "text": "ثانيا : الأعمال غير المتكاملة ( المتعلقة بأحد بنود العملية (توريد ومصنعية):",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 72,
+   "doc": "0412-002-004-003",
+   "page": 7,
+   "box": [
+    247,
+    161,
+    905,
+    241
+   ],
+   "text": "وقول عمرو بن معد يكرب الزبيدي :",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 73,
+   "doc": "0655-019-002-011",
+   "page": 3,
+   "box": [
+    1258,
+    108,
+    1639,
+    198
+   ],
+   "text": "أتى الله بقلب سليم .",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 74,
+   "doc": "0692-000-041-008",
+   "page": 2,
+   "box": [
+    983,
+    135,
+    1125,
+    192
+   ],
+   "text": "اليومية :",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 75,
+   "doc": "0562-028-109-009",
+   "page": 25,
+   "box": [
+    723,
+    156,
+    1084,
+    214
+   ],
+   "text": "إرشادات التطبيق",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 76,
+   "doc": "0460-005-002-007",
+   "page": 21,
+   "box": [
+    973,
+    104,
+    1598,
+    169
+   ],
+   "text": "ثانيا - المساعدات الفنية والمعنوية :",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 77,
+   "doc": "0355-000-002-006",
+   "page": 14,
+   "box": [
+    1816,
+    209,
+    2217,
+    269
+   ],
+   "text": "البرابرة المغول . (٢٤) .",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 78,
+   "doc": "0498-000-388-003",
+   "page": 6,
+   "box": [
+    1720,
+    117,
+    1942,
+    165
+   ],
+   "text": "المال- التحلية",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 79,
+   "doc": "0562-028-109-009",
+   "page": 86,
+   "box": [
+    752,
+    156,
+    1132,
+    202
+   ],
+   "text": "بيان بأسماء الورثة الشرعيين",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "caption or a table's source"
+  },
+  {
+   "n": 80,
+   "doc": "0562-028-109-009",
+   "page": 78,
+   "box": [
+    1323,
+    136,
+    1654,
+    192
+   ],
+   "text": "ثانياً : أعمال غير متكاملة",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 81,
+   "doc": "0701-010-004-013",
+   "page": 6,
+   "box": [
+    1142,
+    163,
+    1390,
+    205
+   ],
+   "text": "Mail Opening",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "a label in a figure or glossary"
+  },
+  {
+   "n": 82,
+   "doc": "0701-010-004-013",
+   "page": 4,
+   "box": [
+    180,
+    178,
+    444,
+    213
+   ],
+   "text": "Forms Control",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 83,
+   "doc": "0460-005-002-007",
+   "page": 29,
+   "box": [
+    632,
+    106,
+    874,
+    169
+   ],
+   "text": "القرض الرابع",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 84,
+   "doc": "0040-006-002-010",
+   "page": 2,
+   "box": [
+    819,
+    124,
+    1744,
+    171
+   ],
+   "text": "تقرير عن ورشة العمل الأولى حول صياغة مخرجات / نتاجات التعلم",
+   "rule": "short text in the top 8%",
+   "stratum": "top8",
+   "verdict": "unsure",
+   "what": "a short heading-like line at the top of a page: running section title or heading"
+  },
+  {
+   "n": 85,
+   "doc": "0755-013-142-007",
+   "page": 8,
+   "box": [
+    1239,
+    2547,
+    1643,
+    2594
+   ],
+   "text": "٤٨ - تاريخ العرب والعالم",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 86,
+   "doc": "2051-000-006-005",
+   "page": 4,
+   "box": [
+    247,
+    3129,
+    391,
+    3156
+   ],
+   "text": "العدد (6) 2015",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 87,
+   "doc": "0679-000-014-004",
+   "page": 8,
+   "box": [
+    1002,
+    2827,
+    1051,
+    2845
+   ],
+   "text": "فيروس نجد",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 88,
+   "doc": "0751-015-006-011",
+   "page": 3,
+   "box": [
+    132,
+    3235,
+    1058,
+    3300
+   ],
+   "text": "٨٥ - افاق عربية - حزيران ١٩٩٠ - السنة الخامسة عشرة",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 89,
+   "doc": "0890-019-003-001",
+   "page": 10,
+   "box": [
+    855,
+    2464,
+    1380,
+    2521
+   ],
+   "text": "(٢) معرفة ، الهامش ٢ ص ١٣٨.",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "content",
+   "what": "note"
+  },
+  {
+   "n": 90,
+   "doc": "0755-013-142-007",
+   "page": 6,
+   "box": [
+    1236,
+    2538,
+    1645,
+    2588
+   ],
+   "text": "٤٦ - تاريخ العرب والعالم",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 91,
+   "doc": "0596-004-007-002",
+   "page": 3,
+   "box": [
+    312,
+    2483,
+    828,
+    2554
+   ],
+   "text": "والافتاء والدعوة والارشاد.",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 92,
+   "doc": "0890-019-003-001",
+   "page": 15,
+   "box": [
+    585,
+    2386,
+    1370,
+    2453
+   ],
+   "text": "(١) الماوردى: الأحكام السلطانية، س ٠ ٨ - ٠٨٣",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "content",
+   "what": "note"
+  },
+  {
+   "n": 93,
+   "doc": "0908-000-363-019",
+   "page": 1,
+   "box": [
+    137,
+    3135,
+    1042,
+    3175
+   ],
+   "text": "المهمة المهنية العدد ٣٦٣ جمادى الأولى ١٤٢٩هـ",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 94,
+   "doc": "0460-005-002-007",
+   "page": 3,
+   "box": [
+    1478,
+    2629,
+    1622,
+    2642
+   ],
+   "text": "هو' دون ٠ ٨١٣ ٠٠٢٠١٨٠ ٢/٨١يم",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 95,
+   "doc": "0460-005-002-007",
+   "page": 19,
+   "box": [
+    1657,
+    2625,
+    1682,
+    2637
+   ],
+   "text": "الكوم",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 96,
+   "doc": "0865-021-074-003",
+   "page": 2,
+   "box": [
+    861,
+    2710,
+    1006,
+    2725
+   ],
+   "text": ": : ٥٠٠ حوا ونوين ٥:٤",
+   "rule": "short text in the bottom 6%",
+   "stratum": "bottom6",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 97,
+   "doc": "0562-028-109-009",
+   "page": 84,
+   "box": [
+    1573,
+    1157,
+    1628,
+    1430
+   ],
+   "text": "١ - الأرمل أو الأرملة",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 98,
+   "doc": "1255-000-001-033",
+   "page": 2,
+   "box": [
+    1740,
+    1155,
+    1808,
+    1346
+   ],
+   "text": "ودوفا (1)",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 99,
+   "doc": "0557-010-003-004",
+   "page": 32,
+   "box": [
+    272,
+    2238,
+    307,
+    2333
+   ],
+   "text": "غير موافق",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 100,
+   "doc": "2025-067-002-007",
+   "page": 50,
+   "box": [
+    1778,
+    1294,
+    1825,
+    1438
+   ],
+   "text": "تأثير سلبى",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 101,
+   "doc": "0040-006-002-010",
+   "page": 2,
+   "box": [
+    1835,
+    521,
+    1887,
+    1023
+   ],
+   "text": "المجلد 6 العدد 2 يونيو 2005",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 102,
+   "doc": "1864-000-013-050",
+   "page": 2,
+   "box": [
+    1936,
+    2410,
+    1973,
+    2988
+   ],
+   "text": "KEmpo هافي السوق القديم: 1قدمقادرا if",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 103,
+   "doc": "0312-000-024-019",
+   "page": 19,
+   "box": [
+    1683,
+    1274,
+    1822,
+    1826
+   ],
+   "text": "Paradigme - Syntagme Diachronie - Synchronie",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 104,
+   "doc": "1160-000-001-004",
+   "page": 11,
+   "box": [
+    175,
+    1539,
+    263,
+    1963
+   ],
+   "text": "وجهة نظر عربية",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 105,
+   "doc": "1864-000-013-050",
+   "page": 1,
+   "box": [
+    1980,
+    18,
+    1994,
+    129
+   ],
+   "text": "كيد والت بالص يامرخام",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "noise: a speck, a rule or a picture read as text"
+  },
+  {
+   "n": 106,
+   "doc": "1160-000-001-004",
+   "page": 3,
+   "box": [
+    169,
+    1536,
+    259,
+    1960
+   ],
+   "text": "وجهة نظر عربية",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 107,
+   "doc": "1681-006-011-010",
+   "page": 14,
+   "box": [
+    153,
+    499,
+    203,
+    1082
+   ],
+   "text": "نظام تكاليف كايزين Kaizen Costing",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "a label in a figure or glossary"
+  },
+  {
+   "n": 108,
+   "doc": "2025-067-002-007",
+   "page": 49,
+   "box": [
+    1791,
+    1247,
+    1833,
+    1443
+   ],
+   "text": "الدوافع النفعية",
+   "rule": "text on its side in the outer margin",
+   "stratum": "side",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 109,
+   "doc": "0964-011-036-029",
+   "page": 23,
+   "box": [
+    289,
+    440,
+    1795,
+    491
+   ],
+   "text": "٧. تعليمات سندات الخزينة العامة /مستحقات المقاولين، ذي العدد (١١٨٢/٦)، الصادرة بتاريخ",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "reference"
+  },
+  {
+   "n": 110,
+   "doc": "2025-067-002-007",
+   "page": 43,
+   "box": [
+    250,
+    313,
+    1819,
+    450
+   ],
+   "text": "6/3 متوسط عدد ساعات استخدام أفراد عينة الدراسة من طلاب الجامعات المصرية والسعودية للغة الهجين في تطبيقات الهاتف المحمول:",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "heading"
+  },
+  {
+   "n": 111,
+   "doc": "0073-000-239-002",
+   "page": 8,
+   "box": [
+    240,
+    428,
+    1681,
+    569
+   ],
+   "text": "السنة التحضيرية، وبلغ عددهن (٩٧١٥) طالبة وفق إحصائية عمادة القبول والتسجيل بالجامعة (ملحق٦).",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "a line of the text"
+  },
+  {
+   "n": 112,
+   "doc": "0886-012-044-006",
+   "page": 1,
+   "box": [
+    303,
+    183,
+    1587,
+    510
+   ],
+   "text": "قانون اتحادي رقم ( ١٢) لسنة ١٩٨٤ (١) في شأن اعتماد الحساب الختامي للاتحاد عن السنة المالية المنتهية في ١٩٨٠/١٢/٣١",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "the article's title"
+  },
+  {
+   "n": 113,
+   "doc": "0827-000-051-002",
+   "page": 13,
+   "box": [
+    531,
+    290,
+    1478,
+    342
+   ],
+   "text": "جدول رقم (١) مفهوم عملية اتخاذ القرارات لعدد من الباحثين",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "caption or a table's source"
+  },
+  {
+   "n": 114,
+   "doc": "0266-006-002-001",
+   "page": 1,
+   "box": [
+    224,
+    298,
+    1330,
+    357
+   ],
+   "text": "مجلة جامعة الملك سعود، م ٦، الآداب (٢)، ص ص٤٢٩-٤٧٦ (١٤١٤هـ / ١٩٩٤م).",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 115,
+   "doc": "1769-014-002-002",
+   "page": 1,
+   "box": [
+    848,
+    117,
+    1437,
+    166
+   ],
+   "text": "المجلد 14 - العدد الثاني - ديسمبر 2017",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 116,
+   "doc": "0382-016-063-013",
+   "page": 3,
+   "box": [
+    311,
+    368,
+    1684,
+    501
+   ],
+   "text": "- ((الاقتصاد العماني. ملامح دورة انتعاش جديدة)). الاقتصادي الكويتي، العدد ٢٩٦، نيسان ١٩٩٠، ص٣٦ - ٤١ .",
+   "rule": "the journal's masthead",
+   "stratum": "masthead",
+   "verdict": "content",
+   "what": "reference"
+  },
+  {
+   "n": 117,
+   "doc": "2025-067-002-007",
+   "page": 52,
+   "box": [
+    742,
+    932,
+    767,
+    953
+   ],
+   "text": "11",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 118,
+   "doc": "0562-028-109-009",
+   "page": 71,
+   "box": [
+    1583,
+    341,
+    1625,
+    370
+   ],
+   "text": "٢٥",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 119,
+   "doc": "2025-067-002-007",
+   "page": 39,
+   "box": [
+    885,
+    1259,
+    906,
+    1288
+   ],
+   "text": "3",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 120,
+   "doc": "0557-010-003-004",
+   "page": 34,
+   "box": [
+    918,
+    1851,
+    940,
+    1870
+   ],
+   "text": "-",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 121,
+   "doc": "1862-000-014-009",
+   "page": 16,
+   "box": [
+    299,
+    993,
+    324,
+    1022
+   ],
+   "text": "3",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 122,
+   "doc": "2025-067-002-007",
+   "page": 49,
+   "box": [
+    1325,
+    1522,
+    1354,
+    1543
+   ],
+   "text": "68",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 123,
+   "doc": "2025-067-002-007",
+   "page": 49,
+   "box": [
+    1039,
+    1021,
+    1063,
+    1038
+   ],
+   "text": "30",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 124,
+   "doc": "1681-006-011-010",
+   "page": 50,
+   "box": [
+    1114,
+    1161,
+    1176,
+    1190
+   ],
+   "text": "١١٣",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 125,
+   "doc": "1548-011-001-031",
+   "page": 34,
+   "box": [
+    283,
+    975,
+    304,
+    1002
+   ],
+   "text": "0",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 126,
+   "doc": "2025-067-002-007",
+   "page": 68,
+   "box": [
+    1247,
+    1367,
+    1310,
+    1398
+   ],
+   "text": "180",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 127,
+   "doc": "0827-000-051-002",
+   "page": 21,
+   "box": [
+    1053,
+    1067,
+    1075,
+    1096
+   ],
+   "text": "5",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 128,
+   "doc": "0562-028-109-009",
+   "page": 46,
+   "box": [
+    1614,
+    1092,
+    1638,
+    1122
+   ],
+   "text": "٦",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 129,
+   "doc": "1156-000-077-011",
+   "page": 22,
+   "box": [
+    1103,
+    2103,
+    1131,
+    2123
+   ],
+   "text": "-",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 130,
+   "doc": "2025-067-002-007",
+   "page": 45,
+   "box": [
+    669,
+    1004,
+    690,
+    1032
+   ],
+   "text": "7",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 131,
+   "doc": "0858-016-062-004",
+   "page": 18,
+   "box": [
+    1297,
+    1675,
+    1351,
+    1705
+   ],
+   "text": "2,2",
+   "rule": "a speck read as a digit",
+   "stratum": "speck-digit",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 132,
+   "doc": "1865-000-143-005",
+   "page": 8,
+   "box": [
+    260,
+    2628,
+    323,
+    2678
+   ],
+   "text": "47",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 133,
+   "doc": "1020-002-002-005",
+   "page": 6,
+   "box": [
+    817,
+    2259,
+    895,
+    2299
+   ],
+   "text": "٢٠٤",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 134,
+   "doc": "2051-000-006-005",
+   "page": 6,
+   "box": [
+    62,
+    3093,
+    108,
+    3132
+   ],
+   "text": "51",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 135,
+   "doc": "1156-000-077-011",
+   "page": 17,
+   "box": [
+    1733,
+    3049,
+    1759,
+    3089
+   ],
+   "text": "3",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "content",
+   "what": "table cell"
+  },
+  {
+   "n": 136,
+   "doc": "1474-000-015-014",
+   "page": 28,
+   "box": [
+    837,
+    2634,
+    906,
+    2671
+   ],
+   "text": "294",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 137,
+   "doc": "0734-000-361-006",
+   "page": 12,
+   "box": [
+    833,
+    2516,
+    888,
+    2562
+   ],
+   "text": "٦٤",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 138,
+   "doc": "1450-000-043-005",
+   "page": 5,
+   "box": [
+    2053,
+    3077,
+    2110,
+    3122
+   ],
+   "text": "33",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  },
+  {
+   "n": 139,
+   "doc": "0904-017-001-005",
+   "page": 1,
+   "box": [
+    1156,
+    3235,
+    1217,
+    3284
+   ],
+   "text": "76",
+   "rule": "digits alone at the top or bottom",
+   "stratum": "page-number",
+   "verdict": "furniture",
+   "what": "running head, footer, page number or side tab"
+  }
+ ]
+}
