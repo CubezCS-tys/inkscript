@@ -117,6 +117,13 @@ rule records the experiment, not a theory.
   (the image and line art untouched, checked pixel-identical). Redaction
   was not enough: MuPDF left 19 of 34 runs it could not measure, and every
   engine then read two layers — lines merged, thousands of order inversions.
+- **On a page we rebuild from the scan, every real font's text is neutralised**
+  (experiment 28), not only junk-encoded ones: a stamped running head or a typeset
+  caption is already in Azure's reading, so its own text beside our layer was copied
+  twice, often in a broken encoding the junk test passes. 23 of 205 documents, 9,218
+  words; their order inversions 78 → 0, pages pixel-identical.
+- **Saved with `garbage=1`**, not 3: identical output, a 41-page document 16.4 → 9.5
+  minutes (the deeper pass was 65% of the slowest build).
 - **Persian look-alike letters are folded on Arabic pages** (`text.fold_letters`, in
   `ocr.azure.load_azure`): Azure writes ک for ك and ی for ي/ى in 0.09% of words, in
   69 of 139 scanned documents (experiment 19) — the word looks right and a search typed

@@ -307,9 +307,12 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
         # not measure — so every text object is cut out of the content
         # streams directly; the image and any line art are untouched.
         strip_text_objects(src, page)
-        jf = set(junk_fonts(src, page)) | set(junk_named.get(pn, ()))
+        # Every real font left on a page we rebuild from the scan goes out of the text too (experiment 28): Azure
+        # read the page as rendered, so a stamped running head or a typeset caption is already in our layer, and
+        # its own text beside ours was read twice — often in a broken encoding the junk test passes ("واالربعون").
+        jf = {f[4] for f in page.get_fonts(full=True) if f[3] != "Dummy"} | set(junk_named.get(pn, ()))
         if jf:
-            neutralise_text(src, page, jf)                 # symbol junk beside our layer would be a second text
+            neutralise_text(src, page, jf)                 # drawn as before; only our layer is text
 
         pwords = [w for w in words if w["page"] == pn]
         info = dict(page=pn, words=len(pwords), text="azure")
@@ -370,7 +373,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                                     glyphs=glyphs, blobs=n_blobs, stray=n_stray, pieces=pstats, placed=placed_texts, runs=run_texts))
     out_dir.mkdir(parents=True, exist_ok=True)
     mark_r2l(src)
-    src.save(out_dir / f"{stem}.pdf", garbage=3, deflate=True); src.close()
+    src.save(out_dir / f"{stem}.pdf", garbage=1, deflate=True); src.close()
     if len(A):
         for pr in A.protos:                                # export needs the outlines, not the rasters
             for k in ("fill", "edge", "dist"):
@@ -382,7 +385,7 @@ def build_document(stem, azure_dir, scan_pdf, gemini_md, out_dir, vector, min_ex
                                   repeated=sum(c for c in A.counts if c > 1))
     if vec is not None:
         mark_r2l(vec)
-        vec.save(out_dir / f"{stem}_vector.pdf", garbage=3, deflate=True); vec.close()
+        vec.save(out_dir / f"{stem}_vector.pdf", garbage=1, deflate=True); vec.close()
     return report
 
 

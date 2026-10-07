@@ -146,3 +146,12 @@ corrections), `set/summary.json`, `set/pages.json`, `hunt.json`, `leftover.json`
 * 2026-10-06 23:57 — set started (205 documents, 3,254 pages, 3 workers, watchdog up).
 * 2026-10-07 02:50 — 19 documents built; front matter studied on all 205 without the build.
 * 2026-10-07 07:37 — set done (205/205, exit 0 every one); 07:42 `fix` done ($0.125); analysis and showcase.
+
+## Applied (2026-10-07)
+
+All four patches are in `src/`. The title fallback was re-scored before merging: experiment 26's hand-read truth
+title 9 → 10 of 10 (authors, footnote links unchanged; headings P 0.87 → 0.89, R 0.96 → 0.93), held-out set
+unchanged; one guard added (a page that opens with body text has no title from the fallback — a synthetic test
+had its chapter heading taken as the title); on all 205 documents titles matching the catalogue 171 / 204 and
+catalogue authors 132 / 214 with the guard, as without it.
+

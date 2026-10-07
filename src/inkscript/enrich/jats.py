@@ -492,6 +492,12 @@ def write(doc: dict, quotes: list[dict], marks: dict, stem: str, path: Path, alt
                 _append(sp, f"؛ المطبوع «{rd}» والآية «{vs}»")
             if qt.get("citation"):
                 _append(sp, f"؛ العزو في النص: {qt['citation']['text']}")
+    for g in back.findall("fn-group"):          # a notes heading with no notes after it (experiment 28): JATS wants
+        if g.find("fn") is None:                # (fn | x)+ in a group, so the heading becomes the block's anchor
+            t = g.find("title")
+            if t is not None:
+                meta_("notes-heading", t.text or "", t.get("id"))
+            back.remove(g)
     if not len(back):
         art.remove(back)
     if not len(body):
