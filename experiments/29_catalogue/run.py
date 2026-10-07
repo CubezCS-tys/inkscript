@@ -96,7 +96,7 @@ def one(args):
         scan = az / f"{stem}.pdf"
         marks = assess(doc, quotes, scan)
         overlay(doc, marks, applied_entries(d, stem), quotes)
-        cat = open_catalogue() if mode == "after" else None
+        cat = open_catalogue() if mode != "before" else None
         meta = read_meta(stem, [az, SET28 / "gemini"], catalogue=cat)
         jats.structure_of(doc, meta, scan)
         jn, an = f"{stem}.jats.xml", f"{stem}.alto.xml"
