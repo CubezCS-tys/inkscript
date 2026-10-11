@@ -429,6 +429,9 @@ def main(argv=None) -> int:
     p.add_argument("--dpi", type=int, default=300); p.add_argument("--out", help="write the per-page curve as JSON")
     p.set_defaults(fn=cmd_alphabet)
 
+    from .edition.build import add_parser as edition_parser       # experiment 35
+    edition_parser(sub)
+
     a = ap.parse_args(argv)
     if a.cmd == "frontpage":
         from .ocr.gemini import GEMINI_MODEL

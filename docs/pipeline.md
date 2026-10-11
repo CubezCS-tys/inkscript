@@ -305,6 +305,10 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/gold/format.py`, `draft.py` | the gold page file (experiment 34, D26): schema, checks, atomic save with history, progress, ALTO export; a draft page from Azure's reading (lines, blocks with kinds and columns, the page image) |
 | `src/inkscript/gold/text.py`, `score.py` | the faithful and folded normalisations and a bit-parallel edit distance; `inkscript score` |
 | `src/inkscript/viewer/correct.py`, `app/correct.*` | `inkscript view --gold`: the correction mode (server with checked saves, progress and hours left; the app) |
+| `src/inkscript/edition/model.py` | one article from its JATS + ALTO, the shape every derived edition is written from: front matter, body nodes (headings, paragraphs, XHTML tables, MathML formulas), notes, references, verses; ALTO blocks tied to the nodes (experiment 35) |
+| `src/inkscript/edition/html.py`, `epub.py`, `scan.py` | the reading page (phone first, each paragraph with its clip of the scan) and the EPUB 3, from one renderer; the page pictures |
+| `src/inkscript/edition/printpdf.py`, `pdftext.py`, `fonts.py` | the two re-typeset PDFs (layout-faithful, one column) with LuaLaTeX; the text layer rewritten so pdfium reads it in order (D27); the OFL fonts |
+| `src/inkscript/edition/data.py`, `check.py`, `build.py` | Markdown and the dataset record; the checks on the finished files (every word once, reading order); `inkscript edition` |
 
 | Command | Needs | Gives |
 |---|---|---|
@@ -318,6 +322,7 @@ the tests round-trip `visual()` through it.
 | `inkscript view OUT [--doc ID] [--port N] [--static DIR]` | — | the outputs in a browser: scan with every ALTO word, the JATS as an article, linked; both XML files |
 | `inkscript view --gold GOLD [--port 8766]` | — | the correction mode: each line's scan beside its draft, disagreements marked, Enter to accept; saves as you go |
 | `inkscript score --gold GOLD (--pred DIR \| --reader azure-draft\|gemini-draft) [--out FILE]` | — | the reader's scores per kind and decade, 95% intervals over documents |
+| `inkscript edition MASTERS --out OUT [--doc ID] [--only html,epub,layout,onecol,md,jsonl] [--workers 2] [--resume]` | LuaLaTeX (TeX Live with babel, fontspec) for the PDFs | per article `OUT/<id>/`: `<id>.html` + `scan/`, `.epub`, `.layout.pdf`, `.onecol.pdf`, `.md`, `.jsonl`, `.checks.json`; `OUT/articles.jsonl`, `OUT/summary.json` |
 | `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
 
 Without the bucket or keys, everything still runs on the bundled document

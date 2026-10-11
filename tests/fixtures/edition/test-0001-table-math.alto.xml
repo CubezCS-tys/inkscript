@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alto xmlns="http://www.loc.gov/standards/alto/ns-v4#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SCHEMAVERSION="4.4" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# https://www.loc.gov/standards/alto/v4/alto-4-4.xsd">
+ <Description>
+  <MeasurementUnit>pixel</MeasurementUnit>
+  <sourceImageInformation>
+   <fileName>test-0001-table-math.pdf</fileName>
+   <documentIdentifier documentIdentifierLocation="inkscript test fixtures">test-0001-table-math</documentIdentifier>
+  </sourceImageInformation>
+  <OCRProcessing ID="handmade">
+   <ocrProcessingStep>
+    <processingCategory>contentGeneration</processingCategory>
+    <processingStepDescription>Hand-made test master (experiment 35), NOT an archive page: the page was typeset in Chromium from a written spec and every word's box measured in the browser; no OCR. Pixels at 288 dpi.</processingStepDescription>
+    <processingSoftware>
+     <softwareCreator>inkscript</softwareCreator>
+     <softwareName>experiments/35_edition/testdocs/make_testdocs.py</softwareName>
+     <softwareVersion>exp35</softwareVersion>
+    </processingSoftware>
+   </ocrProcessingStep>
+  </OCRProcessing>
+ </Description>
+ <Tags>
+  <StructureTag ID="role.body" TYPE="paragraph-role" LABEL="body"/>
+  <StructureTag ID="role.title" TYPE="paragraph-role" LABEL="title"/>
+  <StructureTag ID="role.author" TYPE="paragraph-role" LABEL="author"/>
+  <StructureTag ID="role.sectionHeading" TYPE="paragraph-role" LABEL="sectionHeading"/>
+  <StructureTag ID="role.footnote" TYPE="paragraph-role" LABEL="footnote"/>
+  <StructureTag ID="role.pageNumber" TYPE="paragraph-role" LABEL="pageNumber"/>
+  <OtherTag ID="trust.agreed" TYPE="trust" LABEL="agreed" DESCRIPTION="No signal raised a doubt (hand-made: the text is the spec's)."/>
+  <OtherTag ID="kind.formula" TYPE="content-kind" LABEL="formula" DESCRIPTION="The ink of an inline formula: the word is a symbol of the formula held in the JATS as inline-formula (MathML + LaTeX)."/>
+ </Tags>
+ <Layout>
+  <Page ID="page1" PHYSICAL_IMG_NR="1" WIDTH="1749" HEIGHT="2481">
+   <PrintSpace HPOS="0" VPOS="66" WIDTH="1749" HEIGHT="2325">
+    <TextBlock ID="p1b1" TAGREFS="role.pageNumber" LANG="ar" BASEDIRECTION="rtl" HPOS="860" VPOS="63" WIDTH="29" HEIGHT="63">
+     <TextLine ID="p1b1l1" BASEDIRECTION="rtl" HPOS="860" VPOS="63" WIDTH="29" HEIGHT="63">
+      <String ID="p1w0001" CONTENT="٤٥" WC="0.95" TAGREFS="trust.agreed" HPOS="860" VPOS="63" WIDTH="29" HEIGHT="63"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b2" TAGREFS="role.title" LANG="ar" BASEDIRECTION="rtl" HPOS="260" VPOS="144" WIDTH="1230" HEIGHT="198" xlink:href="test-0001-table-math.jats.xml#p1b2" xlink:type="simple">
+     <TextLine ID="p1b2l1" BASEDIRECTION="rtl" HPOS="260" VPOS="144" WIDTH="1230" HEIGHT="105">
+      <String ID="p1w0002" CONTENT="أثر" WC="0.95" TAGREFS="trust.agreed" HPOS="1430" VPOS="144" WIDTH="59" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0003" CONTENT="التعلم" WC="0.95" TAGREFS="trust.agreed" HPOS="1285" VPOS="144" WIDTH="131" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0004" CONTENT="النشط" WC="0.95" TAGREFS="trust.agreed" HPOS="1126" VPOS="144" WIDTH="145" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0005" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1043" VPOS="144" WIDTH="70" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0006" CONTENT="تحصيل" WC="0.95" TAGREFS="trust.agreed" HPOS="857" VPOS="144" WIDTH="172" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0007" CONTENT="طلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="711" VPOS="144" WIDTH="133" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0008" CONTENT="المرحلة" WC="0.95" TAGREFS="trust.agreed" HPOS="529" VPOS="144" WIDTH="169" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0009" CONTENT="الثانوية" WC="0.95" TAGREFS="trust.agreed" HPOS="343" VPOS="144" WIDTH="172" HEIGHT="105"/>
+      <SP/>
+      <String ID="p1w0010" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="260" VPOS="144" WIDTH="70" HEIGHT="105"/>
+     </TextLine>
+     <TextLine ID="p1b2l2" BASEDIRECTION="rtl" HPOS="757" VPOS="237" WIDTH="235" HEIGHT="105">
+      <String ID="p1w0011" CONTENT="الرياضيات" WC="0.95" TAGREFS="trust.agreed" HPOS="757" VPOS="237" WIDTH="235" HEIGHT="105"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b3" TAGREFS="role.author" LANG="ar" BASEDIRECTION="rtl" HPOS="686" VPOS="362" WIDTH="377" HEIGHT="72" xlink:href="test-0001-table-math.jats.xml#p1b3" xlink:type="simple">
+     <TextLine ID="p1b3l1" BASEDIRECTION="rtl" HPOS="686" VPOS="362" WIDTH="377" HEIGHT="72">
+      <String ID="p1w0012" CONTENT="د." WC="0.95" TAGREFS="trust.agreed" HPOS="1037" VPOS="362" WIDTH="26" HEIGHT="72"/>
+      <SP/>
+      <String ID="p1w0013" CONTENT="سامي" WC="0.95" TAGREFS="trust.agreed" HPOS="941" VPOS="362" WIDTH="87" HEIGHT="72"/>
+      <SP/>
+      <String ID="p1w0014" CONTENT="عبد" WC="0.95" TAGREFS="trust.agreed" HPOS="878" VPOS="362" WIDTH="54" HEIGHT="72"/>
+      <SP/>
+      <String ID="p1w0015" CONTENT="الله" WC="0.95" TAGREFS="trust.agreed" HPOS="818" VPOS="362" WIDTH="50" HEIGHT="72"/>
+      <SP/>
+      <String ID="p1w0016" CONTENT="الخطيب" WC="0.95" TAGREFS="trust.agreed" HPOS="686" VPOS="362" WIDTH="123" HEIGHT="72"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b4" TAGREFS="role.sectionHeading" LANG="ar" BASEDIRECTION="rtl" HPOS="1312" VPOS="478" WIDTH="305" HEIGHT="78" xlink:href="test-0001-table-math.jats.xml#p1b4" xlink:type="simple">
+     <TextLine ID="p1b4l1" BASEDIRECTION="rtl" HPOS="1312" VPOS="478" WIDTH="305" HEIGHT="78">
+      <String ID="p1w0017" CONTENT="أولاً:" WC="0.95" TAGREFS="trust.agreed" HPOS="1545" VPOS="478" WIDTH="72" HEIGHT="78"/>
+      <SP/>
+      <String ID="p1w0018" CONTENT="منهج" WC="0.95" TAGREFS="trust.agreed" HPOS="1450" VPOS="478" WIDTH="85" HEIGHT="78"/>
+      <SP/>
+      <String ID="p1w0019" CONTENT="الدراسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1312" VPOS="478" WIDTH="128" HEIGHT="78"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b5" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="132" VPOS="569" WIDTH="1485" HEIGHT="146" xlink:href="test-0001-table-math.jats.xml#p1b5" xlink:type="simple">
+     <TextLine ID="p1b5l1" BASEDIRECTION="rtl" HPOS="132" VPOS="569" WIDTH="1437" HEIGHT="66">
+      <String ID="p1w0020" CONTENT="اتبعت" WC="0.95" TAGREFS="trust.agreed" HPOS="1487" VPOS="569" WIDTH="82" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0021" CONTENT="الدراسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1360" VPOS="569" WIDTH="107" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0022" CONTENT="المنهج" WC="0.95" TAGREFS="trust.agreed" HPOS="1252" VPOS="569" WIDTH="88" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0023" CONTENT="شبه" WC="0.95" TAGREFS="trust.agreed" HPOS="1177" VPOS="569" WIDTH="56" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0024" CONTENT="التجريبي،" WC="0.95" TAGREFS="trust.agreed" HPOS="1020" VPOS="569" WIDTH="137" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0025" CONTENT="وطبقت" WC="0.95" TAGREFS="trust.agreed" HPOS="896" VPOS="569" WIDTH="105" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0026" CONTENT="أدواتها" WC="0.95" TAGREFS="trust.agreed" HPOS="785" VPOS="569" WIDTH="91" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0027" CONTENT="على" WC="0.95" TAGREFS="trust.agreed" HPOS="708" VPOS="569" WIDTH="58" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0028" CONTENT="عينة" WC="0.95" TAGREFS="trust.agreed" HPOS="624" VPOS="569" WIDTH="65" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0029" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="563" VPOS="569" WIDTH="42" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0030" CONTENT="١٢٠" WC="0.95" TAGREFS="trust.agreed" HPOS="502" VPOS="569" WIDTH="42" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0031" CONTENT="طالباً" WC="0.95" TAGREFS="trust.agreed" HPOS="415" VPOS="569" WIDTH="67" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0032" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="351" VPOS="569" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0033" CONTENT="العام" WC="0.95" TAGREFS="trust.agreed" HPOS="267" VPOS="569" WIDTH="65" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0034" CONTENT="الدراسي" WC="0.95" TAGREFS="trust.agreed" HPOS="132" VPOS="569" WIDTH="116" HEIGHT="66"/>
+     </TextLine>
+     <TextLine ID="p1b5l2" BASEDIRECTION="rtl" HPOS="524" VPOS="639" WIDTH="1093" HEIGHT="76">
+      <String ID="p1w0035" CONTENT="2019/2020،" WC="0.95" TAGREFS="trust.agreed" HPOS="1413" VPOS="649" WIDTH="204" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0036" CONTENT="على" WC="0.95" TAGREFS="trust.agreed" HPOS="1347" VPOS="649" WIDTH="58" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0037" CONTENT="نحو" WC="0.95" TAGREFS="trust.agreed" HPOS="1281" VPOS="649" WIDTH="57" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0038" CONTENT="ما" WC="0.95" TAGREFS="trust.agreed" HPOS="1244" VPOS="649" WIDTH="29" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0039" CONTENT="اقترحه" WC="0.95" TAGREFS="trust.agreed" HPOS="1134" VPOS="649" WIDTH="101" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0040" CONTENT="هيك" WC="0.95" TAGREFS="trust.agreed" HPOS="1061" VPOS="649" WIDTH="64" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0041" CONTENT="(Hake," WC="0.95" TAGREFS="trust.agreed" LANG="en" HPOS="826" VPOS="655" WIDTH="115" HEIGHT="42"/>
+      <SP/>
+      <String ID="p1w0042" CONTENT="1998)" WC="0.95" TAGREFS="trust.agreed" HPOS="952" VPOS="655" WIDTH="100" HEIGHT="42"/>
+      <SP/>
+      <String ID="p1w0043" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="772" VPOS="649" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0044" CONTENT="قياس" WC="0.95" TAGREFS="trust.agreed" HPOS="681" VPOS="649" WIDTH="82" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0045" CONTENT="الكسب" WC="0.95" TAGREFS="trust.agreed" HPOS="577" VPOS="649" WIDTH="96" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0046" CONTENT="(١)" WC="0.95" TAGREFS="trust.agreed" HPOS="535" VPOS="639" WIDTH="33" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0047" CONTENT="." WC="0.95" TAGREFS="trust.agreed" HPOS="524" VPOS="655" WIDTH="11" HEIGHT="42"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b6" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="132" VPOS="732" WIDTH="1485" HEIGHT="135" xlink:href="test-0001-table-math.jats.xml#p1b6" xlink:type="simple">
+     <TextLine ID="p1b6l1" BASEDIRECTION="rtl" HPOS="132" VPOS="732" WIDTH="1437" HEIGHT="66">
+      <String ID="p1w0048" CONTENT="ويحسب" WC="0.95" TAGREFS="trust.agreed" HPOS="1450" VPOS="732" WIDTH="119" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0049" CONTENT="متوسط" WC="0.95" TAGREFS="trust.agreed" HPOS="1329" VPOS="732" WIDTH="109" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0050" CONTENT="الدرجات" WC="0.95" TAGREFS="trust.agreed" HPOS="1198" VPOS="732" WIDTH="119" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0051" CONTENT="بالعلاقة" WC="0.95" TAGREFS="trust.agreed" HPOS="1080" VPOS="732" WIDTH="107" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0052" CONTENT="م" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="1049" VPOS="732" WIDTH="20" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0053" CONTENT="=" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="1007" VPOS="732" WIDTH="31" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0054" CONTENT="مج" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="940" VPOS="732" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0055" CONTENT="س" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="888" VPOS="732" WIDTH="41" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0056" CONTENT="÷" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="849" VPOS="732" WIDTH="31" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0057" CONTENT="ن" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="816" VPOS="732" WIDTH="24" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0058" CONTENT="حيث" WC="0.95" TAGREFS="trust.agreed" HPOS="732" VPOS="732" WIDTH="73" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0059" CONTENT="مج" WC="0.95" TAGREFS="trust.agreed" HPOS="675" VPOS="732" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0060" CONTENT="مجموع" WC="0.95" TAGREFS="trust.agreed" HPOS="559" VPOS="732" WIDTH="105" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0061" CONTENT="الدرجات" WC="0.95" TAGREFS="trust.agreed" HPOS="428" VPOS="732" WIDTH="119" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0062" CONTENT="و" WC="0.95" TAGREFS="trust.agreed" HPOS="398" VPOS="732" WIDTH="19" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0063" CONTENT="ن" WC="0.95" TAGREFS="trust.agreed" HPOS="362" VPOS="732" WIDTH="24" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0064" CONTENT="عدد" WC="0.95" TAGREFS="trust.agreed" HPOS="295" VPOS="732" WIDTH="56" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0065" CONTENT="الطلاب،" WC="0.95" TAGREFS="trust.agreed" HPOS="176" VPOS="732" WIDTH="107" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0066" CONTENT="ثم" WC="0.95" TAGREFS="trust.agreed" HPOS="132" VPOS="732" WIDTH="32" HEIGHT="66"/>
+     </TextLine>
+     <TextLine ID="p1b6l2" BASEDIRECTION="rtl" HPOS="1215" VPOS="801" WIDTH="402" HEIGHT="66">
+      <String ID="p1w0067" CONTENT="يجمع" WC="0.95" TAGREFS="trust.agreed" HPOS="1541" VPOS="801" WIDTH="76" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0068" CONTENT="الأثر" WC="0.95" TAGREFS="trust.agreed" HPOS="1474" VPOS="801" WIDTH="58" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0069" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1421" VPOS="801" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0070" CONTENT="المعادلة" WC="0.95" TAGREFS="trust.agreed" HPOS="1307" VPOS="801" WIDTH="105" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0071" CONTENT="الآتية:" WC="0.95" TAGREFS="trust.agreed" HPOS="1215" VPOS="801" WIDTH="83" HEIGHT="66"/>
+     </TextLine>
+    </TextBlock>
+    <Illustration ID="p1eq1" TYPE="formula" HPOS="132" VPOS="880" WIDTH="903" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p1eq1" xlink:type="simple"/>
+    <TextBlock ID="p1b7" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="873" VPOS="964" WIDTH="695" HEIGHT="66" xlink:href="test-0001-table-math.jats.xml#p1b7" xlink:type="simple">
+     <TextLine ID="p1b7l1" BASEDIRECTION="rtl" HPOS="873" VPOS="964" WIDTH="695" HEIGHT="66">
+      <String ID="p1w0072" CONTENT="ويستخرج" WC="0.95" TAGREFS="trust.agreed" HPOS="1426" VPOS="964" WIDTH="142" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0073" CONTENT="الانحراف" WC="0.95" TAGREFS="trust.agreed" HPOS="1290" VPOS="964" WIDTH="128" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0074" CONTENT="المعياري" WC="0.95" TAGREFS="trust.agreed" HPOS="1164" VPOS="964" WIDTH="116" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0075" CONTENT="للدرجات" WC="0.95" TAGREFS="trust.agreed" HPOS="1036" VPOS="964" WIDTH="120" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0076" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="985" VPOS="964" WIDTH="42" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0077" CONTENT="العلاقة:" WC="0.95" TAGREFS="trust.agreed" HPOS="873" VPOS="964" WIDTH="103" HEIGHT="66"/>
+     </TextLine>
+    </TextBlock>
+    <Illustration ID="p1eq2" TYPE="formula" HPOS="132" VPOS="1049" WIDTH="974" HEIGHT="168" xlink:href="test-0001-table-math.jats.xml#p1eq2" xlink:type="simple"/>
+    <TextBlock ID="p1b8" TAGREFS="role.footnote" LANG="ar" BASEDIRECTION="rtl" HPOS="842" VPOS="2332" WIDTH="775" HEIGHT="57" xlink:href="test-0001-table-math.jats.xml#p1b8" xlink:type="simple">
+     <TextLine ID="p1b8l1" BASEDIRECTION="rtl" HPOS="842" VPOS="2332" WIDTH="775" HEIGHT="57">
+      <String ID="p1w0078" CONTENT="(١)" WC="0.95" TAGREFS="trust.agreed" HPOS="1585" VPOS="2332" WIDTH="32" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0079" CONTENT="أجريت" WC="0.95" TAGREFS="trust.agreed" HPOS="1497" VPOS="2332" WIDTH="80" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0080" CONTENT="الدراسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1402" VPOS="2332" WIDTH="88" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0081" CONTENT="بإشراف" WC="0.95" TAGREFS="trust.agreed" HPOS="1307" VPOS="2332" WIDTH="88" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0082" CONTENT="وزارة" WC="0.95" TAGREFS="trust.agreed" HPOS="1237" VPOS="2332" WIDTH="62" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0083" CONTENT="التربية" WC="0.95" TAGREFS="trust.agreed" HPOS="1154" VPOS="2332" WIDTH="76" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0084" CONTENT="والتعليم،" WC="0.95" TAGREFS="trust.agreed" HPOS="1047" VPOS="2332" WIDTH="100" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0085" CONTENT="تقرير" WC="0.95" TAGREFS="trust.agreed" HPOS="980" VPOS="2332" WIDTH="60" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0086" CONTENT="رقم" WC="0.95" TAGREFS="trust.agreed" HPOS="928" VPOS="2332" WIDTH="44" HEIGHT="57"/>
+      <SP/>
+      <String ID="p1w0087" CONTENT="17-B." WC="0.95" TAGREFS="trust.agreed" LANG="en" HPOS="842" VPOS="2332" WIDTH="80" HEIGHT="57"/>
+     </TextLine>
+    </TextBlock>
+   </PrintSpace>
+  </Page>
+  <Page ID="page2" PHYSICAL_IMG_NR="2" WIDTH="1749" HEIGHT="2481">
+   <PrintSpace HPOS="0" VPOS="66" WIDTH="1749" HEIGHT="867">
+    <TextBlock ID="p2b1" TAGREFS="role.pageNumber" LANG="ar" BASEDIRECTION="rtl" HPOS="859" VPOS="63" WIDTH="31" HEIGHT="63">
+     <TextLine ID="p2b1l1" BASEDIRECTION="rtl" HPOS="859" VPOS="63" WIDTH="31" HEIGHT="63">
+      <String ID="p2w0088" CONTENT="٤٦" WC="0.95" TAGREFS="trust.agreed" HPOS="859" VPOS="63" WIDTH="31" HEIGHT="63"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p2b2" TAGREFS="role.sectionHeading" LANG="ar" BASEDIRECTION="rtl" HPOS="1314" VPOS="174" WIDTH="303" HEIGHT="78" xlink:href="test-0001-table-math.jats.xml#p2b2" xlink:type="simple">
+     <TextLine ID="p2b2l1" BASEDIRECTION="rtl" HPOS="1314" VPOS="174" WIDTH="303" HEIGHT="78">
+      <String ID="p2w0089" CONTENT="ثانياً:" WC="0.95" TAGREFS="trust.agreed" HPOS="1538" VPOS="174" WIDTH="79" HEIGHT="78"/>
+      <SP/>
+      <String ID="p2w0090" CONTENT="عينة" WC="0.95" TAGREFS="trust.agreed" HPOS="1452" VPOS="174" WIDTH="75" HEIGHT="78"/>
+      <SP/>
+      <String ID="p2w0091" CONTENT="الدراسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1314" VPOS="174" WIDTH="128" HEIGHT="78"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p2b3" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="163" VPOS="266" WIDTH="1406" HEIGHT="66" xlink:href="test-0001-table-math.jats.xml#p2b3" xlink:type="simple">
+     <TextLine ID="p2b3l1" BASEDIRECTION="rtl" HPOS="163" VPOS="266" WIDTH="1406" HEIGHT="66">
+      <String ID="p2w0092" CONTENT="توزعت" WC="0.95" TAGREFS="trust.agreed" HPOS="1470" VPOS="266" WIDTH="99" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0093" CONTENT="العينة" WC="0.95" TAGREFS="trust.agreed" HPOS="1382" VPOS="266" WIDTH="80" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0094" CONTENT="على" WC="0.95" TAGREFS="trust.agreed" HPOS="1315" VPOS="266" WIDTH="58" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0095" CONTENT="صفين" WC="0.95" TAGREFS="trust.agreed" HPOS="1221" VPOS="266" WIDTH="85" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0096" CONTENT="دراسيين،" WC="0.95" TAGREFS="trust.agreed" HPOS="1083" VPOS="266" WIDTH="129" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0097" CONTENT="ويبين" WC="0.95" TAGREFS="trust.agreed" HPOS="992" VPOS="266" WIDTH="82" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0098" CONTENT="الجدول" WC="0.95" TAGREFS="trust.agreed" HPOS="877" VPOS="266" WIDTH="107" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0099" CONTENT="الآتي" WC="0.95" TAGREFS="trust.agreed" HPOS="799" VPOS="266" WIDTH="69" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0100" CONTENT="أعداد" WC="0.95" TAGREFS="trust.agreed" HPOS="715" VPOS="266" WIDTH="75" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0101" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="607" VPOS="266" WIDTH="99" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0102" CONTENT="ونسبهم" WC="0.95" TAGREFS="trust.agreed" HPOS="493" VPOS="266" WIDTH="105" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0103" CONTENT="بحسب" WC="0.95" TAGREFS="trust.agreed" HPOS="387" VPOS="266" WIDTH="97" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0104" CONTENT="الجنس" WC="0.95" TAGREFS="trust.agreed" HPOS="281" VPOS="266" WIDTH="97" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0105" CONTENT="والصف:" WC="0.95" TAGREFS="trust.agreed" HPOS="163" VPOS="266" WIDTH="109" HEIGHT="66"/>
+     </TextLine>
+    </TextBlock>
+    <ComposedBlock ID="p2t1" TYPE="table" HPOS="132" VPOS="350" WIDTH="1485" HEIGHT="423" xlink:href="test-0001-table-math.jats.xml#p2t1" xlink:type="simple">
+     <TextBlock ID="p2b4" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="509" VPOS="347" WIDTH="732" HEIGHT="66" xlink:href="test-0001-table-math.jats.xml#p2b4" xlink:type="simple">
+      <TextLine ID="p2b4l1" BASEDIRECTION="rtl" HPOS="509" VPOS="347" WIDTH="732" HEIGHT="66">
+       <String ID="p2w0106" CONTENT="جدول" WC="0.95" TAGREFS="trust.agreed" HPOS="1155" VPOS="347" WIDTH="86" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0107" CONTENT="(١):" WC="0.95" TAGREFS="trust.agreed" HPOS="1097" VPOS="347" WIDTH="49" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0108" CONTENT="توزيع" WC="0.95" TAGREFS="trust.agreed" HPOS="1014" VPOS="347" WIDTH="75" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0109" CONTENT="عينة" WC="0.95" TAGREFS="trust.agreed" HPOS="942" VPOS="347" WIDTH="64" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0110" CONTENT="الدراسة" WC="0.95" TAGREFS="trust.agreed" HPOS="824" VPOS="347" WIDTH="109" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0111" CONTENT="بحسب" WC="0.95" TAGREFS="trust.agreed" HPOS="723" VPOS="347" WIDTH="93" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0112" CONTENT="الجنس" WC="0.95" TAGREFS="trust.agreed" HPOS="619" VPOS="347" WIDTH="95" HEIGHT="66"/>
+       <SP/>
+       <String ID="p2w0113" CONTENT="والصف" WC="0.95" TAGREFS="trust.agreed" HPOS="509" VPOS="347" WIDTH="102" HEIGHT="66"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c00" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1081" VPOS="428" WIDTH="171" HEIGHT="137" xlink:href="test-0001-table-math.jats.xml#p2t1c00" xlink:type="simple">
+      <TextLine ID="p2t1c00l1" BASEDIRECTION="rtl" HPOS="1134" VPOS="464" WIDTH="63" HEIGHT="63">
+       <String ID="p2w0114" CONTENT="الفئة" WC="0.95" TAGREFS="trust.agreed" HPOS="1134" VPOS="464" WIDTH="63" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c01" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="639" VPOS="428" WIDTH="441" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c01" xlink:type="simple">
+      <TextLine ID="p2t1c01l1" BASEDIRECTION="rtl" HPOS="781" VPOS="430" WIDTH="159" HEIGHT="63">
+       <String ID="p2w0115" CONTENT="عدد" WC="0.95" TAGREFS="trust.agreed" HPOS="886" VPOS="430" WIDTH="53" HEIGHT="63"/>
+       <SP/>
+       <String ID="p2w0116" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="781" VPOS="430" WIDTH="98" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c03" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="498" VPOS="428" WIDTH="142" HEIGHT="137" xlink:href="test-0001-table-math.jats.xml#p2t1c03" xlink:type="simple">
+      <TextLine ID="p2t1c03l1" BASEDIRECTION="rtl" HPOS="526" VPOS="464" WIDTH="85" HEIGHT="63">
+       <String ID="p2w0117" CONTENT="النسبة" WC="0.95" TAGREFS="trust.agreed" HPOS="526" VPOS="464" WIDTH="85" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c11" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="863" VPOS="497" WIDTH="217" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c11" xlink:type="simple">
+      <TextLine ID="p2t1c11l1" BASEDIRECTION="rtl" HPOS="892" VPOS="498" WIDTH="160" HEIGHT="63">
+       <String ID="p2w0118" CONTENT="الصف" WC="0.95" TAGREFS="trust.agreed" HPOS="971" VPOS="498" WIDTH="81" HEIGHT="63"/>
+       <SP/>
+       <String ID="p2w0119" CONTENT="الأول" WC="0.95" TAGREFS="trust.agreed" HPOS="892" VPOS="498" WIDTH="72" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c12" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="639" VPOS="497" WIDTH="224" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c12" xlink:type="simple">
+      <TextLine ID="p2t1c12l1" BASEDIRECTION="rtl" HPOS="668" VPOS="498" WIDTH="167" HEIGHT="63">
+       <String ID="p2w0120" CONTENT="الصف" WC="0.95" TAGREFS="trust.agreed" HPOS="754" VPOS="498" WIDTH="81" HEIGHT="63"/>
+       <SP/>
+       <String ID="p2w0121" CONTENT="الثاني" WC="0.95" TAGREFS="trust.agreed" HPOS="668" VPOS="498" WIDTH="78" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c20" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1081" VPOS="566" WIDTH="171" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c20" xlink:type="simple">
+      <TextLine ID="p2t1c20l1" BASEDIRECTION="rtl" HPOS="1134" VPOS="567" WIDTH="64" HEIGHT="63">
+       <String ID="p2w0122" CONTENT="ذكور" WC="0.95" TAGREFS="trust.agreed" HPOS="1134" VPOS="567" WIDTH="64" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c21" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="863" VPOS="566" WIDTH="217" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c21" xlink:type="simple">
+      <TextLine ID="p2t1c21l1" BASEDIRECTION="rtl" HPOS="958" VPOS="567" WIDTH="27" HEIGHT="63">
+       <String ID="p2w0123" CONTENT="٤٠" WC="0.95" TAGREFS="trust.agreed" HPOS="958" VPOS="567" WIDTH="27" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c22" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="639" VPOS="566" WIDTH="224" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c22" xlink:type="simple">
+      <TextLine ID="p2t1c22l1" BASEDIRECTION="rtl" HPOS="735" VPOS="567" WIDTH="33" HEIGHT="63">
+       <String ID="p2w0124" CONTENT="٣٢" WC="0.95" TAGREFS="trust.agreed" HPOS="735" VPOS="567" WIDTH="33" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c23" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="498" VPOS="566" WIDTH="142" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c23" xlink:type="simple">
+      <TextLine ID="p2t1c23l1" BASEDIRECTION="rtl" HPOS="547" VPOS="567" WIDTH="43" HEIGHT="63">
+       <String ID="p2w0125" CONTENT="٪٦٠" WC="0.95" TAGREFS="trust.agreed" HPOS="547" VPOS="567" WIDTH="43" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c30" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1081" VPOS="634" WIDTH="171" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c30" xlink:type="simple">
+      <TextLine ID="p2t1c30l1" BASEDIRECTION="rtl" HPOS="1135" VPOS="636" WIDTH="61" HEIGHT="63">
+       <String ID="p2w0126" CONTENT="إناث" WC="0.95" TAGREFS="trust.agreed" HPOS="1135" VPOS="636" WIDTH="61" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c31" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="863" VPOS="634" WIDTH="217" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c31" xlink:type="simple">
+      <TextLine ID="p2t1c31l1" BASEDIRECTION="rtl" HPOS="956" VPOS="636" WIDTH="32" HEIGHT="63">
+       <String ID="p2w0127" CONTENT="٢٦" WC="0.95" TAGREFS="trust.agreed" HPOS="956" VPOS="636" WIDTH="32" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c32" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="639" VPOS="634" WIDTH="224" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c32" xlink:type="simple">
+      <TextLine ID="p2t1c32l1" BASEDIRECTION="rtl" HPOS="736" VPOS="636" WIDTH="31" HEIGHT="63">
+       <String ID="p2w0128" CONTENT="٢٢" WC="0.95" TAGREFS="trust.agreed" HPOS="736" VPOS="636" WIDTH="31" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c33" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="498" VPOS="634" WIDTH="142" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c33" xlink:type="simple">
+      <TextLine ID="p2t1c33l1" BASEDIRECTION="rtl" HPOS="548" VPOS="636" WIDTH="42" HEIGHT="63">
+       <String ID="p2w0129" CONTENT="٪٤٠" WC="0.95" TAGREFS="trust.agreed" HPOS="548" VPOS="636" WIDTH="42" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c40" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1081" VPOS="703" WIDTH="171" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c40" xlink:type="simple">
+      <TextLine ID="p2t1c40l1" BASEDIRECTION="rtl" HPOS="1109" VPOS="704" WIDTH="114" HEIGHT="63">
+       <String ID="p2w0130" CONTENT="المجموع" WC="0.95" TAGREFS="trust.agreed" HPOS="1109" VPOS="704" WIDTH="114" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c41" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="863" VPOS="703" WIDTH="217" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c41" xlink:type="simple">
+      <TextLine ID="p2t1c41l1" BASEDIRECTION="rtl" HPOS="955" VPOS="704" WIDTH="33" HEIGHT="63">
+       <String ID="p2w0131" CONTENT="٦٦" WC="0.95" TAGREFS="trust.agreed" HPOS="955" VPOS="704" WIDTH="33" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c42" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="639" VPOS="703" WIDTH="224" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c42" xlink:type="simple">
+      <TextLine ID="p2t1c42l1" BASEDIRECTION="rtl" HPOS="736" VPOS="704" WIDTH="30" HEIGHT="63">
+       <String ID="p2w0132" CONTENT="٥٤" WC="0.95" TAGREFS="trust.agreed" HPOS="736" VPOS="704" WIDTH="30" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p2t1c43" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="498" VPOS="703" WIDTH="142" HEIGHT="69" xlink:href="test-0001-table-math.jats.xml#p2t1c43" xlink:type="simple">
+      <TextLine ID="p2t1c43l1" BASEDIRECTION="rtl" HPOS="544" VPOS="704" WIDTH="50" HEIGHT="63">
+       <String ID="p2w0133" CONTENT="٪١٠٠" WC="0.95" TAGREFS="trust.agreed" HPOS="544" VPOS="704" WIDTH="50" HEIGHT="63"/>
+      </TextLine>
+     </TextBlock>
+    </ComposedBlock>
+    <TextBlock ID="p2b5" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="132" VPOS="795" WIDTH="1485" HEIGHT="135" xlink:href="test-0001-table-math.jats.xml#p2b5" xlink:type="simple">
+     <TextLine ID="p2b5l1" BASEDIRECTION="rtl" HPOS="132" VPOS="795" WIDTH="1437" HEIGHT="66">
+      <String ID="p2w0134" CONTENT="ويتضح" WC="0.95" TAGREFS="trust.agreed" HPOS="1464" VPOS="795" WIDTH="105" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0135" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="1408" VPOS="795" WIDTH="42" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0136" CONTENT="الجدول" WC="0.95" TAGREFS="trust.agreed" HPOS="1288" VPOS="795" WIDTH="107" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0137" CONTENT="أن" WC="0.95" TAGREFS="trust.agreed" HPOS="1242" VPOS="795" WIDTH="33" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0138" CONTENT="نسبة" WC="0.95" TAGREFS="trust.agreed" HPOS="1160" VPOS="795" WIDTH="68" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0139" CONTENT="الذكور" WC="0.95" TAGREFS="trust.agreed" HPOS="1058" VPOS="795" WIDTH="88" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0140" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1000" VPOS="795" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0141" CONTENT="العينة" WC="0.95" TAGREFS="trust.agreed" HPOS="907" VPOS="795" WIDTH="80" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0142" CONTENT="أعلى" WC="0.95" TAGREFS="trust.agreed" HPOS="826" VPOS="795" WIDTH="67" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0143" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="771" VPOS="795" WIDTH="42" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0144" CONTENT="نسبة" WC="0.95" TAGREFS="trust.agreed" HPOS="689" VPOS="795" WIDTH="68" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0145" CONTENT="الإناث،" WC="0.95" TAGREFS="trust.agreed" HPOS="585" VPOS="795" WIDTH="91" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0146" CONTENT="وأن" WC="0.95" TAGREFS="trust.agreed" HPOS="519" VPOS="795" WIDTH="52" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0147" CONTENT="الصف" WC="0.95" TAGREFS="trust.agreed" HPOS="423" VPOS="795" WIDTH="82" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0148" CONTENT="الأول" WC="0.95" TAGREFS="trust.agreed" HPOS="337" VPOS="795" WIDTH="73" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0149" CONTENT="أكثر" WC="0.95" TAGREFS="trust.agreed" HPOS="266" VPOS="795" WIDTH="57" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0150" CONTENT="عدداً" WC="0.95" TAGREFS="trust.agreed" HPOS="187" VPOS="795" WIDTH="66" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0151" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="132" VPOS="795" WIDTH="42" HEIGHT="66"/>
+     </TextLine>
+     <TextLine ID="p2b5l2" BASEDIRECTION="rtl" HPOS="1276" VPOS="864" WIDTH="341" HEIGHT="66">
+      <String ID="p2w0152" CONTENT="الصف" WC="0.95" TAGREFS="trust.agreed" HPOS="1535" VPOS="864" WIDTH="82" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0153" CONTENT="الثاني" WC="0.95" TAGREFS="trust.agreed" HPOS="1445" VPOS="864" WIDTH="81" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0154" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1391" VPOS="864" WIDTH="45" HEIGHT="66"/>
+      <SP/>
+      <String ID="p2w0155" CONTENT="الفئتين." WC="0.95" TAGREFS="trust.agreed" HPOS="1276" VPOS="864" WIDTH="106" HEIGHT="66"/>
+     </TextLine>
+    </TextBlock>
+   </PrintSpace>
+  </Page>
+ </Layout>
+</alto>

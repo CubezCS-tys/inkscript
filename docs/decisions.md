@@ -341,3 +341,15 @@ normalisation; invented, dropped and repeated lines counted apart (a VLM's
 characteristic failure); TEDS for tables; a LaTeX token distance for
 equations (not CDM, which needs rendering); intervals by bootstrap over
 documents.
+**D27 · The re-typeset editions are set with LuaLaTeX, line for line, and their text layer is rewritten for
+pdfium (2026-10-11).** Experiment 35 set the same pages with LuaLaTeX (HarfBuzz, babel's Arabic, kashida
+justification) and with Chromium (HTML → PDF, the stylesheet the reading page shares) and read them back with
+pdfium 5.12.1 (the first rule: Chrome's engine is the judge). Chromium lost a third to half of the words (41–69%
+found: its lam-alef comes back as ال, spaces vanish, brackets turn); LuaLaTeX with our rewrite of the text
+layer kept 99.9–100%. Per-word /ActualText was tried and dropped (pdfium ran lines together, 80% in order); the
+rewrite stores each line as the faithful PDF does (`edition/pdftext.py`). The layout-faithful page sets every ALTO
+line at its own place and width, not each block re-flowed: ink correlation with the scan 0.58–0.88 against
+0.27–0.71, the same reading order. Not chosen: WeasyPrint/Paged.js/Vivliostyle (the same browser-style
+justification by spaces only, no kashida; Chromium stands for them), Typst (no Arabic justification). The reading
+page and EPUB stay HTML (their reader's browser shapes them). A document mostly in Latin script is not marked
+right to left (pdfium read three English articles backwards, 23% → 99.9%).

@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alto xmlns="http://www.loc.gov/standards/alto/ns-v4#" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" SCHEMAVERSION="4.4" xsi:schemaLocation="http://www.loc.gov/standards/alto/ns-v4# https://www.loc.gov/standards/alto/v4/alto-4-4.xsd">
+ <Description>
+  <MeasurementUnit>pixel</MeasurementUnit>
+  <sourceImageInformation>
+   <fileName>test-0002-two-columns.pdf</fileName>
+   <documentIdentifier documentIdentifierLocation="inkscript test fixtures">test-0002-two-columns</documentIdentifier>
+  </sourceImageInformation>
+  <OCRProcessing ID="handmade">
+   <ocrProcessingStep>
+    <processingCategory>contentGeneration</processingCategory>
+    <processingStepDescription>Hand-made test master (experiment 35), NOT an archive page: the page was typeset in Chromium from a written spec and every word's box measured in the browser; no OCR. Pixels at 288 dpi.</processingStepDescription>
+    <processingSoftware>
+     <softwareCreator>inkscript</softwareCreator>
+     <softwareName>experiments/35_edition/testdocs/make_testdocs.py</softwareName>
+     <softwareVersion>exp35</softwareVersion>
+    </processingSoftware>
+   </ocrProcessingStep>
+  </OCRProcessing>
+ </Description>
+ <Tags>
+  <StructureTag ID="role.body" TYPE="paragraph-role" LABEL="body"/>
+  <StructureTag ID="role.title" TYPE="paragraph-role" LABEL="title"/>
+  <StructureTag ID="role.author" TYPE="paragraph-role" LABEL="author"/>
+  <StructureTag ID="role.sectionHeading" TYPE="paragraph-role" LABEL="sectionHeading"/>
+  <StructureTag ID="role.footnote" TYPE="paragraph-role" LABEL="footnote"/>
+  <StructureTag ID="role.pageNumber" TYPE="paragraph-role" LABEL="pageNumber"/>
+  <OtherTag ID="trust.agreed" TYPE="trust" LABEL="agreed" DESCRIPTION="No signal raised a doubt (hand-made: the text is the spec's)."/>
+  <OtherTag ID="kind.formula" TYPE="content-kind" LABEL="formula" DESCRIPTION="The ink of an inline formula: the word is a symbol of the formula held in the JATS as inline-formula (MathML + LaTeX)."/>
+ </Tags>
+ <Layout>
+  <Page ID="page1" PHYSICAL_IMG_NR="1" WIDTH="2481" HEIGHT="3510">
+   <PrintSpace HPOS="0" VPOS="66" WIDTH="2481" HEIGHT="3329">
+    <TextBlock ID="p1b1" TAGREFS="role.pageNumber" LANG="ar" BASEDIRECTION="rtl" HPOS="1216" VPOS="66" WIDTH="49" HEIGHT="72">
+     <TextLine ID="p1b1l1" BASEDIRECTION="rtl" HPOS="1216" VPOS="66" WIDTH="49" HEIGHT="72">
+      <String ID="p1w0001" CONTENT="١٢٧" WC="0.95" TAGREFS="trust.agreed" HPOS="1216" VPOS="66" WIDTH="49" HEIGHT="72"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b2" TAGREFS="role.title" LANG="ar" BASEDIRECTION="rtl" HPOS="386" VPOS="165" WIDTH="1709" HEIGHT="123" xlink:href="test-0002-two-columns.jats.xml#p1b2" xlink:type="simple">
+     <TextLine ID="p1b2l1" BASEDIRECTION="rtl" HPOS="386" VPOS="165" WIDTH="1709" HEIGHT="123">
+      <String ID="p1w0002" CONTENT="تحصيل" WC="0.95" TAGREFS="trust.agreed" HPOS="1897" VPOS="165" WIDTH="199" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0003" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="1690" VPOS="165" WIDTH="191" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0004" CONTENT="قبل" WC="0.95" TAGREFS="trust.agreed" HPOS="1578" VPOS="165" WIDTH="96" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0005" CONTENT="البرنامج" WC="0.95" TAGREFS="trust.agreed" HPOS="1350" VPOS="165" WIDTH="212" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0006" CONTENT="التدريبي" WC="0.95" TAGREFS="trust.agreed" HPOS="1114" VPOS="165" WIDTH="220" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0007" CONTENT="وبعده" WC="0.95" TAGREFS="trust.agreed" HPOS="945" VPOS="165" WIDTH="154" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0008" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="848" VPOS="165" WIDTH="80" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0009" CONTENT="أربع" WC="0.95" TAGREFS="trust.agreed" HPOS="731" VPOS="165" WIDTH="102" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0010" CONTENT="مواد" WC="0.95" TAGREFS="trust.agreed" HPOS="594" VPOS="165" WIDTH="121" HEIGHT="123"/>
+      <SP/>
+      <String ID="p1w0011" CONTENT="دراسية" WC="0.95" TAGREFS="trust.agreed" HPOS="386" VPOS="165" WIDTH="192" HEIGHT="123"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b3" TAGREFS="role.author" LANG="ar" BASEDIRECTION="rtl" HPOS="1045" VPOS="311" WIDTH="390" HEIGHT="81" xlink:href="test-0002-two-columns.jats.xml#p1b3" xlink:type="simple">
+     <TextLine ID="p1b3l1" BASEDIRECTION="rtl" HPOS="1045" VPOS="311" WIDTH="390" HEIGHT="81">
+      <String ID="p1w0012" CONTENT="أ." WC="0.95" TAGREFS="trust.agreed" HPOS="1414" VPOS="311" WIDTH="22" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0013" CONTENT="د." WC="0.95" TAGREFS="trust.agreed" HPOS="1373" VPOS="311" WIDTH="30" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0014" CONTENT="ليلى" WC="0.95" TAGREFS="trust.agreed" HPOS="1289" VPOS="311" WIDTH="73" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0015" CONTENT="حسن" WC="0.95" TAGREFS="trust.agreed" HPOS="1186" VPOS="311" WIDTH="92" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0016" CONTENT="المصري" WC="0.95" TAGREFS="trust.agreed" HPOS="1045" VPOS="311" WIDTH="130" HEIGHT="81"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b4" TAGREFS="role.sectionHeading" LANG="ar" BASEDIRECTION="rtl" HPOS="2191" VPOS="477" WIDTH="122" HEIGHT="90" xlink:href="test-0002-two-columns.jats.xml#p1b4" xlink:type="simple">
+     <TextLine ID="p1b4l1" BASEDIRECTION="rtl" HPOS="2191" VPOS="477" WIDTH="122" HEIGHT="90">
+      <String ID="p1w0017" CONTENT="مقدمة" WC="0.95" TAGREFS="trust.agreed" HPOS="2191" VPOS="477" WIDTH="122" HEIGHT="90"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b5" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1322" VPOS="579" WIDTH="992" HEIGHT="250" xlink:href="test-0002-two-columns.jats.xml#p1b5" xlink:type="simple">
+     <TextLine ID="p1b5l1" BASEDIRECTION="rtl" HPOS="1322" VPOS="579" WIDTH="936" HEIGHT="81">
+      <String ID="p1w0018" CONTENT="يهدف" WC="0.95" TAGREFS="trust.agreed" HPOS="2162" VPOS="579" WIDTH="95" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0019" CONTENT="هذا" WC="0.95" TAGREFS="trust.agreed" HPOS="2092" VPOS="579" WIDTH="57" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0020" CONTENT="البحث" WC="0.95" TAGREFS="trust.agreed" HPOS="1974" VPOS="579" WIDTH="104" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0021" CONTENT="إلى" WC="0.95" TAGREFS="trust.agreed" HPOS="1907" VPOS="579" WIDTH="54" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0022" CONTENT="قياس" WC="0.95" TAGREFS="trust.agreed" HPOS="1798" VPOS="579" WIDTH="95" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0023" CONTENT="أثر" WC="0.95" TAGREFS="trust.agreed" HPOS="1742" VPOS="579" WIDTH="43" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0024" CONTENT="برنامج" WC="0.95" TAGREFS="trust.agreed" HPOS="1620" VPOS="579" WIDTH="108" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0025" CONTENT="تدريبي" WC="0.95" TAGREFS="trust.agreed" HPOS="1492" VPOS="579" WIDTH="114" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0026" CONTENT="قصير" WC="0.95" TAGREFS="trust.agreed" HPOS="1387" VPOS="579" WIDTH="91" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0027" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1322" VPOS="579" WIDTH="52" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b5l2" BASEDIRECTION="rtl" HPOS="1322" VPOS="659" WIDTH="992" HEIGHT="81">
+      <String ID="p1w0028" CONTENT="تحصيل" WC="0.95" TAGREFS="trust.agreed" HPOS="2189" VPOS="659" WIDTH="124" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0029" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="2062" VPOS="659" WIDTH="115" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0030" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1999" VPOS="659" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0031" CONTENT="أربع" WC="0.95" TAGREFS="trust.agreed" HPOS="1923" VPOS="659" WIDTH="64" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0032" CONTENT="مواد" WC="0.95" TAGREFS="trust.agreed" HPOS="1838" VPOS="659" WIDTH="73" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0033" CONTENT="دراسية،" WC="0.95" TAGREFS="trust.agreed" HPOS="1699" VPOS="659" WIDTH="127" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0034" CONTENT="وقد" WC="0.95" TAGREFS="trust.agreed" HPOS="1624" VPOS="659" WIDTH="63" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0035" CONTENT="طبق" WC="0.95" TAGREFS="trust.agreed" HPOS="1538" VPOS="659" WIDTH="74" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0036" CONTENT="البرنامج" WC="0.95" TAGREFS="trust.agreed" HPOS="1396" VPOS="659" WIDTH="130" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0037" CONTENT="مدة" WC="0.95" TAGREFS="trust.agreed" HPOS="1322" VPOS="659" WIDTH="62" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b5l3" BASEDIRECTION="rtl" HPOS="1646" VPOS="742" WIDTH="667" HEIGHT="87">
+      <String ID="p1w0038" CONTENT="ستة" WC="0.95" TAGREFS="trust.agreed" HPOS="2244" VPOS="749" WIDTH="69" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0039" CONTENT="أسابيع" WC="0.95" TAGREFS="trust.agreed" HPOS="2128" VPOS="749" WIDTH="105" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0040" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="2067" VPOS="749" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0041" CONTENT="ثلاث" WC="0.95" TAGREFS="trust.agreed" HPOS="1979" VPOS="749" WIDTH="77" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0042" CONTENT="مدارس" WC="0.95" TAGREFS="trust.agreed" HPOS="1850" VPOS="749" WIDTH="119" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0043" CONTENT="حكومية" WC="0.95" TAGREFS="trust.agreed" HPOS="1707" VPOS="749" WIDTH="132" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0044" CONTENT="(١)" WC="0.95" TAGREFS="trust.agreed" HPOS="1659" VPOS="742" WIDTH="38" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0045" CONTENT="." WC="0.95" TAGREFS="trust.agreed" HPOS="1646" VPOS="767" WIDTH="13" HEIGHT="45"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b6" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1322" VPOS="845" WIDTH="992" HEIGHT="241" xlink:href="test-0002-two-columns.jats.xml#p1b6" xlink:type="simple">
+     <TextLine ID="p1b6l1" BASEDIRECTION="rtl" HPOS="1322" VPOS="845" WIDTH="936" HEIGHT="81">
+      <String ID="p1w0046" CONTENT="واعتمد" WC="0.95" TAGREFS="trust.agreed" HPOS="2143" VPOS="845" WIDTH="114" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0047" CONTENT="البحث" WC="0.95" TAGREFS="trust.agreed" HPOS="2013" VPOS="845" WIDTH="104" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0048" CONTENT="على" WC="0.95" TAGREFS="trust.agreed" HPOS="1920" VPOS="845" WIDTH="67" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0049" CONTENT="اختبارين" WC="0.95" TAGREFS="trust.agreed" HPOS="1750" VPOS="845" WIDTH="144" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0050" CONTENT="متكافئين،" WC="0.95" TAGREFS="trust.agreed" HPOS="1565" VPOS="845" WIDTH="158" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0051" CONTENT="قبلي" WC="0.95" TAGREFS="trust.agreed" HPOS="1462" VPOS="845" WIDTH="76" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0052" CONTENT="وبعدي،" WC="0.95" TAGREFS="trust.agreed" HPOS="1322" VPOS="845" WIDTH="114" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b6l2" BASEDIRECTION="rtl" HPOS="1322" VPOS="925" WIDTH="992" HEIGHT="81">
+      <String ID="p1w0053" CONTENT="أعدهما" WC="0.95" TAGREFS="trust.agreed" HPOS="2202" VPOS="925" WIDTH="111" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0054" CONTENT="فريق" WC="0.95" TAGREFS="trust.agreed" HPOS="2100" VPOS="925" WIDTH="84" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0055" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="2034" VPOS="925" WIDTH="48" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0056" CONTENT="المعلمين" WC="0.95" TAGREFS="trust.agreed" HPOS="1883" VPOS="925" WIDTH="134" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0057" CONTENT="وحكمهما" WC="0.95" TAGREFS="trust.agreed" HPOS="1724" VPOS="925" WIDTH="141" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0058" CONTENT="عدد" WC="0.95" TAGREFS="trust.agreed" HPOS="1642" VPOS="925" WIDTH="65" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0059" CONTENT="من" WC="0.95" TAGREFS="trust.agreed" HPOS="1576" VPOS="925" WIDTH="48" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0060" CONTENT="المختصين" WC="0.95" TAGREFS="trust.agreed" HPOS="1391" VPOS="925" WIDTH="168" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0061" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1322" VPOS="925" WIDTH="52" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b6l3" BASEDIRECTION="rtl" HPOS="2039" VPOS="1005" WIDTH="274" HEIGHT="81">
+      <String ID="p1w0062" CONTENT="القياس" WC="0.95" TAGREFS="trust.agreed" HPOS="2198" VPOS="1005" WIDTH="115" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0063" CONTENT="والتقويم." WC="0.95" TAGREFS="trust.agreed" HPOS="2039" VPOS="1005" WIDTH="149" HEIGHT="81"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b7" TAGREFS="role.sectionHeading" LANG="ar" BASEDIRECTION="rtl" HPOS="1074" VPOS="477" WIDTH="128" HEIGHT="90" xlink:href="test-0002-two-columns.jats.xml#p1b7" xlink:type="simple">
+     <TextLine ID="p1b7l1" BASEDIRECTION="rtl" HPOS="1074" VPOS="477" WIDTH="128" HEIGHT="90">
+      <String ID="p1w0064" CONTENT="النتائج" WC="0.95" TAGREFS="trust.agreed" HPOS="1074" VPOS="477" WIDTH="128" HEIGHT="90"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b8" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="168" VPOS="579" WIDTH="1034" HEIGHT="161" xlink:href="test-0002-two-columns.jats.xml#p1b8" xlink:type="simple">
+     <TextLine ID="p1b8l1" BASEDIRECTION="rtl" HPOS="168" VPOS="579" WIDTH="978" HEIGHT="81">
+      <String ID="p1w0065" CONTENT="حسبت" WC="0.95" TAGREFS="trust.agreed" HPOS="1034" VPOS="579" WIDTH="112" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0066" CONTENT="نسبة" WC="0.95" TAGREFS="trust.agreed" HPOS="941" VPOS="579" WIDTH="79" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0067" CONTENT="النجاح" WC="0.95" TAGREFS="trust.agreed" HPOS="821" VPOS="579" WIDTH="107" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0068" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="756" VPOS="579" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0069" CONTENT="كل" WC="0.95" TAGREFS="trust.agreed" HPOS="695" VPOS="579" WIDTH="47" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0070" CONTENT="مادة" WC="0.95" TAGREFS="trust.agreed" HPOS="611" VPOS="579" WIDTH="71" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0071" CONTENT="بالعلاقة" WC="0.95" TAGREFS="trust.agreed" HPOS="474" VPOS="579" WIDTH="123" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0072" CONTENT="ن" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="433" VPOS="579" WIDTH="27" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0073" CONTENT="=" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="384" VPOS="579" WIDTH="36" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0074" CONTENT="ك" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="344" VPOS="579" WIDTH="26" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0075" CONTENT="÷" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="297" VPOS="579" WIDTH="36" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0076" CONTENT="م" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="264" VPOS="579" WIDTH="23" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0077" CONTENT="×" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="220" VPOS="579" WIDTH="36" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0078" CONTENT="١٠٠" WC="0.95" TAGREFS="trust.agreed kind.formula" HPOS="168" VPOS="579" WIDTH="44" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b8l2" BASEDIRECTION="rtl" HPOS="408" VPOS="659" WIDTH="793" HEIGHT="81">
+      <String ID="p1w0079" CONTENT="حيث" WC="0.95" TAGREFS="trust.agreed" HPOS="1117" VPOS="659" WIDTH="84" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0080" CONTENT="ك" WC="0.95" TAGREFS="trust.agreed" HPOS="1081" VPOS="659" WIDTH="26" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0081" CONTENT="عدد" WC="0.95" TAGREFS="trust.agreed" HPOS="1006" VPOS="659" WIDTH="65" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0082" CONTENT="الناجحين" WC="0.95" TAGREFS="trust.agreed" HPOS="845" VPOS="659" WIDTH="151" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0083" CONTENT="و" WC="0.95" TAGREFS="trust.agreed" HPOS="813" VPOS="659" WIDTH="22" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0084" CONTENT="م" WC="0.95" TAGREFS="trust.agreed" HPOS="780" VPOS="659" WIDTH="23" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0085" CONTENT="عدد" WC="0.95" TAGREFS="trust.agreed" HPOS="705" VPOS="659" WIDTH="65" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0086" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="580" VPOS="659" WIDTH="114" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0087" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="518" VPOS="659" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0088" CONTENT="المادة." WC="0.95" TAGREFS="trust.agreed" HPOS="408" VPOS="659" WIDTH="100" HEIGHT="81"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b9" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="168" VPOS="756" WIDTH="1034" HEIGHT="161" xlink:href="test-0002-two-columns.jats.xml#p1b9" xlink:type="simple">
+     <TextLine ID="p1b9l1" BASEDIRECTION="rtl" HPOS="168" VPOS="756" WIDTH="978" HEIGHT="81">
+      <String ID="p1w0089" CONTENT="ويعرض" WC="0.95" TAGREFS="trust.agreed" HPOS="1019" VPOS="756" WIDTH="127" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0090" CONTENT="الجدول" WC="0.95" TAGREFS="trust.agreed" HPOS="875" VPOS="756" WIDTH="123" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0091" CONTENT="الآتي" WC="0.95" TAGREFS="trust.agreed" HPOS="775" VPOS="756" WIDTH="80" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0092" CONTENT="متوسطات" WC="0.95" TAGREFS="trust.agreed" HPOS="587" VPOS="756" WIDTH="167" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0093" CONTENT="الدرجات" WC="0.95" TAGREFS="trust.agreed" HPOS="428" VPOS="756" WIDTH="138" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0094" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="356" VPOS="756" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0095" CONTENT="الاختبارين" WC="0.95" TAGREFS="trust.agreed" HPOS="168" VPOS="756" WIDTH="168" HEIGHT="81"/>
+     </TextLine>
+     <TextLine ID="p1b9l2" BASEDIRECTION="rtl" HPOS="275" VPOS="836" WIDTH="927" HEIGHT="81">
+      <String ID="p1w0096" CONTENT="والفرق" WC="0.95" TAGREFS="trust.agreed" HPOS="1092" VPOS="836" WIDTH="110" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0097" CONTENT="بينهما" WC="0.95" TAGREFS="trust.agreed" HPOS="990" VPOS="836" WIDTH="92" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0098" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="928" VPOS="836" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0099" CONTENT="كل" WC="0.95" TAGREFS="trust.agreed" HPOS="871" VPOS="836" WIDTH="47" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0100" CONTENT="مادة،" WC="0.95" TAGREFS="trust.agreed" HPOS="780" VPOS="836" WIDTH="81" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0101" CONTENT="مع" WC="0.95" TAGREFS="trust.agreed" HPOS="726" VPOS="836" WIDTH="43" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0102" CONTENT="المتوسط" WC="0.95" TAGREFS="trust.agreed" HPOS="571" VPOS="836" WIDTH="145" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0103" CONTENT="العام" WC="0.95" TAGREFS="trust.agreed" HPOS="486" VPOS="836" WIDTH="75" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0104" CONTENT="للمواد" WC="0.95" TAGREFS="trust.agreed" HPOS="383" VPOS="836" WIDTH="93" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0105" CONTENT="الأربع." WC="0.95" TAGREFS="trust.agreed" HPOS="275" VPOS="836" WIDTH="98" HEIGHT="81"/>
+     </TextLine>
+    </TextBlock>
+    <ComposedBlock ID="p1t1" TYPE="table" HPOS="168" VPOS="1122" WIDTH="2145" HEIGHT="631" xlink:href="test-0002-two-columns.jats.xml#p1t1" xlink:type="simple">
+     <TextBlock ID="p1b10" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="704" VPOS="1122" WIDTH="1072" HEIGHT="75" xlink:href="test-0002-two-columns.jats.xml#p1b10" xlink:type="simple">
+      <TextLine ID="p1b10l1" BASEDIRECTION="rtl" HPOS="704" VPOS="1122" WIDTH="1072" HEIGHT="75">
+       <String ID="p1w0106" CONTENT="جدول" WC="0.95" TAGREFS="trust.agreed" HPOS="1677" VPOS="1122" WIDTH="99" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0107" CONTENT="(٢):" WC="0.95" TAGREFS="trust.agreed" HPOS="1606" VPOS="1122" WIDTH="62" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0108" CONTENT="متوسطات" WC="0.95" TAGREFS="trust.agreed" HPOS="1428" VPOS="1122" WIDTH="169" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0109" CONTENT="درجات" WC="0.95" TAGREFS="trust.agreed" HPOS="1305" VPOS="1122" WIDTH="113" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0110" CONTENT="الطلاب" WC="0.95" TAGREFS="trust.agreed" HPOS="1179" VPOS="1122" WIDTH="117" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0111" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1119" VPOS="1122" WIDTH="49" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0112" CONTENT="الاختبارين" WC="0.95" TAGREFS="trust.agreed" HPOS="945" VPOS="1122" WIDTH="165" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0113" CONTENT="القبلي" WC="0.95" TAGREFS="trust.agreed" HPOS="840" VPOS="1122" WIDTH="95" HEIGHT="75"/>
+       <SP/>
+       <String ID="p1w0114" CONTENT="والبعدي" WC="0.95" TAGREFS="trust.agreed" HPOS="704" VPOS="1122" WIDTH="126" HEIGHT="75"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c00" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1212" WIDTH="294" HEIGHT="154" xlink:href="test-0002-two-columns.jats.xml#p1t1c00" xlink:type="simple">
+      <TextLine ID="p1t1c00l1" BASEDIRECTION="rtl" HPOS="1428" VPOS="1252" WIDTH="88" HEIGHT="72">
+       <String ID="p1w0115" CONTENT="المادة" WC="0.95" TAGREFS="trust.agreed" HPOS="1428" VPOS="1252" WIDTH="88" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c01" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1212" WIDTH="322" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c01" xlink:type="simple">
+      <TextLine ID="p1t1c01l1" BASEDIRECTION="rtl" HPOS="1032" VPOS="1214" WIDTH="265" HEIGHT="72">
+       <String ID="p1w0116" CONTENT="متوسط" WC="0.95" TAGREFS="trust.agreed" HPOS="1174" VPOS="1214" WIDTH="122" HEIGHT="72"/>
+       <SP/>
+       <String ID="p1w0117" CONTENT="الدرجات" WC="0.95" TAGREFS="trust.agreed" HPOS="1032" VPOS="1214" WIDTH="133" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c03" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1212" WIDTH="141" HEIGHT="154" xlink:href="test-0002-two-columns.jats.xml#p1t1c03" xlink:type="simple">
+      <TextLine ID="p1t1c03l1" BASEDIRECTION="rtl" HPOS="891" VPOS="1252" WIDTH="84" HEIGHT="72">
+       <String ID="p1w0118" CONTENT="الفرق" WC="0.95" TAGREFS="trust.agreed" HPOS="891" VPOS="1252" WIDTH="84" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c11" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1289" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c11" xlink:type="simple">
+      <TextLine ID="p1t1c11l1" BASEDIRECTION="rtl" HPOS="1201" VPOS="1291" WIDTH="92" HEIGHT="72">
+       <String ID="p1w0119" CONTENT="القبلي" WC="0.95" TAGREFS="trust.agreed" HPOS="1201" VPOS="1291" WIDTH="92" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c12" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1289" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c12" xlink:type="simple">
+      <TextLine ID="p1t1c12l1" BASEDIRECTION="rtl" HPOS="1036" VPOS="1291" WIDTH="101" HEIGHT="72">
+       <String ID="p1w0120" CONTENT="البعدي" WC="0.95" TAGREFS="trust.agreed" HPOS="1036" VPOS="1291" WIDTH="101" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c20" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1366" WIDTH="294" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c20" xlink:type="simple">
+      <TextLine ID="p1t1c20l1" BASEDIRECTION="rtl" HPOS="1391" VPOS="1368" WIDTH="161" HEIGHT="72">
+       <String ID="p1w0121" CONTENT="الرياضيات" WC="0.95" TAGREFS="trust.agreed" HPOS="1391" VPOS="1368" WIDTH="161" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c21" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1366" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c21" xlink:type="simple">
+      <TextLine ID="p1t1c21l1" BASEDIRECTION="rtl" HPOS="1216" VPOS="1368" WIDTH="61" HEIGHT="72">
+       <String ID="p1w0122" CONTENT="٥٤٫٢" WC="0.95" TAGREFS="trust.agreed" HPOS="1216" VPOS="1368" WIDTH="61" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c22" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1366" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c22" xlink:type="simple">
+      <TextLine ID="p1t1c22l1" BASEDIRECTION="rtl" HPOS="1056" VPOS="1368" WIDTH="60" HEIGHT="72">
+       <String ID="p1w0123" CONTENT="٧١٫٨" WC="0.95" TAGREFS="trust.agreed" HPOS="1056" VPOS="1368" WIDTH="60" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c23" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1366" WIDTH="141" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c23" xlink:type="simple">
+      <TextLine ID="p1t1c23l1" BASEDIRECTION="rtl" HPOS="903" VPOS="1368" WIDTH="61" HEIGHT="72">
+       <String ID="p1w0124" CONTENT="١٧٫٦" WC="0.95" TAGREFS="trust.agreed" HPOS="903" VPOS="1368" WIDTH="61" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c30" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1443" WIDTH="294" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c30" xlink:type="simple">
+      <TextLine ID="p1t1c30l1" BASEDIRECTION="rtl" HPOS="1425" VPOS="1445" WIDTH="93" HEIGHT="72">
+       <String ID="p1w0125" CONTENT="العلوم" WC="0.95" TAGREFS="trust.agreed" HPOS="1425" VPOS="1445" WIDTH="93" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c31" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1443" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c31" xlink:type="simple">
+      <TextLine ID="p1t1c31l1" BASEDIRECTION="rtl" HPOS="1218" VPOS="1445" WIDTH="58" HEIGHT="72">
+       <String ID="p1w0126" CONTENT="٥٨٫٠" WC="0.95" TAGREFS="trust.agreed" HPOS="1218" VPOS="1445" WIDTH="58" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c32" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1443" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c32" xlink:type="simple">
+      <TextLine ID="p1t1c32l1" BASEDIRECTION="rtl" HPOS="1054" VPOS="1445" WIDTH="65" HEIGHT="72">
+       <String ID="p1w0127" CONTENT="٦٩٫٤" WC="0.95" TAGREFS="trust.agreed" HPOS="1054" VPOS="1445" WIDTH="65" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c33" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1443" WIDTH="141" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c33" xlink:type="simple">
+      <TextLine ID="p1t1c33l1" BASEDIRECTION="rtl" HPOS="906" VPOS="1445" WIDTH="54" HEIGHT="72">
+       <String ID="p1w0128" CONTENT="١١٫٤" WC="0.95" TAGREFS="trust.agreed" HPOS="906" VPOS="1445" WIDTH="54" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c40" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1520" WIDTH="294" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c40" xlink:type="simple">
+      <TextLine ID="p1t1c40l1" BASEDIRECTION="rtl" HPOS="1377" VPOS="1522" WIDTH="188" HEIGHT="72">
+       <String ID="p1w0129" CONTENT="اللغة" WC="0.95" TAGREFS="trust.agreed" HPOS="1493" VPOS="1522" WIDTH="73" HEIGHT="72"/>
+       <SP/>
+       <String ID="p1w0130" CONTENT="العربية" WC="0.95" TAGREFS="trust.agreed" HPOS="1377" VPOS="1522" WIDTH="106" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c41" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1520" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c41" xlink:type="simple">
+      <TextLine ID="p1t1c41l1" BASEDIRECTION="rtl" HPOS="1216" VPOS="1522" WIDTH="63" HEIGHT="72">
+       <String ID="p1w0131" CONTENT="٦٢٫٥" WC="0.95" TAGREFS="trust.agreed" HPOS="1216" VPOS="1522" WIDTH="63" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c42" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1520" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c42" xlink:type="simple">
+      <TextLine ID="p1t1c42l1" BASEDIRECTION="rtl" HPOS="1059" VPOS="1522" WIDTH="55" HEIGHT="72">
+       <String ID="p1w0132" CONTENT="٧٠٫١" WC="0.95" TAGREFS="trust.agreed" HPOS="1059" VPOS="1522" WIDTH="55" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c43" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1520" WIDTH="141" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c43" xlink:type="simple">
+      <TextLine ID="p1t1c43l1" BASEDIRECTION="rtl" HPOS="909" VPOS="1522" WIDTH="47" HEIGHT="72">
+       <String ID="p1w0133" CONTENT="٧٫٦" WC="0.95" TAGREFS="trust.agreed" HPOS="909" VPOS="1522" WIDTH="47" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c50" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1597" WIDTH="294" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c50" xlink:type="simple">
+      <TextLine ID="p1t1c50l1" BASEDIRECTION="rtl" HPOS="1353" VPOS="1599" WIDTH="237" HEIGHT="72">
+       <String ID="p1w0134" CONTENT="اللغة" WC="0.95" TAGREFS="trust.agreed" HPOS="1517" VPOS="1599" WIDTH="73" HEIGHT="72"/>
+       <SP/>
+       <String ID="p1w0135" CONTENT="الإنجليزية" WC="0.95" TAGREFS="trust.agreed" HPOS="1353" VPOS="1599" WIDTH="154" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c51" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1597" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c51" xlink:type="simple">
+      <TextLine ID="p1t1c51l1" BASEDIRECTION="rtl" HPOS="1214" VPOS="1599" WIDTH="66" HEIGHT="72">
+       <String ID="p1w0136" CONTENT="٤٩٫٣" WC="0.95" TAGREFS="trust.agreed" HPOS="1214" VPOS="1599" WIDTH="66" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c52" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1597" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c52" xlink:type="simple">
+      <TextLine ID="p1t1c52l1" BASEDIRECTION="rtl" HPOS="1056" VPOS="1599" WIDTH="60" HEIGHT="72">
+       <String ID="p1w0137" CONTENT="٦٠٫٢" WC="0.95" TAGREFS="trust.agreed" HPOS="1056" VPOS="1599" WIDTH="60" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c53" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1597" WIDTH="141" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c53" xlink:type="simple">
+      <TextLine ID="p1t1c53l1" BASEDIRECTION="rtl" HPOS="905" VPOS="1599" WIDTH="55" HEIGHT="72">
+       <String ID="p1w0138" CONTENT="١٠٫٩" WC="0.95" TAGREFS="trust.agreed" HPOS="905" VPOS="1599" WIDTH="55" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c60" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1325" VPOS="1674" WIDTH="294" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c60" xlink:type="simple">
+      <TextLine ID="p1t1c60l1" BASEDIRECTION="rtl" HPOS="1359" VPOS="1676" WIDTH="225" HEIGHT="72">
+       <String ID="p1w0139" CONTENT="المتوسط" WC="0.95" TAGREFS="trust.agreed" HPOS="1443" VPOS="1676" WIDTH="141" HEIGHT="72"/>
+       <SP/>
+       <String ID="p1w0140" CONTENT="العام" WC="0.95" TAGREFS="trust.agreed" HPOS="1359" VPOS="1676" WIDTH="74" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c61" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1169" VPOS="1674" WIDTH="156" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c61" xlink:type="simple">
+      <TextLine ID="p1t1c61l1" BASEDIRECTION="rtl" HPOS="1218" VPOS="1676" WIDTH="58" HEIGHT="72">
+       <String ID="p1w0141" CONTENT="٥٦٫٠" WC="0.95" TAGREFS="trust.agreed" HPOS="1218" VPOS="1676" WIDTH="58" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c62" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="1003" VPOS="1674" WIDTH="166" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c62" xlink:type="simple">
+      <TextLine ID="p1t1c62l1" BASEDIRECTION="rtl" HPOS="1053" VPOS="1676" WIDTH="66" HEIGHT="72">
+       <String ID="p1w0142" CONTENT="٦٧٫٩" WC="0.95" TAGREFS="trust.agreed" HPOS="1053" VPOS="1676" WIDTH="66" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+     <TextBlock ID="p1t1c63" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="862" VPOS="1674" WIDTH="141" HEIGHT="77" xlink:href="test-0002-two-columns.jats.xml#p1t1c63" xlink:type="simple">
+      <TextLine ID="p1t1c63l1" BASEDIRECTION="rtl" HPOS="905" VPOS="1676" WIDTH="55" HEIGHT="72">
+       <String ID="p1w0143" CONTENT="١١٫٩" WC="0.95" TAGREFS="trust.agreed" HPOS="905" VPOS="1676" WIDTH="55" HEIGHT="72"/>
+      </TextLine>
+     </TextBlock>
+    </ComposedBlock>
+    <TextBlock ID="p1b11" TAGREFS="role.body" LANG="ar" BASEDIRECTION="rtl" HPOS="532" VPOS="1775" WIDTH="1725" HEIGHT="81" xlink:href="test-0002-two-columns.jats.xml#p1b11" xlink:type="simple">
+     <TextLine ID="p1b11l1" BASEDIRECTION="rtl" HPOS="532" VPOS="1775" WIDTH="1725" HEIGHT="81">
+      <String ID="p1w0144" CONTENT="وتدل" WC="0.95" TAGREFS="trust.agreed" HPOS="2173" VPOS="1775" WIDTH="84" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0145" CONTENT="النتائج" WC="0.95" TAGREFS="trust.agreed" HPOS="2056" VPOS="1775" WIDTH="107" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0146" CONTENT="على" WC="0.95" TAGREFS="trust.agreed" HPOS="1979" VPOS="1775" WIDTH="67" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0147" CONTENT="تحسن" WC="0.95" TAGREFS="trust.agreed" HPOS="1867" VPOS="1775" WIDTH="102" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0148" CONTENT="واضح" WC="0.95" TAGREFS="trust.agreed" HPOS="1756" VPOS="1775" WIDTH="100" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0149" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1694" VPOS="1775" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0150" CONTENT="جميع" WC="0.95" TAGREFS="trust.agreed" HPOS="1596" VPOS="1775" WIDTH="88" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0151" CONTENT="المواد،" WC="0.95" TAGREFS="trust.agreed" HPOS="1484" VPOS="1775" WIDTH="102" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0152" CONTENT="وكان" WC="0.95" TAGREFS="trust.agreed" HPOS="1394" VPOS="1775" WIDTH="80" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0153" CONTENT="أكبر" WC="0.95" TAGREFS="trust.agreed" HPOS="1321" VPOS="1775" WIDTH="63" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0154" CONTENT="الفروق" WC="0.95" TAGREFS="trust.agreed" HPOS="1201" VPOS="1775" WIDTH="110" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0155" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="1139" VPOS="1775" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0156" CONTENT="الرياضيات" WC="0.95" TAGREFS="trust.agreed" HPOS="960" VPOS="1775" WIDTH="168" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0157" CONTENT="وأصغرها" WC="0.95" TAGREFS="trust.agreed" HPOS="807" VPOS="1775" WIDTH="143" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0158" CONTENT="في" WC="0.95" TAGREFS="trust.agreed" HPOS="746" VPOS="1775" WIDTH="52" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0159" CONTENT="اللغة" WC="0.95" TAGREFS="trust.agreed" HPOS="662" VPOS="1775" WIDTH="73" HEIGHT="81"/>
+      <SP/>
+      <String ID="p1w0160" CONTENT="العربية." WC="0.95" TAGREFS="trust.agreed" HPOS="532" VPOS="1775" WIDTH="120" HEIGHT="81"/>
+     </TextLine>
+    </TextBlock>
+    <TextBlock ID="p1b12" TAGREFS="role.footnote" LANG="ar" BASEDIRECTION="rtl" HPOS="1310" VPOS="3326" WIDTH="1003" HEIGHT="66" xlink:href="test-0002-two-columns.jats.xml#p1b12" xlink:type="simple">
+     <TextLine ID="p1b12l1" BASEDIRECTION="rtl" HPOS="1310" VPOS="3326" WIDTH="1003" HEIGHT="66">
+      <String ID="p1w0161" CONTENT="(١)" WC="0.95" TAGREFS="trust.agreed" HPOS="2276" VPOS="3326" WIDTH="37" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0162" CONTENT="المدارس" WC="0.95" TAGREFS="trust.agreed" HPOS="2154" VPOS="3326" WIDTH="113" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0163" CONTENT="هي:" WC="0.95" TAGREFS="trust.agreed" HPOS="2092" VPOS="3326" WIDTH="53" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0164" CONTENT="مدرسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1990" VPOS="3326" WIDTH="93" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0165" CONTENT="النور،" WC="0.95" TAGREFS="trust.agreed" HPOS="1913" VPOS="3326" WIDTH="69" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0166" CONTENT="ومدرسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1794" VPOS="3326" WIDTH="111" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0167" CONTENT="الأمل،" WC="0.95" TAGREFS="trust.agreed" HPOS="1709" VPOS="3326" WIDTH="77" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0168" CONTENT="ومدرسة" WC="0.95" TAGREFS="trust.agreed" HPOS="1589" VPOS="3326" WIDTH="111" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0169" CONTENT="الفجر" WC="0.95" TAGREFS="trust.agreed" HPOS="1508" VPOS="3326" WIDTH="73" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0170" CONTENT="(العام" WC="0.95" TAGREFS="trust.agreed" HPOS="1426" VPOS="3326" WIDTH="74" HEIGHT="66"/>
+      <SP/>
+      <String ID="p1w0171" CONTENT="2021)." WC="0.95" TAGREFS="trust.agreed" HPOS="1310" VPOS="3326" WIDTH="108" HEIGHT="66"/>
+     </TextLine>
+    </TextBlock>
+   </PrintSpace>
+  </Page>
+ </Layout>
+</alto>

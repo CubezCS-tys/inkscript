@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article" dtd-version="1.4" xml:lang="ar">
+ <processing-meta tagset-family="jats" base-tagset="archiving" table-model="xhtml" math-representation="mathml tex" mathml-version="3.0"/>
+ <front>
+  <journal-meta>
+   <journal-id journal-id-type="publisher-id">test</journal-id>
+   <journal-title-group>
+    <journal-title>مجلة الاختبار</journal-title>
+   </journal-title-group>
+   <publisher>
+    <publisher-name>inkscript (hand-made test files)</publisher-name>
+   </publisher>
+  </journal-meta>
+  <article-meta>
+   <article-id pub-id-type="other" assigning-authority="inkscript">test-0001-table-math</article-id>
+   <title-group>
+    <article-title id="p1b2">أثر التعلم النشط في تحصيل طلاب المرحلة الثانوية في الرياضيات</article-title>
+   </title-group>
+   <contrib-group>
+    <contrib contrib-type="author" id="p1b3">
+     <string-name>د. سامي عبد الله الخطيب</string-name>
+    </contrib>
+   </contrib-group>
+   <pub-date publication-format="print" date-type="pub" calendar="gregorian">
+    <year>2026</year>
+   </pub-date>
+   <volume>1</volume>
+   <issue>1</issue>
+   <fpage>45</fpage>
+   <lpage>46</lpage>
+   <counts>
+    <page-count count="2"/>
+   </counts>
+   <custom-meta-group>
+    <custom-meta>
+     <meta-name>hand-made-test-file</meta-name>
+     <meta-value>Hand-made test master (experiment 35): NOT an archive page. Written by hand to test tables (XHTML, merged cells, cells in reading order: the first cell of a row is the rightmost on the page) and equations (MathML dir=rtl + LaTeX + scan crop) in every derived edition; the 'scan' is the same text typeset in Chromium. See tests/fixtures/edition/README.md.</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>text-direction</meta-name>
+     <meta-value>rtl (text stored in logical order; xml:lang carries the script)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>cell-order</meta-name>
+     <meta-value>logical: the first cell of a row is the rightmost on the page</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>faithful-pdf</meta-name>
+     <meta-value>test-0001-table-math.pdf (stand-in: the typeset page as a grey image)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>alto-file</meta-name>
+     <meta-value>test-0001-table-math.alto.xml</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>trust</meta-name>
+     <meta-value>0 words verified, 155 agreed, 0 flagged (per-word marks in the ALTO file)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>quran-quotations</meta-name>
+     <meta-value>0 found, 0 equal to the verse</meta-value>
+    </custom-meta>
+   </custom-meta-group>
+  </article-meta>
+ </front>
+ <body>
+  <sec id="sec1">
+   <title id="p1b4">أولاً: منهج الدراسة</title>
+   <p id="p1b5">اتبعت الدراسة المنهج شبه التجريبي، وطبقت أدواتها على عينة من ١٢٠ طالباً في العام الدراسي 2019/2020، على نحو ما اقترحه هيك (Hake, 1998) في قياس الكسب <xref ref-type="fn" rid="fn-p1-1">(١)</xref>.</p>
+   <p id="p1b6">ويحسب متوسط الدرجات بالعلاقة <inline-formula id="p1f1"><alternatives><mml:math dir="rtl"><mml:mi>م</mml:mi><mml:mo>=</mml:mo><mml:mrow><mml:mo>مج</mml:mo><mml:mi>س</mml:mi></mml:mrow><mml:mo>÷</mml:mo><mml:mi>ن</mml:mi></mml:math><tex-math><![CDATA[\text{م} = \text{مج}\,\text{س} \div \text{ن}]]></tex-math></alternatives></inline-formula> حيث مج مجموع الدرجات و ن عدد الطلاب، ثم يجمع الأثر في المعادلة الآتية:</p>
+   <disp-formula id="p1eq1">
+    <label>(٣)</label>
+    <alternatives>
+     <mml:math display="block" dir="rtl"><mml:mi>س</mml:mi><mml:mo>=</mml:mo><mml:mrow><mml:mo>(</mml:mo><mml:mi>أ</mml:mi><mml:mo>+</mml:mo><mml:mi>ب</mml:mi><mml:mo>)</mml:mo></mml:mrow><mml:mo>÷</mml:mo><mml:mn>٢</mml:mn></mml:math>
+     <tex-math><![CDATA[\text{س} = (\text{أ} + \text{ب}) \div ٢]]></tex-math>
+     <graphic xlink:href="test-0001-table-math.crops/p1eq1.png" specific-use="scan-crop"/>
+    </alternatives>
+   </disp-formula>
+   <p id="p1b7">ويستخرج الانحراف المعياري للدرجات من العلاقة:</p>
+   <disp-formula id="p1eq2">
+    <label>(٤)</label>
+    <alternatives>
+     <mml:math display="block" dir="rtl"><mml:msup><mml:mi>ع</mml:mi><mml:mn>٢</mml:mn></mml:msup><mml:mo>=</mml:mo><mml:mfrac><mml:mrow><mml:munderover><mml:mo>∑</mml:mo><mml:mrow><mml:mi>ر</mml:mi><mml:mo>=</mml:mo><mml:mn>١</mml:mn></mml:mrow><mml:mi>ن</mml:mi></mml:munderover><mml:msup><mml:mrow><mml:mo>(</mml:mo><mml:msub><mml:mi>س</mml:mi><mml:mi>ر</mml:mi></mml:msub><mml:mo>−</mml:mo><mml:mi>م</mml:mi><mml:mo>)</mml:mo></mml:mrow><mml:mn>٢</mml:mn></mml:msup></mml:mrow><mml:mi>ن</mml:mi></mml:mfrac></mml:math>
+     <tex-math><![CDATA[\text{ع}^{٢} = \frac{\sum_{\text{ر}=١}^{\text{ن}} (\text{س}_{\text{ر}} - \text{م})^{٢}}{\text{ن}}]]></tex-math>
+     <graphic xlink:href="test-0001-table-math.crops/p1eq2.png" specific-use="scan-crop"/>
+    </alternatives>
+   </disp-formula>
+  </sec>
+  <sec id="sec2">
+   <title id="p2b2">ثانياً: عينة الدراسة</title>
+   <p id="p2b3">توزعت العينة على صفين دراسيين، ويبين الجدول الآتي أعداد الطلاب ونسبهم بحسب الجنس والصف:</p>
+   <table-wrap id="p2t1">
+    <caption><p id="p2b4">جدول (١): توزيع عينة الدراسة بحسب الجنس والصف</p></caption>
+    <alternatives>
+     <graphic xlink:href="test-0001-table-math.crops/p2t1.png" specific-use="scan-crop"/>
+     <table>
+      <thead>
+       <tr><th id="p2t1c00" rowspan="2">الفئة</th><th id="p2t1c01" colspan="2">عدد الطلاب</th><th id="p2t1c03" rowspan="2">النسبة</th></tr>
+       <tr><th id="p2t1c11">الصف الأول</th><th id="p2t1c12">الصف الثاني</th></tr>
+      </thead>
+      <tbody>
+       <tr><th id="p2t1c20" scope="row">ذكور</th><td id="p2t1c21">٤٠</td><td id="p2t1c22">٣٢</td><td id="p2t1c23">٪٦٠</td></tr>
+       <tr><th id="p2t1c30" scope="row">إناث</th><td id="p2t1c31">٢٦</td><td id="p2t1c32">٢٢</td><td id="p2t1c33">٪٤٠</td></tr>
+       <tr><th id="p2t1c40" scope="row">المجموع</th><td id="p2t1c41">٦٦</td><td id="p2t1c42">٥٤</td><td id="p2t1c43">٪١٠٠</td></tr>
+      </tbody>
+     </table>
+    </alternatives>
+   </table-wrap>
+   <p id="p2b5">ويتضح من الجدول أن نسبة الذكور في العينة أعلى من نسبة الإناث، وأن الصف الأول أكثر عدداً من الصف الثاني في الفئتين.</p>
+  </sec>
+ </body>
+ <back>
+  <fn-group>
+   <fn id="fn-p1-1">
+    <label>١</label>
+    <p id="p1b8">أجريت الدراسة بإشراف وزارة التربية والتعليم، تقرير رقم 17-B.</p>
+   </fn>
+  </fn-group>
+ </back>
+</article>
