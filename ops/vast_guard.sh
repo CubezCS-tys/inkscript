@@ -1,8 +1,8 @@
 #!/bin/bash
 # Safety net for rented Vast.ai GPUs, independent of any Claude session: every 5 minutes, destroy any
-# instance older than MAX_MIN minutes (default 120) and log it. Jobs take minutes, so this only ever
+# instance older than MAX_MIN minutes (default 360) and log it. Jobs take minutes, so this only ever
 # catches a machine an interrupted agent forgot.  Start: setsid nohup ops/vast_guard.sh >/dev/null 2>&1 &
-V=~/.local/venvs/vast/bin/vastai; MAX_MIN=${MAX_MIN:-120}; LOG=~/.config/vastai/guard.log
+V=~/.local/venvs/vast/bin/vastai; MAX_MIN=${MAX_MIN:-360}; LOG=~/.config/vastai/guard.log
 while true; do
   $V show instances --raw 2>/dev/null | python3 -c "
 import json,sys,time
