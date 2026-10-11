@@ -13,7 +13,7 @@ const REGION_TYPES = ['text', 'heading', 'title', 'footnote', 'caption', 'table'
 const LST = {todo: 'to do', ok: 'correct', edited: 'corrected', added: 'added', deleted: 'not text', unsure: 'unsure'};
 const PST = {todo: 'to do', doing: 'started', done: 'done', skip: 'skipped', error: 'broken file'};
 const MARKS = ['\u064E', '\u064F', '\u0650', '\u064B', '\u064C', '\u064D', '\u0651', '\u0652'];
-const PALETTE = [...MARKS, 'ء', 'أ', 'إ', 'آ', 'ٱ', 'ى', 'ي', 'ة', 'ه', 'ﷺ', '«', '»', '(', ')',
+const PALETTE = [...MARKS, 'ء', 'ا', 'أ', 'إ', 'آ', 'ٱ', 'ى', 'ي', 'ة', 'ه', 'ﷺ', '«', '»', '(', ')',
   '٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 const ART_COL = ['#D9480F', '#1971C2', '#2F9E44', '#9C36B5', '#E67700', '#0C8599', '#C2255C', '#5C940D', '#6741D9'];
 const PREF_KEY = 'inkscript-gold';
