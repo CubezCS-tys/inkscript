@@ -150,6 +150,9 @@ reading; a second, blind reading (Gemini) marks the words where the two disagree
 <h2>How to start</h2>
 <pre>cd /home/yassine/inkscript
 .venv/bin/inkscript view --gold experiments/34_yardstick/out/gold</pre>
+<p>Until the branch <code>worktree-agent-a38346193b473c156</code> is merged, run it from that branch's code:</p>
+<pre>cd /home/yassine/inkscript
+PYTHONPATH=.claude/worktrees/agent-a38346193b473c156/src .venv/bin/python -m inkscript.cli view --gold experiments/34_yardstick/out/gold</pre>
 <p>Then open <b><a href="http://localhost:8766/">http://localhost:8766/</a></b> in Chrome on Windows and press <b>Continue</b>.
 Every Enter saves; close the browser any time and Continue picks up at the first line not done. If Windows cannot reach
 it, stop it (Ctrl+C) and start it again with <code>--host 0.0.0.0</code>.</p>
