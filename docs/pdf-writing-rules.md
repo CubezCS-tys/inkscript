@@ -176,6 +176,23 @@ rule records the experiment, not a theory.
   other column of a two-column page was folded into it, chain-merging 87
   lines into 8.
 
+## Re-typeset editions (`inkscript edition`, since 2026-10-11)
+
+The new print PDFs of experiment 35 (D27) are LuaLaTeX's, but their text is stored by the same rules, measured
+in pdfium 5.12.1 on 8 documents and the hand-made test masters:
+
+- **Each line's glyphs left to right, a real space glyph at every word gap, multi-letter Arabic ToUnicode entries
+  (lam-alef) reversed, marks and kashida drawn as outlines with the marks kept in the copied text**
+  (`edition/pdftext.py`). As LuaTeX writes them pdfium found 47–69% of the words in Chromium's equivalent and lost
+  spaces; rewritten, 99.9–100% (median).
+- **No per-word /ActualText**: pdfium stopped seeing line breaks and ran short lines together (80% in order).
+- **Lines sharing a band are written left to right** (cells of a table row, a verse's two halves): pdfium joins
+  text that overlaps vertically into one line.
+- **A document mostly in Latin script is marked L2R, not R2L**: marked R2L, pdfium read three English articles
+  backwards (23–25% of words in order → 99.9%). Latin lines *inside* an Arabic document still copy word-reversed
+  (D18).
+- **Lines printed sideways** (a box over 1.8 times taller than wide) are turned 90°, not squeezed across the page.
+
 ## Not handled yet
 
 - Reading order on two-column pages is only as good as Azure's line order.

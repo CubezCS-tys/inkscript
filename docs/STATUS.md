@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-07. Update this file whenever a headline number or a
+*Last updated 2026-10-11. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -34,6 +34,7 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 | Page furniture told from content (experiment 30) | blocks set aside on the 205 documents 9,815 → 6,742, "lone" ones with letters 470 → 267; on 140 old furniture blocks read by eye content kept 56/60 (93%, 84–97%), furniture still set aside 71/78 (91%, 83–96%); held out (60 blocks drawn afterwards) released blocks that are content 33/38 (87%, 73–94%); experiment 26's truth unchanged (0 furniture leaks) | experiment 28's 205 documents (`experiments/30_furniture_flags`) | 2026-10-07 |
 | Block and page marks instead of flag floods (experiment 30: vowelled, handwritten, decorative) | flagged on documents over 50% vowelled 60.3% → 12.3%, handwritten pages 76.6% → 10.6%, all words 4.9% → 4.6% (under 5% vowelled unchanged); on 19's judged words flagged 5.0% → 4.3%, errors flagged word by word 50 → 45 of 61, flagged or inside a marked block 50 → 50; unflagged words outside marked blocks still 0.42% wrong | same 205 documents; 2,935 judged words (nothing paid) | 2026-10-07 |
 | **JATS front matter from Mandumah's MARC catalogue, tied to the ink** (`--xml`, default when the index exists) | record for 204/205 documents; title 194 → **205** (on its printed words 194 → 202; the page alone matched the catalogue in 171/204), authors 147 → **205** (195 of 214 catalogue names found on the page; the page alone found 132), journal title 101 → 205, ISSN 0 → 89, year 66 → 205 (Hijri 10 → 76), pages 165 → 205, abstract 0 → 34, keywords 0 → 204, DOI 0 → 15, affiliations 26 → 50; honorifics as `<prefix>` (97); JATS 1.4 / ALTO 4.4 valid 205/205; no wrong record found, and of 204 neighbours' records given on purpose 0 were accepted; index 1.1 GB, 29 ms to open, 1.1 ms a lookup | the 205 documents of experiment 28 (`experiments/29_catalogue`) | 2026-10-07 |
+| **Derived editions from the master files** (`inkscript edition`, experiment 35): reading HTML, EPUB 3, layout-faithful PDF, one-column PDF, Markdown, dataset record | 205/205 built, 0 failures, 18 min on 2 workers, 0.63 GB a worker; printed words found, read back from the files: HTML/EPUB/Markdown/JSONL 99.99%, layout PDF 99.97% (every ALTO word, furniture too), one-column PDF 99.94% (digits aside: it renumbers notes); words in reading order in pdfium: layout 96.1%, one-column 93.6% (median document 99.3% / 99.0%; the rest mostly Latin lines in Arabic documents, D18); EPUB epubcheck-clean 21/21; Gemini judge on 36 pages, scan beside rebuild: same blocks 33 + 3 mostly, same order 36/36, overall 4/5 on 33 (planted faults: dropped paragraph 3/3, swapped 3/3, demoted heading 0/2); $0.39 | experiment 29's 205 masters, 3,254 pages (`experiments/35_edition`, `out/report.html`) | 2026-10-11 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
 
 ## What they do not do (known gaps)
@@ -92,6 +93,10 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   was identical old and new in every document sampled.
 
 ## In flight / where outputs are (this machine)
+
+- **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
+  `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
+  `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.
 
 - **The scale run (2026-10-07)**: 205 documents built with everything on and fixed in
   `experiments/28_scale/out/set/w0..w2/`; numbers in `summary.json`, the owner's page

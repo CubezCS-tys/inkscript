@@ -259,7 +259,7 @@ the tests round-trip `visual()` through it.
 
 | File | What it does |
 |---|---|
-| `src/inkscript/cli.py` | the twelve subcommands (table below) |
+| `src/inkscript/cli.py` | the thirteen subcommands (table below) |
 | `src/inkscript/text.py` | Arabic text rules: runs/pieces, marks, `visual` (how text is stored) and `chrome_reads` (pdfium's line reconstruction, emulated) |
 | `src/inkscript/ocr/azure.py`, `align.py`, `gemini.py`, `frontpage.py` | load Azure's JSON; fit Gemini's page-1 text into Azure's boxes; the Gemini calls and fallbacks; the older searchable-PDF path |
 | `src/inkscript/geometry/trace.py` | page → ink blobs as outline polygons; rules separated |
@@ -285,6 +285,10 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
 | `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, block outlines and page notes in a second ("Reading marks"), incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
+| `src/inkscript/edition/model.py` | one article from its JATS + ALTO, the shape every derived edition is written from: front matter, body nodes (headings, paragraphs, XHTML tables, MathML formulas), notes, references, verses; ALTO blocks tied to the nodes (experiment 35) |
+| `src/inkscript/edition/html.py`, `epub.py`, `scan.py` | the reading page (phone first, each paragraph with its clip of the scan) and the EPUB 3, from one renderer; the page pictures |
+| `src/inkscript/edition/printpdf.py`, `pdftext.py`, `fonts.py` | the two re-typeset PDFs (layout-faithful, one column) with LuaLaTeX; the text layer rewritten so pdfium reads it in order (D27); the OFL fonts |
+| `src/inkscript/edition/data.py`, `check.py`, `build.py` | Markdown and the dataset record; the checks on the finished files (every word once, reading order); `inkscript edition` |
 
 | Command | Needs | Gives |
 |---|---|---|
@@ -296,6 +300,7 @@ the tests round-trip `visual()` through it.
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |
 | `inkscript fix OUT/<stem>\|OUT --azure-dir … [--judge gemini\|none] [--apply] [--cap 1.0]` | `GEMINI_API_KEY` (unless `--judge none`) | `<stem>.corrections.json` (every proposal, verdict and write); with `--apply` the accepted ones in both PDFs' text, the ALTO, JATS and trust PDFs |
 | `inkscript view OUT [--doc ID] [--port N] [--static DIR]` | — | the outputs in a browser: scan with every ALTO word, the JATS as an article, linked; both XML files |
+| `inkscript edition MASTERS --out OUT [--doc ID] [--only html,epub,layout,onecol,md,jsonl] [--workers 2] [--resume]` | LuaLaTeX (TeX Live with babel, fontspec) for the PDFs | per article `OUT/<id>/`: `<id>.html` + `scan/`, `.epub`, `.layout.pdf`, `.onecol.pdf`, `.md`, `.jsonl`, `.checks.json`; `OUT/articles.jsonl`, `OUT/summary.json` |
 | `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
 
 Without the bucket or keys, everything still runs on the bundled document

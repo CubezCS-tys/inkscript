@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">
+<article xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mml="http://www.w3.org/1998/Math/MathML" article-type="research-article" dtd-version="1.4" xml:lang="ar">
+ <processing-meta tagset-family="jats" base-tagset="archiving" table-model="xhtml" math-representation="mathml tex" mathml-version="3.0"/>
+ <front>
+  <journal-meta>
+   <journal-id journal-id-type="publisher-id">test</journal-id>
+   <journal-title-group>
+    <journal-title>مجلة الاختبار</journal-title>
+   </journal-title-group>
+   <publisher>
+    <publisher-name>inkscript (hand-made test files)</publisher-name>
+   </publisher>
+  </journal-meta>
+  <article-meta>
+   <article-id pub-id-type="other" assigning-authority="inkscript">test-0002-two-columns</article-id>
+   <title-group>
+    <article-title id="p1b2">تحصيل الطلاب قبل البرنامج التدريبي وبعده في أربع مواد دراسية</article-title>
+   </title-group>
+   <contrib-group>
+    <contrib contrib-type="author" id="p1b3">
+     <string-name>أ. د. ليلى حسن المصري</string-name>
+    </contrib>
+   </contrib-group>
+   <pub-date publication-format="print" date-type="pub" calendar="gregorian">
+    <year>2026</year>
+   </pub-date>
+   <volume>1</volume>
+   <issue>1</issue>
+   <fpage>127</fpage>
+   <lpage>127</lpage>
+   <counts>
+    <page-count count="1"/>
+   </counts>
+   <custom-meta-group>
+    <custom-meta>
+     <meta-name>hand-made-test-file</meta-name>
+     <meta-value>Hand-made test master (experiment 35): NOT an archive page. Written by hand to test tables (XHTML, merged cells, cells in reading order: the first cell of a row is the rightmost on the page) and equations (MathML dir=rtl + LaTeX + scan crop) in every derived edition; the 'scan' is the same text typeset in Chromium. See tests/fixtures/edition/README.md.</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>text-direction</meta-name>
+     <meta-value>rtl (text stored in logical order; xml:lang carries the script)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>cell-order</meta-name>
+     <meta-value>logical: the first cell of a row is the rightmost on the page</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>faithful-pdf</meta-name>
+     <meta-value>test-0002-two-columns.pdf (stand-in: the typeset page as a grey image)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>alto-file</meta-name>
+     <meta-value>test-0002-two-columns.alto.xml</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>trust</meta-name>
+     <meta-value>0 words verified, 171 agreed, 0 flagged (per-word marks in the ALTO file)</meta-value>
+    </custom-meta>
+    <custom-meta>
+     <meta-name>quran-quotations</meta-name>
+     <meta-value>0 found, 0 equal to the verse</meta-value>
+    </custom-meta>
+   </custom-meta-group>
+  </article-meta>
+ </front>
+ <body>
+  <sec id="sec1">
+   <title id="p1b4">مقدمة</title>
+   <p id="p1b5">يهدف هذا البحث إلى قياس أثر برنامج تدريبي قصير في تحصيل الطلاب في أربع مواد دراسية، وقد طبق البرنامج مدة ستة أسابيع في ثلاث مدارس حكومية <xref ref-type="fn" rid="fn-p1-1">(١)</xref>.</p>
+   <p id="p1b6">واعتمد البحث على اختبارين متكافئين، قبلي وبعدي، أعدهما فريق من المعلمين وحكمهما عدد من المختصين في القياس والتقويم.</p>
+  </sec>
+  <sec id="sec2">
+   <title id="p1b7">النتائج</title>
+   <p id="p1b8">حسبت نسبة النجاح في كل مادة بالعلاقة <inline-formula id="p1f1"><alternatives><mml:math dir="rtl"><mml:mi>ن</mml:mi><mml:mo>=</mml:mo><mml:mi>ك</mml:mi><mml:mo>÷</mml:mo><mml:mi>م</mml:mi><mml:mo>×</mml:mo><mml:mn>١٠٠</mml:mn></mml:math><tex-math><![CDATA[\text{ن} = \text{ك} \div \text{م} \times ١٠٠]]></tex-math></alternatives></inline-formula> حيث ك عدد الناجحين و م عدد الطلاب في المادة.</p>
+   <p id="p1b9">ويعرض الجدول الآتي متوسطات الدرجات في الاختبارين والفرق بينهما في كل مادة، مع المتوسط العام للمواد الأربع.</p>
+   <table-wrap id="p1t1">
+    <caption><p id="p1b10">جدول (٢): متوسطات درجات الطلاب في الاختبارين القبلي والبعدي</p></caption>
+    <alternatives>
+     <graphic xlink:href="test-0002-two-columns.crops/p1t1.png" specific-use="scan-crop"/>
+     <table>
+      <thead>
+       <tr><th id="p1t1c00" rowspan="2">المادة</th><th id="p1t1c01" colspan="2">متوسط الدرجات</th><th id="p1t1c03" rowspan="2">الفرق</th></tr>
+       <tr><th id="p1t1c11">القبلي</th><th id="p1t1c12">البعدي</th></tr>
+      </thead>
+      <tbody>
+       <tr><th id="p1t1c20" scope="row">الرياضيات</th><td id="p1t1c21">٥٤٫٢</td><td id="p1t1c22">٧١٫٨</td><td id="p1t1c23">١٧٫٦</td></tr>
+       <tr><th id="p1t1c30" scope="row">العلوم</th><td id="p1t1c31">٥٨٫٠</td><td id="p1t1c32">٦٩٫٤</td><td id="p1t1c33">١١٫٤</td></tr>
+       <tr><th id="p1t1c40" scope="row">اللغة العربية</th><td id="p1t1c41">٦٢٫٥</td><td id="p1t1c42">٧٠٫١</td><td id="p1t1c43">٧٫٦</td></tr>
+       <tr><th id="p1t1c50" scope="row">اللغة الإنجليزية</th><td id="p1t1c51">٤٩٫٣</td><td id="p1t1c52">٦٠٫٢</td><td id="p1t1c53">١٠٫٩</td></tr>
+       <tr><th id="p1t1c60" scope="row">المتوسط العام</th><td id="p1t1c61">٥٦٫٠</td><td id="p1t1c62">٦٧٫٩</td><td id="p1t1c63">١١٫٩</td></tr>
+      </tbody>
+     </table>
+    </alternatives>
+   </table-wrap>
+   <p id="p1b11">وتدل النتائج على تحسن واضح في جميع المواد، وكان أكبر الفروق في الرياضيات وأصغرها في اللغة العربية.</p>
+  </sec>
+ </body>
+ <back>
+  <fn-group>
+   <fn id="fn-p1-1">
+    <label>١</label>
+    <p id="p1b12">المدارس هي: مدرسة النور، ومدرسة الأمل، ومدرسة الفجر (العام 2021).</p>
+   </fn>
+  </fn-group>
+ </back>
+</article>

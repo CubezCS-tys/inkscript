@@ -273,6 +273,19 @@ reason is recorded), **open** (voiced, not yet judged).
   could read); the letters' own boxes from `shapes.json` drawn inside a word;
   the trust PDF and vector PDF opened at the same place.
 
+- **Every edition from the master files** (owner, 2026-10-11: "rebuilt as a native digital
+  publication anyone can read online, print, search or train AI on"). *built* — `inkscript edition`
+  (experiment 35, D27): reading HTML with a clip of the scan per paragraph, EPUB 3, a layout-faithful
+  and a one-column print PDF (LuaLaTeX), Markdown, a dataset record; checked on the files.
+  *Open:* real kashida justification (babel inserts 1–14 a document; Raqim's kashida points, research
+  note 04); Latin lines inside Arabic PDFs copy word-reversed (D18's price) — a per-line direction
+  that pdfium honours would fix both PDFs; archive tables are boxes of words until the master knows
+  them (the editions already render XHTML tables and MathML: hand-made tests); redraw rules,
+  ornaments and pictures (crops) in the layout rebuild; a judge that sees heading size (0/2 planted);
+  the issue as one EPUB/PDF (all articles of an issue), IIIF regions instead of page JPEGs; a site of
+  all articles with search on the folded text; Croissant card for the dataset (rights are the owner's
+  call).
+
 ## Scale
 
 - **Run the corpus.** *in progress.* 227 journals done twice; next a rerun
