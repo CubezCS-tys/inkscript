@@ -316,3 +316,28 @@ when the check says "disagrees" (no such case in the set; open in ideas.md).
 The index lives in `~/.cache/inkscript/catalogue/` (1.1 GB SQLite, 1 ms a
 lookup, nothing in memory), not in git: Mandumah's data, rebuildable from the
 bucket in minutes, like the cached schemas (D20).
+
+**D26 · The yardstick: our own hand-checked pages, stored as one JSON file per
+page, corrected from two blind readings (2026-10-11).** The owner wants
+"most accurate" proven on Mandumah's pages, not only on public benchmarks (no
+public set looks like these scans; experiment 32's research). Experiment 34
+chose 202 pages from 185 documents (stratified by decade, journal and kind)
+and split them **by journal**: the test pages' journals may never be prompted,
+tuned or trained on (`experiments/34_yardstick/out/heldout.txt`). Truth is
+**`inkscript-gold/1`**: one JSON per page beside its 300 dpi image. It holds
+lines with boxes and the text exactly as printed (vowels, hamza and ى/ي as
+printed; no tatweel; no Persian code points), a reading order, blocks with
+their column and article (so a layout-keeping rebuild stays possible), tables
+as HTML cell grids, equations as LaTeX, and the drafts and statuses. Not
+chosen: ALTO as the working file (it cannot hold the drafts, statuses, tables
+or equations; `to_alto()` exports valid ALTO 4.4 for exchange); a page-level
+text file (it loses the boxes, so invented and dropped lines cannot be told
+from misreadings). The draft is Azure's reading. A blind Gemini reading of
+every line marks where they differ, so the owner presses Enter on agreeing
+lines and decides only the marked ones. Not chosen: typing pages from scratch
+(about 3× the time), or showing Gemini Azure's reading (it anchors). Scoring
+(`inkscript score`): CER and WER under a *faithful* and a *folded*
+normalisation; invented, dropped and repeated lines counted apart (a VLM's
+characteristic failure); TEDS for tables; a LaTeX token distance for
+equations (not CDM, which needs rendering); intervals by bootstrap over
+documents.

@@ -85,6 +85,22 @@ reason is recorded), **open** (voiced, not yet judged).
   measure. First step: train Kraken on one typeface from Azure's readings,
   test whether it catches Azure's errors on gold-set pages.
 
+- **The yardstick: a hand-checked gold set every reader is scored on** (owner,
+  2026-10-11; experiment 34, D26). *built, waiting for the owner's correcting.*
+  202 pages are drafted from Azure, with a blind Gemini line reading marking
+  the disagreements; `inkscript view --gold` corrects them and `inkscript
+  score` scores any reader. *Next:* the owner corrects the pages (about 13.6 h);
+  then Azure's real bar per kind and decade; then the stage 1 bake-off on the
+  same pages (research/03_build.md). *Open:*
+  - public benchmarks: KITAB-Bench and Misraj-DocOCR, with a runner stub in
+    `experiments/34_yardstick/bench.py`;
+  - CDM for equations, if formulas matter;
+  - more handwriting pages (only 6 were found in the pool);
+  - a second checker on a sample of corrected pages, to measure the owner's own
+    error rate;
+  - an "accept all agreeing lines on this page" key, if the measured pace says
+    it would help.
+
 - **A gold set, and the error taxonomy before the checker.** *experiment 12,
   2026-09-21: tools built, first page marked, method changed.* The first page
   (`0005` p2, heavy face) came back **277 words, 0 errors** — so whole-page

@@ -7,6 +7,8 @@
   inkscript alphabet    shape dictionary across pages: does it saturate?    (geometry)
   inkscript fix         corrections from Quran verses, judged on the ink, into the text only   (enrich)
   inkscript view        the outputs in a browser: scan + ALTO words, JATS article, linked  (viewer)
+                        --gold DIR: the correction mode for the gold pages (experiment 34)
+  inkscript score       a reader's output against the gold pages: CER/WER, invented lines, TEDS  (gold)
 """
 from __future__ import annotations
 import argparse, json, sys
@@ -186,6 +188,14 @@ def cmd_compare(a) -> int:
 
 
 def cmd_view(a) -> int:
+    if a.port is None:
+        a.port = 8766 if a.gold else 8765
+    if a.gold:
+        from .viewer.correct import main as correct
+        return correct(a)
+    if not a.out_dir:
+        print("view: give an OUT_DIR (a build's outputs) or --gold GOLD_DIR (the correction mode)")
+        return 2
     from .viewer.serve import main as view
     return view(a)
 
@@ -400,10 +410,14 @@ def main(argv=None) -> int:
     p.add_argument("-v", "--verbose", action="store_true", help="list every proposal, not only the accepted ones")
     p.set_defaults(fn=cmd_fix)
 
+    from .gold.score import add_parser as score_parser
+    score_parser(sub)
+
     p = sub.add_parser("view", help="look at a build's outputs in the browser: the scan with every ALTO word, the JATS as an article, linked; both XML files")
-    p.add_argument("out_dir", help="an output dir of `native --xml` (searched at any depth for <id>.alto.xml + <id>.jats.xml)")
+    p.add_argument("out_dir", nargs="?", help="an output dir of `native --xml` (searched at any depth for <id>.alto.xml + <id>.jats.xml)")
+    p.add_argument("--gold", metavar="GOLD_DIR", help="correction mode (experiment 34): correct the gold pages <page_id>.json + .jpg in GOLD_DIR line by line (default port 8766)")
     p.add_argument("--doc", action="append", help="open this document id (with --static: export only these; repeatable)")
-    p.add_argument("--port", type=int, default=8765); p.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to open it from a phone on the same network")
+    p.add_argument("--port", type=int, default=None, help="8765 (8766 with --gold)"); p.add_argument("--host", default="127.0.0.1", help="0.0.0.0 to open it from a phone on the same network, or from Windows if WSL's localhost forwarding does not reach it")
     p.add_argument("--scan-dir", help="draw the pages from these scans <id>.pdf (default: the faithful <id>.pdf beside the XML)")
     p.add_argument("--dpi", type=int, default=150, help="page image resolution")
     p.add_argument("--static", metavar="DIR", help="write a self-contained folder that opens from disk instead of serving")

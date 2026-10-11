@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>inkscript gold</title>
+<link rel="stylesheet" href="correct.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/" title="all pages">ink<b>script</b> gold</a>
+  <div class="ptitle" id="ptitle"></div>
+  <nav class="modes" id="modes" hidden>
+    <button data-mode="lines">Lines</button>
+    <button data-mode="tables">Tables</button>
+    <button data-mode="equations">Equations</button>
+    <button data-mode="articles">Articles</button>
+  </nav>
+  <span class="clock" id="clock" title="time on this page (counted only while you work)"></span>
+  <span class="saved" id="saved"></span>
+  <span class="pgbtns" id="pgbtns" hidden>
+    <button data-act="pagedone" title="mark the whole page done">Page done</button>
+    <button data-act="skip" title="this page cannot be used (no text, wrong page...)">Skip page</button>
+  </span>
+</header>
+<main id="main"><div class="msg">Loading…</div></main>
+<div class="modal" id="modal" hidden><div class="box" id="modalbox"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script src="correct.js"></script>
+</body>
+</html>

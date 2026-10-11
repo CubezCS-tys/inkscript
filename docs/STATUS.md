@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-07. Update this file whenever a headline number or a
+*Last updated 2026-10-11. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -34,6 +34,7 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 | Page furniture told from content (experiment 30) | blocks set aside on the 205 documents 9,815 → 6,742, "lone" ones with letters 470 → 267; on 140 old furniture blocks read by eye content kept 56/60 (93%, 84–97%), furniture still set aside 71/78 (91%, 83–96%); held out (60 blocks drawn afterwards) released blocks that are content 33/38 (87%, 73–94%); experiment 26's truth unchanged (0 furniture leaks) | experiment 28's 205 documents (`experiments/30_furniture_flags`) | 2026-10-07 |
 | Block and page marks instead of flag floods (experiment 30: vowelled, handwritten, decorative) | flagged on documents over 50% vowelled 60.3% → 12.3%, handwritten pages 76.6% → 10.6%, all words 4.9% → 4.6% (under 5% vowelled unchanged); on 19's judged words flagged 5.0% → 4.3%, errors flagged word by word 50 → 45 of 61, flagged or inside a marked block 50 → 50; unflagged words outside marked blocks still 0.42% wrong | same 205 documents; 2,935 judged words (nothing paid) | 2026-10-07 |
 | **JATS front matter from Mandumah's MARC catalogue, tied to the ink** (`--xml`, default when the index exists) | record for 204/205 documents; title 194 → **205** (on its printed words 194 → 202; the page alone matched the catalogue in 171/204), authors 147 → **205** (195 of 214 catalogue names found on the page; the page alone found 132), journal title 101 → 205, ISSN 0 → 89, year 66 → 205 (Hijri 10 → 76), pages 165 → 205, abstract 0 → 34, keywords 0 → 204, DOI 0 → 15, affiliations 26 → 50; honorifics as `<prefix>` (97); JATS 1.4 / ALTO 4.4 valid 205/205; no wrong record found, and of 204 neighbours' records given on purpose 0 were accepted; index 1.1 GB, 29 ms to open, 1.1 ms a lookup | the 205 documents of experiment 28 (`experiments/29_catalogue`) | 2026-10-07 |
+| **The yardstick (gold set) for every reader** (experiment 34, D26) | 202 pages drafted and ready to correct: 185 documents, 159 journals, 1929–2025, 44 pages before 1970; tables 29, equations 14, Quran 22, vowelled 21, footnotes 43, mixed Latin 39, magazines 50; held out by journal 151 test / 51 dev; Gemini disagrees with Azure on 26% of 8,493 lines; correcting estimated at **13.6 h** (7.8–25); `inkscript view --gold`, `inkscript score`; nothing is gold until the owner corrects | `experiments/34_yardstick` (`out/report.html`), $12.40 | 2026-10-11 |
 | Selection in current Chrome (Chromium 153, real browser, scripted drag) | letter by letter in reading order, lines copy out exactly, once the PDF is marked right-to-left; unmarked it jumped word to word | `0618-021-002-004` p3 | 2026-10-05 |
 
 ## What they do not do (known gaps)
