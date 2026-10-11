@@ -26,7 +26,7 @@ for i in d:
         print(iid, f'GPU idle {(now - keep[iid]) / 60:.0f} min')
 json.dump(keep, open(path, 'w'))" | while read id why; do
       echo "$(date -Is) destroying $id ($why)" >> $LOG
-      $V destroy instance "$id" >> $LOG 2>&1
+      $V destroy instance "$id" -y >> $LOG 2>&1
   done
   sleep 300
 done
