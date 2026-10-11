@@ -93,6 +93,19 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 
 ## In flight / where outputs are (this machine)
 
+- **Second branch, the open reading stack (started 2026-10-11)**, beside the ink-as-text
+  work, which stays alive ([vision.md](vision.md), [roadmap.md](roadmap.md)). Research and plan:
+  [experiments/32_open_stack](../experiments/32_open_stack/README.md) (plan page:
+  https://claude.ai/artifact/4sMPMdfjjnrkttPTHsE1kM). Running, each on its own worktree branch,
+  outputs in the main checkout's `experiments/3x_*/out/`:
+  - 33: Kraken on Mandumah lines, then fine-tuned on born-digital lines. First numbers
+    (2026-10-11, out of the box): Arabic character errors on clean born-digital lines are
+    Kraken 4.1%, Azure 1.75%; 9.6% on the same lines degraded; about 7% on real scans
+    (against Azure's readings, so silver truth).
+  - 34: the yardstick, 202 pages selected, gold drafts and correction mode being built.
+  - 35: the native edition (reading HTML, EPUB, re-typeset print PDF, AI text) from the
+    205 JATS + ALTO files.
+
 - **The scale run (2026-10-07)**: 205 documents built with everything on and fixed in
   `experiments/28_scale/out/set/w0..w2/`; numbers in `summary.json`, the owner's page
   `experiments/28_scale/out/showcase.html`. Nothing is running.

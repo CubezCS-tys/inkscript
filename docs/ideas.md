@@ -302,3 +302,21 @@ reason is recorded), **open** (voiced, not yet judged).
   - **A page-level "handwritten" mark** — *done (experiment 30):* from Azure's
     handwriting style; plus "decorative" for script lettering on printed pages
     (handwritten pages 77% → 11% flagged).
+
+## The open reading stack (second branch, 2026-10-11)
+
+- **Our own reader instead of Azure**: *in progress*. A fine-tuned Kraken is the main text
+  engine (characters plus line positions). A VLM (dots.ocr, PaddleOCR-VL, Qwen3-VL) handles
+  tables, equations and layout and gives a second reading; the trust marks referee. Research:
+  [experiments/32_open_stack](../experiments/32_open_stack/README.md).
+- **Training data nobody else has**: born-digital Mandumah pages (exact text; 42% of documents
+  in experiment 19's sample, fewer once junk-encoded text layers are removed), synthetic pages
+  in the rebuilt typefaces (experiment 11), lines Azure and Gemini agree on.
+- **Newspapers rebuilt as articles**: *open*. Block detection, then grouping into articles,
+  then reading order; "continued on page N" has no open solution. One METS file per issue
+  over ALTO pages and JATS articles (research note 04).
+- **A layout-faithful re-typeset edition, judged by a vision model against the scan**:
+  *in progress* (experiment 35).
+- **eScriptorium as the correction platform for helpers at archive scale**: *parked*. It reads
+  and writes ALTO, so the yardstick's pages open there too.
+

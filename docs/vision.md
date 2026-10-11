@@ -41,3 +41,41 @@ The corpus is Mandumah's scanned Arabic journals (`s3://mandumah-source-docs/<id
 each already read by Azure Document Intelligence. Page 1 (title, author) is
 re-read by Gemini, because that is where Azure fails most and where it matters
 most.
+
+## A second branch: the open reading stack (2026-10-11)
+
+The ink-as-text vision above is **still alive**. The owner added a second
+branch in the same direction, document digitisation, and is keeping both until
+it is clearer which way to take the first. In their words:
+
+**The shift (2026-10-11).** "I no longer want to rely on azure or stuff like
+that and want to move a bit more open source, and sort of build the whole
+stack myself and get the most accurate OCR and output at the same time … not
+have the perfect font or whatever but is to keep the accuracy of text
+equations, tables as accurate as possible and having this in some sort of
+file format."
+
+**The goal (2026-10-11).** "say there is this old newspaper from the Arab world
+… I basically want to take it and recognise every letter and every word and
+rework the formatting if need be … once the document is understood it can
+re-adjust where things go but still have a native format at the end."
+
+**Who it is for.** "literally everyone, when you see an english paper of
+research it can be read online, printed, trained etc so it needs to have that
+same functionality." The print edition stays "as close to the original as
+possible", tested with a model as a judge.
+
+Agreed in the same conversation:
+- Every word keeps a box on the scan, so it can be proven.
+- Vowel marks are recorded exactly as printed; search ignores them.
+- Equations and tables are rare in the archive but a priority.
+- "Most accurate" must hold on public Arabic benchmarks and on a hand-checked
+  Mandumah set.
+- All papers and decades are in scope ("throw everything at it").
+
+How it is being built: [experiments/32_open_stack](../experiments/32_open_stack/README.md)
+(research and plan). An open line reader (Kraken, fine-tuned on Mandumah's own
+pages) is the main text engine and gives every line's position. A VLM is the
+specialist for tables, equations and layout, and a second reading. The
+project's checks (Quran, judge, trust marks) referee between them. The master
+files stay JATS + ALTO, and every edition is derived from them.

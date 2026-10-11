@@ -12,6 +12,25 @@ Mandumah archive. Tables, equations and arbitrary documents are deliberately
 not on it yet, and widening needs a new rule for what fidelity means when the
 content is not ink.
 
+## Second branch: the open reading stack (owner, 2026-10-11)
+
+Runs **beside** the live list below, not instead of it; the owner keeps both
+until it is clear which to take forward ([vision.md](vision.md)). Plan and
+research: [experiments/32_open_stack](../experiments/32_open_stack/README.md).
+The owner decides at each step marked ◆.
+
+1. **The yardstick** (experiment 34): ~200 hand-checked Mandumah pages and a
+   scorer; Azure's score on it is the bar. ◆ after the owner's correcting.
+2. **Kraken, fine-tuned on Mandumah lines** (experiment 33), as the main text
+   engine with line positions. ◆ on its score on real old scans.
+3. **The native edition** (experiment 35): reading HTML, EPUB, re-typeset print
+   PDF (layout-faithful and one-column) and AI text, all derived from JATS + ALTO.
+4. **A bake-off of VLMs and closed services** on the yardstick (dots.ocr,
+   PaddleOCR-VL, Qwen3-VL; Azure, Gemini, Mistral). ◆ which VLM to fine-tune.
+5. **A VLM fine-tune** on a rented GPU, for tables, equations and layout. ◆ spend.
+6. **Newspapers:** block detection, grouping into articles, reading order; one
+   METS file per issue.
+
 ## The live list (owner's order, 2026-09-20)
 
 1. **Make the text trustworthy.** The PDFs carry Azure's reading; "words
