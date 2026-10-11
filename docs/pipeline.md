@@ -18,7 +18,8 @@
 | Meeting point | `inkscript.pdf` | both | ink-glyph PDFs |
 | Checks | `inkscript.verify` | PDFs | pdfium/MuPDF/poppler numbers |
 | What we know beyond the ink | `inkscript.enrich` | Azure JSON, scan, build outputs | JATS + ALTO XML, trust marks, Quran links, `_trust.pdf` |
-| Review | `inkscript.viewer` | outputs | `inkscript view` (the XML files in a browser, linked to the scan); static HTML bundles |
+| Review | `inkscript.viewer` | outputs | `inkscript view` (the XML files in a browser, linked to the scan); static HTML bundles; `view --gold` the correction mode for the gold pages |
+| The yardstick | `inkscript.gold` | gold pages, any reader's output | `inkscript score`: CER/WER, invented/dropped/repeated lines, TEDS, equations, reading order (experiment 34) |
 
 ## Letters
 
@@ -161,6 +162,22 @@ anywhere; experiment 31) over the files `--xml` writes:
 It is fast on long documents: a page and its words are drawn only when they
 come near the view (48 pages: open 0.9 s, jump to page 40 in 0.2 s).
 
+## The yardstick: gold pages and `inkscript score` (since 2026-10-11)
+
+Experiment 34 (D26). About 200 hand-checked pages, one `<page_id>.json` each
+(`inkscript-gold/1`, documented in `src/inkscript/gold/format.py`) beside its
+300 dpi page image: lines with boxes and the text exactly as printed, reading
+order, blocks with their column and article, tables as HTML, equations as LaTeX.
+
+```
+inkscript view --gold experiments/34_yardstick/out/gold     # http://localhost:8766/ — correct, don't type
+inkscript score --gold GOLD --pred PRED_DIR --name READER   # any reader: <page_id>.json or .txt per page
+inkscript score --gold GOLD --reader azure-draft --drafts   # plumbing check on the drafts
+```
+
+Only pages marked done are scored; the `test` split (by journal) is never tuned
+on (`experiments/34_yardstick/out/heldout.txt`).
+
 ## Checking a document against itself
 
 `inkscript check OUT/native` reads each `<stem>.shapes.json` and lists
@@ -259,7 +276,7 @@ the tests round-trip `visual()` through it.
 
 | File | What it does |
 |---|---|
-| `src/inkscript/cli.py` | the twelve subcommands (table below) |
+| `src/inkscript/cli.py` | the thirteen subcommands (table below) |
 | `src/inkscript/text.py` | Arabic text rules: runs/pieces, marks, `visual` (how text is stored) and `chrome_reads` (pdfium's line reconstruction, emulated) |
 | `src/inkscript/ocr/azure.py`, `align.py`, `gemini.py`, `frontpage.py` | load Azure's JSON; fit Gemini's page-1 text into Azure's boxes; the Gemini calls and fallbacks; the older searchable-PDF path |
 | `src/inkscript/geometry/trace.py` | page → ink blobs as outline polygons; rules separated |
@@ -285,6 +302,9 @@ the tests round-trip `visual()` through it.
 | `src/inkscript/enrich/jats.py`, `alto.py` | `<stem>.jats.xml` (JATS 1.4 Archiving) and `<stem>.alto.xml` (ALTO 4.4) |
 | `src/inkscript/enrich/trustpdf.py` | `<stem>_trust.pdf`: highlights in an optional-content layer, block outlines and page notes in a second ("Reading marks"), incremental update; its check |
 | `src/inkscript/enrich/schemas.py` | fetches and caches the official schemas; validates |
+| `src/inkscript/gold/format.py`, `draft.py` | the gold page file (experiment 34, D26): schema, checks, atomic save with history, progress, ALTO export; a draft page from Azure's reading (lines, blocks with kinds and columns, the page image) |
+| `src/inkscript/gold/text.py`, `score.py` | the faithful and folded normalisations and a bit-parallel edit distance; `inkscript score` |
+| `src/inkscript/viewer/correct.py`, `app/correct.*` | `inkscript view --gold`: the correction mode (server with checked saves, progress and hours left; the app) |
 
 | Command | Needs | Gives |
 |---|---|---|
@@ -296,6 +316,8 @@ the tests round-trip `visual()` through it.
 | `inkscript correct PDF corrections.json` | — | readings rewritten in place, logged in `<stem>.corrections.json` |
 | `inkscript fix OUT/<stem>\|OUT --azure-dir … [--judge gemini\|none] [--apply] [--cap 1.0]` | `GEMINI_API_KEY` (unless `--judge none`) | `<stem>.corrections.json` (every proposal, verdict and write); with `--apply` the accepted ones in both PDFs' text, the ALTO, JATS and trust PDFs |
 | `inkscript view OUT [--doc ID] [--port N] [--static DIR]` | — | the outputs in a browser: scan with every ALTO word, the JATS as an article, linked; both XML files |
+| `inkscript view --gold GOLD [--port 8766]` | — | the correction mode: each line's scan beside its draft, disagreements marked, Enter to accept; saves as you go |
+| `inkscript score --gold GOLD (--pred DIR \| --reader azure-draft\|gemini-draft) [--out FILE]` | — | the reader's scores per kind and decade, 95% intervals over documents |
 | `inkscript compare`, `trace`, `alphabet` | — | front-page review bundle; one page's outlines; alphabet saturation |
 
 Without the bucket or keys, everything still runs on the bundled document
