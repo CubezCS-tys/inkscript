@@ -83,7 +83,29 @@ reason is recorded), **open** (voiced, not yet judged).
   59% in one study (English, Chinese and Korean; arxiv.org/abs/2607.21617); no
   benchmark covers Mandumah-like scans, so the gold set (experiment 12) is the
   measure. First step: train Kraken on one typeface from Azure's readings,
-  test whether it catches Azure's errors on gold-set pages.
+  test whether it catches Azure's errors on gold-set pages. *First
+  measurement 2026-10-12 (experiment 33), see the next item.*
+
+- **An open line reader of our own, fine-tuned on Mandumah (Kraken / PP-OCRv6).**
+  *experiment, 2026-10-12 (`experiments/33_kraken`, `out/report.html`).* Out of
+  the box the OpenITI print model is 3–12× worse than Azure (born-digital lines
+  3.6% of characters vs 1.0%; real-scan judged words 24.5% vs 2.0%). Fine-tuned
+  on 13k born-digital lines (their PDF text is exact) plus 22k real-scan lines
+  read by Azure (silver, ≥ 0.9 confidence): born-digital 1.3–1.5%, scan-like
+  copies 1.4–2.1%, real-scan words 15.2% (body text 4.3% vs Azure 1.1%), whole
+  scanned pages 13.4% → 8.2% against Azure's lines. Close to Azure on modern
+  print, still 4–8× Azure on old scans: *open* — more real-scan lines (Azure's
+  readings are free training data), old typefaces, and scoring on the owner's
+  gold pages (experiment 34). Two engines with different strengths (VGSL: old
+  print, vowelled, footnotes; PP-OCRv6: modern print, titles, Latin). Its line
+  finder, fine-tuned on 400 scanned pages, finds 95% of Azure's lines (93% out of
+  the box) and takes whole pages to 6.5%. A rented GPU trains a
+  round in minutes, but this machine's upload (0.02–0.17 MB/s to the hosts that
+  night) is the bottleneck. *Not the bottleneck:* reading order and line
+  positions come with every line. PaddleOCR-VL-0.9B (smoke test, 60 lines, 7
+  pages) reads lines about as well but invents and skips on pages. *Dropped for
+  now:* a targeted round with synthetic vowelled Quran lines (Amiri, Noto Naskh)
+  and pre-1970 lines (half an epoch on CPU) did not help old or vowelled print.
 
 - **The yardstick: a hand-checked gold set every reader is scored on** (owner,
   2026-10-11; experiment 34, D26). *built, waiting for the owner's correcting.*

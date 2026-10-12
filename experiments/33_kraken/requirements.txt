@@ -1,0 +1,30 @@
+# experiment 33's own venv (out/env), not the project's. kraken 7.1.1 is installed with --no-deps first because it
+# pins torch<=2.14 and the CPU wheel at hand is 2.14.1+cpu; its other requirements are these:
+click<8.3,>=8.1
+coremltools~=9.0
+htrmopo~=0.6
+iso639-lang
+jinja2~=3.1.6
+jsonschema
+lightning==2.6.1
+lxml
+numpy
+packaging
+pillow>=9.2.0
+platformdirs
+protobuf>=3.0.0
+pyarrow
+regex
+requests
+rich<14.1.0
+safetensors~=0.7.0
+scikit-image~=0.25.2
+scikit-learn~=1.7.2
+scipy~=1.15.3
+shapely~=2.1.2
+threadpoolctl~=3.6.0
+torchmetrics
+pymupdf
+rapidfuzz
+python-bidi
+torch==2.14.1+cpu
