@@ -94,8 +94,7 @@ def label(pid):
     return gray, L
 
 
-for pid in sys.argv[1:] or ["0266-006-002-001_p042", "0005-055-003-004_p008"]:
-    gray, L = label(pid)
+def draw(pid, gray, L):
     img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR); over = img.copy()
     for l in L:
         x0, y0, x1, y1 = (int(round(v)) for v in l["box"]); c = COL[l["label"]]
@@ -108,4 +107,9 @@ for pid in sys.argv[1:] or ["0266-006-002-001_p042", "0005-055-003-004_p008"]:
     pad = np.full((img.shape[0], 260, 3), 255, np.uint8)
     cv2.imwrite(str(OUT / f"{pid}.jpg"), np.hstack([img, pad]) if False else cv2.copyMakeBorder(img, 0, 0, 0, 260, cv2.BORDER_CONSTANT, value=(255, 255, 255)), [cv2.IMWRITE_JPEG_QUALITY, 85])
     json.dump(L, open(OUT / f"{pid}.json", "w"), ensure_ascii=False, indent=1)
+
+
+if __name__ == "__main__":
+  for pid in sys.argv[1:] or ["0266-006-002-001_p042", "0005-055-003-004_p008"]:
+    gray, L = label(pid); draw(pid, gray, L)
     for l in L: print(l["id"], f"{l['label']:15}", l["size"], l["bold"], l["gap_above"], l["indent_right"], l["gap_inside"], l["why"], l["text"][:40])

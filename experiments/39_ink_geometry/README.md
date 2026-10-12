@@ -44,6 +44,26 @@ every Azure line was labelled from the ink and Azure's words alone, without usin
   - the page number.
 - This is a demonstration, not a measurement. The rules were tuned on these two pages in four rounds.
 
+**Scored on the 44 pilot pages, untuned** (`score_layout.py`, `score_report.py` → `out/layout_score.html`).
+- No page has hand layout labels (the 9 gold pages were corrected for text only), so Gemini 3.1 Pro labelled every line from
+  the image alone. I checked its two biggest disagreements by eye; it was right both times. $0.52.
+- Lines the rules are meant for (body, heading, footnote, list, verse, furniture): **47%** agree overall.
+  - plain single-column text (19 pages): **72%**;
+  - tables: 32%;
+  - equations: 30%;
+  - columns: 26%;
+  - decorative: 19%.
+- Causes:
+  1. **One column assumed:** 389 lines were called verse, only 6% right.
+  2. **One footnote makes every later line a footnote,** and table rules start it: 549 lines called footnote, 16% right
+     (real footnotes found 85%).
+  3. **Lists only by dash:** 14% found.
+  4. **Furniture only at the top:** 25% found.
+  5. **Headings too varied for one rule:** 27% found.
+
+The perfect result on two pages was the tuned kind. The rules belong after the rivers (columns, tables and equations set
+apart first), with a model for what measurement can't settle.
+
 **What it changes.** It is a thinking aid for the owner's "map" idea: the ink is a model-free survey of the page.
 The rivers give exact edges and columns; a model that sees the whole page names the blocks and covers what white
 space does not show. Nothing in `src/` changed.
