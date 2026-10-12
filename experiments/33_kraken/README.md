@@ -22,6 +22,9 @@ scale; pages with the found lines drawn). Everything below is dated 2026-10-11/1
   runs lines together across columns 4× less, and whole scanned pages improve 8.2% → **6.5%** (against Azure's lines).
 - **A VLM off the shelf (PaddleOCR-VL-0.9B) reads single lines about as well as fine-tuned Kraken but invents and
   skips on whole pages** (44% of its page words are not in Azure's reading; one page ran to the 4,096-token cap).
+- **A targeted round for old prints, footnotes and vowelled lines (round C) did not help** (half an epoch on CPU;
+  pre-1970 words 15.1% → 16.1%, vowelled 12.2% → 13.4%).
+- **On the owner's two finished gold pages** (47 lines): Azure 0.8%, Kraken out of the box 3.6%, fine-tuned 2.6–2.8%.
 - **Training on a rented GPU is ~110× faster than this laptop's CPU** (an epoch of 27k lines: 95 s against ≈ 3 h).
 
 ## Method
@@ -72,7 +75,7 @@ documents (1,000 draws).
 | ppA | pp0, fine-tuned 14 epochs (cosine) | same | RTX 5090, 60 min (4 min an epoch, batch 8) |
 | ftB | ftA continued, 5 epochs | + 22,238 real scan lines read by Azure (every word ≥ 0.9 confidence; 269 documents, 160 printed before 2000; no journal of experiment 19) | RTX 5090, 45 min beside ppB |
 | ppB | ppA continued, 3 epochs | same | same |
-| ftC | ftA continued (round C) | see "Round C" | see "Round C" |
+| ftC | ftA continued, half an epoch | round C's 17,878 lines (pre-1970 and small-print silver lines, synthetic vowelled lines, replay) | this CPU, 49 min (the memory guard stopped the full epoch) |
 
 Line images are given to every model with a level baseline at 70% of the crop's height and the crop as boundary:
 the OpenITI model was trained on baselines and read the same crops 40% worse as plain boxes (silver CER 10.4% vs
@@ -140,7 +143,21 @@ Kraken out of the box 3.6%, round A 3.2%, round B 2.8% (PP-OCRv6 B 2.7%).
 
 ### Round C (old prints, footnotes, vowelled)
 
-ROUND_C
+Aim: old prints, footnotes and vowelled lines (the coordinator's priority 2). Material (`pack_C.py`, all journals
+held out by experiment 34 excluded): all 4,600 pre-1970 silver lines (49 documents fetched for it, `old70_ids.txt`),
+2,698 small-print silver lines, 4,000 other silver lines, 1,500 synthetic vowelled lines (`synth.py`: Quran verses
+set by HarfBuzz in Amiri and Noto Naskh, clean and scan-like; real silver lines give almost no vowelled text because
+Azure's confidence on vowelled words is under 0.9, and experiment 11's rebuilt typefaces are no longer on this
+machine), and 4,000 born-digital lines as replay; 17,878 images, scaled to 96 px. Started from round A's Kraken (no
+held-out journal). The 280 MB pack could not reach a rented GPU (0.17 MB/s), so it trained on this CPU: the memory
+guard stopped it twice when other jobs ran beside it, and the run kept is **half an epoch** (49 minutes; dev 0.9485).
+
+Result: **no gain where it was aimed.** Real-scan judged words 16.8% (round A) → 16.8%; printed before 1970 (218
+words) 15.1% → 16.1% (round B: 12.8%); vowelled 12.2% → 13.4%; footnotes 13.4% → 13.8%; body text 4.5% → 3.8%; scan
+lines against Azure 5.5% → 5.0% (round B 5.0%); born-digital unchanged (1.6% clean, 2.3% scan-like; vowelled
+scan-like lines 8.9% → 7.3%). On the owner's two gold pages 2.6% (round B 2.8%). Half an epoch on 18k lines is
+little; synthetic Quran lines in two modern typefaces did not carry over to vowelled words in real old prints. Round
+B's broader set of real-scan lines remains the better recipe.
 
 ### A first look at a VLM (PaddleOCR-VL-0.9B)
 

@@ -103,7 +103,9 @@ reason is recorded), **open** (voiced, not yet judged).
   round in minutes, but this machine's upload (0.02–0.17 MB/s to the hosts that
   night) is the bottleneck. *Not the bottleneck:* reading order and line
   positions come with every line. PaddleOCR-VL-0.9B (smoke test, 60 lines, 7
-  pages) reads lines about as well but invents and skips on pages.
+  pages) reads lines about as well but invents and skips on pages. *Dropped for
+  now:* a targeted round with synthetic vowelled Quran lines (Amiri, Noto Naskh)
+  and pre-1970 lines (half an epoch on CPU) did not help old or vowelled print.
 
 - **A gold set, and the error taxonomy before the checker.** *experiment 12,
   2026-09-21: tools built, first page marked, method changed.* The first page
