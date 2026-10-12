@@ -30,6 +30,20 @@ Captions were written after looking at every image (`rivers_report.py`). Nothing
   - bulleted points;
   - grey photos, which count as paper.
 
+**The other senses** (`senses.py`, `senses_report.py` → `out/senses.html`). On the two pages where the rivers saw one block,
+every Azure line was labelled from the ink and Azure's words alone, without using the page's hand labels and with no model.
+- Signals from the ink: letter size, stroke thickness, spacing above, indents, a short rule.
+- Signals from Azure's words: a leading dash, numbering, footnote numbers that match markers in the body.
+- Every line came out right on both pages:
+  - the header row;
+  - paragraphs;
+  - the numbered heading, with strokes 1.23× the page's own;
+  - the verse;
+  - the footnotes under the rule, with letters about 0.9×;
+  - the bullets and their continuations;
+  - the page number.
+- This is a demonstration, not a measurement. The rules were tuned on these two pages in four rounds.
+
 **What it changes.** It is a thinking aid for the owner's "map" idea: the ink is a model-free survey of the page.
 The rivers give exact edges and columns; a model that sees the whole page names the blocks and covers what white
 space does not show. Nothing in `src/` changed.
