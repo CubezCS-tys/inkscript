@@ -371,6 +371,16 @@ reason is recorded), **open** (voiced, not yet judged).
   scoring on gold tables and equations once the owner has corrected some. Research:
   [experiments/32_open_stack](../experiments/32_open_stack/README.md); bake-off:
   [experiments/36_vlm_bakeoff](../experiments/36_vlm_bakeoff/README.md).
+- **Our own document parser: Azure's words in a model's layout** (owner, 2026-10-12): *tried on the hardest
+  pages, partly useful (experiment 38, D29).* dots.mocr's blocks, order, table grids, formulas and pictures with
+  Azure's words poured in by position: a blind judge preferred the new layout page on 18 of 33 hard pages (old 4,
+  tie 11), a reviewer on 28 of 44 (old 3); pictures placed, formulas typeset and checked on the crop (judged 3.89 vs
+  3.47), tables ruled; no Azure word lost. *Not working yet:* Azure's words in dots' table grid (judged 2.8 vs 3.4 for
+  dots' own cells), the one-column page's reading order and table width, inline bold. *Dropped for now:* model
+  correction of Azure's text (Gemini Flash on the crop under strict rules: 30 right, 34 wrong on gold; it adds
+  hamzas old prints lack and fixes the author's misprints). *Next:* dots' cell text with Azure as a check, dots'
+  order in the one-column page, bold from the ink, more gold tables and equations.
+  [experiments/38_parser](../experiments/38_parser/README.md).
 - **dots.ocr / dots.mocr licence**: *open, for the owner.* MIT plus a licence agreement: §3.3(c) forbids
   "unauthorized digitization of publications/document scanning" without permissions, §5.4 limits
   training other models on its outputs. To clear before dots.mocr's readings become training data
