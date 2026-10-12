@@ -64,6 +64,22 @@ every Azure line was labelled from the ink and Azure's words alone, without usin
 The perfect result on two pages was the tuned kind. The rules belong after the rivers (columns, tables and equations set
 apart first), with a model for what measurement can't settle.
 
+**The small model on the same lines** (`score_model.py`, no spend: experiment 36's dots.mocr run). Each Azure line takes
+the type of the dots.mocr block covering it.
+- All labelled lines: dots.mocr **80.5%**, the rules 34.6%.
+- Lines the rules handle: dots.mocr 74.5%, the rules 47%.
+- By kind of page, dots.mocr:
+  - plain text 89%;
+  - tables 92%;
+  - equations 88%;
+  - columns 70%;
+  - decorative 22%.
+- Where dots.mocr is weak:
+  - lists 19% (273 list lines called plain text);
+  - verse 0% (it has no such label);
+  - headings 57%.
+- A naive mix (dots.mocr, plus the rules' verse) was worse, 70%, because the rules over-call verse.
+
 **What it changes.** It is a thinking aid for the owner's "map" idea: the ink is a model-free survey of the page.
 The rivers give exact edges and columns; a model that sees the whole page names the blocks and covers what white
 space does not show. Nothing in `src/` changed.
