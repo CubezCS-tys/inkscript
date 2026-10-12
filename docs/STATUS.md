@@ -106,6 +106,18 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
     Kraken 4.1%, Azure 1.75%; 9.6% on the same lines degraded; about 7% on real scans
     (against Azure's readings, so silver truth).
   - 34: the yardstick, merged; the owner is correcting (`inkscript view --gold`).
+  - 36: the VLM bake-off (2026-10-12, D28; owner's page
+    `/home/yassine/inkscript/experiments/36_vlm_bakeoff/out/report.html`). **dots.mocr** is the main open reader: characters
+    wrong on the owner's 6 done gold pages 3.0% [1.7–4.6] (Azure 0.9%, flattered), born-digital pages
+    5.5% [3.0–9.2] (Azure 3.1%), 13.7% different from Azure on all 202 yardstick pages; invented
+    0.9 words per 1,000 outside tables, dropped 15.2, no runaway or given-up page; two columns in
+    order 86.5%; vowel marks kept 60% (Azure 89%); tables judged 3.44/5, equations 2.42/5;
+    2,807 pages/h, $0.17 per 1,000 pages on one RTX 5090. amad-vlm6 reads plain text best (1.5% /
+    3.6%) but gives no layout; PaddleOCR-VL reads two-column Arabic left column first and invents;
+    Qwen3-VL gives up on 23% of pages or loops. Kraken as checker flags 92–100% of the VLMs'
+    inventions (precision 9–13% on good readers). dots' licence agreement (no "unauthorized
+    digitization of publications", limits on training from its outputs) is for the owner to clear.
+    Spent $1.62 (GPU $1.06, Gemini judge $0.56).
   - 35: the native edition, merged (below).
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in

@@ -356,10 +356,25 @@ reason is recorded), **open** (voiced, not yet judged).
 
 ## The open reading stack (second branch, 2026-10-11)
 
-- **Our own reader instead of Azure**: *in progress*. A fine-tuned Kraken is the main text
-  engine (characters plus line positions). A VLM (dots.ocr, PaddleOCR-VL, Qwen3-VL) handles
-  tables, equations and layout and gives a second reading; the trust marks referee. Research:
-  [experiments/32_open_stack](../experiments/32_open_stack/README.md).
+- **Our own reader instead of Azure**: *in progress; the VLM chosen 2026-10-12 (experiment 36, D28).*
+  Three layers: **dots.mocr is the main reader** (text, blocks with boxes, tables, reading order:
+  3.0% of characters wrong on the 6 done gold pages, 5.5% born-digital, 0.9 invented words per 1,000
+  outside tables, never ran away); **Kraken is the checker** beside it (an independent reading of every
+  line; it flags 92–100% of the VLMs' inventions, but most flags on a good reader are Kraken's own
+  misreadings, so it marks where to look); **amad-vlm6 is a text cross-check** on doubtful blocks (best
+  plain text, 1.5% gold, but no layout, tables or equations, and it loops on 2% of pages). The trust
+  marks referee. *Dropped:* Qwen3-VL (32B gives up on 23% of pages, answering a text page as one
+  picture tag, and runs away on 8%; 8B loops; both add vowel marks not printed; 32B 9× slower) and
+  PaddleOCR-VL-1.5 (reads two-column Arabic left column first, 54.8% in order; invents 22.4 and drops
+  50.8 words per 1,000; 25.8% on born-digital pages). *Open:* equations (every model weak, dots.mocr
+  2.42/5), vowel marks (dots.mocr keeps 60%, Azure 89%), dots.mocr's dropped text (15.2 per 1,000), and
+  scoring on gold tables and equations once the owner has corrected some. Research:
+  [experiments/32_open_stack](../experiments/32_open_stack/README.md); bake-off:
+  [experiments/36_vlm_bakeoff](../experiments/36_vlm_bakeoff/README.md).
+- **dots.ocr / dots.mocr licence**: *open, for the owner.* MIT plus a licence agreement: §3.3(c) forbids
+  "unauthorized digitization of publications/document scanning" without permissions, §5.4 limits
+  training other models on its outputs. To clear before dots.mocr's readings become training data
+  (e.g. silver lines for Kraken) or part of the product ([models.md](../experiments/36_vlm_bakeoff/models.md)).
 - **Training data nobody else has**: born-digital Mandumah pages (exact text; 42% of documents
   in experiment 19's sample, fewer once junk-encoded text layers are removed), synthetic pages
   in the rebuilt typefaces (experiment 11), lines Azure and Gemini agree on.
