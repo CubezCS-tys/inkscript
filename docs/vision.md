@@ -79,3 +79,25 @@ pages) is the main text engine and gives every line's position. A VLM is the
 specialist for tables, equations and layout, and a second reading. The
 project's checks (Quran, judge, trust marks) referee between them. The master
 files stay JATS + ALTO, and every edition is derived from them.
+
+### Reframed: Azure's text, our own document parser (2026-10-12)
+
+After experiments 33 and 36, the owner kept Azure's text and moved the work to what is built on top of it:
+
+> "Azure is what we have to be dependent on for now because we've already got all the text from all the OCR that we've done. I've OCR'd, I think, more than a million documents that are sitting in S3."
+
+> "Now what I want to get is the ability to recreate the documents using vision language models or LLMs ... and just to be able to understand and correct at the same time what the document's actually trying to say. We become an augmenter, our own sort of document parser. ... We respect the layout. We respect the images. We respect the equations."
+
+Why it matters to them:
+
+> "lets contiue builkding the best product for academics in the middle east who have been treated as second calss when it comes to their digital documnts and whole internt experince"
+
+The stack (experiment 38):
+1. dots.mocr finds the layout.
+2. Azure's words go into it.
+3. Tables, equations and images are rebuilt.
+4. Correction happens only where the scan supports it, with every change logged.
+5. Kraken flags missing text.
+6. JATS + ALTO masters, and every edition built from them.
+
+The ink-as-text vision stays alive beside it.
