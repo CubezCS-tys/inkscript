@@ -136,7 +136,7 @@ def main(argv):
                           model=MODEL, max_out=4000, schema=SCHEMA, thinking="low",
                           est_in=int(1200 + len(lines) / 2 + 700))
         from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(4) as ex:
+        with ThreadPoolExecutor(8) as ex:
             answers = list(ex.map(ask, us))
         for u, (ans, usd) in zip(us, answers):
             if ans is None:
