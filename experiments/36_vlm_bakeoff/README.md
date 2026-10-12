@@ -89,7 +89,7 @@ What the numbers show:
 ## Spend
 
 GPU: $0.95 logged (2.03 h at $0.469/h, `out/gpu_spend.jsonl`); the Vast credit went from $20.378 to $19.318, i.e.
-$1.08 by the credit drop ($20.38 → $19.30, disk included; the instance was destroyed, `vastai show instances` showed 0 at 14:20). Gemini judge: $0.56 (`out/gemini_spend.jsonl`). Total about $1.62.
+$1.08 by the credit drop ($20.38 → $19.30, disk included; the instance was destroyed, `vastai show instances` showed 0 at 14:20). Gemini judge: $0.56 (`out/gemini_spend.jsonl`). Total about $1.64.
 
 ## Scoring (built before the VLM outputs landed)
 
