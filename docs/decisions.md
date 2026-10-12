@@ -353,3 +353,22 @@ line at its own place and width, not each block re-flowed: ink correlation with 
 justification by spaces only, no kashida; Chromium stands for them), Typst (no Arabic justification). The reading
 page and EPUB stay HTML (their reader's browser shapes them). A document mostly in Latin script is not marked
 right to left (pdfium read three English articles backwards, 23% → 99.9%).
+**D28 · The open stack reads whole pages with dots.mocr, with Kraken beside it as the checker (2026-10-12).**
+Experiment 36 ran six open VLMs with their authors' recipes on the same 258 pages (the 202 yardstick pages and
+56 born-digital pages whose text layer is exact) on one rented RTX 5090, and scored them with `inkscript score`'s
+measures plus a word-level count of invented, dropped and looped text. dots.mocr was best of the layout readers
+on every measure: characters wrong on the owner's 6 done gold pages 3.0% (dots.ocr 3.6%, PaddleOCR-VL 5.8%,
+Qwen3-VL-8B 12.1%; Azure 0.9%, flattered because the gold was corrected from its draft), born-digital 5.5% (7.3%,
+25.8%, Qwen3-VL-32B 38.1%; Azure 3.1%); 0.9 invented words per 1,000 outside tables, no page run away or given
+up; two columns in order 86.5% (Paddle 54.8%); tables judged 3.44 of 5 (next 2.66); 2,807 pages an hour, $0.17
+per 1,000 pages. Kraken (experiment 33) stays beside it as the checker: an independent reading of every line,
+which flags 92–100% of the VLMs' inventions on truth pages; its precision on good readers is 9–13% (its own
+misreadings, mostly tables), so a flag means "look here", not "wrong". Not chosen: amad-vlm6 as the main reader
+(best plain text, 1.5% gold and 3.6% born-digital, but no boxes, layout, tables or equations, and loops; kept as a
+text cross-check); PaddleOCR-VL-1.5 (left column first on two-column Arabic, invents 22.4 and drops 50.8 words per
+1,000 vs Azure); Qwen3-VL-32B AWQ (answers 23% of pages as one picture tag, runs away on 8%, adds vowel marks not
+printed, 9× slower) and Qwen3-VL-8B (loops: 714 repeated words per 1,000). dots.mocr's weak spots stay open:
+equations (2.42 of 5), vowel marks (60% kept, Azure 89%), dropped text (15.2 per 1,000). **Its licence must be
+cleared by the owner first**: MIT plus an agreement forbidding "unauthorized digitization of publications"
+(§3.3c) and limiting training on its outputs (§5.4); until then its readings are not training data and not in
+the product (`experiments/36_vlm_bakeoff/models.md`).
