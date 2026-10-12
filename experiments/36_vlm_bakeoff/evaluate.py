@@ -55,7 +55,7 @@ from pathlib import Path
 import numpy as np
 
 from inkscript.gold.format import gold_lines, load
-from inkscript.gold.score import loops, score_page
+from inkscript.gold.score import eq_sim, loops, score_page, teds
 from inkscript.gold.text import HARAKAT, distance, faithful, folded
 
 OUT = Path("/home/yassine/inkscript/experiments/36_vlm_bakeoff/out")
@@ -103,6 +103,68 @@ def drafts_of(pid: str):
     t = [dict(html=x.get("html") or x.get("draft_html") or "", box=x.get("box")) for x in g.get("tables", [])]
     e = [dict(latex=x.get("latex") or x.get("draft_latex") or "", box=x.get("box")) for x in g.get("equations", [])]
     return [x for x in t if x["html"]], [x for x in e if x["latex"]]
+
+
+def bd_clean(pid: str, t: dict, az: dict):
+    """The born-digital truth less its scrambled running heads: on the bd_2532 journal (Egyptian J. of Agricultural
+    Economics) the head is two overlapping text runs whose letters the text layer interleaves. A truth line in the
+    top 200 px of a bd_2532 page is dropped when no Azure line overlapping it is >= 0.6 similar. Returns the clean
+    truth and the dropped lines, each with the Azure text of its place (to remove the readers' reading of it)."""
+    if not pid.startswith("bd_2532"):
+        return t, []
+    keep, gone = [], []
+    for ln in t["lines"]:
+        b = ln.get("box")
+        if b and b[1] < 200:
+            near = [a for a in az["lines"] if a.get("box") and min(a["box"][3], b[3]) - max(a["box"][1], b[1]) > 0]
+            best = max((_sim(folded(ln["text"]), folded(a["text"])) for a in near), default=0.0)
+            if best < 0.6:
+                gone.append(dict(box=b, az=[a["text"] for a in near]))
+                continue
+        keep.append(ln)
+    return dict(t, lines=keep), gone
+
+
+def drop_like(pred: dict, gone: list) -> dict:
+    out = []
+    for ln in pred.get("lines", []):
+        b, txt = ln.get("box"), folded(ln.get("text") or "")
+        hit = False
+        for g in gone:
+            gb = g["box"]
+            if b and gb[0] <= (b[0] + b[2]) / 2 <= gb[2] and gb[1] - 20 <= (b[1] + b[3]) / 2 <= gb[3] + 20 \
+                    and b[3] - b[1] < 3 * (gb[3] - gb[1]):
+                hit = True
+            elif any(txt and _sim(txt, folded(a)) >= 0.5 for a in g["az"]):
+                hit = True
+        if not hit:
+            out.append(ln)
+    return dict(pred, lines=out)
+
+
+def boxpair(refs: list, preds: list) -> list[tuple[str, str]]:
+    """(reference, reader) contents: pairs by box IoU >= 0.2, best first; the reference objects left over take the
+    reader's leftovers in order (a reader without boxes is paired by order only); a reference with none gets ""."""
+    def iou(a, b):
+        if not a or not b:
+            return 0.0
+        ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+        iy = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+        u = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - ix * iy
+        return ix * iy / u if u > 0 else 0.0
+    cand = sorted(((iou(r[1], p[1]), i, j) for i, r in enumerate(refs) for j, p in enumerate(preds)), reverse=True)
+    ri, pj, pair = set(), set(), {}
+    for v, i, j in cand:
+        if v < 0.2:
+            break
+        if i in ri or j in pj:
+            continue
+        ri.add(i); pj.add(j); pair[i] = j
+    rest = [j for j in range(len(preds)) if j not in pj]
+    for i in range(len(refs)):
+        if i not in pair and rest:
+            pair[i] = rest.pop(0)
+    return [(r[0], preds[pair[i]][0] if i in pair else "") for i, r in enumerate(refs)]
 
 
 def digits_folded(d: dict) -> dict:
@@ -354,6 +416,10 @@ def page_eval(job) -> dict | None:
         gref, p_s, kl_s = g, pred, predkl
     elif sset == "bd":
         t = jload(OUT / "ref" / "bdtruth" / f"{pid}.json")
+        t, gone = bd_clean(pid, t, az)
+        if gone:      # the reader's reading of an excluded line goes too (by box, else by text like Azure's)
+            pred = drop_like(pred, gone)
+            predkl = drop_like(predkl, gone) if predkl else None
         ref_lines = [ln["text"].translate(DIG) for ln in t["lines"]]
         ref_kinds = [ln.get("kind", "text") for ln in t["lines"]]
         pool_extra = []
@@ -384,6 +450,25 @@ def page_eval(job) -> dict | None:
     if has_e and sp["eq"]:
         row["eq_sum"], row["eq_n"] = sum(v for v, _ in sp["eq"]), len(sp["eq"])
         row["eq_exact"] = sum(1 for _, x in sp["eq"] if x)
+    # the same, each reference table/equation paired with the reader's by box overlap (score.py pairs by index)
+    if has_t:
+        refs = [(x.get("html") or (x.get("draft_html") if sset != "gold" else "") or "", x.get("box"))
+                for x in gref.get("tables", [])]
+        refs = [r for r in refs if r[0]]
+        pr = [(x.get("html", ""), x.get("box")) for x in pred.get("tables", [])]
+        v = [teds(r, p) for r, p in boxpair(refs, pr)]
+        v = [x for x in v if x is not None]
+        if v:
+            row["tedsb_sum"], row["tedsb_n"] = sum(v), len(v)
+    if has_e:
+        refs = [(x.get("latex") or (x.get("draft_latex") if sset != "gold" else "") or "", x.get("box"))
+                for x in gref.get("equations", [])]
+        refs = [r for r in refs if r[0]]
+        pr = [(x.get("latex", ""), x.get("box")) for x in pred.get("equations", [])]
+        v = [eq_sim(r, p) for r, p in boxpair(refs, pr)]
+        if v:
+            row["eqb_sum"], row["eqb_n"] = sum(s for s, _ in v), len(v)
+            row["eqb_exact"] = sum(1 for _, x in v if x)
     # words
     plines = [ln["text"] if sset != "bd" else ln["text"].translate(DIG) for ln in pred.get("lines", [])
               if (ln.get("text") or "").strip()]
@@ -424,6 +509,8 @@ def page_eval(job) -> dict | None:
                inv_page=int(bool(inv_w)), drop_page=int(bool(drp_w)), rep_page=int(len(rep) >= 4))
     run_away = bool(meta.get("hit_cap")) or meta.get("status") not in (None, "ok") or len(P) > 2 * len(Rw) + 50
     row["runaway"] = int(run_away)
+    # gave up: under a tenth of the page's words (Qwen calls a whole text page one <img>)
+    row["empty"] = int(len(Rw) >= 20 and len(P) < 0.1 * len(Rw))
     row["hit_cap"] = int(bool(meta.get("hit_cap")))
     row["examples"] = dict(invented=[" ".join(t[1] for t in PT[s:e])[:200] for s, e in inv[:3]],
                            dropped=[" ".join(t[1] for t in RT[s:e])[:200] for s, e in drp[:3]])
@@ -498,8 +585,10 @@ RATIOS = {
     "dropped_cell_per_1000w": ("dropped_w_cell", "ref_words", 1000),
     "pages_inventing": ("inv_page", "_pages"), "pages_dropping": ("drop_page", "_pages"),
     "pages_repeating": ("rep_page", "_pages"), "pages_runaway": ("runaway", "_pages"), "pages_hit_cap": ("hit_cap", "_pages"),
+    "pages_empty": ("empty", "_pages"),
     "mark_precision": ("mark_tp", "_mark_p"), "mark_recall": ("mark_tp", "_mark_r"),
     "teds": ("teds_sum", "teds_n"), "eq_sim": ("eq_sum", "eq_n"), "eq_exact": ("eq_exact", "eq_n"),
+    "teds_box": ("tedsb_sum", "tedsb_n"), "eq_sim_box": ("eqb_sum", "eqb_n"), "eq_exact_box": ("eqb_exact", "eqb_n"),
     "checker_precision": ("chk_tp", "chk_flag"), "checker_recall": ("chk_tp", "chk_label"),
     "checker_flag_rate_per_1000w": ("chk_flag", "ref_words", 1000),
     "checker_page_recall": ("chk_both_page", "chk_label_page"), "checker_page_precision": ("chk_both_page", "chk_flag_page"),
@@ -508,8 +597,10 @@ RATIOS = {
     "checker_drop_run_precision": ("chkd_tp_runs", "chkd_runs"), "checker_drop_recall": ("chkd_caught", "chkd_label"),
 }
 CI = ("faithful.cer", "folded.cer", "faithful.wer", "line_cer", "word_order", "invented_per_1000w", "dropped_per_1000w",
-      "repeated_per_1000w", "pages_inventing", "pages_runaway", "mark_precision", "mark_recall", "teds", "eq_sim",
-      "checker_precision", "checker_recall", "checker_drop_recall")
+      "repeated_per_1000w", "pages_inventing", "pages_dropping", "pages_repeating", "pages_runaway", "pages_empty",
+      "mark_precision",
+      "mark_recall", "teds", "eq_sim", "teds_box", "eq_sim_box", "line_order", "checker_page_recall",
+      "checker_precision", "checker_recall", "checker_drop_recall", "checker_drop_run_precision")
 
 
 def _derived(r: dict) -> dict:
@@ -565,8 +656,7 @@ def strata(pid: str) -> list[str]:
         out.append(f"decade:{band(p['decade'])}")
     if t & {"vowelled", "quran"}:
         out.append("vowelled_quran")
-    if "table" in t:
-        out.append("table")
+    out.append("table" if "table" in t else "non_table")     # invented text is headlined on non_table pages
     if "equation" in t:
         out.append("equation")
     if t & {"columns", "magazine"} or (p.get("ncols") or 1) > 1:
@@ -591,6 +681,10 @@ def speed() -> dict:
     for d in sorted((OUT / "raw").glob("*/run.json")) if (OUT / "raw").exists() else []:
         r = jload(d)
         pph = r.get("pages_per_hour")
+        ses = [s for s in r.get("sessions", []) if s.get("ok") and s.get("wall_s")]
+        if len(ses) > 1:      # a crashed session plus a clean rerun (qwen3vl8b): the session that did most pages
+            s = max(ses, key=lambda s: s["ok"])
+            pph = round(3600 * s["ok"] / s["wall_s"], 1)
         out[r.get("tag", d.parent.name)] = dict(
             pages_ok=r.get("pages_ok"), pages_per_hour=pph, mean_s_per_page=r.get("mean_s_per_page"),
             hit_cap=r.get("hit_cap"), completion_tokens=r.get("completion_tokens"), gpu=r.get("gpu"),
@@ -615,7 +709,8 @@ def main():
     sets = {"gold": sorted(gd), "bd": sorted(p["page_id"] for p in MANIFEST if p["kind"] == "born-digital"),
             "ys_azure": sorted(p["page_id"] for p in MANIFEST if p["kind"] == "yardstick")}
     jobs = [(r, pid, s) for r in readers for s, pids in sets.items() for pid in pids
-            if not (r == "azure" and s == "ys_azure")]
+            if not (r == "azure" and s == "ys_azure") and (PRED / r / f"{pid}.json").exists()]
+    # (a reader that did not run on a page is left out on it: qwen3vl32b_awq_card ran on 10 test pages only)
     with Pool(a.workers) as pool:
         rows = [r for r in pool.imap_unordered(page_eval, jobs, chunksize=4) if r]
     with open(OUT / "eval_pages.jsonl", "w", encoding="utf-8") as f:
@@ -624,7 +719,10 @@ def main():
     res = dict(about=__doc__.split("\n\n")[0], sets={k: len(v) for k, v in sets.items()},
                gold_pages=sets["gold"], labels={"gold": "accuracy vs the owner's gold (Azure flattered: gold was "
                                                           "corrected from Azure's draft)",
-                                                "bd": "accuracy vs born-digital text layer (digits folded)",
+                                                "bd": "accuracy vs born-digital text layer (digits folded; the "
+                                                      "bd_2532 scrambled running heads excluded; ligature-order "
+                                                      "defects such as جملة for مجلة remain: a floor of ~0.5 "
+                                                      "dropped words per 1,000 under every reader)",
                                                 "ys_azure": "AGREEMENT WITH AZURE, not accuracy; tables/equations vs "
                                                             "gemini-3.1-pro drafts"},
                results={}, speed=speed())
@@ -632,6 +730,8 @@ def main():
     for r in rows:
         for st in strata(r["page_id"]):
             groups[(r["set"], r["reader"], st)].append(r)
+        if not r["runaway"] and not r["empty"]:      # the reader's own healthy pages: how it reads when it works
+            groups[(r["set"], r["reader"], "healthy")].append(r)
     for (s, rd, st), rs in sorted(groups.items()):
         res["results"].setdefault(s, {}).setdefault(rd, {})[st] = summarise(rs, a.boot)
     # the CLI's own report per reader on the gold pages (same function as the rows above; kept for the record)

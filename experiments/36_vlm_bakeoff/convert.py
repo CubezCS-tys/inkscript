@@ -60,11 +60,29 @@ CAT = {  # lower-cased model labels -> our kinds
     "table": "table", "formula": "equation", "display_formula": "equation", "equation": "equation",
     "picture": "picture", "image": "picture", "figure": "picture", "chart": "picture", "seal": "picture",
     "img": "picture", "formula_number": "text", "inline_formula": "text",
+    "page-number": "furniture", "page_number": "furniture", "section-title": "heading", "section_title": "heading",
+    "subtitle": "heading", "verse": "text", "quote": "text", "blockquote": "text", "author": "text", "date": "text",
+    "note": "footnote", "footnotes": "footnote", "math": "equation", "list": "text", "pre": "text", "loose": "text",
+    "figcaption": "caption", "stanza": "text", "poem": "text", "answer": "text", "box": "text",
+    "journal-info": "furniture", "logo": "picture", "sub-section-title": "heading", "references": "text",
 }
 
 
 def cat(label: str) -> str:
-    return CAT.get((label or "text").strip().lower(), "text")
+    """A model label -> our kind; a compound Qwen class (header-right, page-footer-left) by its first known part."""
+    s = (label or "text").strip().lower()
+    if s in CAT:
+        return CAT[s]
+    parts = re.split(r"[-_ ]", s)
+    for n in range(len(parts) - 1, 0, -1):
+        if "-".join(parts[:n]) in CAT:
+            return CAT["-".join(parts[:n])]
+    return "text"
+
+
+def known(label: str) -> bool:
+    s = (label or "").strip().lower()
+    return s in CAT or any("-".join(re.split(r"[-_ ]", s)[:n]) in CAT for n in range(1, 4))
 
 
 _MD = [(re.compile(r"^\s{0,3}#{1,6}\s+"), ""), (re.compile(r"\*\*(.+?)\*\*"), r"\1"), (re.compile(r"__(.+?)__"), r"\1")]
@@ -120,41 +138,75 @@ def cell_lines(html: str) -> list[str]:
 
 
 class _QwenHTML(HTMLParser):
-    """qwenvl html: each element carrying data-bbox is a block (outermost wins); its inner HTML is kept for tables,
-    its text (with <br> as newline) for the rest."""
+    """qwenvl html: a block is an element carrying data-bbox (outermost wins) or, when the model gave no
+    coordinates (most pages), a paragraph-level element (p, h1-h6, li, table, blockquote, pre, or a div whose class
+    names a category: header, footnote, page-number...); wrapper divs (page, main-content, no class) are transparent,
+    and text lying loose in them becomes its own block. <head>/<style>/<script>/<title> content is dropped. A
+    table keeps its inner HTML; the rest keeps its text, <br> and nested paragraphs as newlines."""
+
+    LEAF = {"p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "table", "blockquote", "pre", "figcaption", "caption"}
+    VOID = {"br", "img", "hr", "meta", "link", "input"}
+    SKIP = {"head", "style", "script", "title"}
 
     def __init__(self):
         super().__init__(convert_charrefs=False)
-        self.blocks, self.depth, self.cur = [], 0, None
+        self.blocks, self.depth, self.cur, self.skip, self.loose = [], 0, None, 0, ""
+
+    def _flush_loose(self):
+        if self.loose.strip():
+            self.blocks.append(dict(tag="loose", cls="", bbox="", raw=self.loose, text=self.loose))
+        self.loose = ""
+
+    def _is_block(self, tag, a):
+        if "data-bbox" in a:
+            return True
+        if tag in self.LEAF:
+            return True
+        cls = (a.get("class") or "").split()
+        return tag in ("div", "section", "span", "aside", "header", "footer") and bool(cls) and \
+            known(cls[0]) and cls[0].lower() not in ("page", "content", "main-content", "main-text")
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        if self.cur is None:
-            if "data-bbox" in a:
-                self.cur = dict(tag=tag, cls=a.get("class", ""), bbox=a["data-bbox"], raw="", text="")
-                self.depth = 1
+        if tag in self.SKIP:
+            self.skip += 1
             return
-        self.depth += tag not in ("br", "img", "hr", "meta")
+        if self.skip:
+            return
+        if self.cur is None:
+            if tag in self.VOID:
+                if tag == "br":
+                    self.loose += "\n"
+                elif "data-bbox" in a:
+                    self.blocks.append(dict(tag=tag, cls=a.get("class", ""), bbox=a["data-bbox"], raw="", text=""))
+                return
+            if self._is_block(tag, a):
+                self._flush_loose()
+                self.cur = dict(tag=tag, cls=a.get("class", "") or "", bbox=a.get("data-bbox", ""), raw="", text="")
+                self.depth = 1
+            elif tag in ("div", "section", "article", "main", "body"):
+                self.loose += "\n"
+            return
+        if tag not in self.VOID:
+            self.depth += 1
         self.cur["raw"] += self.get_starttag_text()
-        if tag == "br":
-            self.cur["text"] += "\n"
-        elif tag in ("tr", "p", "div", "li"):
+        if tag == "br" or tag in ("tr", "p", "div", "li"):
             self.cur["text"] += "\n"
 
     def handle_startendtag(self, tag, attrs):
-        a = dict(attrs)
-        if self.cur is None:
-            if "data-bbox" in a:
-                self.blocks.append(dict(tag=tag, cls=a.get("class", ""), bbox=a["data-bbox"], raw="", text=""))
-            return
-        self.cur["raw"] += self.get_starttag_text()
-        if tag == "br":
-            self.cur["text"] += "\n"
+        self.handle_starttag(tag, attrs)
+        if tag not in self.VOID and tag not in self.SKIP:
+            self.handle_endtag(tag)
 
     def handle_endtag(self, tag):
-        if self.cur is None:
+        if tag in self.SKIP:
+            self.skip = max(0, self.skip - 1)
             return
-        if tag in ("br", "img", "hr", "meta"):
+        if self.skip or tag in self.VOID:
+            return
+        if self.cur is None:
+            if tag in ("div", "section", "article", "main", "body"):
+                self.loose += "\n"
             return
         self.depth -= 1
         if self.depth == 0:
@@ -166,15 +218,26 @@ class _QwenHTML(HTMLParser):
                 self.cur["text"] += " "
 
     def handle_data(self, d):
+        if self.skip:
+            return
         if self.cur is not None:
             self.cur["raw"] += d
             self.cur["text"] += d
+        else:
+            self.loose += d
 
     def handle_entityref(self, name):
         self.handle_data(htmlmod.unescape(f"&{name};"))
 
     def handle_charref(self, name):
         self.handle_data(htmlmod.unescape(f"&#{name};"))
+
+    def close(self):
+        super().close()
+        if self.cur is not None:      # truncated mid-block
+            self.blocks.append(self.cur)
+            self.cur = None
+        self._flush_loose()
 
 
 # ---------------------------------------------------------------- parsers: raw record -> blocks in pack pixels
@@ -238,8 +301,6 @@ def parse_qwen(rec):
         p.close()
     except Exception:
         pass
-    if p.cur is not None:          # truncated mid-block
-        p.blocks.append(p.cur)
     W, H = rec.get("orig_size") or [MAN[rec["page_id"]]["width"], MAN[rec["page_id"]]["height"]]
     out = []
     for b in p.blocks:
@@ -249,17 +310,23 @@ def parse_qwen(rec):
         except Exception:
             box = None
         label = b["cls"] or b["tag"]
-        k = "table" if b["tag"] == "table" or "table" in label else cat(label.split()[0] if label else b["tag"])
+        k = "table" if b["tag"] == "table" or "<table" in b["raw"] or "table" in label.split()[:1] \
+            else cat(label.split()[0] if label else b["tag"])
         if b["tag"] in ("h1", "h2", "h3", "h4", "h5", "h6") and k == "text":
             k = "heading"
         text = htmlmod.unescape(b["text"])
+        if k == "picture" and text.strip():     # Qwen often wraps the whole page's text in <div class="image">
+            k = "text"
         if k == "table":
             out.append(dict(kind=k, box=box, label=label, html=b["raw"] if b["tag"] != "table" else f"<table>{b['raw']}</table>"))
+            pre = re.split(r"<table", text, 1)[0] if b["tag"] != "table" else ""
+            if pre.strip() and b["tag"] != "table":       # a caption div holding the table: keep its words
+                out.append(dict(kind="caption", box=box, label=label, text=pre))
         elif k == "equation":
             out.append(dict(kind=k, box=box, label=label, latex=unlatex_block(text)))
         else:
             out.append(dict(kind=k, box=box, label=label, text=text))
-    status = "ok" if p.blocks else ("unparsed" if s else "empty")
+    status = ("ok" if any(b["bbox"] for b in p.blocks) else "nobox") if p.blocks else ("unparsed" if s else "empty")
     if not p.blocks and s:      # no html: take it as text
         out = [dict(kind="text", box=None, text=re.sub(r"<[^>]+>", "\n", s), label="raw")]
     return out, status
@@ -313,7 +380,7 @@ def to_pred(blocks, meta) -> dict:
             t = t.strip()
             if t:
                 lines.append(dict(text=t, box=b["box"], kind=b["kind"], block=bi))
-    meta = dict(meta, has_boxes=any(b["box"] for b in blocks), has_tables=True, has_equations=True)
+    meta = dict(meta, has_boxes=any(b["box"] for b in blocks), has_tables=not meta.get("plain"), has_equations=not meta.get("plain"))
     return dict(lines=lines, tables=tables, equations=eqs, blocks=bl, meta=meta)
 
 
@@ -430,7 +497,7 @@ def convert(tag: str) -> dict:
         if rec.get("page_id") not in MAN:
             continue
         blocks, ps = parse(rec) if rec.get("status", "ok") == "ok" else ([], "failed")
-        write(tag, rec["page_id"], to_pred(blocks, raw_meta(rec, ps)))
+        write(tag, rec["page_id"], to_pred(blocks, dict(raw_meta(rec, ps), plain=kind_of(tag) == "amad")))
         st[ps] = st.get(ps, 0) + 1
         n += 1
     return dict(tag=tag, pages=n, parse=st)

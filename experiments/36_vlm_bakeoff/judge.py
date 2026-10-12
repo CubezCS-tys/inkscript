@@ -132,7 +132,8 @@ def crop(pid: str, box) -> bytes:
 
 
 def build(it: dict, seed: int = 36):
-    rs = sorted(it["cands"])
+    rs = sorted(r for r in it["cands"] if (it["cands"][r] or "").strip())   # a reader that gave nothing: graded 1
+    # locally ("missing"), not sent (the test call graded empty candidates 2, inconsistently)
     random.Random(f"{seed}:{it['page_id']}:{it['id']}").shuffle(rs)
     labels = [chr(65 + i) for i in range(len(rs))]
     tag = "HTML" if it["kind"] == "table" else "LaTeX"
@@ -221,15 +222,22 @@ def main():
                               worst_case_usd=round(worst, 2), spent_so_far=round(spent(), 3), cap=CAP), indent=1))
         return
     res_f = OUT / "judge.jsonl"
+    its.sort(key=lambda it: (it["split"] != "test", it["page_id"], it["id"]))     # held-out pages first
     n = 0
     for it in its:
         if a.limit and n >= a.limit:
             break
         prompt, labmap = build(it)
-        ans, usd = call(prompt, crop(it["page_id"], it["box"]), it["kind"], f"{it['page_id']}:{it['id']}")
-        n += 1
+        missing = {r: dict(missing=True, structure_ok=False, grade=1, note="gave no " + it["kind"])
+                   for r in it["cands"] if r not in labmap.values()}
+        if labmap:
+            ans, usd = call(prompt, crop(it["page_id"], it["box"]), it["kind"], f"{it['page_id']}:{it['id']}")
+            n += 1
+        else:
+            ans, usd = {"verdicts": []}, 0.0
         row = dict(page_id=it["page_id"], id=it["id"], kind=it["kind"], split=it["split"], labels=labmap, usd=usd,
-                   verdicts={labmap.get(v["label"], v["label"]): v for v in (ans or {}).get("verdicts", [])} if ans else None)
+                   verdicts={**missing, **{labmap.get(v["label"].replace("Candidate", "").strip(), v["label"]): v for v in ans.get("verdicts", [])}}
+                   if ans else None)
         with open(res_f, "a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
         print(it["page_id"], it["id"], f"${usd:.4f}", "ok" if ans else "FAILED", flush=True)
