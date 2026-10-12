@@ -197,7 +197,8 @@ def front_xml(stem: str, title_block: dict | None, title_text: str) -> str:
                 at.remove(c)
             at.text = title_text
             at.set("id", title_block["id"])
-    return etree.tostring(fr, encoding="unicode")
+    x = etree.tostring(fr, encoding="unicode")
+    return re.sub(r' xmlns:(xlink|mml|xsi|ali)="[^"]*"', "", x)     # declared on <article>
 
 
 def mathml_prefixed(mml: str) -> str:
@@ -426,6 +427,8 @@ def main(argv):
             continue
         if not (OUT / "pages" / pid / "layout.json").exists():
             continue
+        if not raw and not (OUT / "pages" / pid / "corrections.json").exists():
+            continue                      # the corrected master waits for its corrections
         s = build(pid, raw)
         print(pid, "words", s["alto_words"], "corrected", s["corrected_words"], "dots", s["dots_strings"],
               "JATS", "ok" if not s["jats_errors"] else s["jats_errors"][:2],

@@ -326,7 +326,23 @@ def parse_page(pid: str, meta: dict) -> dict:
     for b in blocks:
         if b["role"] == "table":
             rows = parse_table(b["dots_text"])
+            import copy
+            rows0 = copy.deepcopy(rows)
             rows, tleft = fill_table(rows, b["words"], b["box"]) if rows else ([], b["words"])
+            # dots sometimes lists an Arabic table's cells left to right: the editions want reading order (the
+            # first cell of a row the rightmost). Seen on the page itself: if most rows' matched cells run left
+            # to right, every row is reversed and the table filled again.
+            ltr = rtl = 0
+            for r in rows:
+                xs = [(c["box"][0] + c["box"][2]) / 2 for c in r["cells"] if c.get("words")]
+                for a, c2 in zip(xs, xs[1:]):
+                    ltr += c2 > a
+                    rtl += c2 < a
+            if rows and ltr > rtl and not is_latin(" ".join(c["text"] for r in rows for c in r["cells"])):
+                for r in rows0:
+                    r["cells"].reverse()
+                rows, tleft = fill_table(rows0, b["words"], b["box"])
+                b["cells_reversed"] = True
             b["rows"] = rows
             b["table_leftover"] = tleft
             b["html"] = b["dots_text"]

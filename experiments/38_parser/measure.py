@@ -51,7 +51,8 @@ def pred_from_layout(L, F, rep):
                     if c.get("words"):
                         for ln in order_lines(c["words"]):
                             ws = cw(ln, rep)
-                            lines.append(dict(text=" ".join(w["text"] for w in ws), box=_ub(ws)))
+                            if ws:
+                                lines.append(dict(text=" ".join(w["text"] for w in ws), box=_ub(ws)))
                     elif c.get("text"):
                         lines.append(dict(text=c["text"], box=c["box"]))
             tables.append(dict(html=table_html(b, rep, cw), box=b["box"]))
@@ -72,6 +73,18 @@ def pred_from_layout(L, F, rep):
 def _ub(ws):
     return [min(w["box"][0] for w in ws), min(w["box"][1] for w in ws), max(w["box"][2] for w in ws),
             max(w["box"][3] for w in ws)]
+
+
+def bag(g, pred):
+    """Order-free word error: words missing from the reading plus words it has that the truth does not, over the
+    truth's words (faithful normalisation; equations left out on both sides as score_page does by kind)."""
+    from collections import Counter
+    from inkscript.gold.format import gold_lines
+    G = Counter(w for ln in gold_lines(g) if ln.get("kind") != "equation" for w in faithful(ln.get("text", "")).split())
+    P = Counter(w for x in pred.get("lines", []) for w in faithful(x.get("text", "")).split())
+    miss = sum((G - P).values())
+    extra = sum((P - G).values())
+    return {"bag.words": sum(G.values()), "bag.missing": miss, "bag.extra": extra}
 
 
 def keep(s):
@@ -155,7 +168,7 @@ def main(argv):
         dp = B36 / "pred/dots_mocr" / f"{pid}.json"
         if dp.exists():
             preds["dots"] = json.loads(dp.read_text(encoding="utf-8"))
-        sc = {k: keep(score_page(truth, v, drafts=not done)) for k, v in preds.items()}
+        sc = {k: dict(keep(score_page(truth, v, drafts=not done)), **bag(truth, v)) for k, v in preds.items()}
         m = dict(page_id=pid, gold_done=done, kinds=g["kinds"], primary=g["primary"], decade=g["decade"],
                  split=g["split"], stats=L["stats"], scores=sc,
                  corrections=dict(proposed=len(C["edits"]) if C else 0,
