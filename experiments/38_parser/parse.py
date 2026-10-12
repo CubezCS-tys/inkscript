@@ -167,6 +167,12 @@ def fill_table(rows: list[dict], words: list[dict], tbox) -> tuple[list[dict], l
         now = " ".join(segs[j]["text"] for j in c["segs"])
         if c["segs"] and sim(c["text"], now + " " + segs[si]["text"]) <= sim(c["text"], now):
             continue
+        if c["segs"]:                    # a cell is one place: a further segment must touch the ones it has
+            cb = union(segs[j]["box"] for j in c["segs"])
+            sb = segs[si]["box"]
+            lh = max(sb[3] - sb[1], 1)
+            if max(cb[1], sb[1]) - min(cb[3], sb[3]) > 1.0 * lh or min(cb[2], sb[2]) - max(cb[0], sb[0]) < -lh:
+                continue
         c["segs"].append(si)
         used.add(si)
     # bands of the matched cells: rows by y, columns by x
@@ -209,6 +215,17 @@ def fill_table(rows: list[dict], words: list[dict], tbox) -> tuple[list[dict], l
         else:
             c["words"] = []
         c.pop("segs")
+    # a dots-only cell whose words Azure already has in another cell of its row (an Azure segment running over two
+    # cells) would print them twice: it is left empty, and said so
+    for ri, k, c in cells:
+        if c["words"] or not c["text"]:
+            continue
+        row_words = [folded(w["text"]) for c2 in rows[ri]["cells"] for w in c2.get("words") or []]
+        mine = [x for x in folded(c["text"]).split() if x]
+        if mine and sum(x in row_words for x in mine) >= 0.6 * len(mine):
+            c["covered_by_azure"] = c["text"]
+            c["text"] = ""
+            c["source"] = "covered"
     # inferred boxes for dots-only cells (row and column bands; else spread evenly over the table)
     x0, y0, x1, y1 = tbox
     for i in range(nr):
@@ -454,6 +471,8 @@ def parse_page(pid: str, meta: dict) -> dict:
                  table_cells_azure=sum(c["source"].startswith("azure") for b in blocks if b["role"] == "table"
                                        for r in b["rows"] for c in r["cells"]),
                  table_cells_dots=len(cells_dots),
+                 table_cells_covered=sum(c.get("source") == "covered" for b in blocks if b["role"] == "table"
+                                         for r in b["rows"] for c in r["cells"]),
                  table_words_left=sum(len(b.get("table_leftover") or []) for b in blocks),
                  formulas=sum(b["role"] == "formula" for b in blocks),
                  figures=sum(b["role"] == "figure" for b in blocks),

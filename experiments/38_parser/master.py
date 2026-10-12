@@ -157,12 +157,16 @@ class Alto:
                 "</PrintSpace></Page></Layout></alto>\n")
 
 
-def split_dots(text: str, box) -> list[list[dict]]:
-    """dots-only text as one line of words sharing its box evenly (right to left)."""
+def split_dots(text: str, box, line_h: float | None = None) -> list[list[dict]]:
+    """dots-only text as one line of words sharing its box evenly (right to left); with line_h, the line is that
+    high, centred in the box (a table cell's box is the whole cell, which would set the text far too big)."""
     ws = text.split()
     if not ws:
         return []
     x0, y0, x1, y1 = box
+    if line_h and y1 - y0 > 1.3 * line_h:
+        cy = (y0 + y1) / 2
+        y0, y1 = cy - line_h / 2, cy + line_h / 2
     n = sum(len(w) for w in ws)
     out, x = [], x1
     for w in ws:
@@ -352,6 +356,8 @@ def build(pid: str, raw: bool = False) -> dict:
                        f'xlink:href="{pid}.jats.xml#{b["id"]}" xlink:type="simple">']
             A.raw(cells_x[0])
             rows_x = {"head": [], "body": []}
+            hs = sorted(w["box"][3] - w["box"][1] for r in b["rows"] for c in r["cells"] for w in c.get("words") or [])
+            tlh = hs[len(hs) // 2] if hs else None
             for ri, r in enumerate(b["rows"]):
                 cs = []
                 for ci, c in enumerate(r["cells"]):
@@ -367,7 +373,7 @@ def build(pid: str, raw: bool = False) -> dict:
                         cs.append(f'<{tag} id="{cid}"{sp}>{e(txt)}</{tag}>')
                     elif c.get("text"):
                         stats["dots_strings"] += len(c["text"].split())
-                        A.textblock(cid, "tableCell", split_dots(c["text"], c["box"]), href=cid, dots=True)
+                        A.textblock(cid, "tableCell", split_dots(c["text"], c["box"], tlh), href=cid, dots=True)
                         cs.append(f'<{tag} id="{cid}"{sp} content-type="vlm-text">{e(c["text"])}</{tag}>')
                     else:
                         cs.append(f'<{tag} id="{cid}"{sp}/>')

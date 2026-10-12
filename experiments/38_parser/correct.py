@@ -14,7 +14,9 @@ Every proposal is logged. It is applied only if all of these hold (rules fixed b
   - at most 3 words before and 3 after (else: too-long, a rewrite);
   - it does not only add vowel marks (else: adds-marks); it does not only remove or change vowel marks
     (else: marks-only: Azure keeps 89% of printed marks, the model's reading of marks on a crop is not trusted);
-  - after is not empty unless before is pure punctuation/noise (else: deletes-words).
+  - after is not empty unless before is pure punctuation/noise (else: deletes-words);
+  - its words are on one Azure line (else: spans-lines; added after a table cell built from two places was
+    "corrected" into one tall word, found on 0073-000-239-002_p024).
 Applied edits rewrite the words (a join takes the union of the boxes, a split shares the box by letters); the
 original Azure words stay recoverable (ALTO <ALTERNATIVE>, and this log).
 """
@@ -150,6 +152,8 @@ def main(argv):
                 else:
                     st, s = check(e, u["texts"][k].split())
                 ids = u["lines"][k][s:s + len(e.get("before", "").split())] if s >= 0 else []
+                if st == "applied" and len({i.split("w")[0] for i in ids}) > 1:
+                    st = "spans-lines"          # words from two Azure lines (e.g. two places in a table cell)
                 log.append(dict(unit=u["id"], line=k + 1, before=e.get("before"), after=e.get("after"),
                                 kind=e.get("kind"), reason=e.get("reason"), confidence=e.get("confidence"),
                                 status=st, word_ids=ids, line_text=u["texts"][k] if 0 <= k < len(u["texts"]) else ""))
