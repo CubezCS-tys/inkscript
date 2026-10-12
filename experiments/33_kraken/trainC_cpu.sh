@@ -5,6 +5,6 @@
 #   script -qfc experiments/33_kraken/trainC_cpu.sh out/train/ftC.log
 cd /home/yassine/inkscript/experiments/33_kraken/out
 mkdir -p train/ftC
-exec /usr/bin/time -v nice env/bin/ketos --workers 2 --threads 5 -d cpu train -f binary -i models/ftA.safetensors \
+exec /usr/bin/time -v nice env/bin/ketos --workers 2 --threads 6 -d cpu train -f binary -i models/ftA.safetensors \
   --resize union -u NFD --augment -B 16 -r 0.0002 --warmup 100 -N 1 -q fixed -F 0.5 \
   -o train/ftC -e train/C_dev.lst -t train/C_train.lst

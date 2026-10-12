@@ -18,8 +18,8 @@ scale; pages with the found lines drawn). Everything below is dated 2026-10-11/1
   lines 3.6% → **1.3–1.5%** (Azure 1.0%), scan-like copies 9.0% → **1.4–2.1%**; real-scan judged words 24.5% →
   **15.2%** (body text 5.4% → **4.3%**; Azure 1.1%), lines against Azure's reading 7.0% → **5.0%**, whole scanned
   pages 13.4% → **8.2%**. On real scans it is still **4–8× Azure**.
-- **Kraken's own line finder is not the main loss**: it finds 93% of Azure's lines cleanly out of the box (see
-  "The line finder").
+- **The line finder**: out of the box it finds 93% of Azure's lines; fine-tuned on 400 scanned pages it finds 95%,
+  runs lines together across columns 4× less, and whole scanned pages improve 8.2% → **6.5%** (against Azure's lines).
 - **A VLM off the shelf (PaddleOCR-VL-0.9B) reads single lines about as well as fine-tuned Kraken but invents and
   skips on whole pages** (44% of its page words are not in Azure's reading; one page ran to the 4,096-token cap).
 - **Training on a rented GPU is ~110× faster than this laptop's CPU** (an epoch of 27k lines: 95 s against ≈ 3 h).
@@ -118,7 +118,25 @@ about 5.6% of Azure's lines get no Kraken line at all.
 
 ### The line finder
 
-SEG_RESULTS
+Kraken's line finder (`blla`, shipped with kraken 7.1.1) against Azure's lines on experiment 19's 139 scanned pages
+(`segeval.py`; silver geometry: Azure's polygons, baselines found in the ink by `seg_data.py`; a found baseline
+belongs to the Azure line that holds at least half its points):
+
+| line finder | Azure lines | found | missed | run together (merged) | cut in two (split) | extra | baseline off by (median, share of line height) |
+|---|---|---|---|---|---|---|---|
+| default | 4,931 | 93.1% | 2.9% | 2.4% | 1.6% | 183 | 3.4% |
+| fine-tuned | 4,931 | **95.4%** | **1.9%** | **0.6%** | 2.0% | 235 | 5.0% |
+
+Fine-tuned (`segtrain_cpu.sh`) from `blla` on 400 scanned pages of the silver documents (Azure's line polygons, cut
+where Azure ran one line across two columns; baselines at the densest ink row; no journal of experiment 19 or held
+out by experiment 34), 3 epochs on this CPU, 3 h 15 min, peak 4.1 GB; best dev epoch 2 (mean IU 0.651). The rented
+GPU was tried four times for it and each upload crawled (see "Compute and spend").
+
+End to end (round-B Kraken reading what each finder found), scanned pages against Azure's lines: **8.2% → 6.5%** of
+characters different (pre-2000 9.1 → 7.4, 2000 on 7.2 → 5.5), Azure lines with no Kraken line 278 → 188 of 4,997.
+The test is silver: a finder that learned Azure's habits is favoured. On the owner's two finished gold pages
+(experiment 34, 47 lines; `gold_eval.py`): whole pages 7.3% → 6.0%; on the gold lines themselves Azure 0.8%,
+Kraken out of the box 3.6%, round A 3.2%, round B 2.8% (PP-OCRv6 B 2.7%).
 
 ### Round C (old prints, footnotes, vowelled)
 
@@ -170,7 +188,7 @@ current model code fails under transformers 4.55 (the card's version) and under 
 CPU (this machine, 16 cores, ≤ 8 GB for this experiment, watchdog `watchdog.sh`): fine-tuning reads 2.7 lines a
 second whatever the thread count above 6 (an epoch of 27k images ≈ 3 h), peak 6.3 GB; inference 7–10 lines a second
 with 2 workers; kraken's page finder 5–15 s a page. GPU (Vast.ai RTX 5090, datacenter, verified): the same epoch in
-95 s (VGSL, batch 32) or 4 min (PP-OCRv6, batch 8). **GPU spend: SPEND** (credit $23.02 → CREDIT); every instance,
+95 s (VGSL, batch 32) or 4 min (PP-OCRv6, batch 8). **GPU spend: $2.64** of the $10 cap (credit $23.02 → $20.38); every instance,
 including the failures (three uploads too slow, one host stuck loading its image, the VLM's library mismatches), is
 in `out/gpu_spend.jsonl` and the report. No paid API.
 

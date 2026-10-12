@@ -97,8 +97,9 @@ reason is recorded), **open** (voiced, not yet judged).
   print, still 4–8× Azure on old scans: *open* — more real-scan lines (Azure's
   readings are free training data), old typefaces, and scoring on the owner's
   gold pages (experiment 34). Two engines with different strengths (VGSL: old
-  print, vowelled, footnotes; PP-OCRv6: modern print, titles, Latin). Kraken's
-  own line finder already finds 93% of Azure's lines. A rented GPU trains a
+  print, vowelled, footnotes; PP-OCRv6: modern print, titles, Latin). Its line
+  finder, fine-tuned on 400 scanned pages, finds 95% of Azure's lines (93% out of
+  the box) and takes whole pages to 6.5%. A rented GPU trains a
   round in minutes, but this machine's upload (0.02–0.17 MB/s to the hosts that
   night) is the bottleneck. *Not the bottleneck:* reading order and line
   positions come with every line. PaddleOCR-VL-0.9B (smoke test, 60 lines, 7

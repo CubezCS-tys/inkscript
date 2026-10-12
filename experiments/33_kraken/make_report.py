@@ -20,7 +20,7 @@ MODELS = TXT.get("models", ["base", "pp0", "cpuq", "ftA", "ppA", "ftB", "ppB"])
 NAMES = {"base": "Kraken out of the box (OpenITI print model)", "pp0": "PP-OCRv6 small out of the box",
          "cpuq": "Kraken, a quarter epoch on CPU (1 h)", "ftA": "Kraken round A (born-digital lines, GPU)",
          "ppA": "PP-OCRv6 round A (born-digital lines, GPU)", "ftB": "Kraken round B (+ real scan lines read by Azure)",
-         "ppB": "PP-OCRv6 round B (+ real scan lines read by Azure)", "ftC": "Kraken round C (+ old prints, footnotes, vowelled)",
+         "ppB": "PP-OCRv6 round B (+ real scan lines read by Azure)", "ftC": "Kraken round C (+ old prints, footnotes, vowelled)", "ftB_segcpu": "Kraken round B + fine-tuned line finder",
          "azure": "Azure"}
 SERIES = [("base", "before"), (BEST, "after"), (PP, "pp"), ("azure", "azure")]
 
@@ -121,7 +121,10 @@ def panel_sil(grp="all"):
 
 
 def panel_pages():
-    return [(SHORT[t], *trip(g(pg, f"{t}/scan_silver", "all", "faithful", "cer")), cls) for t, cls in SERIES if t != "azure"]
+    rows = [(SHORT[t], *trip(g(pg, f"{t}/scan_silver", "all", "faithful", "cer")), cls) for t, cls in SERIES if t != "azure"]
+    if g(pg, f"{BEST}_segcpu/scan_silver"):
+        rows.insert(2, ("Kraken, fine-tuned, + fine-tuned line finder", *trip(g(pg, f"{BEST}_segcpu/scan_silver", "all", "faithful", "cer")), "after2"))
+    return rows
 
 
 sec = []
@@ -195,6 +198,16 @@ if SE:
             r = SE[t]["pages"].get(pname, {})
             cells.append(f'<figure class="pg"><img src="{img64(im, 900, 70)}" alt="page"><figcaption>{names[t]}: found {r.get("found")}, missed {r.get("missed")}, merged {r.get("merged")}, split {r.get("split")}, extra {r.get("extra")} of {r.get("silver")}</figcaption></figure>')
         seg_html += f'<div class="pair">{"".join(cells)}</div>'
+
+# ---------------------------------------------------------------- gold pages
+gold_html = ""
+if (OUT / "gold_eval.json").exists():
+    GE = json.load(open(OUT / "gold_eval.json"))
+    gold_html = (f"<p>{TXT.get('gold_text', '')}</p><table><tr><th>reader</th><th>gold lines: characters wrong (faithful)</th><th>search-folded</th></tr>"
+                 + "".join(f"<tr><td>{NAMES.get(k, k)}</td><td>{pct(v['faithful'])}</td><td>{pct(v['search'])}</td></tr>" for k, v in GE["readers"].items())
+                 + "</table><table><tr><th>whole pages, round-B Kraken</th><th>characters wrong</th><th>gold lines missed</th><th>lines invented</th></tr>"
+                 + "".join(f"<tr><td>{k.replace('ftB+blla', 'default line finder').replace('ftB+segcpu', 'fine-tuned line finder')}</td><td>{pct(v['cer'])}</td><td>{v['dropped']}</td><td>{v['inserted']}</td></tr>" for k, v in GE["page_runs"].items())
+                 + "</table>")
 
 # ---------------------------------------------------------------- VLM
 vlm_html = ""
@@ -289,7 +302,7 @@ figure.bars {{ margin:18px 0; }} figcaption {{ font-weight:600; margin-bottom:6p
 .row {{ display:flex; align-items:center; gap:10px; margin:4px 0; }} .lab {{ width:170px; flex:none; color:var(--ink2); font-size:.88rem; }}
 .track {{ position:relative; flex:1; height:26px; }}
 .bar {{ position:absolute; left:0; top:3px; height:20px; border-radius:0 4px 4px 0; }}
-.bar.before {{ background:var(--before); }} .bar.after {{ background:var(--after); }} .bar.pp {{ background:var(--pp); }} .bar.azure {{ background:var(--azure); }}
+.bar.before {{ background:var(--before); }} .bar.after {{ background:var(--after); }} .bar.pp {{ background:var(--pp); }} .bar.azure {{ background:var(--azure); }} .bar.after2 {{ background:repeating-linear-gradient(45deg, var(--after) 0 6px, transparent 6px 9px); border:1px solid var(--after); }}
 .ci {{ position:absolute; top:12px; height:2px; background:var(--ink2); opacity:.75; }}
 .val {{ position:absolute; top:3px; font-size:.85rem; white-space:nowrap; }} .val small {{ color:var(--ink2); }}
 .na {{ color:var(--ink2); font-size:.85rem; position:absolute; left:0; top:4px; }}
@@ -324,6 +337,8 @@ pre.vlm {{ white-space:pre-wrap; background:var(--card); border:1px solid var(--
 <h2>The line finder</h2>
 {TXT.get("seg_text", "")}
 {seg_html}
+<h2>The owner's gold pages (experiment 34)</h2>
+{gold_html}
 <h2>A first look at a VLM: PaddleOCR-VL-0.9B</h2>
 {TXT.get("vlm_text", "")}
 {vlm_html}
