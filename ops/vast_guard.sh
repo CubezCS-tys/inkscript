@@ -18,6 +18,17 @@ now = time.time(); keep = {}
 for i in d:
     iid = str(i['id']); age = (now - (i.get('start_date') or now)) / 60
     util = i.get('gpu_util')
+    if i.get('actual_status') == 'running' and util is not None and util < 5 and i.get('ssh_host'):
+        # Vast's gpu_util can lag at 0 for many minutes while the card is busy (2026-10-12): ask the machine itself
+        import subprocess
+        try:
+            out = subprocess.run(['ssh', '-i', os.path.expanduser('~/.ssh/id_ed25519_vast'), '-o', 'ConnectTimeout=10',
+                                  '-o', 'StrictHostKeyChecking=no', '-o', 'BatchMode=yes', '-p', str(i['ssh_port']),
+                                  f\"root@{i['ssh_host']}\", 'nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits'],
+                                 capture_output=True, text=True, timeout=30).stdout.split()
+            util = max(float(x) for x in out) if out else util
+        except Exception:
+            pass
     if i.get('actual_status') == 'running' and util is not None and util < 5:
         keep[iid] = idle.get(iid, now)
     if age >= int(os.environ['MAX_MIN']):
