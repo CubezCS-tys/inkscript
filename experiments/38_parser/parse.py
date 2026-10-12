@@ -271,6 +271,8 @@ def parse_page(pid: str, meta: dict) -> dict:
     blocks = []
     for b in dots_blocks(pid):
         role = ROLE.get(b["cat"], "p")
+        if role == "p" and re.fullmatch(r"\s*\$\$[\s\S]*\$\$\s*", b["text"]):
+            role = "formula"            # a displayed formula dots.mocr labelled as text
         text, lvl = strip_md(b["text"]) if role not in ("table", "formula") else (b["text"], 0)
         if role in ("header", "footer") and NUMBERISH.match(text or "x"):
             role = "pagenum"

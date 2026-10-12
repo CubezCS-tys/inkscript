@@ -481,6 +481,21 @@ def _formula(ed: Edition, b, sc: float, H: float, st: dict) -> str:
     return ""
 
 
+INK_ONLY = ("pictureText", "formulaInk")
+
+
+def _figure(ed: Edition, b, sc: float, H: float, st: dict) -> str:
+    node = next((n for n in ed.body if n.kind == "figure" and n.id in (b.id, b.target)), None)
+    g = node.extra.get("graphic", "") if node is not None else ""
+    p = (Path(ed.jats_path).parent / g) if g else None
+    if p is None or not p.exists():
+        st["figures_missing"] = st.get("figures_missing", 0) + 1
+        return ""
+    st["figures"] = st.get("figures", 0) + 1
+    x, y, w, h = (v * sc for v in b.box)
+    return r"\put(%.1f,%.1f){\includegraphics[width=%.1fbp,height=%.1fbp]{%s}}" % (x, H - y - h, w, h, p)
+
+
 FITBOX = r"""
 \newbox\fitb
 % \fitbox{w bp}{h bp}{content}: the content at its natural size, scaled down only if it is larger than w x h
@@ -522,6 +537,12 @@ def layout_tex(ed: Edition, height_k: float = 1.3, baseline: float = 0.9, mode: 
             if b.role == "table" and not b.lines:
                 st["tables"] += 1
                 out.extend(s + "\n" for s in _table_rules(ed, b, sc, H))
+                continue
+            if b.role == "figure" and not b.lines:     # a picture: its crop of the scan, where it was printed
+                out.append(_figure(ed, b, sc, H, st) + "\n")
+                continue
+            if b.role in INK_ONLY:                     # text inside a picture or a typeset formula: the picture or
+                st["ink_only_lines"] = st.get("ink_only_lines", 0) + len(b.lines)   # the formula shows it
                 continue
             lines = [ln for ln in b.lines if ln.words]
             if not lines:
@@ -859,6 +880,14 @@ def onecol_tex(ed: Edition) -> tuple[str, dict]:
                            % (Path(ed.jats_path).parent / g, words(lab)))
         elif n.kind == "table":
             out.append(_table_tex(ed, n, notes, st))
+        elif n.kind == "figure":
+            g = n.extra.get("graphic", "")
+            if g and (Path(ed.jats_path).parent / g).exists():
+                st["figures"] = st.get("figures", 0) + 1
+                cap = _inl(ed, n.extra.get("caption") or [], False, notes, st)
+                out.append(r"\begin{center}\includegraphics[width=0.8\textwidth,height=0.4\textheight,"
+                           r"keepaspectratio]{%s}\par\smallskip{\small %s}\end{center}"
+                           % (Path(ed.jats_path).parent / g, cap))
         out.append("\n")
     # notes no marker reached
     left = [v for v in notes.values() if not v["used"]]

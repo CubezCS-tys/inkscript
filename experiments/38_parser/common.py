@@ -19,8 +19,15 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import threading
 import time
 from pathlib import Path
+
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))     # this worktree's inkscript
+
+LOCK = threading.Lock()
+INFLIGHT = [0.0]          # worst-case cost of calls sent and not yet logged (threads)
 
 MAIN = Path("/home/yassine/inkscript")
 OUT = MAIN / "experiments/38_parser/out"
@@ -217,9 +224,20 @@ def gemini(prompt: str, images: list[bytes], tag: str, model: str = "gemini-3.8-
     pin, pout = PRICE[model]
     tin = est_in or (1200 * len(images) + len(prompt) / 2.5)
     worst = tin / 1e6 * pin + max_out / 1e6 * pout
-    if spent() + worst > CAP:
-        print(f"STOP: spent ${spent():.3f}; a call (up to ${worst:.3f}) could cross the ${CAP} cap", flush=True)
-        return None, 0.0
+    with LOCK:
+        if spent() + INFLIGHT[0] + worst > CAP:
+            print(f"STOP: spent ${spent():.3f}; a call (up to ${worst:.3f}) could cross the ${CAP} cap", flush=True)
+            return None, 0.0
+        INFLIGHT[0] += worst
+    try:
+        return _send(model, prompt, images, tag, max_out, schema, thinking, resolution, key, pin, pout)
+    finally:
+        with LOCK:
+            INFLIGHT[0] -= worst
+
+
+def _send(model, prompt, images, tag, max_out, schema, thinking, resolution, key, pin, pout):
+    c = _load_cache()
     from google import genai
     from google.genai import types
     from inkscript.enrich.judge import _key
@@ -248,17 +266,19 @@ def gemini(prompt: str, images: list[bytes], tag: str, model: str = "gemini-3.8-
     usd = tin / 1e6 * pin + tout / 1e6 * pout
     fin = str(r.candidates[0].finish_reason) if r.candidates else "none"
     SPEND.parent.mkdir(parents=True, exist_ok=True)
-    with open(SPEND, "a") as f:
-        f.write(json.dumps(dict(when=time.strftime("%Y-%m-%d %H:%M:%S"), model=model, tag=tag, tin=tin, tout=tout,
-                                usd=round(usd, 6), finish=fin, total=round(spent() + usd, 4))) + "\n")
+    with LOCK:
+        with open(SPEND, "a") as f:
+            f.write(json.dumps(dict(when=time.strftime("%Y-%m-%d %H:%M:%S"), model=model, tag=tag, tin=tin, tout=tout,
+                                    usd=round(usd, 6), finish=fin, total=round(spent() + usd, 4))) + "\n")
     try:
         ans = json.loads(r.text)
     except Exception:
         print(f"  truncated or unparsable answer ({fin}) for {tag}: kept as a failure, not retried", flush=True)
         return None, usd
-    with open(CACHE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(dict(key=key, tag=tag, model=model, answer=ans), ensure_ascii=False) + "\n")
-    c[key] = ans
+    with LOCK:
+        with open(CACHE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(dict(key=key, tag=tag, model=model, answer=ans), ensure_ascii=False) + "\n")
+        c[key] = ans
     return ans, usd
 
 

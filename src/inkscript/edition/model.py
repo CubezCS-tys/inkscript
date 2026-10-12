@@ -35,7 +35,8 @@ ALTO_NS = "http://www.loc.gov/standards/alto/ns-v4#"
 _A = "{%s}" % ALTO_NS
 XLINK = "{http://www.w3.org/1999/xlink}"
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
-BLOCK_ID = re.compile(r"^p(\d+)(?:b\d+|t\d+(?:c\d+)?|eq\d+)(?:-\d+)?$")   # a block, a table (cell), a formula
+BLOCK_ID = re.compile(r"^p(\d+)(?:b\d+|t\d+(?:c\d+)?|eq\d+|f\d+)(?:-\d+)?$")   # a block, a table (cell), a formula,
+#                                                                          a figure
 MML = "http://www.w3.org/1998/Math/MathML"
 FURNITURE = {"pageHeader", "pageFooter", "pageNumber"}
 
@@ -171,6 +172,8 @@ class Node:
             return " ".join(plain(c["inl"]) for r in self.extra["rows"] for c in r["cells"])
         if self.kind == "formula":
             return self.extra.get("ink", "")
+        if self.kind == "figure":
+            return plain(self.extra.get("caption") or [])
         return plain(self.inl)
 
 
@@ -299,6 +302,18 @@ def _table(tw) -> dict:
                                                                              else None))
 
 
+def _fig(fg) -> dict:
+    """A <fig>: label, caption, and the picture (a crop of the scan) it holds."""
+    cap = fg.find("caption")
+    capp = cap.find("p") if cap is not None else None
+    g = fg.find(".//graphic")
+    return dict(label=txt(fg.find("label")),
+                caption=_inline(capp if capp is not None else cap) if cap is not None else [],
+                graphic=g.get(XLINK + "href") if g is not None else "",
+                caption_id=(capp.get("id") if capp is not None else None) or (cap.get("id") if cap is not None
+                                                                             else None))
+
+
 def _lang(el):
     v = el.get(XML_LANG)
     return v if v and v != "ar" else None
@@ -407,6 +422,21 @@ def read_body(art) -> tuple[list, list, list, list]:
                 body.append(Node("formula", [], el.get("id"), extra=dict(label=txt(el.find("label")), **_math(el))))
             elif tag == "table-wrap":
                 body.append(Node("table", [], el.get("id"), extra=_table(el)))
+            elif tag == "fig":
+                body.append(Node("figure", [], el.get("id"), extra=_fig(el)))
+            elif tag == "list-item":             # a list item: its printed label (bullet, number) opens its text
+                lab = txt(el.find("label"))
+                first = True
+                for p in el:
+                    if isinstance(p.tag, str) and p.tag == "p":
+                        n = node("p", p)
+                        if first and lab:
+                            n.inl.insert(0, {"t": "text", "s": lab + " "})
+                            n.extra["list_label"] = lab
+                        first = False
+                        body.append(n)
+                    elif isinstance(p.tag, str) and p.tag != "label":
+                        walk([p], depth)
             elif tag:
                 walk(el, depth)
     b = art.find("body")
@@ -469,6 +499,17 @@ class Edition:
                 lst.insert(0, k)
         kind_of = {"heading": "heading", "p": "p", "ref-head": "ref", "ref": "ref", "formula": "formula"}
         for n in self.body + self.refs:
+            if n.kind == "figure":               # the picture's own block, then its caption's
+                n.blocks = [b for b in pointing.get(n.id, [n.id]) if b in self.blocks]
+                for bid in n.blocks:
+                    self.blocks[bid].kind = self.blocks[bid].kind or "figure"
+                cid = n.extra.get("caption_id")
+                if cid:
+                    cb = [b for b in pointing.get(cid, [cid]) if b in self.blocks]
+                    for bid in cb:
+                        self.blocks[bid].kind = self.blocks[bid].kind or "caption"
+                    n.blocks += cb
+                continue
             if n.kind == "table":                # the table's own block, then each cell's
                 n.blocks = [b for b in pointing.get(n.id, [n.id]) if b in self.blocks]
                 for r in n.extra["rows"]:

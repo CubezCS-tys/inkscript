@@ -3,8 +3,8 @@
     /home/yassine/inkscript/.venv/bin/python pages.py
 
 About 30 of the hardest yardstick pages, chosen by hand from their kinds (experiment 34's tags and dots.mocr's
-block categories), every one of them with an experiment-35 edition of its document so the comparison is like for
-like, plus every gold page whose status is "done" when this runs (text accuracy against truth). Inference only:
+block categories), every one of them but two (equation pages, to have formulas dots.mocr missed) with an experiment-35
+edition of its document so the comparison is like for like, plus every gold page whose status is "done" when this runs (text accuracy against truth). Inference only:
 nothing is tuned on these pages.
 """
 from __future__ import annotations
@@ -31,6 +31,8 @@ HARD = {
     "0682-000-092-014_p027": "equation, footnotes, Latin",
     "2025-067-002-007_p061": "equation, table, caption, list, footnote",
     "2382-005-003-001_p005": "six numbered equations, a diagram with its caption",
+    "0460-009-003-012_p010": "a displayed formula dots.mocr read as text, a small table (no old edition)",
+    "1147-000-007-006_p004": "matrices and vectors, nine formulas (no old edition)",
     # magazines, decorative pages, pictures
     "0299-000-004-010_p002": "magazine page with a picture and Quran, 1970s",
     "0465-011-001,002-009_p001": "decorative first page, 21 blocks",

@@ -327,6 +327,10 @@ def _md_node(n: Node, notes: set) -> list[str]:
         return lines
     if n.kind == "table":
         return [table_html(n), ""]
+    if n.kind == "figure":
+        cap = _md_inl(n.extra.get("caption") or [], notes)
+        g = n.extra.get("graphic", "")
+        return ([f"![{cap or 'picture'}]({g})"] if g else []) + ([cap] if cap else []) + [""]
     s = _md_inl(n.inl, notes)
     if n.lang:
         return [f'<div lang="{n.lang}" dir="ltr">', "", s, "", "</div>", ""]
@@ -481,6 +485,10 @@ def full_text(ed: Edition) -> str:
             x = n.extra
             f = f"$${x['tex']}$$" if x.get("tex") else x.get("ink", "")
             out.append(" ".join(filter(None, (f, x.get("label")))))
+        elif n.kind == "figure":
+            cap = plain(n.extra.get("caption") or [])
+            if cap:
+                out.append(cap)
         else:
             out.append(plain_tex(n.inl))
     for n in ed.refs:

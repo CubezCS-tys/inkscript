@@ -26,7 +26,7 @@ from pathlib import Path
 
 from lxml import etree
 
-from .model import MML
+from .model import MML, plain
 
 DIGITS_AR = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
 
@@ -244,6 +244,15 @@ class Renderer:
                     f'{self.og(n, crop)}</div>')
         if n.kind == "table":
             return self.table(n)
+        if n.kind == "figure":
+            x = n.extra
+            crop = self.crops.get(n.id)
+            cap = self.inl(x.get("caption") or [])
+            lab = f'<span class="flabel">{t(x.get("label"))}</span> ' if x.get("label") else ""
+            alt = plain(x.get("caption") or []) or "picture"
+            img = f'<img class="fig" src="{a(crop)}" alt="{a(alt)}"/>' if crop else ""
+            fc = f"<figcaption>{lab}{cap}</figcaption>" if (cap or lab) else ""
+            return f'<figure{self.block_attrs(n, "figure")}>{img}{fc}{self.og(n, crop)}</figure>' if (img or fc) else ""
         return ""
 
     def table(self, n) -> str:
@@ -554,6 +563,8 @@ math[display=block]{font-size:1.15em}
 math{font-family:'Naskh','Markazi',math}
 .eqlabel{color:var(--mute)}
 img.crop{max-width:100%}
+figure.figure{margin:1rem 0;text-align:center}figure.figure img.fig{max-width:100%;height:auto}
+figure.figure figcaption{font-size:.85rem;margin-top:.3rem}
 code.tex{font-size:.85rem}
 button.og{all:unset;cursor:pointer;color:var(--mute);opacity:.55;display:inline-block;vertical-align:middle;
 margin-inline-start:.3rem;line-height:0;padding:.15rem}
@@ -697,7 +708,7 @@ def copy_crops(ed, d: Path) -> dict:
     """The masters' scan crops of formulas and tables (JATS <graphic specific-use="scan-crop">) into crops/."""
     out = {}
     for n in ed.body:
-        g = (n.extra or {}).get("graphic") if n.kind in ("formula", "table") else None
+        g = (n.extra or {}).get("graphic") if n.kind in ("formula", "table", "figure") else None
         if not g or re.match(r"^[a-z]+:", g):
             continue
         src = (ed.jats_path.parent / g).resolve()
