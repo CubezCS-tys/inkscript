@@ -3,6 +3,8 @@
 # venvs and downloads the pinned weights from Hugging Face, all in parallel. Marker files: *.ok / *.fail in /work/setup/.
 cd /work; mkdir -p setup logs out/raw; export HF_HOME=/work/hf
 PY=$(command -v python3 || command -v python)
+# the runtime image lacks a C compiler (triton builds a helper at vLLM start-up) and the libraries paddle and cv2 load
+(apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gcc libgomp1 libgl1 libglib2.0-0 > setup/apt.log 2>&1) &
 # 1. weights (a tiny venv of its own so downloads start at once)
 (
   $PY -m venv /opt/hf && /opt/hf/bin/pip install -q -U "huggingface_hub>=1.0" > setup/hf_pip.log 2>&1
