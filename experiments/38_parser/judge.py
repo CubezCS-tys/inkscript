@@ -50,7 +50,8 @@ of it as HTML, labelled {labels}, made by different systems. Judge each against 
 - cells_wrong: cells whose text differs from the print (a wrong digit, letter or word counts);
 - cells_missing / cells_extra: printed cells left out / cells not printed;
 - grade 1 (unusable) to 5 (exact); note: at most 15 words on the worst problem.
-Arabic-Indic and Western digits count as the same digit.
+Arabic-Indic and Western digits count as the same digit. A candidate may list each row's cells from right to left
+(the Arabic reading order) or from left to right: do not count the direction as an error.
 {cands}""",
        "formula": """Image 1 is a crop of a scanned Arabic journal page holding one displayed formula (Arabic words may
 appear in it). Below are {n} transcriptions of it as LaTeX, labelled {labels}, made by different systems. Judge each

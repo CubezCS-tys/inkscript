@@ -372,3 +372,18 @@ equations (2.42 of 5), vowel marks (60% kept, Azure 89%), dropped text (15.2 per
 cleared by the owner first**: MIT plus an agreement forbidding "unauthorized digitization of publications"
 (§3.3c) and limiting training on its outputs (§5.4); until then its readings are not training data and not in
 the product (`experiments/36_vlm_bakeoff/models.md`).
+**D29 · Our own parser keeps Azure's words and takes everything else from the models; model correction of the
+text stays off (2026-10-12).** Experiment 38 rebuilt 35 of the hardest yardstick pages and the 9 done gold pages from
+dots.mocr's layout (blocks, categories, reading order, table grids, formulas, pictures) with every Azure word placed
+by position in exactly one block, then wrote JATS + ALTO and built every edition with `inkscript edition`. Against
+experiment 35's editions a blind Gemini 3.1 Pro judge preferred the new layout page on 18 of 33 hard pages (old 4,
+tie 11) and a Claude reviewer on 28 of 44 (old 3, all table pages); no Azure word was lost (35 non-gold pages), and
+the order-free word error on gold stayed Azure's (5.4% vs 5.5%). Chosen: Azure's words over dots.mocr's (dots.mocr
+alone drops 10% of the gold words, Azure in its layout none); formulas from dots.mocr checked on the crop by Gemini
+Pro (6 of 19 changed, judged better 6, worse 0), MathML + tex-math + crop. Not chosen: **correction "with
+understanding"** by Gemini 3.8 Flash on each block's crop under fixed rules (no style, no modernising, no vowel
+marks, ≤ 3 words, confidence ≥ 0.8): on gold it was right 30 times and wrong 34 (word errors 85 → 89; it adds hamzas
+old prints lack, splits printed joins, fixes the author's misprints, turns ى into ي); filling dots.mocr's table
+cells with Azure's words as the final text (judged 2.8 vs 3.4 for dots' own cells: cells placed by position merge
+or shift) — kept for the layout page's ruled tables, to be replaced by dots' cell text checked against Azure. The
+licence of dots.mocr (D28) still has to be cleared before any of this goes into the product.

@@ -100,10 +100,14 @@ the old one on {W.get('old', 0)}, a tie on {W.get('tie', 0)}; mean closeness {J[
 The text is Azure's: poured into the new layout it keeps Azure's words (word-bag error on gold
 {ci(tg['joined']['bag_err'])} vs Azure {ci(tg['azure']['bag_err'])}). The model correction is <b>not</b> good enough to switch on:
 of {sum(tc['gold_verdicts'].values())} changes it made on gold pages, {tc['gold_verdicts'].get('right', 0)} were right and
-{tc['gold_verdicts'].get('wrong', 0)} wrong.</p>
+{tc['gold_verdicts'].get('wrong', 0)} wrong. Tables come out ruled, but Azure's words poured into the model's grid
+were judged worse than the model's own cells ({S['judge_table']['new']} vs {S['judge_table']['dots']} of 5); formulas
+checked on the crop were judged better ({S['judge_formula']['new']} vs {S['judge_formula']['dots']}).
+A Claude reviewer who looked at every page: new better on {S['spotcheck']['better'].get('new', 0)}, same on
+{S['spotcheck']['better'].get('same', 0)}, old better on {S['spotcheck']['better'].get('old', 0)}.</p>
 <div class=cards>
 <div class=card>new page preferred<b>{W.get('new', 0)}/{J['pages']}</b><span class=mut>old {W.get('old', 0)}, tie {W.get('tie', 0)}</span></div>
-<div class=card>text on gold, characters wrong (in reading order)<b>{pct(tg['corrected']['cer'][0])}</b><span class=mut>Azure as is {pct(tg['azure']['cer'][0])}; joined {pct(tg['joined']['cer'][0])}</span></div>
+<div class=card>Azure words lost by the new layout (the {S['pages'] - S['gold_done']} other pages)<b>{pct(S['text_vs_azure']['joined']['bag_missing'][0], 2)}</b><span class=mut>gold pages, words wrong order-free: Azure {pct(tg['azure']['bag_err'][0])}, new {pct(tg['joined']['bag_err'][0])}, corrected {pct(tg['corrected']['bag_err'][0])}</span></div>
 <div class=card>tables rebuilt with rules<b>{S['assignment']['tables']}</b><span class=mut>{S['assignment']['table_cells_azure']} of {S['assignment']['table_cells']} cells filled from Azure</span></div>
 <div class=card>pictures placed<b>{S['assignment']['figures']}</b><span class=mut>formulas typeset: {S['assignment']['formulas']}</span></div>
 <div class=card>corrections right on gold<b>{pct(tc['gold_precision'], 0)}</b><span class=mut>[{pct(tc['gold_precision_ci'][0], 0)}–{pct(tc['gold_precision_ci'][1], 0)}], word errors {tc['gold_word_errors_before']} → {tc['gold_word_errors_after']}</span></div>

@@ -90,7 +90,13 @@ def main():
     # judges
     js = [json.loads(l) for l in (OUT / "judge_sides.jsonl").read_text().splitlines()] \
         if (OUT / "judge_sides.jsonl").exists() else []
-    js = [j for j in js if j["key"] in hard]
+    allj = js
+    jg = [j for j in allj if j["key"] not in hard]
+    wg = Counter(j["unblinded"]["winner"] for j in jg)
+    S["judge_sides_gold"] = dict(pages=len(jg), winner=dict(wg),
+                                 grade_new=round(sum(j["grade_new"] for j in jg) / max(1, len(jg)), 2),
+                                 grade_old=round(sum(j["grade_old"] for j in jg) / max(1, len(jg)), 2))
+    js = [j for j in allj if j["key"] in hard]
     w = Counter(j["unblinded"]["winner"] for j in js)
     asp = {}
     for j in js:
@@ -115,6 +121,19 @@ def main():
     # editions
     errs = [m["page_id"] for m in M if (m.get("edition") or {}).get("errors")]
     S["editions"] = dict(built=sum(1 for m in M if m.get("edition")), with_errors=errs)
+    sp = [json.loads(f.read_text(encoding="utf-8")) for f in sorted((OUT / "spotcheck").glob("*.json"))] \
+        if (OUT / "spotcheck").exists() else []
+    fc = Counter()
+    for r in sp:
+        for f in r.get("faults") or []:
+            fc[f"{f.get('category')}|{f.get('severity')}"] += 1
+    mean = lambda k: round(sum(r[k] for r in sp if isinstance(r.get(k), (int, float))) /
+                           max(1, sum(isinstance(r.get(k), (int, float)) for r in sp)), 2)
+    S["spotcheck"] = dict(pages=len(sp), better=dict(Counter(r.get("better") for r in sp)),
+                          new_layout=mean("new_layout_score"), new_onecol=mean("new_onecol_score"),
+                          old_layout=mean("old_layout_score"),
+                          severity=dict(Counter(f.get("severity") for r in sp for f in r.get("faults") or [])),
+                          faults=dict(fc.most_common()))
     S["gemini_usd"] = round(spent(), 3)
     (OUT / "summary.json").write_text(json.dumps(S, ensure_ascii=False, indent=1), encoding="utf-8")
     print(json.dumps(S, ensure_ascii=False, indent=1)[:4000])
