@@ -6,7 +6,7 @@ is least sure of. Stages (each resumable, each writes under out/round2/):
   [predict]    out/venv/bin/python predict_local.py round2   (the round-1 model on every candidate)  -> pred.json
   select       all maths pages, then the least sure of the rest, up to N pages                -> chosen.json
   label        the Flash referee on the chosen pages, as round 1                               -> labels/
-Gemini for experiment 39 capped at $19 (round 1 spent $11.92; the owner approved $7 more on 2026-10-13)."""
+Gemini for experiment 39 capped at $20.50 (round 1 spent $11.92; the owner approved $7 more on 2026-10-13, then raised the cap from $19 to $20.50 the same day)."""
 import json, random, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -17,7 +17,7 @@ sys.path.insert(0, str(MAIN / "src")); sys.path.insert(0, str(HERE))
 import os; os.environ.setdefault("REFEREE", "gemini-3.8-flash")
 import train_pages as T, common
 from inkscript.gold.draft import write_pages, page_id
-common.CAP = 19.0
+common.CAP = 20.5
 T.PAGES, T.LAB = PAGES, LAB                                               # T.referee reads and writes these
 AWS = str(MAIN / ".venv/bin/aws"); MORE = HERE / "out/more/azure"
 N = int(os.environ.get("N", 1450))
