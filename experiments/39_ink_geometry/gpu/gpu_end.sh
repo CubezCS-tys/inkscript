@@ -1,6 +1,6 @@
 #!/bin/bash
 # Destroy the instance and log the end with its cost:  DPH=<$/h> gpu_end.sh "jobs done"
-V=~/.local/venvs/vast/bin/vastai; OUT=/home/yassine/inkscript/experiments/39_ink_geometry/out/gpu; LOG=$OUT/gpu_spend.jsonl
+E=/home/yassine/inkscript/experiments/39_ink_geometry; V=~/.local/venvs/vast/bin/vastai; OUT=$E/${GOUT:-out/gpu}; LOG=$E/out/gpu/gpu_spend.jsonl
 read ID HOST PORT < $OUT/gpu_instance.txt
 START=$(grep "\"instance\": $ID" $LOG | grep '"start"' | tail -1 | python3 -c "import json,sys,datetime; print(datetime.datetime.fromisoformat(json.loads(sys.stdin.read())['time']).timestamp())")
 $V destroy instance $ID -y

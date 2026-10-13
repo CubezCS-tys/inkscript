@@ -1,8 +1,9 @@
 """The fine-tuned layout model on the 44 test pages, against the Pro referee (out/score_test, the same label set the
 model was trained on), next to dots.mocr and the rules on the same lines. Each Azure line takes the class of the
 predicted box that covers most of it (at least 40% of the line); none -> "none".
-Reads out/gpu/predictions.json; writes out/score_yolo.json."""
-import json, sys
+Reads out/gpu/predictions.json; writes out/score_yolo.json (env PRED and OUT, relative to this folder, for round 2:
+PRED=out/gpu2/predictions.json OUT=out/score_yolo2.json)."""
+import json, os, sys
 from collections import Counter
 from pathlib import Path
 HERE = Path(__file__).parent
@@ -16,7 +17,7 @@ GROUP = {"body": "plain text", "footnotes": "plain text", "latin": "plain text",
          "magazine": "columns", "decorative": "decorative", "table": "tables", "equation": "equations"}
 from common import dots_blocks, inter, area, page_image
 
-pred = json.load(open(HERE / "out/gpu/predictions.json"))
+pred = json.load(open(HERE / os.environ.get("PRED", "out/gpu/predictions.json")))
 rows = []
 for f in sorted((HERE / "out/score_test").glob("*.json")):
     r = json.load(open(f)); pid = r["pid"]; p = pred.get(pid)
@@ -43,4 +44,4 @@ for lab in LABELS:
                                **{m + "_right_when_said": round(sum(x[m] == lab and x["ref"] == lab for x in R) / max(1, sum(x[m] == lab for x in R)), 3) for m in M})
     print(f"  {lab:10}", out["label " + lab])
 print("model's misses", Counter((x["ref"], x["model"]) for x in R if x["ref"] != x["model"]).most_common(12))
-json.dump(dict(scores=out, rows=rows), open(HERE / "out/score_yolo.json", "w"), ensure_ascii=False)
+json.dump(dict(scores=out, rows=rows), open(HERE / os.environ.get("OUT", "out/score_yolo.json"), "w"), ensure_ascii=False)
