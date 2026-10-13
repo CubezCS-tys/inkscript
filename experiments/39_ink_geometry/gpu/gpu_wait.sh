@@ -1,7 +1,7 @@
 #!/bin/bash
 # Wait for train.done / train.failed on the rented GPU (or a hard stop at MAXMIN minutes since renting), fetch
 # /work/out (weights best/last, results.csv, plots, predictions; no epoch checkpoints) and the logs into $GOUT (default out/gpu/), then destroy the instance and log its cost (gpu_end.sh).
-OUT=/home/yassine/inkscript/experiments/39_ink_geometry/${GOUT:-out/gpu}; G=$(cd "$(dirname "$0")" && pwd)
+EXP=$(cd "$(dirname "$0")/.." && pwd); OUT=$EXP/${GOUT:-out/gpu}; G=$(cd "$(dirname "$0")" && pwd)
 read ID HOST PORT < $OUT/gpu_instance.txt
 [ -f $OUT/gpu_job.env ] && . $OUT/gpu_job.env                       # DPH and JOB as gpu_run.sh was given them
 SSH="ssh -i $HOME/.ssh/id_ed25519_vast -p $PORT -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new root@$HOST"

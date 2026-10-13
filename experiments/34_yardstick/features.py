@@ -22,7 +22,7 @@ from pathlib import Path
 
 import numpy as np
 
-OUT = Path("/home/yassine/inkscript/experiments/34_yardstick/out")
+OUT = Path(__file__).resolve().parent / "out"       # was /home/yassine/inkscript/experiments/34_yardstick/out
 AR = re.compile("[ء-ي]")
 VOW = re.compile("[ً-ِْ]")
 LAT = re.compile("[A-Za-z]")

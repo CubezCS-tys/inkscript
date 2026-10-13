@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))     # this 
 LOCK = threading.Lock()
 INFLIGHT = [0.0]          # worst-case cost of calls sent and not yet logged (threads)
 
-MAIN = Path("/home/yassine/inkscript")
+MAIN = Path(__file__).resolve().parents[2]       # the checkout; was /home/yassine/inkscript
 OUT = MAIN / "experiments/38_parser/out"
 GOLD = MAIN / "experiments/34_yardstick/out/gold"
 B36 = MAIN / "experiments/36_vlm_bakeoff/out"

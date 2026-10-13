@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-MAIN = Path("/home/yassine/inkscript")
+MAIN = Path(__file__).resolve().parents[2]       # the checkout; was /home/yassine/inkscript
 OUT = MAIN / "experiments/34_yardstick/out"
 SOURCES = [MAIN / "experiments/28_scale/out/azure", OUT / "extra"]
 

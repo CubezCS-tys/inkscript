@@ -5,7 +5,7 @@
 # (-y) and the script exits 2. Every start and end goes to out/gpu_spend.jsonl. Prints "INSTANCE <id> <host> <port>".
 # GOUT: where this run's instance file and results go (default out/gpu, round 1); DATA: the dataset folder, uploaded as
 # out/train/$DATA.tar; the spend log is always out/gpu/gpu_spend.jsonl.
-E=/home/yassine/inkscript/experiments/39_ink_geometry; V=~/.local/venvs/vast/bin/vastai; OUT=$E/${GOUT:-out/gpu}; mkdir -p $OUT $E/out/gpu; LOG=$E/out/gpu/gpu_spend.jsonl
+EXP=$(cd "$(dirname "$0")/.." && pwd); V=~/.local/venvs/vast/bin/vastai; OUT=$EXP/${GOUT:-out/gpu}; mkdir -p $OUT $EXP/out/gpu; LOG=$EXP/out/gpu/gpu_spend.jsonl
 DATA=${DATA:-yolo}; JOB=${JOB:-layout fine-tune}
 G=$(cd "$(dirname "$0")" && pwd); OID=$1; DPH=${DPH:-0}
 ID=$($V create instance $OID --image pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime --disk 60 --ssh --direct --raw | python3 -c "import json,sys; print(json.load(sys.stdin)['new_contract'])")
@@ -37,6 +37,6 @@ tar czf /tmp/gpu39.tgz -C "$G/.." gpu
 pup /tmp/gpu39.tgz
 $SSH "rm -f /work/linktest.bin; cd /work && tar xzf gpu39.tgz && chmod +x gpu/*.sh && (setsid nohup gpu/setup.sh > logs_setup.out 2>&1 < /dev/null &)" 2>/dev/null
 
-$SSH "cd /work && (setsid nohup env EPOCHS=${EPOCHS:-80} DATA=$DATA gpu/train.sh > train.out 2>&1 < /dev/null &)" 2>/dev/null; S=$(date +%s); pup $E/out/train/$DATA.tar; echo "$DATA.tar up in $(( $(date +%s)-S )) s"
+$SSH "cd /work && (setsid nohup env EPOCHS=${EPOCHS:-80} DATA=$DATA gpu/train.sh > train.out 2>&1 < /dev/null &)" 2>/dev/null; S=$(date +%s); pup $EXP/out/train/$DATA.tar; echo "$DATA.tar up in $(( $(date +%s)-S )) s"
 $SSH "cd /work && ls -l $DATA.tar && touch yolo.uploaded" 2>/dev/null
 echo "INSTANCE $ID $HOST $PORT"
