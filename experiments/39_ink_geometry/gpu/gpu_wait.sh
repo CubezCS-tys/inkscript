@@ -3,6 +3,7 @@
 # /work/out (weights best/last, results.csv, plots, predictions; no epoch checkpoints) and the logs into $GOUT (default out/gpu/), then destroy the instance and log its cost (gpu_end.sh).
 OUT=/home/yassine/inkscript/experiments/39_ink_geometry/${GOUT:-out/gpu}; G=$(cd "$(dirname "$0")" && pwd)
 read ID HOST PORT < $OUT/gpu_instance.txt
+[ -f $OUT/gpu_job.env ] && . $OUT/gpu_job.env                       # DPH and JOB as gpu_run.sh was given them
 SSH="ssh -i $HOME/.ssh/id_ed25519_vast -p $PORT -o ConnectTimeout=20 -o StrictHostKeyChecking=accept-new root@$HOST"
 T0=$(date +%s); MAXMIN=${MAXMIN:-150}
 until $SSH "ls /work/train.done /work/train.failed 2>/dev/null | grep -q ." 2>/dev/null || [ $(( ($(date +%s) - T0) / 60 )) -ge $MAXMIN ]; do sleep 60; done

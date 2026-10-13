@@ -11,6 +11,7 @@ G=$(cd "$(dirname "$0")" && pwd); OID=$1; DPH=${DPH:-0}
 ID=$($V create instance $OID --image pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime --disk 60 --ssh --direct --raw | python3 -c "import json,sys; print(json.load(sys.stdin)['new_contract'])")
 [ -z "$ID" ] && { echo "create failed"; exit 1; }
 T0=$(date +%s); echo $ID > $OUT/gpu_instance.txt
+printf "DPH=%q\nJOB=%q\n" "$DPH" "$JOB" > $OUT/gpu_job.env           # gpu_wait.sh reads the rate and the job label from here
 echo "{\"event\": \"start\", \"time\": \"$(date -Is)\", \"instance\": $ID, \"offer\": $OID, \"dph\": $DPH, \"job\": \"$JOB\"}" >> $LOG
 for i in $(seq 90); do $V show instance $ID --raw 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if d and d.get('actual_status')=='running' else 1)" 2>/dev/null && break; sleep 10; done
 URL=$($V ssh-url $ID); HP=${URL#ssh://root@}; HOST=${HP%:*}; PORT=${HP#*:}
@@ -23,8 +24,8 @@ pup() {   # upload one file in 8 parallel pieces, joined on the far side
   $SSH "cd /work && cat $b.part* > $b && rm -f $b.part*" 2>/dev/null; rm -rf $d
 }
 head -c 20000000 /dev/urandom > /tmp/linktest.bin
-S=$(date +%s.%N); pup /tmp/linktest.bin; E=$(date +%s.%N)
-RATE=$(python3 -c "print(round(20/($E-$S),2))")
+S=$(date +%s.%N); pup /tmp/linktest.bin; S1=$(date +%s.%N)          # not E: E is the experiment folder
+RATE=$(python3 -c "print(round(20/($S1-$S),2))")
 echo "link test: $RATE MB/s to $HOST"
 if python3 -c "import sys; sys.exit(0 if $RATE >= ${MINRATE:-0.5} else 1)"; then :; else
   $V destroy instance $ID -y > /dev/null
