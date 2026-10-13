@@ -9,6 +9,7 @@ version needs no image. Why this exists, in the owner's words:
 
 ## Read in this order
 
+0. [docs/handoff.md](docs/handoff.md) — where we are as of 2026-10-13, written for a fresh session on the server.
 1. [docs/STATUS.md](docs/STATUS.md) — what works today, with the numbers and their dates; what is in flight.
 2. [docs/ideas.md](docs/ideas.md) — every idea discussed: done, tried-and-dropped, parked, open — with where to pick each up.
 3. [docs/roadmap.md](docs/roadmap.md) — the milestones the owner wants next, in order.

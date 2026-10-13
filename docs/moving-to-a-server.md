@@ -1,5 +1,7 @@
 # Moving development to a server
 
+*For the current state (experiments 33–39, Vast, data sizes, hard-coded paths), read [handoff.md](handoff.md) first; this page covers the core pipeline.*
+
 Git holds the code, the docs, the tests and one bundled document — 7 MB. It
 deliberately does **not** hold data, keys or outputs (`.gitignore`: `.env`,
 `.venv/`, `output/`, `data/`, `*.zip`, `experiments/*/out/`, caches). So a
