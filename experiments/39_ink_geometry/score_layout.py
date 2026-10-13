@@ -1,19 +1,22 @@
 """The frozen line labeller (senses.py, rules as committed in 0f0ff0a, not tuned since) on experiment 38's 44 pages,
 scored against an independent referee: Gemini looks at the page with every Azure line boxed and numbered and labels
 each line, without seeing our rules or labels. Per page -> out/score/<pid>.json (skipped if present), then a summary.
-Gemini spend is logged in out/gemini_spend.jsonl, capped at $3."""
+Gemini spend is logged in out/gemini_spend.jsonl; the whole experiment is capped at $15 (the owner has ~£20 of Gemini credit).
+REFEREE=<model> picks another referee (answers in out/score_<model>/)."""
 import json, sys, threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import cv2, numpy as np
-HERE = Path(__file__).parent; OUT = HERE / "out/score"; OUT.mkdir(parents=True, exist_ok=True)
+import os
+MODEL = os.environ.get("REFEREE", "gemini-3.1-pro-preview")
+HERE = Path(__file__).parent; OUT = HERE / os.environ.get("SCORE_DIR", "out/score" if MODEL == "gemini-3.1-pro-preview" else f"out/score_{MODEL}"); OUT.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(HERE.parent / "38_parser")); sys.path.insert(0, str(HERE))
 import common
-common.SPEND = HERE / "out/gemini_spend.jsonl"; common.CACHE = HERE / "out/gemini_cache.jsonl"; common.CAP = 3.0; common._cache = None
+common.SPEND = HERE / "out/gemini_spend.jsonl"; common.CACHE = HERE / "out/gemini_cache.jsonl"; common.CAP = 15.0; common._cache = None
 from common import gemini, jpeg
 from senses import label
 
-LABELS = ["furniture", "heading", "body", "list", "verse", "footnote", "caption", "table", "equation", "other"]
+LABELS = ["furniture", "heading", "body", "list", "verse", "footnote", "references", "caption", "table", "equation", "other"]
 OURS = {"paragraph start": "body", "body": "body", "bullet": "list", "bullet, continued": "list"}
 PROMPT = """This is a scanned page from an Arabic academic journal. Every text line found by the OCR is boxed and numbered
 in red (the number sits just to the right of its box). Label every numbered line with exactly one of:
@@ -23,6 +26,7 @@ in red (the number sits just to the right of its box). Label every numbered line
 - list: a line that belongs to a bulleted or numbered list item (the item's first line and its continuation lines)
 - verse: a line of poetry (often two half-verses separated by a gap)
 - footnote: a note at the foot of the page, usually below a short rule, often in smaller type
+- references: a line of a bibliography, reference list or endnotes section (e.g. under "المراجع" or "الهوامش")
 - caption: a caption of a figure or table
 - table: a line or cell inside a table
 - equation: a mathematical formula
@@ -51,7 +55,7 @@ def one(pid):
         r = dict(pid=pid, error=f"labeller failed: {type(e).__name__}: {e}"); f.write_text(json.dumps(r)); return r
     img = numbered(gray, L); cv2.imwrite(str(OUT / f"{pid}.jpg"), img, [cv2.IMWRITE_JPEG_QUALITY, 80])
     ans, usd = gemini(PROMPT % len(L), [jpeg(img, max_side=2600, quality=88)], f"layout-referee {pid}",
-                      model="gemini-3.1-pro-preview", max_out=12000, schema=SCHEMA, thinking="low", est_in=3000)
+                      model=MODEL, max_out=12000, schema=SCHEMA, thinking="low", est_in=3000)
     if not ans: return dict(pid=pid, error="no referee answer")         # not saved: a rerun retries it
     ref = {a["n"]: a["label"] for a in ans["lines"]}
     rows = [dict(n=n, id=l["id"], text=l["text"], box=l["box"], ours=l["label"], ours_m=OURS.get(l["label"], l["label"]),
