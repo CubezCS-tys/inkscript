@@ -1,14 +1,17 @@
 #!/bin/bash
 # Rent one GPU, test the link, start setup at once, upload the page pack and scripts, start the orchestrator.
-#   DPH=<$/h> gpu_run.sh OFFER_ID          (adapted from experiments/36_vlm_bakeoff/gpu/gpu_run.sh: the dataset, then train.sh)
+#   DPH=<$/h> [GOUT=out/gpu2 DATA=yolo2 JOB="layout fine-tune round 2"] gpu_run.sh OFFER_ID   (adapted from experiments/36_vlm_bakeoff/gpu/gpu_run.sh: the dataset, then train.sh)
 # Link test: 20 MB in 8 parallel scp streams right after renting; under MINRATE (0.5 MB/s) the instance is destroyed
 # (-y) and the script exits 2. Every start and end goes to out/gpu_spend.jsonl. Prints "INSTANCE <id> <host> <port>".
-V=~/.local/venvs/vast/bin/vastai; OUT=/home/yassine/inkscript/experiments/39_ink_geometry/out/gpu; mkdir -p $OUT; LOG=$OUT/gpu_spend.jsonl
+# GOUT: where this run's instance file and results go (default out/gpu, round 1); DATA: the dataset folder, uploaded as
+# out/train/$DATA.tar; the spend log is always out/gpu/gpu_spend.jsonl.
+E=/home/yassine/inkscript/experiments/39_ink_geometry; V=~/.local/venvs/vast/bin/vastai; OUT=$E/${GOUT:-out/gpu}; mkdir -p $OUT $E/out/gpu; LOG=$E/out/gpu/gpu_spend.jsonl
+DATA=${DATA:-yolo}; JOB=${JOB:-layout fine-tune}
 G=$(cd "$(dirname "$0")" && pwd); OID=$1; DPH=${DPH:-0}
 ID=$($V create instance $OID --image pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime --disk 60 --ssh --direct --raw | python3 -c "import json,sys; print(json.load(sys.stdin)['new_contract'])")
 [ -z "$ID" ] && { echo "create failed"; exit 1; }
 T0=$(date +%s); echo $ID > $OUT/gpu_instance.txt
-echo "{\"event\": \"start\", \"time\": \"$(date -Is)\", \"instance\": $ID, \"offer\": $OID, \"dph\": $DPH, \"job\": \"vlm bakeoff\"}" >> $LOG
+echo "{\"event\": \"start\", \"time\": \"$(date -Is)\", \"instance\": $ID, \"offer\": $OID, \"dph\": $DPH, \"job\": \"$JOB\"}" >> $LOG
 for i in $(seq 90); do $V show instance $ID --raw 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if d and d.get('actual_status')=='running' else 1)" 2>/dev/null && break; sleep 10; done
 URL=$($V ssh-url $ID); HP=${URL#ssh://root@}; HOST=${HP%:*}; PORT=${HP#*:}
 echo "$ID $HOST $PORT" > $OUT/gpu_instance.txt
@@ -33,6 +36,6 @@ tar czf /tmp/gpu39.tgz -C "$G/.." gpu
 pup /tmp/gpu39.tgz
 $SSH "rm -f /work/linktest.bin; cd /work && tar xzf gpu39.tgz && chmod +x gpu/*.sh && (setsid nohup gpu/setup.sh > logs_setup.out 2>&1 < /dev/null &)" 2>/dev/null
 
-$SSH "cd /work && (setsid nohup env EPOCHS=${EPOCHS:-80} gpu/train.sh > train.out 2>&1 < /dev/null &)" 2>/dev/null; S=$(date +%s); pup /home/yassine/inkscript/experiments/39_ink_geometry/out/train/yolo.tar; echo "yolo.tar up in $(( $(date +%s)-S )) s"
-$SSH "cd /work && ls -l yolo.tar && touch yolo.uploaded" 2>/dev/null
+$SSH "cd /work && (setsid nohup env EPOCHS=${EPOCHS:-80} DATA=$DATA gpu/train.sh > train.out 2>&1 < /dev/null &)" 2>/dev/null; S=$(date +%s); pup $E/out/train/$DATA.tar; echo "$DATA.tar up in $(( $(date +%s)-S )) s"
+$SSH "cd /work && ls -l $DATA.tar && touch yolo.uploaded" 2>/dev/null
 echo "INSTANCE $ID $HOST $PORT"
