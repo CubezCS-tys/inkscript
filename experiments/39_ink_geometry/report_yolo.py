@@ -1,5 +1,6 @@
-"""out/score_yolo.json (round 1) + out/score_yolo2.json (round 2) + both training curves -> out/layout_model.html and
-out/model/<pid>_r2.jpg (left: round 1, middle: round 2, right: the Pro referee; thick red outline: that model and the
+"""out/score_yolo.json (round 1) + out/score_yolo2.json (round 2) + out/round2/summary.json (counts and costs from the run's
+logs, and the verdict) + both training curves + the training labels -> out/layout_model.html and
+out/model/<pid>_r2.jpg (the six pages below, every equation page and the four pages round 2 lost most on) (left: round 1, middle: round 2, right: the Pro referee; thick red outline: that model and the
 referee disagree). The six pages are chosen from round 1's scores, as in the round-1 report, so they stay the same."""
 import json, csv, html, sys
 from collections import defaultdict
@@ -42,10 +43,25 @@ for g in ["plain text", "columns", "decorative", "tables", "equations"]:
     ps = sorted((p for p, a in acc.items() if a["g"] == g and a["n"] >= 15), key=lambda p: -acc[p]["r1"] / acc[p]["n"])
     if ps: show.append((ps[len(ps) // 2], g, "a typical page"))
 worst = min((p for p in acc if acc[p]["n"] >= 15), key=lambda p: acc[p]["r1"] / acc[p]["n"]); show.append((worst, acc[worst]["g"], "round 1's worst page"))
-for pid, _, _ in show:
+EQP = sorted((p for p, a in acc.items() if a["g"] == "equations"), key=lambda p: acc[p]["r1"] - acc[p]["r2"])   # all equation pages, most improved first
+LOST = sorted(acc, key=lambda p: acc[p]["r2"] - acc[p]["r1"])[:4]                                   # the four pages round 2 lost most lines on
+for pid in {p for p, _, _ in show} | set(EQP) | set(LOST):
     g = page_image(pid); bar = np.full((g.shape[0], 30, 3), 160, np.uint8)
     im = np.hstack([panel(g, by[pid], "r1"), bar, panel(g, by[pid], "r2"), bar, panel(g, by[pid], "ref")]); s = 1300 / im.shape[0]
     cv2.imwrite(str(OUT / "model" / f"{pid}_r2.jpg"), cv2.resize(im, (int(im.shape[1] * s), 1300), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 82])
+
+# the training mix: lines of each label in round 1's training pages and in round 2's
+NAMES = ["furniture", "heading", "body", "list", "verse", "footnote", "references", "caption", "table", "equation", "other"]
+MIX = {}
+for y in ("yolo", "yolo2"):
+    c = defaultdict(int)
+    for f in (OUT / "train" / y / "labels/train").glob("*.txt"):
+        for l in f.read_text().splitlines():
+            if l.strip(): c[NAMES[int(l.split()[0])]] += 1
+    MIX[y] = c
+mmax = max(max(c.values()) for c in MIX.values())
+mix = "".join(f"<tr><td>{k}</td>" + "".join(f"<td><div class=bar style='width:220px'><span style='width:{100*MIX[y][k]/mmax:.1f}%;background:{HEX[k] if k != 'body' else '#888'}'></span></div><small>{MIX[y][k]:,}</small></td>" for y in ("yolo", "yolo2")) +
+              f"<td>×{MIX['yolo2'][k]/max(1, MIX['yolo'][k]):.1f}</td></tr>" for k in ["body", "table", "list", "references", "furniture", "heading", "footnote", "other", "caption", "verse", "equation"])
 
 # model + dots: the model's label, but dots.mocr's wherever dots says table or equation
 comb = {k: sum((x["dots"] if x["dots"] in ("table", "equation") else x[k]) == x["ref"] for x in R) / len(R) for k in ("r1", "r2")}
@@ -89,6 +105,11 @@ HEAD = "<tr><th>{}</th><th>lines</th><th>rules</th><th>dots.mocr</th><th>round 1
 groups = "".join(row4(g, S1[g], S2[g]) for g in ["plain text", "columns", "decorative", "tables", "equations"])
 labels = "".join(row4(l, S1["label " + l], S2["label " + l]) for l in ["body", "heading", "list", "verse", "footnote", "references", "furniture", "caption", "table", "equation"] if "label " + l in S1)
 legend = " ".join(f"<span class=chip style='background:{HEX[k]}'>{k}</span>" for k in ["body", "heading", "footnote", "references", "list", "verse", "furniture", "table", "equation", "caption", "other", "none"])
+card = lambda p, g, w: (f"<section><h3>{html.escape(g)} <span class=v>{html.escape(w)}</span></h3><p>Round 1: {acc[p]['r1']} of {acc[p]['n']} lines agree ({100*acc[p]['r1']/acc[p]['n']:.0f}%). "
+                         f"Round 2: {acc[p]['r2']} ({100*acc[p]['r2']/acc[p]['n']:.0f}%). <code>{p}</code></p>"
+                         f"<figure><img loading=lazy src='model/{p}_r2.jpg'><figcaption>left: round 1 · middle: round 2 · right: the referee · thick red outline: that model and the referee disagree</figcaption></figure></section>")
+eqcards = "".join(card(p, "equations", f"{acc[p]['r2'] - acc[p]['r1']:+d} lines") for p in EQP)
+lostcards = "".join(card(p, acc[p]["g"], f"{acc[p]['r2'] - acc[p]['r1']:+d} lines") for p in LOST)
 cards = "".join(f"<section><h3>{html.escape(g)} <span class=v>{html.escape(w)}</span></h3><p>Round 1: {acc[p]['r1']} of {acc[p]['n']} lines agree ({100*acc[p]['r1']/acc[p]['n']:.0f}%). "
                 f"Round 2: {acc[p]['r2']} ({100*acc[p]['r2']/acc[p]['n']:.0f}%). <code>{p}</code></p>"
                 f"<figure><img loading=lazy src='model/{p}_r2.jpg'><figcaption>left: round 1 · middle: round 2 · right: the referee · thick red outline: that model and the referee disagree</figcaption></figure></section>" for p, g, w in show)
@@ -118,15 +139,18 @@ figure{{margin:0;background:var(--card);border:1px solid var(--line);border-radi
 <li><b>The pages the model was least sure of.</b> Round 1's model was run on {INFO['cands']:,} candidate pages; the rest of the {INFO['chosen']:,} were those where the most lines had no confident box, or where it said equation, caption or other.</li>
 <li><b>Labels:</b> Gemini Flash, as in round 1: {INFO['labelled']:,} pages labelled for ${INFO['gemini']:.2f}. Equation lines in training: <b>{INFO['eq_r1']} → {INFO['eq_r2']}</b>; table lines {INFO['tab_r1']:,} → {INFO['tab_r2']:,}; list lines {INFO['list_r1']:,} → {INFO['list_r2']:,}; heading lines {INFO['head_r1']:,} → {INFO['head_r2']:,}.</li>
 <li><b>Training:</b> the same settings as round 1, started from the same public weights (not from round 1), so the two rounds compare cleanly.</li></ul>
-<h2>The 8 equation pages</h2><p>The test set has {eq['pages']} pages that are mostly equations: {eq['n']} lines, {eq['neq']} of them equations by the referee's reading.</p>
+<h2>The {eq['pages']} equation pages</h2><p>The test set has {eq['pages']} pages that are mostly equations: {eq['n']} lines, {eq['neq']} of them equations by the referee's reading.</p>
 <div class=tw><table><tr><th></th><th>dots.mocr</th><th>round 1</th><th>round 2</th></tr>
 <tr><td>all lines on these pages</td><td>{pct(eq['dots_all'])}</td><td>{pct(eq['r1_all'])}</td><td><b>{pct(eq['r2_all'])}</b></td></tr>
 <tr><td>equation lines named equation</td><td>{pct(eq['dots_eq'])}</td><td>{pct(eq['r1_eq'])}</td><td><b>{pct(eq['r2_eq'])}</b></td></tr></table></div>
+<h2>What the training saw</h2><p>Lines of each kind in the training pages, round 1 (left) and round 2 (right). Round 2 more than tripled the table lines, while footnotes and verse barely grew.</p><div class=tw><table><tr><th></th><th>round 1 ({INFO['train_pages_r1']:,} pages)</th><th>round 2 ({INFO['train_pages_r2']:,} pages)</th><th></th></tr>{mix}</table></div>
+<h2>All {eq['pages']} equation pages, round 1 and round 2</h2><p>Look for the equation colour (blue) in the middle panel: round 1 never used it. {legend}</p>{eqcards}
 <h2>By kind of page</h2><div class=tw><table>{HEAD.format('pages')}{groups}</table></div>
 <h2>By label</h2><p>Share of the referee's lines of each kind that were named the same. Change is in percentage points, round 1 → round 2.</p><div class=tw><table>{HEAD.format('label')}{labels}</table></div>
 <p class=note><b>Fair to dots.</b> dots.mocr has no label for verse or reference lists. On the lines whose label both can give: dots {100*fair['dots']:.1f}%, round 1 {100*fair['r1']:.1f}%, round 2 {100*fair['r2']:.1f}%.</p>
 <p class=note><b>Two experts together.</b> Take the model's label, but where dots.mocr says "table" or "equation", take dots instead: round 1 + dots {100*comb['r1']:.1f}%, round 2 + dots <b>{100*comb['r2']:.1f}%</b>.</p>
 {INFO['wrong']}
+<h2>The four pages round 2 lost most on</h2><p>{legend}</p>{lostcards}
 <h2>How the training went</h2><p>Validation score (mAP50) on the held-out books. Round 1 was checked on 185 pages from 22 books; round 2 on those same pages plus {INFO['val_added']} pages from its own held-out books, so the two curves are on slightly different pages. Round 1 kept epoch {best['r1'][0]} (stopped at {best['r1'][2]}); round 2 kept epoch {best['r2'][0]} (stopped at {best['r2'][2]}).</p>{svg}
 <h2>The same six pages, round 1 and round 2</h2><p>{legend}</p>{cards}
 <p class=note><b>Honesty notes.</b> The referee is a model, not a person. The test pages are the hard pilot set: plain books score higher. The test pages are only 44, so a change of one or two points on a single label can be a handful of lines. {INFO['notes']} Scripts: <code>more_pages.py</code>, <code>round2.py</code>, <code>train_pages.py</code>, <code>make_yolo.py</code>, <code>gpu/</code>, <code>predict_local.py</code>, <code>score_yolo.py</code>, <code>report_yolo.py</code>.</p>

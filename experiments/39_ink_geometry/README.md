@@ -99,6 +99,32 @@ a small model, so Gemini is not needed at run time.
   - Model, but dots.mocr wherever it says table or equation: **92.1%**.
 - `report_yolo.py` → `out/layout_model.html`: the scores, the training curve, six pages side by side.
 
+**Round 2 of the layout model** (2026-10-13/14). Aim: fix equations (0%), lists and headings with more data.
+- Data (`more_pages.py`, `round2.py`): 150 new documents fetched from S3 from five journals with no test page
+  (1541, 0527, 0700, 1016, 2483), so the test set does not measure those journals directly. 1,752 candidate pages;
+  the round-1 model ran on all of them; chosen 1,450 = every page with maths (295) + the pages it was least sure of
+  (1,253 from 141 of the new documents, 197 from round 1's unused pool). Flash labelled all 1,450 for $7.67 (experiment
+  39 Gemini total $19.59 of the $20.50 cap). Dataset `out/train/yolo2`: train 3,824, val 319, test the same 44.
+- Training lines, round 1 → 2: equation 77 → 1,044, table 16,775 → 60,542, list 7,126 → 10,833, heading 3,150 → 4,580,
+  footnote 3,410 → 4,014, verse 1,707 → 1,895. The new pages are 63% table lines (33 a page; round 1 had 7).
+- Run: same settings, from the same public weights; RTX 5090, 2.3 h, **$1.94**. Stopped at epoch 44, kept 16
+  (val mAP50 0.683 on a larger val set). `gpu/setup.sh` now pins `opencv-python-headless==4.10.0.84` (the run failed
+  on `No module named 'cv2'` until that version was reinstalled with `--no-deps`).
+- Scored (`PRED=out/gpu2/predictions.json OUT=out/score_yolo2.json score_yolo.py`), round 1 → round 2:
+  - all lines **87.7% → 87.8%**; with dots.mocr for tables and equations **92.1% → 90.5%** (dots already named
+    equations, 94%, so round 2's gain there adds nothing, while its losses stay);
+  - equation **0% → 78%**, list 54% → 68%, references 78% → 85%, caption 80% → 87%;
+  - heading 64% → 61%, **footnote 95% → 67%**, **verse 96% → 61%**, body 96.2% → 95.7%, table 89% → 89%, furniture 87% → 86%;
+  - by kind of page: equations 74% → 86%, columns 86% → 98%, plain text 95% → 87%, decorative 95% → 85%, tables 86% → 87%.
+- Why: the table-heavy new pages. Verse in two aligned half-line columns is now called table (16 lines of one poem
+  page); numbered footnotes are called list (24 lines on four pages; at the foot of the new pages Flash said list more
+  often than footnote); one reference page went to footnote/list. Six pages hold most of the loss.
+- **Verdict: does not meet the bar** (93% overall, equations, lists and headings each up, nothing broken).
+  Next, if wanted: rebalance (cap table lines a page, or drop part of the table pages) and add footnote and verse
+  pages, or start from round 1's weights with only the maths pages.
+- `out/round2/summary.json` holds the numbers; `report_yolo.py` now writes round 1 beside round 2 into
+  `out/layout_model.html`: the training mix, all 8 equation pages and the four pages round 2 lost most on, side by side.
+
 **What it changes.** It is a thinking aid for the owner's "map" idea: the ink is a model-free survey of the page.
 The rivers give exact edges and columns; a model that sees the whole page names the blocks and covers what white
 space does not show. Nothing in `src/` changed.
@@ -106,4 +132,4 @@ space does not show. Nothing in `src/` changed.
 **Outputs** (gitignored):
 - `out/report.html`: the geometry, scan beside shapes beside redraw, plus close-ups.
 - `out/rivers.html`: the ten river pages.
-- `out/layout_model.html`: the trained layout model against dots.mocr and the rules; weights in `out/gpu/out/run/weights/best.pt`.
+- `out/layout_model.html`: the trained layout model (round 1 and round 2) against dots.mocr and the rules; weights in `out/gpu/out/run/weights/best.pt` (round 1) and `out/gpu2/out/run/weights/best.pt` (round 2).

@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-12. Update this file whenever a headline number or a
+*Last updated 2026-10-14. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## What the PDFs do
@@ -123,6 +123,11 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   - 38: the parser (Azure's words in dots.mocr's layout) on the hardest pages, done 2026-10-12 (D29); owner's page
     `/home/yassine/inkscript/experiments/38_parser/out/report.html`, per-page masters and editions in
     `experiments/38_parser/out/pages/<pid>/`. Nothing is running.
+  - 39: the layout model (DocLayout-YOLO on Gemini Flash line labels), round 2 done 2026-10-14: 87.8% of the 44
+    test pages' lines named like the Pro referee (round 1 87.7%, dots.mocr 84.4%); equations 0% → 78%, lists 54% → 68%,
+    but footnotes 95% → 67% and verse 96% → 61% (the new pages were 63% table lines); with dots for tables and
+    equations 90.5% (round 1 92.1%). Not good enough to replace round 1. Owner's page
+    `/home/yassine/inkscript/experiments/39_ink_geometry/out/layout_model.html`. Nothing is running.
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.
