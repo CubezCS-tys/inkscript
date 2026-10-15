@@ -101,6 +101,9 @@ pages were not run whole.
 ## Files
 
 `common.py` (exp 40's client: CAP $20, prices corrected) · `inventory.py` · `choose_sample.py` · `structure.py` ·
-`score41.py` · `render41.py` · `sheets.py` · `handcheck.py` · `report.py`. Outputs under `out/` (gitignored):
+`score41.py` · `render41.py` · `sheets.py` · `handcheck.py` · `report.py` · `reader.py` (the owner's reading
+edition of Argon's 55 articles, no model calls: `out/reader/index.html` library, `out/reader/<stem>.html` with metadata
+header, page-break joins, KaTeX, figure crops, footnote popovers, misprint flags, a fixes toggle and scans beside the
+text; 82 MB with 399 page scans). Outputs under `out/` (gitignored):
 `sample.json`, `inventory.json`, `pages/` (300 dpi renders), `argon/`, `flash/`, `argon_r2/`, `flash_r2/`,
-`pilot_v1/` (the pilot's argon, flash and flash_med outputs, prompt v1), `side/`, `sheets/`, `handcheck/`, `scores.json`, `judged.json`, `report.html`, logs.
+`pilot_v1/` (the pilot's argon, flash and flash_med outputs, prompt v1), `side/`, `reader/`, `sheets/`, `handcheck/`, `scores.json`, `judged.json`, `report.html`, logs.
