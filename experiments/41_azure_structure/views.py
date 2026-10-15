@@ -9,14 +9,24 @@ The owner did not like the flowing reader (reader.py): they want the original on
                                        equations, figure crops, that page's footnotes at its foot, misprint flags,
                                        Gemini's fixes behind a toggle). Pointing at a block outlines it on the scan.
                                        On a phone the scan stacks above ours, page by page.
-  out/views/mirror/<stem>.html         MIRROR: a born-digital twin of each page. A page box with the scan's aspect
-                                       ratio; every Azure line (after Gemini's splits and fixes) placed at its own box,
-                                       its text in Scheherazade New (Latin lines in Noto Serif), sized from the box
-                                       height of its block and stretched or squeezed (scaleX, in the browser, after
-                                       the font loads) to the box width; figures as crops at their boxes, equations as
-                                       KaTeX fitted to their box, table cells at their boxes. Scan beside it at the same
-                                       size; "Blocks" outlines blocks by type; "Overlay" lays the twin on the scan with
-                                       an opacity slider.
+  out/views/mirror/<stem>.html         LAYOUT: layout fidelity in our own format. A page box with the scan's aspect ratio;
+                                       every block at its printed box (the union of its lines; a block that turns a
+                                       column is cut into one box per column, each holding the lines that fall in it),
+                                       its text set in our typography: paragraphs flowing and justified (a piece that
+                                       continues in the next box justifies its last line too), headings bold, verse as
+                                       two half-lines at the printed widths, references with a hanging indent, captions
+                                       and running heads muted, footnotes small under a short rule with linked calls,
+                                       tables as HTML tables with rules, equations in KaTeX, figures as crops. One font
+                                       size per kind of block on each page (body, footnotes, captions, running heads...; fitted in the
+                                       browser after the fonts load: the largest size at which 85% of the boxes hold
+                                       their text), then a little shrink per overflowing box (capped), then visible
+                                       overflow with a red edge. Never stretched. "Order" numbers the blocks in Gemini's
+                                       reading order and draws the path (dashed where a block turns a column; a blue
+                                       arrow where it continues on the next page). Scan beside it; "Blocks" outlines by
+                                       type; "Overlay" lays it on the scan with an opacity slider.
+  out/views/mirror_lines/<stem>.html   LINES: the earlier twin: every Azure line (after Gemini's splits and fixes) placed
+                                       at its own box, sized from its block's line height and stretched or squeezed
+                                       (scaleX) to the box width.
   out/views/scans/, figs/, thumbs/     JPEGs hard-linked (or copied) from out/reader/ (made there by reader.py; made
                                        here from out/pages/ if absent)
 
@@ -209,10 +219,10 @@ def build_pages(a, cap):
             f'<p class="provenance" dir="ltr">{len(pages)} pages · scan on the left, our rebuild of the same page on '
             f'the right (text: Azure, structure: Gemini 4 Argon, exp 41) · {fix_n} fixes of Azure (button '
             f'<b>Fixes</b>) · {sic_n} suspected misprints (wavy underline, kept as printed) · '
-            f'<a href="../mirror/{stem}.html">mirror view</a></p></header>')
+            f'<a href="../mirror/{stem}.html">layout view</a></p></header>')
     page = PAGE_TPL.format(lang=E(lang), title=E(title[:90]), fonts=FONTS, katex=KATEX, css=BASE_CSS + PAGES_CSS,
                            bar=bar(title, [("fixes", "Fixes", "Highlight Gemini's fixes of Azure's misreadings (f)")],
-                                   ("mirror", stem)),
+                                   [(f"../mirror/{stem}.html", "Layout")]),
                            body=head + '<main class="prows">' + "\n".join(rows) + "</main>",
                            data=json.dumps(dict(stem=stem, lang=lang)), js=COMMON_JS + PAGES_JS)
     (VIEWS / "pages").mkdir(parents=True, exist_ok=True)
@@ -245,7 +255,7 @@ def boxstyle(px, W, H):
     return f"left:{pct(x0, W)};top:{pct(y0, H)};width:{pct(x1 - x0, W)};height:{pct(y1 - y0, H)}"
 
 
-def build_mirror(a, cap):
+def build_lines(a, cap):
     stem, pages, S = a["stem"], cap["pages"], cap["S"]
     lang, ddir, title, sub = doc_info(a, cap)
     fig_k, rows, hidden_notes = {}, [], []
@@ -338,7 +348,8 @@ def build_mirror(a, cap):
             f'<p class="provenance" dir="ltr">{len(pages)} pages · scan on the left, a born-digital twin on the right: '
             f'every Azure line at its own place, in Scheherazade New, stretched to its printed width · '
             f'{stats["lines"]} lines' + (f' ({stats["noise"]} more that no block took, faint)' if stats["noise"] else "")
-            + f' · <a href="../pages/{stem}.html">page-by-page view</a></p></header>')
+            + f' · <a href="../pages/{stem}.html">page-by-page view</a> · <a href="../mirror/{stem}.html">layout view</a>'
+            '</p></header>')
     tools = [("fixes", "Fixes", "Highlight Gemini's fixes of Azure's misreadings (f)"),
              ("blocks", "Blocks", "Outline the blocks by type (b)"),
              ("overlay", "Overlay", "Lay the twin over the scan (o)")]
@@ -349,10 +360,268 @@ def build_mirror(a, cap):
         ("title", "heading", "byline", "paragraph", "abstract", "verse", "quote", "list_item", "reference", "table",
          "equation", "caption", "figure", "footnote", "header", "footer", "other")) + "</div>")
     page = PAGE_TPL.format(lang=E(lang), title=E(title[:90]), fonts=FONTS, katex=KATEX, css=BASE_CSS + MIRROR_CSS,
-                           bar=bar(title, tools, ("pages", stem), extra=slider),
+                           bar=bar(title, tools, [(f"../mirror/{stem}.html", "Layout"),
+                                                  (f"../pages/{stem}.html", "Page by page")], extra=slider),
                            body=head + legend + '<main class="mrows">' + "\n".join(rows) + "</main>"
                            + "".join(hidden_notes),
                            data=json.dumps(dict(stem=stem, lang=lang)), js=COMMON_JS + MIRROR_JS)
+    (VIEWS / "mirror_lines").mkdir(parents=True, exist_ok=True)
+    (VIEWS / "mirror_lines" / f"{stem}.html").write_text(page, encoding="utf-8")
+    return stats
+
+
+# ------------------------------------------------------------------------------------------------ view 3: layout
+
+
+GROUP = {"title": "head", "heading": "head", "byline": "head",
+         "paragraph": "body", "quote": "body", "abstract": "body", "keywords": "body", "list_item": "body",
+         "reference": "body", "verse": "body",
+         "footnote": "note", "caption": "caption", "header": "header", "footer": "footer", "other": "other",
+         "table": "table", "equation": "eq"}
+WHOLE = {"verse", "table", "equation"}      # never cut into column pieces (a verse's halves sit side by side)
+
+
+def rows_of(boxes):
+    """Number of visual rows in a set of line boxes (Azure sometimes gives one printed line as two boxes)."""
+    rows = []
+    for b in sorted(boxes, key=lambda b: (b[1] + b[3]) / 2):
+        c, h = (b[1] + b[3]) / 2, b[3] - b[1]
+        if rows and abs(c - rows[-1][0]) < 0.45 * max(h, rows[-1][1]):
+            continue
+        rows.append((c, h))
+    return max(1, len(rows))
+
+
+def pieces_of(ids, S):
+    """A block's lines on one page, cut where the reading turns a column (the next line does not sit under the
+    previous ones, or jumps up): the text of each box is the lines that fall in it. Words Azure boxed separately on
+    one printed line (a running head) stay together unless far apart (a page number at the margin)."""
+    out = []
+    for x in ids:
+        b = S.lines[x]["px"]
+        if out:
+            cur = out[-1]
+            ux = cur["box"]
+            ov = min(ux[2], b[2]) - max(ux[0], b[0])
+            narrow = min(ux[2] - ux[0], b[2] - b[0]) or 1
+            last = S.lines[cur["ids"][-1]]["px"]
+            h = max(1, last[3] - last[1])
+            up = b[1] < last[1] - 0.6 * h
+            gap = b[1] > last[3] + 3.5 * h
+            vov = min(last[3], b[3]) - max(last[1], b[1])
+            hgap = max(b[0] - last[2], last[0] - b[2])
+            beside = vov > 0.5 * min(h, b[3] - b[1]) and hgap < 1.5 * h      # the next words of the same printed line
+            if (ov >= 0.3 * narrow and not up and not gap) or beside:
+                cur["ids"].append(x)
+                cur["box"] = ST.union([ux, b])
+                continue
+        out.append(dict(ids=[x], box=list(b)))
+    return out
+
+
+def block_dir(rec):
+    tag, at, inner = R.split_tag(rec["html"])
+    at = R.redir(at, inner)
+    return "ltr" if ' dir="ltr"' in at else "rtl"
+
+
+def continues_next(rec, blocks, i):
+    """Does this block go on at the top of the next page? The next block of the same flow (a footnote's next
+    footnote; otherwise the next block that is not a running head, page number or footnote) is marked continued
+    and sits on the next page."""
+    T = rec["type"]
+    if T in ("header", "footer"):
+        return False
+    for r in blocks[i + 1:]:
+        if r["page"] > rec["page"] + 1:
+            return False
+        if (r["type"] == "footnote") != (T == "footnote") or r["type"] in ("header", "footer"):
+            continue
+        return bool(r["continued"] and r["page"] == rec["page"] + 1)
+    return False
+
+
+def build_layout(a, cap):
+    stem, pages, S = a["stem"], cap["pages"], cap["S"]
+    lang, ddir, title, sub = doc_info(a, cap)
+    blocks = cap["blocks"]
+    pos = {id(r): i for i, r in enumerate(blocks)}
+    allbody = [S.lines[x]["px"][3] - S.lines[x]["px"][1] for r in blocks if GROUP.get(r["type"]) == "body"
+               for x in r["ids"]]
+    doc_body = statistics.median(allbody) if allbody else 40
+    fig_k, rows = {}, []
+    stats = dict(blocks=0, pieces=0, turned=0, noise=0)
+    for i, p in enumerate(pages):
+        W, H = S.dims[p]
+        recs = [r for r in blocks if r["page"] == p]
+        k = lambda h: FS_K * h / W * 100                      # line-box height (px) -> font size in cqw
+        hs = {}
+        for r in recs:
+            for x in r["ids"]:
+                if S.lines[x]["page"] == p:
+                    hs.setdefault(GROUP.get(r["type"], "other"), []).append(S.lines[x]["px"][3] - S.lines[x]["px"][1])
+        med = {g: statistics.median(v) for g, v in hs.items()}
+        fbody = k(med.get("body", doc_body))
+        fnote = k(min(med.get("note", doc_body * 0.8), med.get("body", doc_body)))
+        els, arrows_seq, used, num = [], [], set(), 0
+        fn_first = True
+        for rec in recs:
+            T, g = rec["type"], GROUP.get(rec["type"], "other")
+            used.update(rec["ids"])
+            ids = [x for x in rec["ids"] if S.lines[x]["page"] == p]
+            d = block_dir(rec)
+            cont_next = continues_next(rec, blocks, pos[id(rec)])
+            if T == "figure" and rec.get("fig_box"):
+                fig_k[p] = fig_k.get(p, 0) + 1
+                src = fig(a, p, fig_k[p], rec["fig_box"])
+                x0, y0, x1, y1 = rec["fig_box"]
+                x0, x1 = sorted((max(0, x0 - 4), min(1000, x1 + 4)))      # reader.make_fig pads its crop by 4/1000
+                y0, y1 = sorted((max(0, y0 - 4), min(1000, y1 + 4)))
+                bx = [x0 * W / 1000, y0 * H / 1000, x1 * W / 1000, y1 * H / 1000]
+                num += 1
+                im = (f'<img src="../{src}" alt="{E(rec.get("description") or "")}" loading="lazy">' if src else
+                      f'<span class="fig-missing">[{E(rec.get("description") or "figure")}]</span>')
+                els.append(f'<div class="pc fg t-figure" data-t="figure" style="{boxstyle(bx, W, H)}">{im}'
+                           f'<span class="ob">{num}</span></div>')
+                arrows_seq.append((bx, num, False))
+                stats["blocks"] += 1
+                continue
+            if T == "figure":
+                continue
+            if not ids:
+                continue
+            if T in WHOLE:
+                pcs = [dict(ids=ids, box=ST.union([S.lines[x]["px"] for x in ids]))]
+            else:
+                pcs = pieces_of(ids, S)
+            num += 1
+            stats["blocks"] += 1
+            stats["turned"] += len(pcs) > 1
+            calls = list(rec.get("calls") or [])
+            # base size (cqw) and the block's printed line pitch
+            if g == "head":
+                bh = statistics.median([S.lines[x]["px"][3] - S.lines[x]["px"][1] for x in ids])
+                f0 = min(k(bh), fbody * 3.2)
+            elif g == "note":
+                f0 = fnote
+            elif g == "table":
+                f0 = fbody * 0.9
+            elif g in ("caption", "header", "footer", "other"):
+                f0 = min(k(med.get(g, doc_body * 0.8)), fbody * 1.3)
+            else:
+                f0 = fbody
+            for j, pc in enumerate(pcs):
+                bx = pc["box"]
+                last_piece = j == len(pcs) - 1
+                if T == "verse":
+                    hems = [h for h in rec.get("hemistichs") or [] if any(S.lines[x]["page"] == p for x in h)]
+                    nrow = max(1, (len(hems) + 1) // 2) if len(hems) > 1 else 1
+                    inner = R.split_tag(rec["html"])[2]
+                    cols = ""
+                    if len(hems) == 2:
+                        b1 = ST.union([S.lines[x]["px"] for x in hems[0]])
+                        b2 = ST.union([S.lines[x]["px"] for x in hems[1]])
+                        bw = (bx[2] - bx[0]) or 1
+                        w1, w2 = (b1[2] - b1[0]) / bw, (b2[2] - b2[0]) / bw
+                        gp = max(0.025, 1 - w1 - w2)
+                        cols = f";--c1:{w1 * 100:.1f}fr;--c2:{w2 * 100:.1f}fr;--cg:{gp * 100:.1f}%"
+                    cls = "verse" + (" free" if len(hems) == 1 else "")
+                    content = f'<div class="tx {cls}" dir="{d}" style="{cols[1:]}">{inner}</div>'
+                elif T == "table":
+                    nrow = max(1, len(rec.get("rows") or []))
+                    h = re.sub(r' data-(lines|bbox|n|type)="[^"]*"', "", rec["html"])
+                    content = f'<div class="tx" dir="{d}">{h}</div>'
+                elif T == "equation" and rec.get("latex"):
+                    nrow = 1
+                    content = (f'<div class="tx eq" dir="ltr"><span class="math">\\[{E(rec["latex"])}\\]</span></div>')
+                else:
+                    nrow = rows_of([S.lines[x]["px"] for x in pc["ids"]])
+                    txt = " ".join(line_html(S, x, calls) for x in pc["ids"])
+                    if j == 0 and rec["continued"]:
+                        txt = '<span class="contmark" title="continues from the previous page">&#8627;</span>' + txt
+                    if last_piece:
+                        for mh in rec.get("missed_html", []):
+                            txt += " " + re.sub(r"^<p [^>]*>(.*)</p>$", r'<span class="added">\1</span>', mh, flags=re.S)
+                    lvl = f" h{rec.get('level')}" if T == "heading" and str(rec.get("level") or "").isdigit() else ""
+                    cls = "tx" + lvl + (" more" if g in ("body", "note") and (not last_piece or cont_next) else "")
+                    idattr = ""
+                    if T == "footnote" and j == 0 and not rec["continued"] and rec.get("fn_id"):
+                        idattr = f' id="n-{E(rec["fn_id"])}"'
+                    content = f'<div class="{cls}"{idattr} dir="{d}">{txt}</div>'
+                lh = (bx[3] - bx[1]) / nrow / W * 100
+                extra = ""
+                if T == "footnote" and fn_first and not rec["continued"]:
+                    extra, fn_first = " fn1", False
+                badge = f'<span class="ob">{num}</span>' if j == 0 else ""
+                if last_piece and cont_next:
+                    badge += '<span class="ob nx" title="continues on the next page">&#8618;</span>'
+                els.append(f'<div class="pc g-{g} t-{T}{extra}" data-t="{T}" data-g="{g}" '
+                           f'style="{boxstyle(bx, W, H)};--f:{f0:.3f};--lh:{lh:.3f}">{content}{badge}</div>')
+                arrows_seq.append((bx, num, j > 0))
+                stats["pieces"] += 1
+        # Azure lines no block took: shown only with "Blocks"
+        for lid, L in S.lines.items():
+            if L["page"] != p or L.get("split") or lid in used:
+                continue
+            h = L["px"][3] - L["px"][1]
+            els.append(f'<div class="pc noise" dir="auto" title="not in any block (Gemini: noise)" '
+                       f'style="{boxstyle(L["px"], W, H)};--f:{k(h):.3f};--lh:{h / W * 100:.3f}">'
+                       f'<div class="tx">{E(L["text"])}</div></div>')
+            stats["noise"] += 1
+        # reading order: block to block (solid), column turns inside a block (dashed)
+        sw = W * 0.0022
+        svg = [f'<svg class="ord" viewBox="0 0 {W} {H}" aria-hidden="true"><defs><marker id="ah{p}" viewBox="0 0 10 10" '
+               f'refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">'
+               f'<path d="M0,0L10,5L0,10z" class="ahd"/></marker></defs>']
+        for (b0, n0, _), (b1, n1, turn) in zip(arrows_seq, arrows_seq[1:]):
+            x0, y0 = (b0[0] + b0[2]) / 2, (b0[1] + b0[3]) / 2
+            x1, y1 = (b1[0] + b1[2]) / 2, (b1[1] + b1[3]) / 2
+            dx, dy = x1 - x0, y1 - y0
+            ln = (dx * dx + dy * dy) ** .5 or 1
+            sh = min(ln * 0.18, W * 0.02)
+            xa, ya, xb, yb = x0 + dx / ln * sh, y0 + dy / ln * sh, x1 - dx / ln * sh, y1 - dy / ln * sh
+            mx, my = (xa + xb) / 2 - dy * 0.12, (ya + yb) / 2 + dx * 0.12      # a slight bow so arrows stay apart
+            svg.append(f'<path d="M{xa:.0f},{ya:.0f}Q{mx:.0f},{my:.0f} {xb:.0f},{yb:.0f}" class="{"tn" if turn else "bk"}" '
+                       f'stroke-width="{sw:.1f}"' + (f' stroke-dasharray="{W * .008:.0f},{W * .006:.0f}"' if turn else "")
+                       + f' marker-end="url(#ah{p})"/>')
+        svg.append("</svg>")
+        src = scan(a, p)
+        rows.append(
+            f'<section class="mrow" id="p{p}" data-p="{p}">'
+            f'<div class="plab"><a href="#p{p}">page {p}</a><span>{i + 1} / {len(pages)}</span></div>'
+            f'<div class="mpair">'
+            f'<div class="mscan" style="aspect-ratio:{W}/{H}"><img src="../{src}" alt="scan of page {p}" '
+            f'loading="{"eager" if i < 2 else "lazy"}" width="{W}" height="{H}"></div>'
+            f'<div class="lpage" style="aspect-ratio:{W}/{H}" lang="{E(lang)}" dir="{ddir}">{"".join(els)}'
+            f'{"".join(svg)}</div>'
+            f'</div></section>')
+    fix_n = sum(r.count('class="fix"') for r in rows)
+    sic_n = sum(r.count('class="sic"') for r in rows)
+    head = (f'<header class="vhead" dir="{ddir}"><h1 dir="auto">{E(title)}</h1><p class="kicker" dir="auto">{E(sub)}</p>'
+            f'<p class="provenance" dir="ltr">{len(pages)} pages · scan on the left; on the right each block of the '
+            f'printed page at its own place, its text set in our type (Scheherazade New), flowing and justified, one '
+            f'size per kind of block on each page · {stats["blocks"]} blocks in {stats["pieces"]} boxes '
+            f'({stats["turned"]} turn a column or page) · {fix_n} fixes (<b>Fixes</b>) · {sic_n} suspected misprints '
+            f'(wavy underline) · <b>Order</b> shows Gemini\'s reading order · text that does not fit its box after '
+            f'shrinking is left visible, with a red edge · '
+            f'<a href="../mirror_lines/{stem}.html">line-by-line version</a> · '
+            f'<a href="../pages/{stem}.html">page by page</a></p></header>')
+    tools = [("fixes", "Fixes", "Highlight Gemini's fixes of Azure's misreadings (f)"),
+             ("blocks", "Blocks", "Outline the blocks by type (b)"),
+             ("order", "Order", "Number the blocks in reading order and draw the path (r)"),
+             ("overlay", "Overlay", "Lay our page over the scan (o)")]
+    slider = ('<label class="ovl" title="Opacity of our page over the scan">'
+              '<input type="range" id="ov" min="0" max="100" value="60" aria-label="page opacity"></label>')
+    legend = ('<div class="legend" dir="ltr">' + "".join(
+        f'<span class="lg t-{t}">{t.replace("_", " ")}</span>' for t in
+        ("title", "heading", "byline", "paragraph", "abstract", "verse", "quote", "list_item", "reference", "table",
+         "equation", "caption", "figure", "footnote", "header", "footer", "other")) +
+        '<span class="lg noise">not in any block</span></div>')
+    page = PAGE_TPL.format(lang=E(lang), title=E(title[:90]), fonts=FONTS, katex=KATEX, css=BASE_CSS + MIRROR_CSS + LAYOUT_CSS,
+                           bar=bar(title, tools, [(f"../mirror_lines/{stem}.html", "Lines"),
+                                                  (f"../pages/{stem}.html", "Page by page")], extra=slider),
+                           body=head + legend + '<main class="mrows">' + "\n".join(rows) + "</main>",
+                           data=json.dumps(dict(stem=stem, lang=lang)), js=COMMON_JS + LAYOUT_JS)
     (VIEWS / "mirror").mkdir(parents=True, exist_ok=True)
     (VIEWS / "mirror" / f"{stem}.html").write_text(page, encoding="utf-8")
     return stats
@@ -361,14 +630,12 @@ def build_mirror(a, cap):
 # ------------------------------------------------------------------------------------------------ templates
 
 
-def bar(title, tools, other, extra=""):
-    kind, stem = other
+def bar(title, tools, links, extra=""):
     btn = "".join(f'<button type="button" data-toggle="{n}" aria-pressed="false" title="{E(t)}">{E(lab)}</button>'
                   for n, lab, t in tools)
-    lab = "Mirror" if kind == "mirror" else "Page by page"
+    lk = "".join(f'<a class="tool" href="{E(h)}">{E(lab)}</a>' for h, lab in links)
     return (f'<nav class="bar" dir="ltr"><a class="home" href="../index.html">&larr; All</a>'
-            f'<span class="t" dir="auto">{E(title[:90])}</span>{btn}{extra}'
-            f'<a class="tool" href="../{kind}/{stem}.html">{lab}</a>'
+            f'<span class="t" dir="auto">{E(title[:90])}</span>{btn}{extra}{lk}'
             f'<button type="button" id="theme" title="Light / dark">Auto</button></nav>')
 
 
@@ -561,6 +828,112 @@ setToggle('fixes',store('views-fixes')==='1');setToggle('blocks',store('views-bl
 setToggle('overlay',store('views-overlay')==='1');
 """
 
+LAYOUT_CSS = r"""
+.lpage{position:relative;width:100%;container-type:inline-size;background:var(--paper);color:var(--ink);
+box-shadow:var(--shadow);border-radius:2px;overflow:hidden}
+.pc{position:absolute;font-family:var(--text);font-size:calc(var(--f) * var(--sg,1) * var(--z,1) * 1cqw);
+line-height:max(calc(var(--lh) * 1cqw),1.05em)}
+.g-body{--sg:var(--s-body,1)}.g-note{--sg:var(--s-note,1)}.g-caption{--sg:var(--s-caption,1)}
+.g-header{--sg:var(--s-header,1)}.g-footer{--sg:var(--s-footer,1)}.g-other{--sg:var(--s-other,1)}
+.g-table{--sg:var(--s-table,1)}
+.pc .tx{text-align:justify;text-justify:inter-word;hyphens:none}
+.pc .tx.more{text-align-last:justify}
+.pc .tx[dir="ltr"]{font-family:"Noto Serif",Georgia,serif}
+.g-head .tx{font-weight:700;text-align:center;text-align-last:center}
+.t-byline .tx{font-weight:400}
+.t-header .tx,.t-footer .tx{color:var(--muted);text-align:center;text-align-last:center}
+.t-caption .tx,.t-other .tx{color:var(--muted)}
+.t-reference .tx{padding-inline-start:.7em;text-indent:-.7em}
+.pc .tx.verse{display:grid;grid-template-columns:var(--c1,1fr) var(--c2,1fr);column-gap:var(--cg,6%);max-width:none;margin:0}
+.pc .verse .hemistich{text-align:justify;text-align-last:justify}
+.pc .verse.free{display:block}.pc .verse.free .hemistich{text-align:center;text-align-last:center}
+.t-table{line-height:1.25}
+.t-table .tx{height:100%}
+.t-table table{width:100%;height:100%;font-size:1em;line-height:1.25;margin:0;border-collapse:collapse}
+.t-table td,.t-table th{border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);padding:0 .3em;
+vertical-align:middle;text-align:center}
+.t-table tr:nth-child(even) td{background:none}
+.t-table th{background:var(--chip)}
+.pc .tx.eq{height:100%;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.pc .eq .katex-display{margin:0}
+.pc.fg img{display:block;width:100%;height:100%;object-fit:contain;background:#fff}
+:root[data-theme="dark"] .pc.fg img{filter:brightness(.9)}
+.pc sup.call{font-size:.6em;line-height:0}
+.pc .contmark{font-size:.8em}
+.pc .added{background:var(--added)}
+.fn1::before{content:"";position:absolute;top:-.25em;inset-inline-start:0;width:30%;
+border-top:1px solid color-mix(in srgb,var(--ink) 45%,transparent)}
+.pc .tx:target{background:var(--added)}
+.pc.over{box-shadow:0 2px 0 0 color-mix(in srgb,#d0461d 75%,transparent);z-index:1}
+.pc.noise{display:none;color:var(--faint)}
+body.blocks .pc{outline:1px solid var(--c,#999);background:color-mix(in srgb,var(--c,#999) 8%,transparent)}
+body.blocks .pc.noise{display:block;outline:1px dashed #b00;background:none;opacity:.7}
+.lg.noise{--c:#b00;border-style:dashed}
+.ob{display:none;position:absolute;z-index:4;top:-.6em;inset-inline-start:-.5em;min-width:1.7em;padding:.2em .35em;
+font:700 max(9px,1.25cqw)/1 var(--ui);text-align:center;color:#fff;background:var(--accent);border-radius:999px;
+box-shadow:0 1px 3px rgba(0,0,0,.25);pointer-events:none;unicode-bidi:isolate}
+.ob.nx{top:auto;bottom:-.6em;inset-inline-start:auto;inset-inline-end:-.5em;background:#2c6cb0;font-size:max(11px,1.6cqw)}
+.ord{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;z-index:3}
+.ord path.bk,.ord path.tn{fill:none;stroke:var(--accent);opacity:.85}
+.ord path.tn{stroke:#2c6cb0}
+.ord .ahd{fill:var(--accent)}
+body.order .ob,body.order .ord{display:block}
+body.order .pc .tx,body.order .pc.fg img{opacity:.5}
+body.overlay .lpage{grid-area:1/1;background:transparent;box-shadow:none;opacity:var(--ov,.6)}
+body.overlay .lpage .tx{color:#c0301a}
+body.overlay .pc.fg img{opacity:0}
+"""
+
+LAYOUT_JS = r"""
+// one font size per kind of block on each page (body, footnotes, captions, running heads, page numbers, tables...):
+// the largest (up to 1.3x the size read from the printed line height) at which 85% of that kind's boxes hold their
+// text; then a box that still overflows shrinks a little (to 85%, a table to 70%); what still does not fit stays
+// visible, the box marked with a red edge. A heading is sized on its own (the largest that fits, 75%-125% of its
+// printed size); an equation is scaled uniformly (never stretched) to fit its box.
+function over(pc){const t=pc.firstElementChild;if(!t)return false;const tb=t.querySelector(':scope>table');
+ const H=pc.clientHeight,W=pc.clientWidth,tol=Math.max(2+0.03*H,0.45*parseFloat(getComputedStyle(pc).lineHeight));
+ // a box overflows when its text needs another line (not when our glyphs are a little taller than the print's)
+ if(tb)return tb.offsetHeight>H+tol||tb.offsetWidth>W+2;
+ return t.scrollHeight>H+tol||t.scrollWidth>t.clientWidth+2}
+function okAt(pg,g,P,s){pg.style.setProperty('--s-'+g,s.toFixed(3));let n=0;for(const pc of P)if(!over(pc))n++;
+ return n>=(P.length<5?P.length:Math.floor(P.length*0.85))}
+const CAP={table:0.7,title:0.75,heading:0.75,byline:0.75};
+function fitPage(pg){
+ const pcs=[...pg.querySelectorAll('.pc[data-g]')];
+ pcs.forEach(pc=>{pc.style.removeProperty('--z');pc.classList.remove('over')});
+ const gs=[...new Set(pcs.map(pc=>pc.dataset.g))].filter(g=>g!=='head'&&g!=='eq');
+ for(const g of gs){const P=pcs.filter(pc=>pc.dataset.g===g);
+  let s=1.3;if(!okAt(pg,g,P,s)){let lo=0.5,hi=1.3;for(let i=0;i<6;i++){const m=(lo+hi)/2;if(okAt(pg,g,P,m))lo=m;else hi=m}
+   s=lo}pg.style.setProperty('--s-'+g,s.toFixed(3))}
+ for(const pc of pcs){if(pc.dataset.g==='eq'){const m=pc.querySelector('.katex')||pc.firstElementChild;
+   const r=Math.min(pc.clientWidth/(m.offsetWidth||1),pc.clientHeight/(m.offsetHeight||1)*1.1);
+   const z=Math.max(0.4,Math.min(r,1.6));pc.style.setProperty('--z',z.toFixed(3));
+   if(r<0.4)pc.classList.add('over');continue}
+  if(pc.dataset.g==='head'){const z0=v=>{pc.style.setProperty('--z',v.toFixed(3));return !over(pc)};
+   if(!z0(1.25)){let lo=0.75,hi=1.25;for(let i=0;i<5;i++){const m=(lo+hi)/2;if(z0(m))lo=m;else hi=m}z0(lo)}
+   if(over(pc))pc.classList.add('over');continue}
+  if(!over(pc))continue;const cap=CAP[pc.dataset.t]||0.85;let z=1;
+  while(z>cap+1e-6){z=Math.max(cap,z-0.03);pc.style.setProperty('--z',z.toFixed(3));if(!over(pc))break}
+  if(over(pc))pc.classList.add('over')}
+ pg.dataset.fit='1'}
+const seen=new Set();
+const io=new IntersectionObserver(es=>{for(const e of es){if(e.isIntersecting){seen.add(e.target);
+ if(!e.target.dataset.fit)fitPage(e.target)}else seen.delete(e.target)}},{rootMargin:'150% 0px'});
+const fontsReady=Promise.all([document.fonts.load('400 20px "Scheherazade New"'),
+ document.fonts.load('700 20px "Scheherazade New"'),document.fonts.load('400 20px "Noto Serif"')]).catch(()=>{})
+ .then(()=>document.fonts.ready);
+fontsReady.then(()=>{document.querySelectorAll('.lpage').forEach(pg=>io.observe(pg));body.classList.add('fitted')});
+let rt=null,lastW=innerWidth;
+addEventListener('resize',()=>{if(Math.abs(innerWidth-lastW)<40)return;lastW=innerWidth;clearTimeout(rt);
+ rt=setTimeout(()=>{document.querySelectorAll('.lpage').forEach(pg=>delete pg.dataset.fit);seen.forEach(fitPage)},200)});
+const ov=document.getElementById('ov');
+function setOv(v){document.documentElement.style.setProperty('--ov',(v/100).toFixed(2));store('views-ov',v)}
+ov.addEventListener('input',()=>setOv(ov.value));ov.value=store('views-ov')||60;setOv(ov.value);
+addEventListener('keydown',e=>{if(e.target.closest('input,textarea')||e.metaKey||e.ctrlKey||e.altKey)return;
+ if(e.key==='r')setToggle('order',!body.classList.contains('order'))});
+for(const n of ['fixes','blocks','order','overlay'])setToggle(n,store('views-'+n)==='1');
+"""
+
 INDEX_CSS = r"""
 .lib{max-width:76rem;margin:0 auto;padding:28px 16px 80px}
 .lib h1{font:700 26px/1.25 var(--ui);margin:.2em 0}
@@ -590,7 +963,8 @@ def write_index(rows):
             f'<div class="ti" dir="auto">{E(r["title"])}</div>'
             f'<div class="jr" dir="auto">{E(r["sub"])} · <span dir="ltr">{E(r["stem"])}</span> · {r["pages"]} pp.</div>'
             f'<div class="go" dir="ltr"><a href="pages/{E(r["stem"])}.html">Page by page</a>'
-            f'<a href="mirror/{E(r["stem"])}.html">Mirror</a></div></div></div>')
+            f'<a href="mirror/{E(r["stem"])}.html">Layout</a>'
+            f'<a href="mirror_lines/{E(r["stem"])}.html">Lines</a></div></div></div>')
     page = f"""<!doctype html>
 <html lang="en" dir="ltr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -602,8 +976,10 @@ def write_index(rows):
 <button type="button" id="theme">Auto</button></nav>
 <main class="lib"><h1>The original beside ours: {len(rows)} articles</h1>
 <p class="lede">Each article in two views. <b>Page by page</b>: every printed page as a row, the scan on the left and
-our rebuild of that page on the right (Azure's words, Gemini 4 Argon's structure). <b>Mirror</b>: a born-digital twin of
-each page, every line set in type at its printed place, beside the scan or laid over it.</p>
+our rebuild of that page on the right (Azure's words, Gemini 4 Argon's structure). <b>Layout</b>: each printed page
+rebuilt in our own format, every block at its printed place, its text flowing and justified in our type, with the
+reading order on demand; beside the scan or laid over it. <b>Lines</b>: the earlier twin, every printed line set at its
+own box and stretched to its width.</p>
 <div class="list">{"".join(cards)}</div>
 <p class="foot">Generated by experiments/41_azure_structure/views.py from out/argon/raw/ (no model calls).</p></main>
 <script>{R.COMMON_JS}</script></body></html>
@@ -627,11 +1003,13 @@ def main():
             print(f"  {a['stem']}: no answers", flush=True)
             continue
         build_pages(a, cap)
-        st = build_mirror(a, cap)
+        build_lines(a, cap)
+        st = build_layout(a, cap)
         lang, ddir, title, sub = doc_info(a, cap)
         idx[a["stem"]] = dict(stem=a["stem"], title=title, sub=sub, dir=ddir, pages=len(cap["pages"]), thumb=thumb(a),
                               year=str(a.get("year") or ""))
-        print(f"  {a['stem']:24} p{len(cap['pages']):>2} lines {st['lines']:>5} noise {st['noise']}", flush=True)
+        print(f"  {a['stem']:24} p{len(cap['pages']):>2} blocks {st['blocks']:>4} boxes {st['pieces']:>4} "
+              f"turned {st['turned']:>3} noise {st['noise']}", flush=True)
     rows = [idx[a["stem"]] for a in arts if a["stem"] in idx]
     rows.sort(key=lambda r: r["year"] or "9999")
     idx_f.write_text(json.dumps(rows, ensure_ascii=False, indent=0), encoding="utf-8")
