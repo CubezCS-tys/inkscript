@@ -392,6 +392,15 @@ reason is recorded), **open** (voiced, not yet judged).
   *Open, for the owner:* Argon as the layout/order/tables/whole-document specialist (or as the labeller that
   trains ours), Azure kept as the text; a larger truth set before choosing an approach; pictures; long articles.
   [experiments/40_gemini4_vlm](../experiments/40_gemini4_vlm/README.md).
+- **Azure's text, Gemini's structure, on whole articles; Argon or Flash** (owner, 2026-10-15): *tested, experiment
+  41.* Exp 40's approach B on 399 pages (43 whole articles, 12 windows): no chunk failed, 1 / 4 of 17,137 lines
+  dropped, none duplicated; with Argon's fixes the text beats Azure alone (1.55% vs 1.80% words wrong on 34 truth
+  pages). Flash builds almost the same structure (94.7% of line types, 99.5% of order; Argon vs itself 96.4%) at
+  $0.0058 vs $0.0151 a page, but its fixes are less often right (27/40 vs 34/40 by eye). *Open, for the owner:* Argon
+  for the edition and Flash as the labeller of training data for our layout / order / table / footnote specialists;
+  before labelling at scale, define list vs body and endnotes in the prompt and reject answers that call a line with
+  words noise; the owner's hand check of five articles (`out/handcheck/`).
+  [experiments/41_azure_structure](../experiments/41_azure_structure/README.md).
 - **dots.ocr / dots.mocr licence**: *open, for the owner.* MIT plus a licence agreement: §3.3(c) forbids
   "unauthorized digitization of publications/document scanning" without permissions, §5.4 limits
   training other models on its outputs. To clear before dots.mocr's readings become training data
