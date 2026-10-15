@@ -128,6 +128,15 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
     but footnotes 95% → 67% and verse 96% → 61% (the new pages were 63% table lines); with dots for tables and
     equations 90.5% (round 1 92.1%). Not good enough to replace round 1. Owner's page
     `/home/yassine/inkscript/experiments/39_ink_geometry/out/layout_model.html`. Nothing is running.
+  - 40: Gemini 4 (gemini-4-argon) alone as the reader, done 2026-10-14, $13.34
+    ([README](../experiments/40_gemini4_vlm/README.md), https://claude.ai/artifact/54SBuWQZQQosVQqyqEpE31): block
+    types right 96.8% (Azure 74%, our layout model 84%); text about Azure's level but not faithful (fixes misprints,
+    adds hamzas). Led to D30: the print as printed, misprints flagged (`span.sic`).
+  - 41: Azure's words with Gemini's structure as line ids, 55 articles / 399 pages, done 2026-10-15, $10.72
+    ([README](../experiments/41_azure_structure/README.md), https://claude.ai/artifact/AiqhFTZTvMF2or8W9Bi4mp): no
+    chunk failed; words wrong on 34 truth pages Argon 1.55%, Flash 1.77%, Azure 1.80%; Argon for the edition, Flash
+    for training labels. A reader for the 55 articles is being built (`reader.py` → `out/reader/`). Waiting on the
+    owner's hand-check of 5 articles (`out/handcheck/`). Gemini credit ran out 2026-10-15.
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

@@ -1,9 +1,57 @@
-# Handoff: where we are (as of 2026-10-13)
+# Handoff: where we are (as of 2026-10-15)
 
-I am the Claude session that worked with the owner on the laptop up to 2026-10-13. I'm writing this for the next
+I am the Claude session that worked with the owner on the laptop up to 2026-10-13 (section 0 brought up to
+2026-10-15). I'm writing this for the next
 session, on the owner's Ubuntu ssh server, which will have none of my memory. My private notes (the "memory" files) don't
 travel with git, so everything in them that matters is written out here. Read this first, then `CLAUDE.md` and the
 docs it lists. Where this file and an older doc disagree, this file is newer.
+
+## 0. Since 2026-10-13 (read this first)
+
+Three experiments and one decision landed on 2026-10-14/15. The headline: **Gemini reading structure on top of
+Azure's words works**, and the owner now has two roads to choose between (end of this section).
+
+- **Exp 39, layout model round 2** (commit `2fe141a`; section 4 has the steps that were run).
+  - Overall flat: **87.7% → 87.8%** of the 44 test pages' lines named like the Pro referee.
+  - Gained: equations **0% → 78%**, lists 54% → 68%.
+  - Broke: footnotes **95% → 67%**, verse **96% → 61%**. The new training pages were 63% table lines, which drowned
+    the rest. With dots.mocr for tables and equations: 90.5% (round 1 92.1%).
+  - **Round 1 stays the best model.** GPU $1.94 (2.3 h, RTX 5090). Report, same URL:
+    https://claude.ai/artifact/MYoVS8BUMfS3xkEJ2BAxeA.
+  - Decision **parked**: rebalance the training mix and train round 3, or move on to the order specialist.
+- **Exp 40, Gemini 4 (gemini-4-argon) alone as the document reader** (`545183b`, `experiments/40_gemini4_vlm`).
+  - Five approaches, **$13.34**. Report: https://claude.ai/artifact/54SBuWQZQQosVQqyqEpE31.
+  - Structure far ahead of everything else: **96.8%** of block types right, Azure 74%, our layout model 84%.
+  - Its text is about Azure's level but **not faithful**: it fixes misprints and adds hamzas. So it reads the
+    structure, not the words.
+- **D30** (`fbeec99`, `docs/decisions.md`): the digital text is the print as printed.
+  1. Printed text kept; suspected misprints carry a flagged correction (`span.sic`), never replace it.
+  2. Azure's misreadings (text that differs from the ink) are fixed.
+  3. Old and Quranic spelling untouched.
+  - The owner agreed to all three.
+- **Exp 41, Azure's words + Gemini's structure** (`1fb3ced`, `experiments/41_azure_structure`).
+  - Gemini sees the page and Azure's lines and answers with **line ids only** (type and order per line), so it
+    can't rewrite words. 55 articles, 399 pages, Argon vs Flash, **$10.72**. Report:
+    https://claude.ai/artifact/AiqhFTZTvMF2or8W9Bi4mp (`out/report.html`).
+  - The format holds: no chunk failed. A quarter of the 17,137 lines were dropped as noise, some wrongly (below).
+  - Words wrong on 34 truth pages: **Argon 1.55%**, Flash 1.77%, Azure alone 1.80%. The models agree on 94.7% of
+    types and 99.5% of order.
+  - Choice: **Argon for the edition, Flash for training labels.**
+  - Prompt gaps to fix in any next run: list vs body, endnotes, and "a line with words is never noise".
+  - Cost per million documents: **Argon about $120k batch, Flash about $46k batch**. Gemini prices double on
+    Dec 1 / Jan 1, so these go up.
+  - **In progress:** a reader for the 55 articles, `experiments/41_azure_structure/reader.py` (uncommitted) →
+    `out/reader/`.
+- **Mistral OCR 4.1 annotations** (`1112ceb`, `experiments/32_open_stack/research/05_mistral_annotations.md`): not a
+  line labeller; a candidate for the pictures specialist.
+- **Chandra 2: skipped.** 68% on Arabic on its own benchmark, and its licence forbids competing with Datalab.
+
+**Open decisions for the owner:**
+1. Hand-check 5 articles from exp 41 (`experiments/41_azure_structure/out/handcheck/`).
+2. Then: pay Gemini to process the archive, or use Flash labels to train our own specialists.
+3. Round 3 of the layout model or move to order (above, parked).
+
+**Money now:** the Gemini credit **ran out on 2026-10-15**. Don't spend any without the owner. **0 Vast instances.**
 
 ## 1. The owner, and how to work with them
 
@@ -95,7 +143,7 @@ agent (Gemini) only on hard or disputed cases.
 |---|---|---|---|---|
 | 1 | Reader | the words | Azure (prebuilt-read: words, lines, paragraphs; no roles, tables or figures) | done: treated as truth |
 | 2 | Map | every island of ink, traced | deterministic | built (exp 39) |
-| 3 | Layout | what each line/region is | model (+ rivers for edges) | **in progress**: round 1 trained, round 2 paused |
+| 3 | Layout | what each line/region is | model (+ rivers for edges) | round 1 is the best model; round 2 done 2026-10-14, not better (section 0) |
 | 4 | Order | which block is read after which | model + rules | not started (Azure's order today) |
 | 5 | Style | bold, size, centring, indents | deterministic + model | not started |
 | 6 | Tables | rows, columns, merged cells; Azure's words into cells | model | not started (layout hands off "table") |
@@ -177,7 +225,10 @@ The offered test "count unclaimed islands on the 44 pilot pages" was **not appro
   - **Stretch the Gemini money.** dots.mocr on a rented GPU pre-labels pages, and Gemini judges only where dots and
     our model disagree.
 
-## 4. Round 2: exact state and how to resume
+## 4. Round 2: what was run (done 2026-10-14; results in section 0)
+
+Kept for the record; all steps below were done and committed in `2fe141a`.
+
 
 Goal: steps 1 and 2 of the plan the owner approved. **Step 1:** equation and table pages. **Step 2:** the pages the
 round-1 model is least sure of. **Caps:** Gemini total for exp 39 **$19** (round 1 spent $11.92, so up to about $7
@@ -194,7 +245,7 @@ Done:
 - **`predict_local.py round2`.** The round-1 model over every candidate. **Complete: `out/round2/pred.json` has all
   1,752 pages** (checked at the time of writing).
 
-Not done (in order):
+Then (done 2026-10-14):
 1. `../../.venv/bin/python round2.py select`: all maths pages, then the least sure, N=1450 → `out/round2/chosen.json`.
    Look at a few chosen pages first.
 2. `../../.venv/bin/python round2.py label`: Flash labels → `out/round2/labels/`. `round2.py` sets the cap to $19.
@@ -207,18 +258,21 @@ Not done (in order):
    round 2 side by side. Say the equation score on the 8 equation test pages explicitly.
 6. Update the README and the `experiments/README.md` row, commit, push, and republish the report at the same URL.
 
-**Uncommitted, unreviewed changes** made by the round-2 agent before I stopped it (review them before use):
+The round-2 agent's script changes (committed with round 2):
 - Modified: `gpu/gpu_end.sh`, `gpu/gpu_run.sh`, `gpu/gpu_wait.sh`, `gpu/train.sh`, `make_yolo.py`,
   `predict_local.py`, `report_yolo.py`, `score_yolo.py`.
 - New, from me: `more_pages.py` and `round2.py`.
 - The GPU scripts were adapted for round 2 (`GOUT` env for the output folder, the fuse patch, `save_period`). Some
   `make_yolo.py` and `predict_local.py` edits are mine (ROUND2 / round2 modes).
 
-To resume, launch one background agent with the steps above, the caps, the GPU rules (section 6) and "report back:
+Round 2 was resumed by one background agent with the steps above, the caps, the GPU rules (section 6) and "report back:
 round 1 vs round 2 by page kind and label, the model+dots number, spend, GPU hours, 0 instances, commit hash; be
 honest if round 2 is not better".
 
 ## 5. Spend so far
+
+- **2026-10-14/15:** exp 39 round 2 GPU **$1.94**; exp 40 Gemini **$13.34**; exp 41 Gemini **$10.72**. The Gemini
+  credit ran out on 2026-10-15.
 
 - **Exp 39 Gemini: $11.92** (round-1 labels, the test referee, small scoring runs).
   - Logged in `experiments/39_ink_geometry/out/gemini_spend.jsonl`.
@@ -339,6 +393,8 @@ path). This file already carries their content.
   - The every-10-epoch checkpoints in `out/gpu/out/run/weights/` (only `best.pt` matters).
 - **Edition font switch** to Scheherazade New (section 1), plus the heading-font question.
 - **Exp 37 (edition review) is paused** for the owner's evening session: 20 of 205 documents reviewed, 64 issues.
-- **Round 2 of the layout model** (section 4): resume when the owner says "carry on".
+- **Exp 41 hand-check, then archive-by-Gemini vs Flash labels for our own specialists** (section 0).
+- **Layout round 3 (rebalanced) vs moving to order** (section 0, parked).
+- **Gemini credit is empty** (2026-10-15): nothing that calls Gemini until the owner tops it up.
 - **The auditor test** (count unclaimed islands on the 44 pages): offered, not approved.
 - **The server move itself** (this document).
