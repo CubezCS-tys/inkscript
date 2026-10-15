@@ -46,3 +46,27 @@ Text: exactly what is printed, every vowel mark kept, no tatweel stretching need
 * **layout**: each leaf block's label by the table above (an ancestor's class wins: anything inside
   `.furniture` is furniture, inside `.footnote` footnote, inside `.verse` verse, inside a table table), and its box.
 * **figures** are reported (count, with boxes) but not scored.
+
+## Suspected misprints: flagged, never replaced (D30, 2026-10-15)
+
+The text stays **exactly as printed**, misprints included. A proposed correction of what the author or printer
+wrote travels beside it as a flag:
+
+```html
+<p dir="rtl" lang="ar">… <span class="sic" data-corr="الصلاة" data-why="ه for ة, a misprint elsewhere in the article spelled ة"
+   data-source="argon">الصلاه</span> …</p>
+```
+
+* the element's text is the printed word (or words), exactly as on the page; `score.py` counts only it;
+* `data-corr`: the proposed reading; `data-why`: one short reason; `data-source`: who proposed it,
+  `argon` (the page or article reading), `azure` (Azure read it differently), `blind-zoom` (E's zoomed re-read with no
+  readings shown), or several separated by spaces when they agree (e.g. `"argon blind-zoom"`);
+* optional `data-votes="argon:الصلاة azure:الصلاه blind-zoom:الصلاه"` records E's three-way vote as it fell, so the
+  flag can be audited later; a two-of-three vote never rewrites the text, at most it raises or drops a flag;
+* a flag covers the smallest printed stretch (one word, or a few for a split or join) and never nests.
+
+This is not for a **reader's** misreading. When Azure read a letter that is not printed (approach B's
+`fixes {line, from, to, why}`), the fix makes the text match the print and is applied, as now, and reported in
+`fixes.jsonl`. Only a change to what is printed becomes a `span.sic`. Old spelling, Quranic orthography, missing
+hamzas, ى for ي, names and dialect are not misprints and get no flag. A reading view may show the printed text or the
+corrections; search indexes both; the number of flags per page is reported.

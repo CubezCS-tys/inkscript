@@ -387,3 +387,18 @@ old prints lack, splits printed joins, fixes the author's misprints, turns ى in
 cells with Azure's words as the final text (judged 2.8 vs 3.4 for dots' own cells: cells placed by position merge
 or shift) — kept for the layout page's ruled tables, to be replaced by dots' cell text checked against Azure. The
 licence of dots.mocr (D28) still has to be cleared before any of this goes into the product.
+**D30 · The digital text is the print exactly as printed; a suspected misprint carries a flagged correction beside
+it, never in its place (2026-10-15).** Owner's choice after experiment 40 (Gemini 4 Argon as the document reader).
+Like *[sic]* in a scholarly edition: the printed word stays the text; a proposed correction travels with it as a
+separate, labelled note (`<span class="sic" data-corr="…" data-why="…" data-source="…">printed</span>`,
+[FORMAT.md](../experiments/40_gemini4_vlm/FORMAT.md)). A reading view may show either; search indexes both; every
+correction can be counted, audited and undone. Two kinds of change are kept apart: fixing a *reader's* misreading
+(Azure saw a letter that is not printed; B's `fixes`, `inkscript fix` D21) makes the text match the print and is
+allowed; "fixing" what the *author or printer* wrote never changes the text, it only adds a flag. Reasons: Argon
+quietly repairs misprints, adds hamzas the print lacks and swaps ه/ة whatever the prompt (B v1's fixes 16% wrong, v5
+7%; E's vote wrote ة for a printed ه); a model allowed to correct also corrects what is not an error (old spelling,
+Quranic orthography, names, dialect), as Gemini Flash did in experiment 38 (30 right, 34 wrong, D29); and the
+project's rule is already a faithful output with restoration kept separate (D14). Not chosen: letting a reader or a
+vote write its correction into the text (E's two-of-three vote changed 89 of 971 words, some for the worse); dropping
+suspected misprints unflagged (the knowledge is useful to readers and to search)
+([experiments/40_gemini4_vlm](../experiments/40_gemini4_vlm/README.md)).

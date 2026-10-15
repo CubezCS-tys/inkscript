@@ -387,7 +387,9 @@ reason is recorded), **open** (voiced, not yet judged).
   footnotes linked across pages, article metadata, no invented passages. Text about Azure's level (1.4–1.7% of words
   wrong vs Azure 1.65%) but **not exactly as printed**: it corrects misprints and adds hamzas whatever the prompt, and
   a vote with Azure lets shared mistakes through. Most faithful: Azure's words arranged by Argon (0.83% on gold, 11
-  pages). *Open, for the owner:* Argon as the layout/order/tables/whole-document specialist (or as the labeller that
+  pages). *Decided 2026-10-15 (D30):* the text stays exactly as printed; a suspected misprint gets a flagged
+  correction beside it (`span.sic`, [FORMAT.md](../experiments/40_gemini4_vlm/FORMAT.md)), never in its place.
+  *Open, for the owner:* Argon as the layout/order/tables/whole-document specialist (or as the labeller that
   trains ours), Azure kept as the text; a larger truth set before choosing an approach; pictures; long articles.
   [experiments/40_gemini4_vlm](../experiments/40_gemini4_vlm/README.md).
 - **dots.ocr / dots.mocr licence**: *open, for the owner.* MIT plus a licence agreement: §3.3(c) forbids
