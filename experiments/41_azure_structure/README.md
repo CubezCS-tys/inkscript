@@ -104,6 +104,11 @@ pages were not run whole.
 `score41.py` · `render41.py` · `sheets.py` · `handcheck.py` · `report.py` · `reader.py` (the owner's reading
 edition of Argon's 55 articles, no model calls: `out/reader/index.html` library, `out/reader/<stem>.html` with metadata
 header, page-break joins, KaTeX, figure crops, footnote popovers, misprint flags, a fixes toggle and scans beside the
-text; 82 MB with 399 page scans). Outputs under `out/` (gitignored):
+text; 82 MB with 399 page scans). `views.py` (the owner wanted the original beside ours instead, 2026-10-15; no model calls):
+`out/views/index.html`; `out/views/pages/<stem>.html` page by page (scan left, our rebuild of exactly that page right,
+footnotes at its foot; stacked on a phone); `out/views/mirror/<stem>.html` a born-digital twin (every Azure line set in
+Scheherazade New at its own box, fitted to the box width; figures, KaTeX equations and table cells at their boxes;
+"Blocks" outlines block types, "Overlay" lays the twin on the scan with an opacity slider); JPEGs hard-linked from
+`out/reader/`; 89 MB. Outputs under `out/` (gitignored):
 `sample.json`, `inventory.json`, `pages/` (300 dpi renders), `argon/`, `flash/`, `argon_r2/`, `flash_r2/`,
 `pilot_v1/` (the pilot's argon, flash and flash_med outputs, prompt v1), `side/`, `reader/`, `sheets/`, `handcheck/`, `scores.json`, `judged.json`, `report.html`, logs.
