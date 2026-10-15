@@ -381,6 +381,15 @@ reason is recorded), **open** (voiced, not yet judged).
   hamzas old prints lack and fixes the author's misprints). *Next:* dots' cell text with Azure as a check, dots'
   order in the one-column page, bold from the ink, more gold tables and equations.
   [experiments/38_parser](../experiments/38_parser/README.md).
+- **Gemini 4 (gemini-4-argon) alone as the document reader** (owner, 2026-10-15): *explored, experiment 40.*
+  One call per page or per whole article at about $0.018 a page: block types right on 96.8% of lines (Azure 74%,
+  experiment 39's model 84.3% on the same pages), tables with merged cells, LaTeX, verse half-lines, column order,
+  footnotes linked across pages, article metadata, no invented passages. Text about Azure's level (1.4–1.7% of words
+  wrong vs Azure 1.65%) but **not exactly as printed**: it corrects misprints and adds hamzas whatever the prompt, and
+  a vote with Azure lets shared mistakes through. Most faithful: Azure's words arranged by Argon (0.83% on gold, 11
+  pages). *Open, for the owner:* Argon as the layout/order/tables/whole-document specialist (or as the labeller that
+  trains ours), Azure kept as the text; a larger truth set before choosing an approach; pictures; long articles.
+  [experiments/40_gemini4_vlm](../experiments/40_gemini4_vlm/README.md).
 - **dots.ocr / dots.mocr licence**: *open, for the owner.* MIT plus a licence agreement: §3.3(c) forbids
   "unauthorized digitization of publications/document scanning" without permissions, §5.4 limits
   training other models on its outputs. To clear before dots.mocr's readings become training data
