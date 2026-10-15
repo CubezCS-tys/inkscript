@@ -135,8 +135,8 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   - 41: Azure's words with Gemini's structure as line ids, 55 articles / 399 pages, done 2026-10-15, $10.72
     ([README](../experiments/41_azure_structure/README.md), https://claude.ai/artifact/AiqhFTZTvMF2or8W9Bi4mp): no
     chunk failed; words wrong on 34 truth pages Argon 1.55%, Flash 1.77%, Azure 1.80%; Argon for the edition, Flash
-    for training labels. A reader for the 55 articles is being built (`reader.py` → `out/reader/`). Waiting on the
-    owner's hand-check of 5 articles (`out/handcheck/`). Gemini credit ran out 2026-10-15.
+    for training labels. Reader and views of the 55 articles in `out/reader/`, `out/views/`. Owner's hand check
+    2026-10-16: 0747 183/183 blocks right; the other four checked by eye, no faults. Gemini credit ran out 2026-10-15.
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

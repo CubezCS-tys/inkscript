@@ -96,7 +96,9 @@ pages were not run whole.
 * Argon is the reader for the edition; Flash is good enough (and 2.6× cheaper) as the labeller for our own layout,
   order, table and footnote specialists, with fixes off. Before labelling at scale: define list vs body and endnotes in
   the prompt; reject any answer that calls a line with words "noise"; keep the box-based table cell order.
-* Owner's hand check pending (`out/handcheck/`).
+* Owner's hand check (2026-10-16): 0747 marked block by block, 183/183 right, no notes (`out/handcheck/marks/`);
+  the other four (2382, 0877, 0924, 1140) checked by eye, no faults found (not marked block by block). Five articles
+  is a small sample; the known gaps above were not hit by them.
 
 ## Files
 
