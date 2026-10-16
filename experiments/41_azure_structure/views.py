@@ -54,7 +54,9 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import reader as R  # noqa: E402  (patches structure.Store.text_html: fixes as span.fix, calls as sup.call)
 import structure as ST  # noqa: E402
+import mread as MR  # noqa: E402  (the masters read back: the Layout view's only source)
 from structure import OUT, is_rtl, sample  # noqa: E402
+from types import SimpleNamespace  # noqa: E402
 
 VIEWS = OUT / "views"
 E = html.escape
@@ -444,43 +446,61 @@ def continues_next(rec, blocks, i):
     return False
 
 
-def build_layout(a, cap):
-    stem, pages, S = a["stem"], cap["pages"], cap["S"]
-    lang, ddir, title, sub = doc_info(a, cap)
-    blocks = cap["blocks"]
+def crop(a, src):
+    """A figure's crop from the masters (<stem>.crops/, padded 4/1000 of the page by masters.py), linked into
+    out/views/crops/."""
+    if not src:
+        return None
+    rel = f"crops/{a['stem']}/{Path(src).name}"
+    f = MR.MAST / src
+    if not f.exists():
+        return None
+    dst = VIEWS / rel
+    if dst.exists() and not os.path.samefile(f, dst):      # masters.py build remakes the crops
+        dst.unlink()
+    _link(f, dst)
+    return rel
+
+
+def build_layout(a, doc):
+    """The Layout view and its print variant, from the masters only (mread.load: JATS + ALTO)."""
+    stem, D = a["stem"], doc["D"]
+    lang, ddir, title, sub = doc["lang"], doc["ddir"], doc["title"], doc["sub"]
+    blocks = doc["blocks"]
+    LX = {L["id"]: L for r in blocks for L in r["lines"] + r["extra_lines"]}
+    SL = SimpleNamespace(lines=LX)                               # pieces_of reads .lines[id]["px"]
+    hgt = lambda L: L["px"][3] - L["px"][1]                       # noqa: E731
     pos = {id(r): i for i, r in enumerate(blocks)}
-    allbody = [S.lines[x]["px"][3] - S.lines[x]["px"][1] for r in blocks if GROUP.get(r["type"]) == "body"
-               for x in r["ids"]]
+    allbody = [hgt(L) for r in blocks if GROUP.get(r["type"]) == "body" for L in r["lines"]]
     doc_body = statistics.median(allbody) if allbody else 40
-    fig_k, rows, prints = {}, [], []
+    rows, prints = [], []
     stats = dict(blocks=0, pieces=0, turned=0, noise=0)
-    for i, p in enumerate(pages):
-        W, H = S.dims[p]
+    for i, pg in enumerate(doc["pages"]):
+        p, W, H = pg["p"], pg["W"], pg["H"]
         recs = [r for r in blocks if r["page"] == p]
         k = lambda h: FS_K * h / W * 100                      # line-box height (px) -> font size in cqw
         hs = {}
         for r in recs:
-            for x in r["ids"]:
-                if S.lines[x]["page"] == p:
-                    hs.setdefault(GROUP.get(r["type"], "other"), []).append(S.lines[x]["px"][3] - S.lines[x]["px"][1])
+            for L in r["lines"] + r["extra_lines"]:
+                hs.setdefault(GROUP.get(r["type"], "other"), []).append(hgt(L))
         med = {g: statistics.median(v) for g, v in hs.items()}
         fbody = k(med.get("body", doc_body))
         fnote = k(min(med.get("note", doc_body * 0.8), med.get("body", doc_body)))
-        els, arrows_seq, used, num = [], [], set(), 0
+        els, arrows_seq, num = [], [], 0
         fn_first = True
         for rec in recs:
             T, g = rec["type"], GROUP.get(rec["type"], "other")
-            used.update(rec["ids"])
-            ids = [x for x in rec["ids"] if S.lines[x]["page"] == p]
-            d = block_dir(rec)
+            ids = [L["id"] for L in rec["lines"]]
+            lg = rec.get("lang") or lang
+            d = "rtl" if lg == "ar" else "ltr"
+            d = "rtl" if d == "ltr" and R.redir(' dir="ltr"', " ".join(L["html"] or "" for L in rec["lines"])) \
+                == ' dir="rtl"' else d
             cont_next = continues_next(rec, blocks, pos[id(rec)])
-            if T == "figure" and rec.get("fig_box"):
-                fig_k[p] = fig_k.get(p, 0) + 1
-                src = fig(a, p, fig_k[p], rec["fig_box"])
-                x0, y0, x1, y1 = rec["fig_box"]
-                x0, x1 = sorted((max(0, x0 - 4), min(1000, x1 + 4)))      # reader.make_fig pads its crop by 4/1000
-                y0, y1 = sorted((max(0, y0 - 4), min(1000, y1 + 4)))
-                bx = [x0 * W / 1000, y0 * H / 1000, x1 * W / 1000, y1 * H / 1000]
+            if T == "figure":
+                src = crop(a, rec.get("src"))
+                x0, y0, x1, y1 = rec["box"]
+                px, py = 4 * W / 1000, 4 * H / 1000            # the crop's margin (masters.py crop, rel_pad)
+                bx = [max(0, x0 - px), max(0, y0 - py), min(W, x1 + px), min(H, y1 + py)]
                 num += 1
                 im = (f'<img src="../{src}" alt="{E(rec.get("description") or "")}" loading="lazy">' if src else
                       f'<span class="fig-missing">[{E(rec.get("description") or "figure")}]</span>')
@@ -489,21 +509,22 @@ def build_layout(a, cap):
                 arrows_seq.append((bx, num, False))
                 stats["blocks"] += 1
                 continue
-            if T == "figure":
-                continue
+            if T == "equation" and rec.get("latex") is not None and rec.get("box"):
+                ids = [L["id"] for L in rec["extra_lines"]] or ids
             if not ids:
                 continue
             if T in WHOLE:
-                pcs = [dict(ids=ids, box=ST.union([S.lines[x]["px"] for x in ids]))]
+                pcs = [dict(ids=ids, box=ST.union([LX[x]["px"] for x in ids]))]
             else:
-                pcs = pieces_of(ids, S)
+                pcs = pieces_of(ids, SL)
+            if len(pcs) == 1 and rec.get("box"):              # the ALTO block's box: also the ink of a line a fix
+                pcs[0]["box"] = list(rec["box"])                # emptied (Argon: not text), as the scan shows it
             num += 1
             stats["blocks"] += 1
             stats["turned"] += len(pcs) > 1
-            calls = list(rec.get("calls") or [])
             # base size (cqw) and the block's printed line pitch
             if g == "head":
-                bh = statistics.median([S.lines[x]["px"][3] - S.lines[x]["px"][1] for x in ids])
+                bh = statistics.median([hgt(LX[x]) for x in ids])
                 f0 = min(k(bh), fbody * 3.2)
             elif g == "note":
                 f0 = fnote
@@ -517,13 +538,13 @@ def build_layout(a, cap):
                 bx = pc["box"]
                 last_piece = j == len(pcs) - 1
                 if T == "verse":
-                    hems = [h for h in rec.get("hemistichs") or [] if any(S.lines[x]["page"] == p for x in h)]
+                    hems = [h for h in rec.get("hemistichs") or [] if h]
                     nrow = max(1, (len(hems) + 1) // 2) if len(hems) > 1 else 1
-                    inner = R.split_tag(rec["html"])[2]
+                    inner = MR.verse_inner(D, rec, W, H)
                     cols = ""
                     if len(hems) == 2:
-                        b1 = ST.union([S.lines[x]["px"] for x in hems[0]])
-                        b2 = ST.union([S.lines[x]["px"] for x in hems[1]])
+                        b1 = ST.union([LX[x]["px"] for x in hems[0] if x in LX])
+                        b2 = ST.union([LX[x]["px"] for x in hems[1] if x in LX])
                         bw = (bx[2] - bx[0]) or 1
                         w1, w2 = (b1[2] - b1[0]) / bw, (b2[2] - b2[0]) / bw
                         gp = max(0.025, 1 - w1 - w2)
@@ -531,20 +552,20 @@ def build_layout(a, cap):
                     cls = "verse" + (" free" if len(hems) == 1 else "")
                     content = f'<div class="tx {cls}" dir="{d}" style="{cols[1:]}">{inner}</div>'
                 elif T == "table":
-                    nrow = max(1, len(rec.get("rows") or []))
-                    h = re.sub(r' data-(lines|bbox|n|type)="[^"]*"', "", rec["html"])
+                    h = MR.table_html(D, rec["table"], d, lg)
+                    nrow = max(1, h.count("<tr>"))
                     content = f'<div class="tx" dir="{d}">{h}</div>'
                 elif T == "equation" and rec.get("latex"):
                     nrow = 1
                     content = (f'<div class="tx eq" dir="ltr"><span class="math">\\[{E(rec["latex"])}\\]</span></div>')
                 else:
-                    nrow = rows_of([S.lines[x]["px"] for x in pc["ids"]])
-                    txt = " ".join(line_html(S, x, calls) for x in pc["ids"])
+                    nrow = rows_of([LX[x]["px"] for x in pc["ids"]])
+                    txt = " ".join(LX[x]["html"] or "" for x in pc["ids"])
                     if j == 0 and rec["continued"]:
                         txt = '<span class="contmark" title="continues from the previous page">&#8627;</span>' + txt
                     if last_piece:
-                        for mh in rec.get("missed_html", []):
-                            txt += " " + re.sub(r"^<p [^>]*>(.*)</p>$", r'<span class="added">\1</span>', mh, flags=re.S)
+                        for t in rec.get("added", []):
+                            txt += f' <span class="added">{E(t)}</span>'
                     lvl = f" h{rec.get('level')}" if T == "heading" and str(rec.get("level") or "").isdigit() else ""
                     cls = "tx" + lvl + (" more" if g in ("body", "note") and (not last_piece or cont_next) else "")
                     idattr = ""
@@ -562,11 +583,9 @@ def build_layout(a, cap):
                            f'style="{boxstyle(bx, W, H)};--f:{f0:.3f};--lh:{lh:.3f}">{content}{badge}</div>')
                 arrows_seq.append((bx, num, j > 0))
                 stats["pieces"] += 1
-        # Azure lines no block took: shown only with "Blocks"
-        for lid, L in S.lines.items():
-            if L["page"] != p or L.get("split") or lid in used:
-                continue
-            h = L["px"][3] - L["px"][1]
+        # lines no block took (the ALTO's role.noise): shown only with "Blocks"
+        for L in doc["noise"].get(p, []):
+            h = hgt(L)
             els.append(f'<div class="pc noise" dir="auto" title="not in any block (Gemini: noise)" '
                        f'style="{boxstyle(L["px"], W, H)};--f:{k(h):.3f};--lh:{h / W * 100:.3f}">'
                        f'<div class="tx">{E(L["text"])}</div></div>')
@@ -592,7 +611,7 @@ def build_layout(a, cap):
         src = scan(a, p)
         rows.append(
             f'<section class="mrow" id="p{p}" data-p="{p}">'
-            f'<div class="plab"><a href="#p{p}">page {p}</a><span>{i + 1} / {len(pages)}</span></div>'
+            f'<div class="plab"><a href="#p{p}">page {p}</a><span>{i + 1} / {len(doc["pages"])}</span></div>'
             f'<div class="mpair">'
             f'<div class="mscan" style="aspect-ratio:{W}/{H}"><img src="../{src}" alt="scan of page {p}" '
             f'loading="{"eager" if i < 2 else "lazy"}" width="{W}" height="{H}"></div>'
@@ -602,7 +621,7 @@ def build_layout(a, cap):
     fix_n = sum(r.count('class="fix"') for r in rows)
     sic_n = sum(r.count('class="sic"') for r in rows)
     head = (f'<header class="vhead" dir="{ddir}"><h1 dir="auto">{E(title)}</h1><p class="kicker" dir="auto">{E(sub)}</p>'
-            f'<p class="provenance" dir="ltr">{len(pages)} pages · scan on the left; on the right each block of the '
+            f'<p class="provenance" dir="ltr">{len(doc["pages"])} pages · scan on the left; on the right each block of the '
             f'printed page at its own place, its text set in our type (Scheherazade New), flowing and justified, one '
             f'size per kind of block on each page · {stats["blocks"]} blocks in {stats["pieces"]} boxes '
             f'({stats["turned"]} turn a column or page) · {fix_n} fixes (<b>Fixes</b>) · {sic_n} suspected misprints '
@@ -1082,6 +1101,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--index-only", action="store_true", help="rewrite index.html from index.json (no views)")
+    ap.add_argument("--layout-only", action="store_true", help="only the Layout view and its print page (masters)")
     args = ap.parse_args()
     VIEWS.mkdir(parents=True, exist_ok=True)
     if args.index_only:
@@ -1093,18 +1113,25 @@ def main():
     for a in arts:
         if args.stems and a["stem"] not in args.stems:
             continue
+        if args.layout_only:
+            st = build_layout(a, MR.load(a))
+            print(f"  {a['stem']:24} blocks {st['blocks']:>4} boxes {st['pieces']:>4} turned {st['turned']:>3} "
+                  f"noise {st['noise']}", flush=True)
+            continue
         cap = R.capture(a)
         if cap is None:
             print(f"  {a['stem']}: no answers", flush=True)
             continue
         build_pages(a, cap)
         build_lines(a, cap)
-        st = build_layout(a, cap)
+        st = build_layout(a, MR.load(a))
         lang, ddir, title, sub = doc_info(a, cap)
         idx[a["stem"]] = dict(stem=a["stem"], title=title, sub=sub, dir=ddir, pages=len(cap["pages"]), thumb=thumb(a),
                               year=str(a.get("year") or ""))
         print(f"  {a['stem']:24} p{len(cap['pages']):>2} blocks {st['blocks']:>4} boxes {st['pieces']:>4} "
               f"turned {st['turned']:>3} noise {st['noise']}", flush=True)
+    if args.layout_only:
+        return
     rows = [idx[a["stem"]] for a in arts if a["stem"] in idx]
     rows.sort(key=lambda r: r["year"] or "9999")
     idx_f.write_text(json.dumps(rows, ensure_ascii=False, indent=0), encoding="utf-8")

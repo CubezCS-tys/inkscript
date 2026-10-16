@@ -273,6 +273,13 @@ class Master:
                 lp = self.lp(rec["page"])
                 k[lp] += 1
                 self.fn_map[rec["fn_id"]] = f"fn-p{lp}-{k[lp]}"
+        self.fixes_at = {}                                       # line id -> [applied fix] (reader.text_html's order)
+        for f in self.S.applied:
+            self.fixes_at.setdefault(f["at"], []).append(f)
+        self.sics = [x for v in self.S.sic.values() for x in v]
+        self.seq_of = {id(r): i for i, r in enumerate(self.recs)}  # ALTO blocks are sorted into Argon's reading order
+        self.seq, self.owner = 0, None                           # the block being converted; its ALTO block id
+        self.tl_of = {}                                          # line id -> its ALTO TextLine ID
         self.stats = Counter()
         self.crops = MAST / f"{self.stem}.crops"
 
@@ -346,43 +353,72 @@ class Master:
 
     # ---------------------------------------------------------------- inline content
     def runs(self, lid: str) -> list[tuple]:
-        """A line's text as runs: plain text, maths, misprint flags (D30) and footnote calls."""
+        """A line's text as runs: plain text, maths, misprint flags (D30), footnote calls and Argon's fixes of Azure
+        misreadings, placed exactly as reader.text_html places them (the Layout view reads them back from the JATS):
+        each fix's corrected text first (its first occurrence); then maths, flags and calls each at its first
+        occurrence that does not cut a fix; one that only fits across a fix drops the line's fix marks. A fix holds
+        the marks inside it: ("fix", [runs], fix)."""
         L = self.S.lines[lid]
         t = L["text"]
-        marks = []
+        FO, FC, P0, P1 = R.FO, R.FC, R.PH0, R.PH1
+        fixes = []
+        for f in self.fixes_at.get(lid, []):
+            to = f.get("to") or ""
+            if to and to in t:
+                t = t.replace(to, FO + chr(R.IDX + len(fixes)) + to + FC, 1)
+                fixes.append(f)
+        reps, k = {}, 0
+
+        def ph(kind, data):
+            nonlocal k
+            k += 1
+            q = P0 + chr(R.IDX + 1000 + k) + P1
+            reps[q] = (kind, data)
+            return q
 
         def place(s, kind, data):
+            nonlocal t
             if not s:
                 return False
-            start = 0
-            while True:
-                i = t.find(s, start)
-                if i < 0:
-                    return False
-                if not any(i < e and i + len(s) > b for b, e, _, _ in marks):
-                    marks.append((i, i + len(s), kind, data))
-                    return True
-                start = i + 1
+            q = ph(kind, (s, data))
+            t2, ok = R._rep(t, s, q)
+            if not ok:
+                del reps[q]
+                return False
+            t = t2
+            return True
         for m in self.S.math.get(lid, []):
             self.stats["inline_math"] += place(m["from"], "math", m)
-        for s in self.S.sic.get(lid, []):
-            self.stats["sic_placed"] += place(s["text"], "sic", s)
+        for s_ in self.S.sic.get(lid, []):
+            self.stats["sic_placed"] += place(s_["text"], "sic", s_)
         for c in self.calls.get(lid, []) + self.calls.get(L.get("split_of") or "\0", []):
+            if not c.get("marker"):
+                self.stats["calls_without_marker"] += 1
+                continue
             fid = self.fn_map.get(ST.fn_norm(c.get("fn")))
-            if fid and c.get("marker"):
-                ok = place(c["marker"], "xref", fid)
-                self.stats["calls_linked"] += ok
-                self.stats["calls_not_found_in_line"] += not ok
+            ok = place(c["marker"], "xref", fid)
+            self.stats["calls_linked" if fid else "calls_without_note"] += ok
+            self.stats["calls_not_found_in_line"] += not ok
+        # back to runs: plain text, placeholders, fix open (+ index) / close
+        tok = re.compile(f"({re.escape(P0)}.{re.escape(P1)}|{re.escape(FO)}.|{re.escape(FC)})", re.S)
+        out, stack = [], []
+        cur = out
+        for piece in tok.split(t):
+            if not piece:
+                continue
+            if piece in reps:
+                kind, (s, data) = reps[piece]
+                cur.append((kind, s, data))
+            elif piece[0] == FO:
+                fx = ("fix", [], fixes[ord(piece[1]) - R.IDX])
+                cur.append(fx)
+                stack.append(cur)
+                cur = fx[1]
+                self.stats["fixes_marked"] += 1
+            elif piece == FC:
+                cur = stack.pop() if stack else out
             else:
-                self.stats["calls_without_note"] += 1
-        out, pos = [], 0
-        for b, e, kind, data in sorted(marks):
-            if b > pos:
-                out.append(("t", t[pos:b]))
-            out.append((kind, t[b:e], data))
-            pos = e
-        if pos < len(t):
-            out.append(("t", t[pos:]))
+                cur.append(("t", piece))
         return out
 
     def put_runs(self, el, runs):
@@ -390,11 +426,17 @@ class Master:
             if r[0] == "t":
                 add_text(el, r[1])
             elif r[0] == "xref":
-                sub(el, "xref", {"ref-type": "fn", "rid": r[2]}, r[1])
+                sub(el, "xref", {"ref-type": "fn", "rid": r[2]}, r[1])      # no rid: a call whose note Argon did not find
             elif r[0] == "sic":
-                n = sub(el, "named-content", {"content-type": "sic", "specific-use": "argon",
+                n = sub(el, "named-content", {"content-type": "sic", "specific-use": "argon", "rid": self.sic_id(r[2]),
                                               f"{{{XL}}}title": r[2]["corr"]}, r[1])
                 n.set(f"{{{XL}}}type", "simple")
+            elif r[0] == "fix":
+                f = r[2]
+                n = sub(el, "named-content", {"content-type": "reader-fix", "specific-use": "argon",
+                                              "rid": self.fix_id(f), f"{{{XL}}}title": f.get("from") or ""})
+                n.set(f"{{{XL}}}type", "simple")
+                self.put_runs(n, r[1])
             elif r[0] == "math":
                 f = sub(el, "inline-formula")
                 alt = sub(f, "alternatives")
@@ -404,21 +446,41 @@ class Master:
                 f.tail = None
                 # the printed symbols stay in the ALTO (kind.formula); the JATS holds the formula
 
-    def fill(self, el, ids, sep_first=False):
+    def fix_id(self, f) -> str:
+        return f"fix{next(i for i, g in enumerate(self.S.applied, 1) if g is f)}"
+
+    def sic_id(self, s) -> str:
+        return f"sic{next(i for i, g in enumerate(self.sics, 1) if g is s)}"
+
+    def fill(self, el, ids, sep_first=False, tbid=None, of=None):
+        """The lines' runs into el, one space between lines. With tbid (the ALTO TextBlock the lines are in), each
+        line starts with an empty <target id="<its ALTO TextLine ID>"/>: the line breaks of the print, linked to their
+        ink (the Layout view cuts each block into its printed lines by them)."""
+        of = of if of is not None else ids
+        if el.text is None and not len(el):
+            el.text = ""                    # mixed content: keeps pretty_print from indenting inside it
         for k, lid in enumerate(ids):
             if k or sep_first:
                 add_text(el, " ")
+            if tbid and self.S.lines[lid]["text"].split():
+                sub(el, "target", {"id": f"{tbid}l{of.index(lid) + 1}"})
             self.put_runs(el, self.runs(lid))
 
     def text(self, ids) -> str:
         return " ".join(self.S.lines[i]["text"] for i in ids)
 
     # ---------------------------------------------------------------- ALTO blocks
-    def tb(self, p, bid, role, ids, target=None, lang=None):
-        """An ALTO TextBlock of these lines on page p (local numbering)."""
+    def tb(self, p, bid, role, ids, target=None, lang=None, seq=None, own=True):
+        """An ALTO TextBlock of these lines on page p (local numbering). seq: the place in Argon's reading order (of
+        the block being converted unless given); the first one of a block owns its added text (p id <bid>-a<k>)."""
         self.used.update(ids)
-        b = dict(kind="text", id=bid, role=role, ids=list(ids), target=target, lang=lang)
+        for k, lid in enumerate(ids, 1):
+            self.tl_of.setdefault(lid, f"{bid}l{k}")
+        b = dict(kind="text", id=bid, role=role, ids=list(ids), target=target, lang=lang,
+                 seq=self.seq if seq is None else seq)
         self.alto[self.lp(p)].append(b)
+        if own and self.owner is None:
+            self.owner = bid
         return b
 
     def box_px(self, ids):
@@ -478,11 +540,18 @@ class Master:
             p = sub(par, "p", {"id": bid, "content-type": ctype})
             if lg != self.lang or lg != "ar":
                 p.set(XML_LANG, lg)
-            self.fill(p, rec["ids"])
+            self.fill(p, rec["ids"], tbid=bid)
             self.tb(rec["page"], bid, ROLE.get(rec["type"], "body"), rec["ids"], bid, lg)
             return p, bid
 
         def added(rec, parent):
+            """Printed text no Azure line covers, after its block; id <the block's first ALTO block>-a<k>."""
+            na = 0
+
+            def aid():
+                nonlocal na
+                na += 1
+                return f"{self.owner}-a{na}" if self.owner else None
             for m in rec.get("missed") or []:
                 t = (m.get("text") or "").strip()
                 if t and m.get("type") in ("header", "footer"):     # a running head Azure missed: no ink box,
@@ -490,7 +559,7 @@ class Master:
                     continue
                 if t and m.get("type") == "equation":               # a formula Azure missed, as Argon's LaTeX
                     host = sub(parent, "p") if parent.tag in ("list-item", "fn", "disp-quote") else parent
-                    f = sub(host, "disp-formula", {"specific-use": "added-by-argon"})
+                    f = sub(host, "disp-formula", {"id": aid(), "specific-use": "added-by-argon"})
                     alt = sub(f, "alternatives")
                     if mathml(alt, t, "block") is None:
                         self.stats["mathml_failed"] += 1
@@ -498,7 +567,7 @@ class Master:
                     self.stats["added_equations"] += 1
                     continue
                 if t:
-                    p = sub(parent, "p", {"content-type": "added", "specific-use": "argon"}, t)
+                    p = sub(parent, "p", {"id": aid(), "content-type": "added", "specific-use": "argon"}, t)
                     if not is_rtl(t):
                         p.set(XML_LANG, lang_of(t))
                     self.stats["added_paragraphs"] += 1
@@ -507,19 +576,21 @@ class Master:
         def caption_into(parent_cap, rec):
             bid = self.bid(rec["page"])
             p = sub(parent_cap, "p", {"id": bid})
-            self.fill(p, rec["ids"])
-            self.tb(rec["page"], bid, "caption", rec["ids"], bid, lang_of(self.text(rec["ids"]), rec.get("lang")))
+            self.fill(p, rec["ids"], tbid=bid)
+            self.tb(rec["page"], bid, "caption", rec["ids"], bid, lang_of(self.text(rec["ids"]), rec.get("lang")),
+                    seq=self.seq_of[id(rec)], own=False)
             self.stats["captions_attached"] += 1
 
         for rec in self.recs:
             T, p, ids = rec["type"], rec["page"], rec["ids"]
             lp = self.lp(p)
+            self.seq, self.owner = self.seq_of[id(rec)], None
             if T in ("header", "footer"):
                 self.stats["added_furniture_left_out"] += len(rec.get("missed") or [])
                 t = self.text(ids)
                 role = "pageHeader" if T == "header" else (
                     "pageNumber" if re.fullmatch(r"[\s\-–—()\[\]0-9٠-٩۰-۹]+", t) else "pageFooter")
-                self.tb(p, self.bid(p), role, ids)
+                self.tb(p, self.bid(p), role, ids, lang=lang_of(t, rec.get("lang")))
                 continue
             if T == "caption" and rec["n"] in caption_taken:
                 continue
@@ -527,15 +598,17 @@ class Master:
             if rec["continued"] and T in JOIN:
                 if T == "footnote" and state.get("last_fn") is not None:
                     el, tid = state["last_fn"]
-                    self.fill(el, ids, sep_first=True)
-                    self.tb(p, self.bid(p), "footnote", ids, tid)
+                    bid = self.bid(p)
+                    self.fill(el, ids, sep_first=True, tbid=bid)
+                    self.tb(p, bid, "footnote", ids, tid)
                     added(rec, el.getparent())
                     self.stats["joined_across_pages"] += 1
                     continue
                 if state["last"] is not None and state["last"][0] == T:
                     el, tid = state["last"][1], state["last"][2]
-                    self.fill(el, ids, sep_first=True)
-                    self.tb(p, self.bid(p), ROLE.get(T, "body"), ids, tid)
+                    bid = self.bid(p)
+                    self.fill(el, ids, sep_first=True, tbid=bid)
+                    self.tb(p, bid, ROLE.get(T, "body"), ids, tid)
                     added(rec, container())
                     self.stats["joined_across_pages"] += 1
                     continue
@@ -544,7 +617,7 @@ class Master:
                 bid = self.bid(p)
                 title_el_id, title_text = bid, self.text(ids)
                 self.title_ids = ids
-                self.tb(p, bid, "title", ids, bid)
+                self.tb(p, bid, "title", ids, bid, lang_of(self.text(ids), rec.get("lang")))
                 continue
             if T in ("title", "byline") and self.whole_start and p == 1 and title_el_id is not None or \
                     T == "byline" and self.whole_start and p == 1:
@@ -554,10 +627,10 @@ class Master:
                 if who is not None and id(who) not in contribs_by_block.values():
                     contribs_by_block[bid] = id(who)
                     who["block"] = bid
-                    self.tb(p, bid, "author", ids, bid)
+                    self.tb(p, bid, "author", ids, bid, lang_of(t, rec.get("lang")))
                 else:
-                    front_blocks.append((bid, t))
-                    self.tb(p, bid, "author" if T == "byline" else "title", ids, bid)
+                    front_blocks.append((bid, t, ids))
+                    self.tb(p, bid, "author" if T == "byline" else "title", ids, bid, lang_of(t, rec.get("lang")))
                 continue
             # ---- footnotes
             if T == "footnote":
@@ -582,8 +655,12 @@ class Master:
                         prec = pending_ref_title
                         bid = self.bid(prec["page"])
                         tt = sub(state["refs"], "title", {"id": bid})
-                        self.fill(tt, prec["ids"])
-                        self.tb(prec["page"], bid, "sectionHeading", prec["ids"], bid)
+                        lvl = str(prec.get("level") or "")
+                        if lvl.isdigit():           # ref-list has no disp-level: Argon's heading level on its title
+                            tt.set("content-type", f"heading-level-{lvl}")
+                        self.fill(tt, prec["ids"], tbid=bid)
+                        self.tb(prec["page"], bid, "sectionHeading", prec["ids"], bid, seq=self.seq_of[id(prec)],
+                                own=False)
                         pending_ref_title = None
                 n = len(state["refs"].findall("ref")) + 1
                 ref = sub(state["refs"], "ref", {"id": f"r{len(back.findall('.//ref')) + 1}"})
@@ -592,7 +669,7 @@ class Master:
                 lg = lang_of(self.text(ids), rec.get("lang"))
                 if lg != "ar":
                     mc.set(XML_LANG, lg)
-                self.fill(mc, ids)
+                self.fill(mc, ids, tbid=bid)
                 self.tb(p, bid, "body", ids, bid, lg)
                 state["last"] = ("reference", mc, bid)
                 added(rec, container())
@@ -643,7 +720,7 @@ class Master:
                     vl = sub(vg, "verse-line", {"id": f"{bid}-{k}"})
                     if lg != "ar":
                         vl.set(XML_LANG, lg)
-                    self.fill(vl, h)
+                    self.fill(vl, h, tbid=bid, of=ids)
                 self.tb(p, bid, "body", ids, bid, lg)
                 self.stats["verses"] += 1
                 self.stats["hemistichs"] += len(hs)
@@ -685,7 +762,7 @@ class Master:
             if L.get("split") or lid in self.used:
                 continue
             kind = "noise" if (lid in noise or (L.get("split_of") or "") in noise) else "dropped"
-            self.tb(L["page"], self.bid(L["page"]), "noise", [lid])
+            self.tb(L["page"], self.bid(L["page"]), "noise", [lid], seq=10 ** 9)
             self.stats[f"{kind}_lines"] += 1
             if not NOT_TEXT.match(L["text"]):
                 self.stats[f"{kind}_lines_with_words"] += 1
@@ -710,28 +787,34 @@ class Master:
         while stack[-1][0] >= lvl and len(stack) > 1:
             stack.pop()
         sec = sub(stack[-1][1], "sec", {"id": f"s{rec['n']}"})
+        if str(rec.get("level") or "").isdigit():      # Argon's level (the nesting clamps it to 1..6 and closes gaps)
+            sec.set("disp-level", str(rec["level"]))
         stack.append((lvl, sec))
         bid = self.bid(rec["page"])
         t = sub(sec, "title", {"id": bid})
+        if rec["type"] == "title":                     # a title block after the article's first page
+            t.set("content-type", "title")
         lg = lang_of(self.text(rec["ids"]), rec.get("lang"))
         if lg != "ar":                          # <title> takes no xml:lang; its section does
             sec.set(XML_LANG, lg)
-        self.fill(t, rec["ids"])
-        self.tb(rec["page"], bid, "sectionHeading", rec["ids"], bid, lg)
+        self.fill(t, rec["ids"], tbid=bid)
+        sq = self.seq_of[id(rec)]
+        self.tb(rec["page"], bid, "sectionHeading", rec["ids"], bid, lg, seq=sq, own=sq == self.seq)
         self.stats["headings"] += 1
         return t, bid
 
-    def crop(self, p, box_px, name) -> str | None:
-        """A crop of the 300 dpi page (out/pages/), box in pixels, padded a little."""
+    def crop(self, p, box_px, name, rel_pad=False) -> str | None:
+        """A crop of the 300 dpi page (out/pages/), box in pixels, padded a little: 8 px, or (rel_pad, figures) 4/1000
+        of the page each way, as reader.make_fig pads Gemini's loose or tight figure boxes."""
         import cv2
         img = cv2.imread(str(ST.page_image(self.a, p)), cv2.IMREAD_COLOR)
         if img is None:
             return None
         H, W = img.shape[:2]
         x0, y0, x1, y1 = box_px
-        pad = 8
-        x0, y0 = max(0, int(x0 - pad)), max(0, int(y0 - pad))
-        x1, y1 = min(W, int(x1 + pad)), min(H, int(y1 + pad))
+        px, py = (4 * W / 1000, 4 * H / 1000) if rel_pad else (8, 8)
+        x0, y0 = max(0, int(x0 - px)), max(0, int(y0 - py))
+        x1, y1 = min(W, int(x1 + px)), min(H, int(y1 + py))
         c = img[y0:y1, x0:x1]
         if c.size == 0 or c.shape[0] < 6 or c.shape[1] < 6:
             return None
@@ -746,6 +829,7 @@ class Master:
     def equation(self, rec, parent):
         p, ids = rec["page"], rec["ids"]
         eid = self.kid(p, "eq")
+        self.owner = eid
         f = sub(parent, "disp-formula", {"id": eid})
         alt = sub(f, "alternatives")
         if mathml(alt, rec["latex"], "block") is None:
@@ -756,7 +840,7 @@ class Master:
             g = self.crop(p, box, f"{eid}.jpg")
             if g:
                 sub(alt, "graphic", {f"{{{XL}}}href": g, "specific-use": "scan-crop"})
-            self.alto[self.lp(p)].append(dict(kind="ill", id=eid, type="formula", box=box, target=eid))
+            self.alto[self.lp(p)].append(dict(kind="ill", id=eid, type="formula", box=box, target=eid, seq=self.seq))
             self.tb(p, self.bid(p), "formulaInk", ids)
             self.stats["formula_ink_words"] += sum(len(self.S.lines[i]["text"].split()) for i in ids)
         self.stats["equations_typeset"] += 1
@@ -767,10 +851,11 @@ class Master:
         x0, y0, x1, y1 = rec["fig_box"]
         box = [min(x0, x1) * W / 1000, min(y0, y1) * H / 1000, max(x0, x1) * W / 1000, max(y0, y1) * H / 1000]
         fid = self.kid(p, "f")
+        self.owner = fid
         fig = sub(parent, "fig", {"id": fid})
         if cap_rec is not None:
             caption_into(sub(fig, "caption"), cap_rec)
-        g = self.crop(p, box, f"{fid}.jpg")
+        g = self.crop(p, box, f"{fid}.jpg", rel_pad=True)
         if g:
             sub(fig, "graphic", {f"{{{XL}}}href": g})
             self.stats["figures"] += 1
@@ -785,7 +870,7 @@ class Master:
             if tag in kids:
                 fig.remove(kids[tag])
                 fig.append(kids[tag])
-        self.alto[self.lp(p)].append(dict(kind="ill", id=fid, type="figure", box=box, target=fid))
+        self.alto[self.lp(p)].append(dict(kind="ill", id=fid, type="figure", box=box, target=fid, seq=self.seq))
         if rec["ids"]:
             self.tb(p, self.bid(p), "pictureText", rec["ids"])
             self.stats["picture_text_words"] += sum(len(self.S.lines[i]["text"].split()) for i in rec["ids"])
@@ -793,6 +878,7 @@ class Master:
     def table(self, rec, parent, cap_rec, caption_into):
         p = rec["page"]
         tid = self.kid(p, "t")
+        self.owner = tid
         tw = sub(parent, "table-wrap", {"id": tid})
         if cap_rec is not None:
             caption_into(sub(tw, "caption"), cap_rec)
@@ -820,12 +906,15 @@ class Master:
                 cell = sub(tr, "th" if c.get("th") else "td",
                            {"id": cid, "colspan": c.get("colspan"), "rowspan": c.get("rowspan")})
                 if c["ids"]:
-                    self.fill(cell, c["ids"])
+                    self.fill(cell, c["ids"], tbid=cid)
                     self.used.update(c["ids"])
+                    for k, lid in enumerate(c["ids"], 1):
+                        self.tl_of.setdefault(lid, f"{cid}l{k}")
                     cells_alto.append(dict(kind="text", id=cid, role="body", ids=list(c["ids"]), target=cid, lang=lg))
         box = self.box_px(rec["ids"]) if rec["ids"] else None
         if box:
-            self.alto[self.lp(p)].append(dict(kind="table", id=tid, box=box, target=tid, cells=cells_alto))
+            self.alto[self.lp(p)].append(dict(kind="table", id=tid, box=box, target=tid, cells=cells_alto,
+                                              seq=self.seq))
         self.stats["tables"] += 1
         self.stats["table_cells"] += len(cells_alto)
 
@@ -863,16 +952,19 @@ class Master:
             title = " ".join("".join(cam.find("title-group/article-title").itertext()).split())
         at = sub(tg, "article-title", {"id": title_id})
         if title_id:
-            self.fill(at, self.title_ids)
+            self.fill(at, self.title_ids, tbid=title_id)
         else:
             at.text = title
         sub_t = (m.get("subtitle") or "").strip()
-        printed = nows(" ".join(t for _, t in front_blocks) + title_text)
+        printed = nows(" ".join(t for _, t, _ in front_blocks) + title_text)
         if sub_t and nows(sub_t) not in printed:
             sub(tg, "subtitle", None, sub_t)
         if cam is not None:
             for tt in cam.findall("title-group/trans-title-group"):
                 tg.append(copy.deepcopy(tt))
+        mt = " ".join((m.get("title") or "").split())
+        if mt and nows(mt) != nows("".join(at.itertext())):   # Argon's reading of the title as a whole (the printed
+            sub(tg, "alt-title", {"alt-title-type": "metadata"}, mt)     # lines may be broken: decorative type)
         aus = self.authors()
         if aus:
             cg = sub(am, "contrib-group")
@@ -889,8 +981,8 @@ class Master:
                 am.append(e)
             if got:
                 continue
-            if tag == "pub-date" and m.get("year"):
-                y = str(m["year"]).translate(DIGITS)
+            if tag == "pub-date" and (m.get("year") or self.a.get("year")):
+                y = str(m.get("year") or self.a.get("year")).translate(DIGITS)
                 yy = re.search(r"\d{4}", y)
                 if yy:
                     pd = sub(am, "pub-date", {"publication-format": "print", "date-type": "pub"})
@@ -933,23 +1025,45 @@ class Master:
                      f"suspected misprints flagged, {st['noise_lines_with_words']} noise lines with words and "
                      f"{st['dropped_lines_with_words']} dropped lines with words kept in the ALTO only, "
                      f"{st['added_paragraphs']} lines Azure missed added from Argon")
-        for bid, t in front_blocks:
-            cm("front-matter-block", t, bid)
+        for k_, name in (("journal", "printed-journal"), ("year", "printed-date")):
+            if str(m.get(k_) or "").strip():          # the journal and date as the pages print them (Argon)
+                cm(name, str(m[k_]).strip())
+        for bid, t, ids in front_blocks:              # printed title lines and bylines not one of the authors
+            c = sub(cmg, "custom-meta", {"id": bid})
+            sub(c, "meta-name", None, "front-matter-block")
+            self.fill(sub(c, "meta-value"), ids, tbid=bid)
 
     def back_notes(self, back):
-        sic = [s for v in self.S.sic.values() for s in v]
-        if sic:
+        """The misprint flags and the reader fixes, one p each (id sic<k> / fix<k>, which the named-content marks in
+        the text point at with rid): printed text -> proposed correction (why) [line], and Azure's reading -> the
+        print (why) [line]; each part in its own named-content so a reader takes them without parsing."""
+        def note(n, id_, a, ta, b, tb, why, at):
+            p = sub(n, "p", {"id": id_})
+            sub(p, "named-content", {"content-type": ta}, a)
+            add_text(p, " → ")
+            sub(p, "named-content", {"content-type": tb}, b)
+            if why:
+                add_text(p, " (")
+                sub(p, "named-content", {"content-type": "why"}, why)
+                add_text(p, ")")
+            add_text(p, " [line ")              # Argon's line id; the link: its ALTO TextLine
+            tl = self.tl_of.get(at)
+            ln = sub(p, "named-content", {"content-type": "alto-line", f"{{{XL}}}href":
+                                          f"{self.stem}.alto.xml#{tl}" if tl else None}, str(at))
+            if tl:
+                ln.set(f"{{{XL}}}type", "simple")
+            add_text(p, "]")
+        if self.sics:
             n = sub(back, "notes", {"notes-type": "suspected-misprints"})
             sub(n, "title", None, "Suspected misprints (D30: the printed text is kept; proposed corrections only)")
-            for s in sic:
-                sub(n, "p", None, f"{s['text']} → {s['corr']}" + (f" ({s['why']})" if s.get("why") else "")
-                    + f" [line {s['at']}]")
+            for k, s in enumerate(self.sics, 1):
+                note(n, f"sic{k}", s["text"], "printed", s["corr"], "proposed-correction", s.get("why"), s["at"])
         if self.S.applied:
             n = sub(back, "notes", {"notes-type": "reader-fixes"})
             sub(n, "title", None, "Azure misreadings fixed by Gemini 4 Argon (Azure's reading → the print)")
-            for f in self.S.applied:
-                sub(n, "p", None, f"{f.get('from')} → {f.get('to')}" + (f" ({f['why']})" if f.get("why") else "")
-                    + f" [line {f['at']}]")
+            for k, f in enumerate(self.S.applied, 1):
+                note(n, f"fix{k}", f.get("from") or "", "azure-reading", f.get("to") or "", "print", f.get("why"),
+                     f["at"])
 
     # ---------------------------------------------------------------- ALTO
     def alto_xml(self):
@@ -991,13 +1105,25 @@ class Master:
                                "DESCRIPTION": "The ink of an inline formula: the JATS holds it as inline-formula."})
         sub(T, q("OtherTag"), {"ID": "fix.argon", "TYPE": "trust", "LABEL": "fixed",
                                "DESCRIPTION": "Azure's reading (ALTERNATIVE) fixed by Gemini 4 Argon to the print."})
+        sub(T, q("OtherTag"), {"ID": "flow.continued", "TYPE": "flow", "LABEL": "continued",
+                               "DESCRIPTION": "The block goes on from the previous page (Gemini 4 Argon); IDNEXT chains "
+                                              "the blocks of one JATS element across pages."})
+        # the blocks of one JATS element (a paragraph or note that turns the page) chained by IDNEXT
+        chain = {}
+        for lp in sorted(self.alto):
+            for b in sorted(self.alto[lp], key=lambda b: b["seq"]):
+                if b["kind"] == "text" and b.get("target"):
+                    chain.setdefault(b["target"], []).append(b)
+        for bs in chain.values():
+            for b0, b1 in zip(bs, bs[1:]):
+                b0["next"] = b1["id"]
         L = sub(A, q("Layout"))
         for lp in sorted(self.alto):
             p = lp + self.a["first"] - 1
             W, H = self.S.dims[p]
             P = sub(L, q("Page"), {"ID": f"page{lp}", "PHYSICAL_IMG_NR": lp, "WIDTH": W, "HEIGHT": H})
             PS = sub(P, q("PrintSpace"), {"HPOS": 0, "VPOS": 0, "WIDTH": W, "HEIGHT": H})
-            for b in self.alto[lp]:
+            for b in sorted(self.alto[lp], key=lambda b: b["seq"]):      # Argon's reading order
                 self.alto_block(PS, b, lp, q)
         return A
 
@@ -1005,7 +1131,7 @@ class Master:
         def pos(el, box):
             x0, y0, x1, y1 = box
             for k, v in (("HPOS", x0), ("VPOS", y0), ("WIDTH", x1 - x0), ("HEIGHT", y1 - y0)):
-                el.set(k, f"{max(0.0, v):.0f}")
+                el.set(k, f"{max(0.0, v):.1f}".removesuffix(".0"))     # Azure's boxes to 0.1 px
 
         def href(el, t):
             if t:
@@ -1017,13 +1143,18 @@ class Master:
             href(el, b["target"])
             return
         if b["kind"] == "table":
-            el = sub(parent, q("ComposedBlock"), {"ID": b["id"], "TYPE": "table"})
+            cont = isinstance(b.get("seq"), int) and self.recs[b["seq"]]["continued"]
+            el = sub(parent, q("ComposedBlock"), {"ID": b["id"], "TYPE": "table",
+                                                  "TAGREFS": "flow.continued" if cont else None})
             pos(el, b["box"])
             href(el, b["target"])
             for c in b["cells"]:
                 self.alto_block(el, c, lp, q)
             return
-        el = sub(parent, q("TextBlock"), {"ID": b["id"], "TAGREFS": f"role.{b['role']}"})
+        cont = b["role"] not in ("noise", "formulaInk", "pictureText") and isinstance(b.get("seq"), int) and \
+            b["seq"] < len(self.recs) and self.recs[b["seq"]]["continued"]
+        el = sub(parent, q("TextBlock"), {"ID": b["id"], "IDNEXT": b.get("next"),
+                                          "TAGREFS": f"role.{b['role']}" + (" flow.continued" if cont else "")})
         lg = b.get("lang") or lang_of(self.text(b["ids"]))
         el.set("LANG", lg)
         el.set("BASEDIRECTION", "rtl" if lg == "ar" else "ltr")
