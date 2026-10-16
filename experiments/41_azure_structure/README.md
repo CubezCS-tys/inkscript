@@ -185,13 +185,52 @@ one-column poem runs half-verse by half-verse down the right edge; column-header
 paragraphs in 0924 (Azure's lines, given to the paragraph). The LuaLaTeX originals are kept in
 `out/formats_lualatex/`.
 
+**The Layout view reads the masters (2026-10-16).** `views.py` now builds the Layout view (`out/views/mirror/`) and its
+print page (`out/views/print/`, hence the Layout PDF) from `out/masters/` only (`mread.py`): block kinds, reading
+order, verse halves, tables, equations, figures, footnote links, misprint flags and fixes from the JATS; boxes, lines
+and words from the ALTO. The page-by-page and Lines views still read Argon's output. The previous HTML is kept in
+`out/views/mirror_argon/` and `print_argon/` (and its PDFs in `out/prints_argon/`). Compared for all 55
+(`layout_compare.py`: every block box, page by page — kind, box, font size, text, inline marks) and by eye on the
+owner's five hand-checked articles (`layout_shots.py`, `out/layout_compare/shots/<stem>/p*.side.jpg`: old | new |
+changed pixels in red). Each difference was a gap in the masters, fixed in `masters.py`:
+- the JATS did not say where printed lines break → an empty `<target id="<ALTO TextLine ID>"/>` at each line start
+  (the view cuts blocks into column pieces line by line);
+- the fixes of Azure misreadings were only listed in back/notes → `named-content content-type="reader-fix"` around the
+  corrected text (xlink:title = Azure's reading, rid = its note), placed as `reader.text_html` places them; notes give
+  each part its own `named-content` and link their line to the ALTO (`alto-line`) — which also restores the fixes
+  in running heads and bylines, which only the ALTO holds;
+- footnote calls whose note Argon did not find (98) were dropped → kept as `xref ref-type="fn"` without rid;
+- continuations Argon marks but the master could not join (window starts, a type change: 13 of 188) were lost → ALTO
+  `TAGREFS flow.continued` on every continued block, `IDNEXT` chaining the blocks of one JATS element;
+- ALTO block order put a caption before its table even when printed after, and a references heading late → ALTO
+  blocks sorted into Argon's reading order;
+- heading levels were clamped and closed by the nesting → `sec/@disp-level` (ref-list titles: `content-type
+  heading-level-N`); a title block after page 1 → `title content-type="title"`;
+- added text (lines Azure missed) had no link to its block → id `<block's ALTO id>-a<k>`;
+- whole-pixel ALTO boxes moved a few column cuts → boxes to 0.1 px;
+- figure crops padded 8 px → 4/1000 of the page, as the view's crops;
+- the header line: Argon's whole title (`alt-title alt-title-type="metadata"` when the printed lines differ), the
+  journal and date as printed (`custom-meta printed-journal / printed-date`), the sample's year when neither the
+  catalogue nor Argon has one.
+Result: 0 differences in 4,646 blocks except (a) 10 blocks in 7 articles where a running head or page number Azure
+missed (0197 p1, 0331 p3, 0418 p2, 0474 p34, 0549 p5, 0732 p2, 1147 p2/5/13/14) was appended as added text — the
+masters leave such furniture out on purpose; (b) 0549 p2: the title's second word is drawn at its own box, no longer
+stretched over a duplicate partial reading of it that a fix emptied (no ALTO line holds that ink). The five articles
+look the same pixel for pixel (one figure crop re-encoded). The JATS text is unchanged (the editions' Markdown and
+JSON differ only by the added year; the web page by box rounding). Both print PDFs printed again (`prints.py`;
+two goto timeouts retried) and read back (`textcheck.py --out masters` against `out/textcheck/final.json`): Layout
+PDF unchanged (133,816 of 135,551 found, 1,735 lost, order 97.16%); one-column 98 lost (was 97: one affiliation word
+of 0732) and order 95.05% → 94.82%, all from 2382 and 1148, whose ALTO now lists captions and the references heading
+where they are printed while the web page puts a caption above its table.
+
 ## Files
 
 `common.py` (exp 40's client: CAP $20, prices corrected) · `inventory.py` · `choose_sample.py` · `structure.py` ·
 `score41.py` · `render41.py` · `sheets.py` · `handcheck.py` · `report.py` · `reader.py` (the owner's reading
 edition of Argon's 55 articles, no model calls: `out/reader/index.html` library, `out/reader/<stem>.html` with metadata
 header, page-break joins, KaTeX, figure crops, footnote popovers, misprint flags, a fixes toggle and scans beside the
-text; 82 MB with 399 page scans). `masters.py` (the downloadable formats, above). `views.py` (the owner wanted the original beside ours instead, 2026-10-15; no model calls):
+text; 82 MB with 399 page scans). `masters.py` (the downloadable formats, above). `mread.py` (the masters read back for the Layout view),
+`layout_compare.py` and `layout_shots.py` (old vs new Layout view, in code and by eye). `views.py` (the owner wanted the original beside ours instead, 2026-10-15; no model calls):
 `out/views/index.html`; `out/views/pages/<stem>.html` page by page (scan left, our rebuild of exactly that page right,
 footnotes at its foot; stacked on a phone); `out/views/mirror/<stem>.html` a born-digital twin (every Azure line set in
 Scheherazade New at its own box, fitted to the box width; figures, KaTeX equations and table cells at their boxes;
