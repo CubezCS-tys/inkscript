@@ -100,13 +100,81 @@ pages were not run whole.
   the other four (2382, 0877, 0924, 1140) checked by eye, no faults found (not marked block by block). Five articles
   is a small sample; the known gaps above were not hit by them.
 
+## Formats to download (2026-10-16, no model calls)
+
+**What.** Each of the 55 articles in seven files, linked under it on `out/views/index.html` with their sizes
+(`out/views/formats/<stem>/`): **Scan PDF** (`inkscript native`, not vector: the scan itself, each word its own ink,
+text selectable and searchable), **Layout PDF** and **One-column PDF**, **Web page**, **Markdown** and **JSON**
+(`inkscript edition`), and the **JATS XML** master. No EPUB, no Word (owner). `masters.py` turns Argon's structure
+and Azure's lines into the JATS 1.4 + ALTO 4.4 masters `inkscript edition` reads (mapping in its docstring): front
+matter from the catalogue master when there is one (41 of 55), title and authors as printed; abstracts and keywords
+stay where printed, as paragraphs; footnotes with linked calls (355); references; verse as `verse-group` with one
+`verse-line` per half (338 halves in 226 verses); 47 tables cell by cell (1,305 cells; ALTO ComposedBlocks); 68
+equations as MathML + LaTeX + scan crop and 82 inline formulas; 49 figures cropped from the 300 dpi pages; D30 flags
+as `named-content content-type="sic"` with the proposed correction in `xlink:title` (174 placed), the printed word
+kept; Argon's 1,134 fixes applied, each listed in `back/notes`, and Azure's reading kept as ALTO `ALTERNATIVE` where a
+fix maps word for word. Lines Argon left out stay in the ALTO only, as `role.noise` (grey in the layout PDF): 172
+noise lines, 41 of them with words (232 words; 26 lines are the top of 0656 p4) and 1 dropped line (20 words).
+A window of a long article is cut to its pages and numbered from 1 in its masters and scan PDF. The scan PDF gets
+Argon's fixes written into Azure's words where they map word for word (961 of 1,134).
+
+    .venv/bin/python masters.py prep            # out/native_in/: Azure JSON + PDF per article (windows cut), 11 s
+    out/native/run_all.sh                       # inkscript native --verify, 3 at a time, 4 threads each
+    .venv/bin/python masters.py build           # out/masters/: JATS, ALTO, crops; 36 s
+    .venv/bin/inkscript edition out/masters --out out/views/formats --only html,layout,onecol,md,jsonl --workers 2
+    .venv/bin/python masters.py link            # scan PDF + JATS beside the editions; formats/formats.json
+    .venv/bin/python masters.py check           # out/formats_check.json (+ formats_check/<stem>.json)
+    .venv/bin/python views.py --index-only      # index.html with the download row
+
+**Checks** (all 55; PDFs read back with pdfium 5.12.1). Edition's own `check.py` (every ALTO word the master places
+in the article, once):
+
+| format | printed words found | lost | twice | words in reading order |
+|---|---|---|---|---|
+| Web page | 131,218 / 131,218 | 0 | 52 | — |
+| Markdown | 131,218 / 131,218 | 0 | 272 (figure captions repeated as picture alt text) | — |
+| JSON | 131,218 / 131,218 | 0 | 3 | — |
+| Layout PDF (every ALTO word) | 134,890 / 135,551 (99.5%) | 661 | 119 | 96.9% |
+| One-column PDF (digits not compared) | 124,950 / 124,987 (99.97%) | 37 | 9 | 92.6% |
+
+Of the layout PDF's 661, 466 are words the master keeps but the page shows as a picture (Azure's words of typeset
+equations, words inside figures); most of the rest are table cells pdfium runs together (0924) and Latin maths.
+The one-column order is lower because footnotes sit at each page's foot while the check expects them at the end
+(0747, 76 notes in 8 pages: 63%). Formulas in the web page: 140 of 153 as MathML; 13 LaTeX strings latex2mathml
+could not convert show as LaTeX code.
+Against Argon's block text (our own count, `masters.py check`): JATS, web page, Markdown and JSON 0 words missing
+of 131,231 (JATS 1: a checker artefact, the web page made from the same JATS has it); one-column PDF 37 of 124,994;
+layout PDF 670 of 135,247 (as above). **Scan PDF**: on the 44 articles with scanned pages only, 329 of 107,251
+words differ from Argon's text (0.3%: fixes that do not map word for word); `--verify`: 112,469 / 112,480 Azure words
+intact, lines in order 11,160 / 11,161, every page keeps its image. **But** on the 11 articles with born-digital
+pages, `inkscript native` keeps the publisher's own text layer there (its rule), and those layers are broken
+(املفتاحية for المفتاحية, reversed English): 5,618 of 27,996 words (20%) do not come back.
+JATS: 55/55 valid against the JATS 1.4 Archiving MathML3 DTD; ALTO: 55/55 valid against ALTO 4.4 XSD.
+Spot checks rendered (0747, 2382, 0877, 0924, 1140): blocks, verse, footnotes, tables, equations and the figure all
+in place.
+
+**Faults found and fixed in `src/inkscript/edition/`** (`pytest -q`: 102 passed): figure and formula crops printed
+as their file path in both PDFs when the masters folder was given as a relative path (LuaLaTeX runs in a temporary
+folder; `model.load` now resolves it); the one-column PDF dropped printed front-matter lines that are not an author
+(now printed, as the web page does); Latin headings were set right to left there and French words hyphenated so they
+did not copy whole (no hyphenation in the one-column PDF now). Added: JATS `verse-line` read as a paragraph of class
+"verse" (centred in the web page and the one-column PDF).
+
+**Limits.** Abstracts and keywords are not in the JATS front matter (printing them in both places would double them
+in every edition). Misprint flags are in the JATS but the editions show the printed word only. The one-column PDF
+floats tables to the next page top. A byline that holds more than an author name (0747's "ضبطها وشرحها …") shows
+twice in the web page header (as the author and as the printed line). Window articles count pages from 1.
+Time: native 38 min for 399 pages (3 workers, peak 1.2 GB each, 4 threads); edition 5 min (2 workers, peak 0.49 GB).
+Disk: `out/views/formats/` 295 MB, `out/masters/` 22 MB, `out/native/` 165 MB beyond the hard links (its
+`*.alphabet.svg` and `*.shapes.json` are not used by the views), `out/native_in/` 48 MB.
+
 ## Files
 
 `common.py` (exp 40's client: CAP $20, prices corrected) · `inventory.py` · `choose_sample.py` · `structure.py` ·
 `score41.py` · `render41.py` · `sheets.py` · `handcheck.py` · `report.py` · `reader.py` (the owner's reading
 edition of Argon's 55 articles, no model calls: `out/reader/index.html` library, `out/reader/<stem>.html` with metadata
 header, page-break joins, KaTeX, figure crops, footnote popovers, misprint flags, a fixes toggle and scans beside the
-text; 82 MB with 399 page scans). `views.py` (the owner wanted the original beside ours instead, 2026-10-15; no model calls):
+text; 82 MB with 399 page scans). `masters.py` (the downloadable formats, above). `views.py` (the owner wanted the original beside ours instead, 2026-10-15; no model calls):
 `out/views/index.html`; `out/views/pages/<stem>.html` page by page (scan left, our rebuild of exactly that page right,
 footnotes at its foot; stacked on a phone); `out/views/mirror/<stem>.html` a born-digital twin (every Azure line set in
 Scheherazade New at its own box, fitted to the box width; figures, KaTeX equations and table cells at their boxes;

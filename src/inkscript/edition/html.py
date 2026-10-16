@@ -521,6 +521,7 @@ h1.title{font-family:'Markazi','Naskh',serif;font-weight:700;font-size:1.9rem;li
 margin:.9rem 0;line-height:1.55}
 .facts .wide{grid-column:1/-1}
 .facts div{display:flex;gap:.4rem}.facts dt{color:var(--mute)}.facts dd{margin:0}
+p.verse{text-align:center;text-indent:0;margin:.1rem 0}
 .abstract{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:.4rem .9rem;margin:.8rem 0;
 font-size:.95rem}
 .abstract h2{font-size:1rem;margin:.3rem 0}

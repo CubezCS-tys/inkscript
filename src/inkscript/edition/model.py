@@ -424,6 +424,11 @@ def read_body(art) -> tuple[list, list, list, list]:
                 body.append(Node("table", [], el.get("id"), extra=_table(el)))
             elif tag == "fig":
                 body.append(Node("figure", [], el.get("id"), extra=_fig(el)))
+            elif tag == "verse-line":            # a line of verse (one half of a classical bayt): a paragraph of
+                n = node("p", el)                #   its own, class "verse" (experiment 41's masters)
+                n.ctype = n.ctype or "verse"
+                n.lang = n.lang or _lang(el.getparent())
+                body.append(n)
             elif tag == "list-item":             # a list item: its printed label (bullet, number) opens its text
                 lab = txt(el.find("label"))
                 first = True
@@ -589,7 +594,7 @@ class Edition:
 
 
 def load(jats_path, alto_path=None, pdf_path=None) -> Edition:
-    jats_path = Path(jats_path)
+    jats_path = Path(jats_path).resolve()        # absolute: LuaLaTeX runs in a temporary folder and reads the crops
     stem = jats_path.name[:-len(".jats.xml")]
     alto_path = Path(alto_path) if alto_path else jats_path.with_name(f"{stem}.alto.xml")
     pdf_path = Path(pdf_path) if pdf_path else jats_path.with_name(f"{stem}.pdf")

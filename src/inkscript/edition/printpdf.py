@@ -791,6 +791,7 @@ def onecol_tex(ed: Edition) -> tuple[str, dict]:
 \usepackage[hidelinks,unicode,pdfusetitle]{hyperref}
 \setlength{\parindent}{1.2em}\setlength{\parskip}{0.25em}
 \linespread{1.12}
+\hyphenpenalty=10000\exhyphenpenalty=10000\emergencystretch=3em
 \pagestyle{fancy}\fancyhf{}\renewcommand{\headrulewidth}{0pt}
 \fancyfoot[C]{\small\thepage}
 \fancyhead[C]{\footnotesize\color{black!60} %s}
@@ -818,6 +819,10 @@ def onecol_tex(ed: Edition) -> tuple[str, dict]:
         if aff:
             out.append(r"{\small\color{black!70}%s}\par" % words(aff))
         out.append(r"\smallskip")
+    shown = {" ".join(x.split()) for a in authors for x in [a.get("display") or ""] + list(a.get("aff") or [])}
+    for fb in f.get("front_blocks", []):     # printed front matter that is not an author (as the reading page has)
+        if " ".join(fb["text"].split()) not in shown:
+            out.append(r"{\small %s}\par" % words(fb["text"]))
     facts = []
     if f.get("journal"):
         facts.append(words(f["journal"]))
@@ -861,11 +866,17 @@ def onecol_tex(ed: Edition) -> tuple[str, dict]:
         if n.kind == "heading":
             st["headings"] += 1
             sz = {1: r"\large", 2: r"\normalsize"}.get(n.level, r"\normalsize")
-            out.append(r"\par\addvspace{1.1em}{\noindent%s\bfseries %s\par}\nopagebreak\smallskip" %
-                       (sz, _inl(ed, n.inl, False, notes, st)))
+            ltr = is_ltr(n.text)                 # a Latin heading reads left to right
+            h = _inl(ed, n.inl, ltr, notes, st)
+            if ltr:
+                h = r"\begin{otherlanguage}{english}%s\end{otherlanguage}" % h
+            out.append(r"\par\addvspace{1.1em}{\noindent%s\bfseries %s\par}\nopagebreak\smallskip" % (sz, h))
         elif n.kind == "p":
             st["paragraphs"] += 1
-            out.append(_para(ed, n, notes, st) + "\n")
+            if n.ctype == "verse":               # a half-line of verse (JATS verse-line), centred
+                out.append(r"{\centering\noindent %s\par}" % _para(ed, n, notes, st) + "\n")
+            else:
+                out.append(_para(ed, n, notes, st) + "\n")
         elif n.kind == "formula":
             tex, g = n.extra.get("tex", ""), n.extra.get("graphic", "")
             lab = n.extra.get("label", "")
