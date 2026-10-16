@@ -260,7 +260,7 @@ class Renderer:
         cap = ""
         if x.get("label") or x.get("caption"):
             lab = f'<span class="tlabel">{t(x.get("label"))}</span> ' if x.get("label") else ""
-            cap = f"<caption>{lab}{self.inl(x.get('caption') or [])}{self.og(n, self.crops.get(n.id))}</caption>"
+            cap = f"<caption dir=\"auto\">{lab}{self.inl(x.get('caption') or [])}{self.og(n, self.crops.get(n.id))}</caption>"
         parts = {"head": [], "body": [], "foot": []}
         for r in x["rows"]:
             cells = []
@@ -275,6 +275,9 @@ class Renderer:
                     at.append(f'rowspan="{c["rowspan"]}"')
                 if c.get("scope") and self.mode == "html":
                     at.append(f'scope="{a(c["scope"])}"')
+                ct = plain(c["inl"]).strip()
+                if len(ct) > 14 and " " in ct:          # a cell of words: kept wide enough to read on a phone
+                    at.append('class="w"')
                 cells.append(f"<{tag}{(' ' + ' '.join(at)) if at else ''}>{self.inl(c['inl'])}</{tag}>")
             parts["head" if r["head"] else "foot" if r["foot"] else "body"].append(f"<tr>{''.join(cells)}</tr>")
         rows = ""
@@ -286,7 +289,11 @@ class Renderer:
             rows += f"<tfoot>{''.join(parts['foot'])}</tfoot>"
         og = "" if cap else self.og(n, self.crops.get(n.id))
         foot = f'<p class="tfoot">{t(x.get("foot"))}</p>' if x.get("foot") else ""
-        return (f'<div{self.block_attrs(n, "tablewrap")}><div class="tscroll"><table dir="rtl">{cap}{rows}'
+        # a table with no Arabic letter in its cells (figures and Latin) reads left to right, columns and minus signs
+        # in the printed order; any Arabic cell keeps it right to left
+        arabic = any(re.search(r"[\u0600-\u06ff\u0750-\u077f]", plain(c["inl"])) for r in x["rows"] for c in r["cells"])
+        tdir = "rtl" if arabic else "ltr"
+        return (f'<div{self.block_attrs(n, "tablewrap")}><div class="tscroll"><table dir="{tdir}">{cap}{rows}'
                 f'</table></div>{og}{foot}</div>')
 
     # -------------------------------------------------------------- front matter
@@ -583,7 +590,33 @@ line-height:1.45;color:var(--mute)}
 .about dl div{margin:.35rem 0}.about dt{font-weight:700;color:var(--fg)}.about dd{margin:0}
 .links a{white-space:nowrap}
 @media (min-width:52rem){body{font-size:1.125rem}.ed{padding-top:2.5rem}h1.title{font-size:2.3rem}}
-@media print{button.og,figure.clip{display:none}}
+td.w,th.w{min-width:7em}
+@media (max-width:40rem){table{font-size:.8rem;line-height:1.45}th,td{padding:.2rem .35rem}td.w,th.w{min-width:6.5em}}
+@page{size:A4;margin:18mm 17mm 20mm}
+@media print{
+:root{--bg:#fff;--fg:#111;--mute:#555;--rule:#bbb;--acc:#7a3b12;--quran:#5b4a12;--qbg:#f6efd6;--card:#f4f2ee;
+--link:#111;color-scheme:light}
+html,body{background:#fff;color:#111}
+body{font-size:11pt;line-height:1.8}
+.ed{max-width:none;padding:0}
+h1.title{font-size:20pt}
+button.og,figure.clip,.about .links{display:none}
+a{text-decoration:none}
+h2,h3,h4,h5,h6,caption{break-after:avoid}
+p{orphans:2;widows:2}
+.tablewrap{margin:.8rem 0}
+.tscroll{overflow:visible}
+table{font-size:9pt;line-height:1.4;max-width:100%;break-inside:auto}
+thead{display:table-header-group}
+tr{break-inside:avoid}
+th,td{padding:.12rem .3rem}
+td.w,th.w{min-width:5.5em}
+table.squeeze{table-layout:fixed;width:100%}
+table.squeeze th,table.squeeze td{overflow-wrap:anywhere;padding:.08rem .15rem}
+figure.figure,.formula{break-inside:avoid}
+figure.figure img.fig{max-height:60vh}
+.note{break-inside:avoid}
+}
 """
 
 JS = r"""
@@ -603,6 +636,20 @@ function clip(spec,crop){
     var c=document.createElement('figcaption');c.textContent='الأصل، الصفحة '+(+p).toLocaleString('ar-EG');
     f.appendChild(c);});
   return f;}
+// print: a table wider than the text column gets a smaller type (down to 62%); one still too wide is set in
+// columns of fixed width whose words may wrap (class squeeze). Run before the browser prints, and by
+// inkscript's own print pipeline at the page's text width (window.__fitTables).
+function fitTables(){
+  document.querySelectorAll('.tscroll').forEach(function(w){
+    var t=w.querySelector('table');if(!t)return;
+    t.style.fontSize='';t.classList.remove('squeeze');
+    var W=w.clientWidth,f0=parseFloat(getComputedStyle(t).fontSize),k=1;
+    while(t.offsetWidth>W+1&&k>0.62){k-=0.04;t.style.fontSize=(f0*k).toFixed(2)+'px';}
+    if(t.offsetWidth>W+1)t.classList.add('squeeze');});}
+function unfitTables(){document.querySelectorAll('.tscroll table').forEach(function(t){
+  t.style.fontSize='';t.classList.remove('squeeze');});}
+window.__fitTables=fitTables;
+addEventListener('beforeprint',fitTables);addEventListener('afterprint',unfitTables);
 document.addEventListener('click',function(e){
   var b=e.target.closest('button.og');if(!b)return;
   var host=b.closest('p,h1,h2,h3,h4,h5,h6,li,div.formula,div.tablewrap,div.note')||b.parentNode;

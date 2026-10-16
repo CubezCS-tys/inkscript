@@ -402,3 +402,13 @@ project's rule is already a faithful output with restoration kept separate (D14)
 vote write its correction into the text (E's two-of-three vote changed 89 of 971 words, some for the worse); dropping
 suspected misprints unflagged (the knowledge is useful to readers and to search)
 ([experiments/40_gemini4_vlm](../experiments/40_gemini4_vlm/README.md)).
+
+**D31 · The two print PDFs of experiment 41 are printed by Chromium from the pages the owner approved, not set
+line by line with LuaLaTeX (2026-10-16; narrows D27).** D27's line-for-line LuaLaTeX page broke on tables (every
+line sized from its own scan height: cells at random sizes, overlaps; the one-column page let wide tables run off
+the edge) and the owner called it terrible. The Layout view (blocks at their printed boxes, text flowing, one size
+per kind of block) and the Web page were already approved on screen, so the PDFs are now those pages printed, with
+D27's text-layer finishing kept (Chromium's lam-alef ToUnicode is reversed, the cause of its lost words in 2026-10-11's
+bake-off). Read back with pdfium: Layout 503 words lost of 134k besides the stray lines the view leaves out by
+design (LuaLaTeX 661), one-column 97 of 125k (LuaLaTeX 37), reading order better in both. One look for screen and
+print; a fix to the view reaches the PDF ([experiments/41_azure_structure](../experiments/41_azure_structure/README.md)).

@@ -168,6 +168,23 @@ Time: native 38 min for 399 pages (3 workers, peak 1.2 GB each, 4 threads); edit
 Disk: `out/views/formats/` 295 MB, `out/masters/` 22 MB, `out/native/` 165 MB beyond the hard links (its
 `*.alphabet.svg` and `*.shapes.json` are not used by the views), `out/native_in/` 48 MB.
 
+**The two print PDFs replaced (2026-10-16).** The owner opened 0924's PDFs: "whoa this is terrible". The LuaLaTeX
+Layout PDF sized every line from its own height on the scan, so table cells came out at random sizes, numbers ran into
+words and headers overlapped; the one-column PDF let wide tables run off the page. (The agent's "tables all in place"
+spot check had been wrong.) Now both are printed by headless Chromium from pages the owner already approved
+(`prints.py`, `print_worker.py`, `textlayer.py`): **Layout PDF** = the Layout view's pages (`views.py` writes
+`out/views/print/<stem>.layout.html`), **One-column PDF** = the Web page with a print stylesheet (A4, tables fitted to
+the width, header row repeated). Text layer finished for pdfium as D27 (lam-alef ToUnicode, /Direction). Read back
+with pdfium 5.12.1 (`textcheck.py`, `out/textcheck/final.json`), old → new: Layout PDF found 99.5% → 98.7%, but 1,232
+of the 1,735 missing are stray lines Argon left out, which the Layout view leaves out on purpose (the old PDF printed
+them grey); without them 661 → 503 lost; order 96.9% → 97.2%. One-column found 99.97% → 99.92% (37 → 97 lost),
+order 92.6% → 95.1%. Looked at by eye (`out/formats_review.html`, scan | layout | one-column): tables one size and
+inside the page. Remaining faults: a heading needing one more line than its printed box spills its last word over
+the line below (0924 p1, p5, p6); verses Azure read as one line keep their halves run together (0747 p3, p7–p9); the
+one-column poem runs half-verse by half-verse down the right edge; column-header words "مليم جنيه" open two
+paragraphs in 0924 (Azure's lines, given to the paragraph). The LuaLaTeX originals are kept in
+`out/formats_lualatex/`.
+
 ## Files
 
 `common.py` (exp 40's client: CAP $20, prices corrected) · `inventory.py` · `choose_sample.py` · `structure.py` ·

@@ -1,0 +1,15 @@
+{
+ "0924-012-005-007": [
+  "Layout PDF, the one recurring fault: a heading that needs one more line than its printed box spills its last word(s) over the line below - p1 'تصرف رجال الادارة مع المحامين', 'مرفوع الى مجلس نقابة المحامين', 'من محمود فهمي جنديه ... صندوق النقابة'; p5 'هـ الإيرادات المتنوعة'; p6 '٥ - مصاريف غرفة المحامين بمحكمة استئناف مصر' ('مصر' printed over '٢٠٠').",
+  "Layout p2: the three tables fill the column width with a larger type than the scan's; the paragraph line right under each table touches it.",
+  "Layout p5 (also web page and one-column): the column-header words 'مليم جنيه' open two paragraphs ('مليم جنيه تقدرت...', 'مليم جنيه لم يدرج...') - Azure lines given to the paragraph, not a print fault.",
+  "Layout tables p2-p5: one size, inside the page, rows aligned; the big table of expenses (p5) matches the scan row for row.",
+  "One-column: every table fits the A4 width in one size (p3-p5), header repeated where the expenses table runs from p4 to p5; small type (about 7-8 pt) but readable. 'About this edition' still names Noto Naskh Arabic / Markazi Text (the edition fonts), not Scheherazade New."
+ ],
+ "0747-001-003-001": [
+  "Layout PDF p1-p9: every page matches its scan block for block; verse in two halves, footnotes (in two columns on p9) at the foot, vowels kept; no overlap seen.",
+  "Layout p3, p7, p8, p9: some verses are set as one justified line with the two halves run together (an ornament or a stray 'ه' between them) where the scan has the two halves apart - the lines Azure read as one line.",
+  "One-column PDF (13 pages for 9 printed): each verse half is set on its own short line down the right edge, so the poem runs as a long single column with most of the page empty - the web page's verse styling at A4 width; the two halves are not side by side.",
+  "One-column: footnotes gathered at the end (p9-p12) with their page marks, as on screen."
+ ]
+}

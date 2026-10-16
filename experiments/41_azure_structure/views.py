@@ -452,7 +452,7 @@ def build_layout(a, cap):
     allbody = [S.lines[x]["px"][3] - S.lines[x]["px"][1] for r in blocks if GROUP.get(r["type"]) == "body"
                for x in r["ids"]]
     doc_body = statistics.median(allbody) if allbody else 40
-    fig_k, rows = {}, []
+    fig_k, rows, prints = {}, [], []
     stats = dict(blocks=0, pieces=0, turned=0, noise=0)
     for i, p in enumerate(pages):
         W, H = S.dims[p]
@@ -588,6 +588,7 @@ def build_layout(a, cap):
                        f'stroke-width="{sw:.1f}"' + (f' stroke-dasharray="{W * .008:.0f},{W * .006:.0f}"' if turn else "")
                        + f' marker-end="url(#ah{p})"/>')
         svg.append("</svg>")
+        prints.append((p, W, H, "".join(e for e in els if 'class="pc noise"' not in e)))
         src = scan(a, p)
         rows.append(
             f'<section class="mrow" id="p{p}" data-p="{p}">'
@@ -627,7 +628,26 @@ def build_layout(a, cap):
                            data=json.dumps(dict(stem=stem, lang=lang)), js=COMMON_JS + LAYOUT_JS)
     (VIEWS / "mirror").mkdir(parents=True, exist_ok=True)
     (VIEWS / "mirror" / f"{stem}.html").write_text(page, encoding="utf-8")
+    write_layout_print(stem, lang, ddir, title, prints)
     return stats
+
+
+def write_layout_print(stem, lang, ddir, title, prints):
+    """out/views/print/<stem>.layout.html: the same pages as the Layout view, alone, for headless Chromium to print
+    (prints.py -> the layout PDF): no bar, no scan, no toggles, no reading-order marks, lines no block took left
+    out; each page its printed size (the 300 dpi scan's pixels / 300 inches) as a named @page; fitted by the
+    view's own script (FIT_JS) on every page before printing."""
+    sizes = {}
+    pages = []
+    for p, W, H, els in prints:
+        k = sizes.setdefault((W, H), f"s{len(sizes)}")
+        pages.append(f'<div class="lpage" data-p="{p}" style="aspect-ratio:{W}/{H};width:{W / 300:.4f}in;page:{k}" '
+                     f'lang="{E(lang)}" dir="{ddir}">{els}</div>')
+    at = "".join(f"@page {k}{{size:{W / 300:.4f}in {H / 300:.4f}in;margin:0}}" for (W, H), k in sizes.items())
+    page = PRINT_TPL.format(lang=E(lang), title=E(title[:200]), fonts=FONTS, katex=KATEX,
+                            css=R.CSS + LAYOUT_CSS + PRINT_CSS + at, body="\n".join(pages), js=FIT_JS + PRINT_JS)
+    (VIEWS / "print").mkdir(parents=True, exist_ok=True)
+    (VIEWS / "print" / f"{stem}.layout.html").write_text(page, encoding="utf-8")
 
 
 # ------------------------------------------------------------------------------------------------ templates
@@ -887,7 +907,7 @@ body.overlay .lpage .tx{color:#c0301a}
 body.overlay .pc.fg img{opacity:0}
 """
 
-LAYOUT_JS = r"""
+FIT_JS = r"""
 // one font size per kind of block on each page (body, footnotes, captions, running heads, page numbers, tables...):
 // the largest (up to 1.3x the size read from the printed line height) at which 85% of that kind's boxes hold their
 // text; then a box that still overflows shrinks a little (to 85%, a table to 70%); what still does not fit stays
@@ -919,6 +939,9 @@ function fitPage(pg){
   while(z>cap+1e-6){z=Math.max(cap,z-0.03);pc.style.setProperty('--z',z.toFixed(3));if(!over(pc))break}
   if(over(pc))pc.classList.add('over')}
  pg.dataset.fit='1'}
+"""
+
+LAYOUT_JS = FIT_JS + r"""
 const seen=new Set();
 const io=new IntersectionObserver(es=>{for(const e of es){if(e.isIntersecting){seen.add(e.target);
  if(!e.target.dataset.fit)fitPage(e.target)}else seen.delete(e.target)}},{rootMargin:'150% 0px'});
@@ -935,6 +958,45 @@ ov.addEventListener('input',()=>setOv(ov.value));ov.value=store('views-ov')||60;
 addEventListener('keydown',e=>{if(e.target.closest('input,textarea')||e.metaKey||e.ctrlKey||e.altKey)return;
  if(e.key==='r')setToggle('order',!body.classList.contains('order'))});
 for(const n of ['fixes','blocks','order','overlay'])setToggle(n,store('views-'+n)==='1');
+"""
+
+PRINT_TPL = """<!doctype html>
+<html lang="{lang}" dir="ltr" data-theme="light"><head><meta charset="utf-8">
+<title>{title}</title>
+<link href="{fonts}" rel="stylesheet">
+<link rel="stylesheet" href="{katex}/katex.min.css">
+<style>{css}</style></head>
+<body class="print">
+{body}
+<script src="{katex}/katex.min.js"></script>
+<script>{js}</script>
+</body></html>
+"""
+
+PRINT_CSS = r"""
+html,body{background:#fff;margin:0;padding:0}
+.math{unicode-bidi:isolate;direction:ltr}
+.contmark{display:none}
+:root{--paper:#fff}
+body.print{font-size:16px;line-height:1.5;overflow:visible}
+.lpage{box-shadow:none;border-radius:0;break-after:page;break-inside:avoid;margin:0}
+.lpage:last-child{break-after:auto}
+.pc.over{box-shadow:none}
+.t-table th{background:#f2efe8}
+.pc .sic{text-decoration:none}
+"""
+
+PRINT_JS = r"""
+document.querySelectorAll('.math').forEach(el=>{let s=el.textContent.trim(),d=false;
+ if(s.startsWith('\\[')){d=true;s=s.slice(2,-2)}else if(s.startsWith('\\(')){s=s.slice(2,-2)}
+ try{katex.render(s,el,{displayMode:d,throwOnError:false,strict:'ignore'})}catch(e){}});
+const body=document.body;
+Promise.all([document.fonts.load('400 20px "Scheherazade New"'),document.fonts.load('700 20px "Scheherazade New"'),
+ document.fonts.load('400 20px "Noto Serif"'),document.fonts.load('700 20px "Noto Serif"')]).catch(()=>{})
+ .then(()=>document.fonts.ready).then(()=>{const pgs=[...document.querySelectorAll('.lpage')];pgs.forEach(fitPage);
+ const over=[...document.querySelectorAll('.pc.over')].map(pc=>({p:+pc.closest('.lpage').dataset.p,t:pc.dataset.t,
+  text:(pc.textContent||'').trim().slice(0,60)}));
+ window.__fit={pages:pgs.length,boxes:document.querySelectorAll('.pc[data-g]').length,over:over}});
 """
 
 INDEX_CSS = r"""
