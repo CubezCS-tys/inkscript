@@ -427,3 +427,16 @@ recognisers do not receive primitive stroke labels. An experimental JSON
 record links evidence and predictions; no new interchange standard is adopted.
 This does not revise D19 or the archive's production pipeline. Evidence and
 limits: [experiment 42](../experiments/42_stroke_recovery/README.md).
+
+**D33 · Metadata is corrected, with the printed form kept and every change logged; the body and the abstract
+stay as printed (2026-10-18, the owner and their father; narrows D30).** D30 keeps the print exactly, misprints
+flagged, because the body is the author's words. Metadata has another job, finding and citing the article: a
+misprint, a misreading or a title cut off by the design (0355, 1979: the display title runs into a photograph and
+only «اثرالتـ / عـلى تطـ / فـى القـ» shows) spoils search, citation and the links between an author's works.
+Metadata here: title and translated title, author names, affiliations, keywords, dates, journal name, volume and
+issue. Rules: the corrected form goes in the main JATS slot and the printed form is always kept beside it (e.g.
+`alt-title`/`string-name` marked printed); each change is logged with the printed form, the corrected form, its
+source (Gemini, the catalogue, a person) and the reason (misprint, misread, cut off by the design); the views mark
+a corrected field and show the printed form on hover; a person's correction wins over Gemini's; the catalogue
+(full title, the author's authority name) is a source. The abstract is the author's prose and stays as printed
+with D30's flags ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
