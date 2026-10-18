@@ -109,11 +109,21 @@ def test_endnote_becomes_linked_footnote():
     assert b["type"] == "footnote" and b["note_kind"] == "endnote" and b["id"] == "en-1" and log["endnotes"] == 1
 
 
+def test_bad_split_rebuilt_from_azure_words():
+    lines = {"21:63": L("كان عليه أن يقدم نحو والشخصيات إنه يؤمن", [134, 858, 882, 882], 21)}
+    a = {"pages": [{"page": 21, "blocks": [{"type": "paragraph", "lines": ["21:63a"]},
+                                            {"type": "paragraph", "lines": ["21:63b"]}]}],
+         "splits": [{"line": "21:63", "parts": ["كان عليه ان يقدم نحو", "والشخصيات إنه يؤمن"]}]}
+    ans, log = RU.normalize(a, lines)
+    assert ans["splits"][0]["parts"] == ["كان عليه أن يقدم نحو", "والشخصيات إنه يؤمن"]
+    assert ans["pages"][0]["blocks"][0]["lines"] == ["21:63a"] and len(log["bad_splits"]) == 1
+
+
 def test_bad_split_is_undone():
     lines = {"21:63": L("ما بعد الحرب العالمية الثانية كان عليه", [134, 858, 882, 882], 21)}
     a = {"pages": [{"page": 21, "blocks": [{"type": "paragraph", "lines": ["21:63a"]},
                                             {"type": "paragraph", "lines": ["21:63b"]}]}],
-         "splits": [{"line": "21:63", "parts": ["ما بعد الحرب العالمية", "والشخصيات إنه يؤمن"]}]}
+         "splits": [{"line": "21:63", "parts": ["ما بعد الحرب", "والشخصيات"]}]}
     ans, log = RU.normalize(a, lines)
     assert ans["pages"][0]["blocks"][0]["lines"] == ["21:63"] and ans["pages"][0]["blocks"][1]["lines"] == []
     assert ans["splits"] == [] and len(log["bad_splits"]) == 1

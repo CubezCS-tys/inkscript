@@ -18,9 +18,10 @@ The rules, in order (each counted in the log):
                 the answer called noise or left out is put back: one or two lines next to a block of running text
                 (paragraph, footnote, list item, other_article, ...) join it at their place; anything else becomes a
                 block of type "other" flagged "from_noise", one per column, placed in reading order by position
-  bad splits    a split whose parts are not Azure's text (exp 41: 0355 21:63, a second part Azure never read) is
-                undone: the first reference to a part becomes the whole line, the other references go (experiment
-                41's assembly left such a line out of every block)
+  bad splits    a split whose parts are not Azure's text (experiment 41's assembly then left the line out of every
+                block: 0355 21:63, where Argon retyped أن as ان inside the parts): when the parts hold as many words
+                as the line, they are rebuilt from Azure's own words at the same cut; otherwise the split is undone
+                (the first reference to a part becomes the whole line, the other references go)
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
@@ -128,16 +129,30 @@ def bad_splits(ans, lines, log):
         t = (lines.get(lid) or {}).get("text", "")
         same = lid in lines and len(parts) >= 2 and lid not in seen and (
             nows("".join(parts)) == nows(t) or sorted(" ".join(parts).split()) == sorted(t.split()))
+        toks = t.split()
         if same:
             keep.append(s)
             seen.add(lid)
+        elif lid in lines and lid not in seen and len(parts) >= 2 and \
+                sum(len(p.split()) for p in parts) == len(toks) and all(p.split() for p in parts):
+            # the parts hold as many words as Azure's line, a letter or two retyped (exp 41: أن -> ان): the
+            # same cut, made of Azure's own words
+            new, k = [], 0
+            for p in parts:
+                n = len(p.split())
+                new.append(" ".join(toks[k:k + n]))
+                k += n
+            keep.append(dict(s, parts=new, _rebuilt_from=parts))
+            seen.add(lid)
+            log["bad_splits"].append(dict(line=lid, parts=parts, azure=t, action="parts rebuilt from Azure's words"))
         elif lid in lines:
             bad[lid] = s
         else:
             keep.append(s)
+    if isinstance(ans.get("splits"), list):
+        ans["splits"] = keep
     if not bad:
         return
-    ans["splits"] = keep
     placed = set()
 
     def fix_list(ids):
@@ -165,7 +180,8 @@ def bad_splits(ans, lines, log):
                         c["lines"] = fix_list(c["lines"])
     for lid, s in bad.items():
         log["bad_splits"].append(dict(line=lid, parts=s.get("parts"), azure=lines[lid]["text"],
-                                      placed=lid in placed))
+                                      action="undone: the whole line in the first part's place" if lid in placed
+                                      else "undone: no block held it"))
 
 
 def verse_cuts(ans, lines, log):

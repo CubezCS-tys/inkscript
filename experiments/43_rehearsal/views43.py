@@ -1,6 +1,6 @@
 """Experiment 43: experiment 41's Layout view (views.build_layout, read from masters by mread.load) drawn from a
 masters folder of this experiment, with text of another article (ALTO role.otherArticle) faded and labelled
-"another article". No model calls; nothing in experiment 41 changes.
+"another article", and ornaments (ALTO role.ornament) left to the scan. No model calls; nothing in experiment 41 changes.
 
     views43.py --masters out/masters_sim --stems 0656-016-001-011 0747-001-003-001 [--out out/views_sim]
 """
@@ -27,13 +27,16 @@ body.blocks .pc.t-other_article{outline:2px dashed #777}
 
 def load43(a):
     doc = MR.load(a)
-    other = set()
+    other, orn = set(), set()
     for b in doc["D"].A.iter(MR._q("TextBlock")):
         if "role.otherArticle" in (b.get("TAGREFS") or ""):
             other.add(b.get("ID"))
+        if "role.ornament" in (b.get("TAGREFS") or ""):
+            orn.add(b.get("ID"))
     for rec in doc["blocks"]:
         if rec.get("alto") in other:
             rec["type"] = "other_article"
+    doc["blocks"] = [r for r in doc["blocks"] if r.get("alto") not in orn]     # ornaments: ink only (the scan)
     return doc
 
 
