@@ -240,6 +240,21 @@ def cmd_simulate():
                                                        "split_lines_word_boxed", "noise_lines_with_words")})
 
 
+def assemble_run(run: str, arts: list[dict]):
+    """A run of run43.py: rules43 on its raw answers (out/<run>/rules/), then the masters (out/<run>/masters/)."""
+    src, dst = OUT / run / "raw", OUT / run / "rules"
+    dst.mkdir(parents=True, exist_ok=True)
+    for a in arts:
+        for x, y in ST.chunks(a):
+            f = src / f"{a['stem']}_c{x:03d}-{y:03d}.json"
+            if f.exists():
+                rec = ST.jl(f)
+                ans, log = apply_rules(a, rec)
+                jdump(dst / f.name, dict(rec, answer=ans, rules43=log))
+        r = M43.build43(a, dst, OUT / run / "masters", True)
+        print(f"  {a['stem']:24} {'ERROR ' + r['error'] if r.get('error') else 'ok'}", flush=True)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", choices=["rules", "harness", "masters", "compare", "simulate", "all"])
