@@ -24,7 +24,7 @@ E41 = HERE.parent / "41_azure_structure"
 sys.path.insert(0, str(E41))
 import structure as ST  # noqa: E402
 
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v2"          # the default; run43.py --prompt v3 calls use("v3")
 
 PROMPT_V2 = """You are restructuring a scanned Arabic journal article (it may contain French or English) into a clean,
 faithful digital edition. A trusted OCR engine (Azure) has already read every page; its lines are listed below, page
@@ -176,9 +176,9 @@ def make_prompt(a: dict, ci: int, x: int, y: int, state: dict | None) -> tuple[s
         context += ST.CTX_LINES.format(lines=ST.line_table(ls))
     if state:
         context += ST.STATE.format(first=x, **state)
-    p = PROMPT_V2.format(images_note=(ST.IMG_CTX if ctx_img else ST.IMG_WHOLE).format(first=x), context=context,
+    p = PROMPTS[PROMPT_VERSION][0].format(images_note=(ST.IMG_CTX if ctx_img else ST.IMG_WHOLE).format(first=x), context=context,
                          lines="\n".join(lines), first=x, last=y,
-                         metadata_spec=META_FULL_V2 if want_meta else ST.META_NONE)
+                         metadata_spec=PROMPTS[PROMPT_VERSION][1] if want_meta else ST.META_NONE)
     return p, imgs, len(imgs)
 
 
@@ -194,19 +194,18 @@ def prompt_text_only(a: dict, ci: int, x: int, y: int, state: dict | None) -> st
         context += ST.CTX_LINES.format(lines=ST.line_table(ls))
     if state:
         context += ST.STATE.format(first=x, **state)
-    return PROMPT_V2.format(images_note=(ST.IMG_CTX if x > 1 else ST.IMG_WHOLE).format(first=x), context=context,
+    return PROMPTS[PROMPT_VERSION][0].format(images_note=(ST.IMG_CTX if x > 1 else ST.IMG_WHOLE).format(first=x), context=context,
                             lines="\n".join(lines), first=x, last=y,
-                            metadata_spec=META_FULL_V2 if ci == 0 else ST.META_NONE)
+                            metadata_spec=PROMPTS[PROMPT_VERSION][1] if ci == 0 else ST.META_NONE)
 
 
-# ------------------------------------------------------------------------------------------------ v3 candidate
-# NOT LIVE: make_prompt and run43.py use PROMPT_V2 only. Three changes proposed after the owner looked at the run of
-# the 55 (README "Decisions pending"); each is PROMPT_V2 with one passage replaced, so the diff is exact. To make it
-# live: give it its own PROMPT_VERSION name (the masters' stamp hashes the text under that name) and add the masters
-# side of (b) (JATS trans-title-group) before any call.
+# ------------------------------------------------------------------------------------------------ prompt v3
+# LIVE since 2026-10-18 (owner's decisions (a)-(c) on the review of the 55, plus the JATS slots: README "Prompt v3 and
+# JATS coverage"). Each change is PROMPT_V2 / META_FULL_V2 with one passage replaced, so the diff is exact.
+# run43.py --prompt v3 uses it; answers record prompt "v3" and the masters' stamp hashes this text.
 
 V3_CHANGES = [
-    # (a) references vs list: one rule for "a list of works"
+    # (a) references vs list: owner's rule (2026-10-18)
     ("""  reference             one entry of a bibliography / reference list (sources, without call numbers in the text)
 """,
      """  reference             v3: one entry of a section the article presents as ITS SOURCES: the entries under a heading
@@ -216,24 +215,53 @@ V3_CHANGES = [
                         or works listed inside the body as part of what the article says, are list_item, not
                         reference. One decision per article.
 """),
-    # (b) a translated title is the title in another language, not "other"
+    # (b) a printed translated title is the title in another language, not "other"
     ("""  title                 the article's main title (once in the article)
 """,
      """  title                 the article's main title (once in the article). v3: the same title printed in another
                         language (often English under an Arabic title, or above an English abstract) is a title
                         block too, with "lang" and "translated": true; never other, never a heading
 """),
-    # (c) figure descriptions in the article's language
+    # (c) figure descriptions in Arabic and English (owner: "store it in both English and Arabic if possible")
     ("""                        text printed inside it, "description": a few words saying what it shows
 """,
-     """                        text printed inside it, "description": a few words saying what it shows, v3: written in
-                        the article's language (Arabic for an Arabic article)
+     """                        text printed inside it, "description": a few words saying what it shows, v3: in BOTH
+                        Arabic and English, {{"ar": "...", "en": "..."}} (the same description in each language)
+"""),
+    # boxed text: pull-quotes, highlighted facts, sidebars (JATS boxed-text)
+    ("""  other                 anything else that is printed text of this article
+""",
+     """  boxed                 v3: text of this article printed inside a frame or a tinted box set apart from the running
+                        text: a pull-quote, a highlighted fact or number, a sidebar, a boxed definition. Ordinary
+                        "lines", one block per printed paragraph; the blocks of one box get the same "box": K
+                        (1, 2, ... on each page). Words printed inside a picture are the figure's lines, not boxed;
+                        another article's text in a frame is other_article.
+  other                 anything else that is printed text of this article
+"""),
+    # quotations: set apart = quote, consistently
+    ("""  quote                 a Quran verse or quotation set apart from the paragraph
+""",
+     """  quote                 a Quran verse or quotation set apart from the paragraph. v3: every Quran verse or
+                        quotation printed on its own line(s) (centred, indented, in other type, or a verse between
+                        ﴿ ﴾ standing alone) is a quote block, one per printed quotation; a short quotation inside a
+                        running sentence stays in its paragraph
 """),
 ]
 
 META_V3_CHANGES = [
+    # (b) translated titles; affiliations split as printed; history dates
     ("""   "journal": "...",""",
-     """   "trans_titles": [{{"lang": "en", "title": "..."}}], "journal": "...","""),
+     """   "trans_titles": [{{"lang": "en", "title": "..."}}],
+   "history": [{{"type": "received", "text": "...", "line": "1:9"}}], "journal": "...","""),
+    ("""   "email": "..."}}],""",
+     """   "email": "...", "aff_parts": {{"department": "...", "institution": "...", "city": "...", "country": "..."}}}}],"""),
+    ("""   printed in these pages; journal, volume, issue, year may come from a running head;""",
+     """   printed in these pages; journal, volume, issue, year may come from a running head; v3: "trans_titles" = the
+   article's title as printed in another language; "history" = dates printed about the article's own submission and
+   publication (تاريخ الاستلام / الإرسال، تاريخ التعديل، تاريخ القبول، تاريخ النشر، Received, Revised, Accepted,
+   Published), type one of received, revised, accepted, published, online, text = the date exactly as printed, line =
+   its line id; "aff_parts" = the parts of that author's printed affiliation, each an exact substring of it, null for a
+   part not printed;"""),
 ]
 
 
@@ -244,5 +272,16 @@ def _apply(text: str, changes) -> str:
     return text
 
 
-PROMPT_V3_CANDIDATE = _apply(PROMPT_V2, V3_CHANGES)
-META_FULL_V3_CANDIDATE = _apply(META_FULL_V2, META_V3_CHANGES)
+PROMPT_V3 = _apply(PROMPT_V2, V3_CHANGES)
+META_FULL_V3 = _apply(META_FULL_V2, META_V3_CHANGES)
+PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3)}
+# the names the earlier README section used for the (then not live) draft of (a)-(c)
+PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
+
+
+def use(version: str):
+    """Make `version` the prompt make_prompt / prompt_text_only send (run43.py --prompt)."""
+    global PROMPT_VERSION
+    if version not in PROMPTS:
+        raise SystemExit(f"unknown prompt {version}: {sorted(PROMPTS)}")
+    PROMPT_VERSION = version

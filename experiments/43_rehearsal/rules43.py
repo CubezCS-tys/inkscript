@@ -37,6 +37,9 @@ The rules, in order (each counted in the log):
                 cut back to that line's edge (+ the crop's 4/1000 margin), when the cut is under 30% of the box's
                 height (0493 p1: the TV drawing's box began inside the title's second line; 1769: the label
                 «شكل رقم (N)» above a picture inside its box, drawn twice)
+  v3 types      (prompt v3) a title block with "translated": true becomes type "trans_title" (the masters write it as
+                JATS trans-title-group); a "boxed" block keeps its type and its "box" number rides in "level" (the
+                assembly keeps level, not unknown keys): the masters group one box's blocks into one boxed-text
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
@@ -50,7 +53,7 @@ MIN_LETTERS = 4                 # fewer letters than this: a speck read as lette
 MIN_W_PER_LETTER = 1.5          # box width (0-1000) per letter; a 7-wide box with 8 letters is vertical junk
 EDGE = 15                       # a line wholly within 1.5% of the left or right page edge is a sliver
 MERGE = {"paragraph", "quote", "list_item", "reference", "footnote", "abstract", "keywords", "other",
-         "other_article", "caption"}
+         "other_article", "caption", "boxed"}
 AR_LET = re.compile(r"[ء-غف-يٮ-ۓۺ-ۼݐ-ݿﭐ-﷿ﹰ-ﻼ]")
 LA_LET = re.compile(r"[A-Za-zÀ-ɏ]")
 ORN_STRONG = re.compile(r"^[٥ه\*※✡☆★✶✦✧❊❋°﴿﴾=⁂✿❀]{1,2}$")
@@ -127,6 +130,20 @@ def endnotes(ans, log):
                 if not b.get("id"):
                     b["id"] = f"en-{b.get('marker')}"
                 log["endnotes"] += 1
+
+
+def v3_types(ans, log):
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict):
+                continue
+            if b.get("type") == "title" and b.get("translated") in (True, "true", 1):
+                b["type"] = "trans_title"
+                log["trans_titles"] += 1
+            elif b.get("type") == "boxed":
+                k = b.get("box")
+                b["level"] = str(k) if k is not None else None
+                log["boxed_blocks"] += 1
 
 
 def nows(s):
@@ -641,7 +658,7 @@ def new_log() -> dict:
     return dict(endnotes=0, cuts=0, bad_cuts=[], ornaments_model=0, ornaments_code=0, ornaments_rejected=[],
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
-                text_in_figure=[], figure_trim=[])
+                text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0)
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -654,6 +671,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
                     log["other_article_blocks"] += 1
                     log["other_article_lines"] += len(b.get("lines") or [])
     endnotes(ans, log)
+    v3_types(ans, log)
     bad_splits(ans, lines, log)
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)

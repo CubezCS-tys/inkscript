@@ -379,12 +379,14 @@ def main():
     ap.add_argument("--assemble", action="store_true", help="rules43 + masters of what is answered (no calls)")
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--run", help="output folder name under out/ (default v2_55 / v2_fresh)")
+    ap.add_argument("--prompt", default="v2", help="prompt version (prompt43.PROMPTS): v2 or v3 (live 2026-10-18)")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--upload-images", action="store_true", help="batch: pages through the File API, not inline")
     ap.add_argument("--poll", type=int, default=60, help="seconds between job polls")
     ap.add_argument("--max-enqueued", type=int, default=4_500_000,
                     help="input tokens per job (Argon Tier 1 allows 5M enqueued tokens across active jobs)")
     args = ap.parse_args()
+    P.use(args.prompt)
     run = args.run or SETS[args.set][0]
     if args.set == "b":                       # page renders of the fresh sample stay in this experiment
         ST.PAGES = OUT / "pages"
@@ -400,7 +402,7 @@ def main():
         return
     if args.cap is None:
         sys.exit("--cap is required for a run with calls")
-    print(f"{run}: {len(arts)} articles, mode {args.mode}, cap ${args.cap}; spent so far ${C.spent():.3f}", flush=True)
+    print(f"{run}: {len(arts)} articles, prompt {P.PROMPT_VERSION}, mode {args.mode}, cap ${args.cap}; spent so far ${C.spent():.3f}", flush=True)
     if args.mode == "standard":
         run_standard(arts, run, args.cap, args.threads)
     else:

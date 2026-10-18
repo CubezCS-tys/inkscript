@@ -46,6 +46,9 @@ font:500 max(9px,1.05cqw)/1.2 var(--ui);color:var(--muted);letter-spacing:.02em}
 .lpage[dir="ltr"] .oa-lab{right:auto;left:-1.3cqw}
 body.hideoa .pc.t-other_article,body.hideoa .pc.oa,body.hideoa .oa-reg{visibility:hidden}
 .pc .wf{display:block}
+.pc.t-boxed{background:color-mix(in srgb,var(--ink) 6%,var(--paper));outline:1.5px solid color-mix(in srgb,var(--ink) 35%,transparent);
+outline-offset:.5cqw;border-radius:2px}
+.pc.t-trans_title .tx{font-weight:600}
 .figtx{position:absolute;bottom:.5em;left:.5em;z-index:5;font:600 max(10px,1.1cqw)/1 var(--ui);padding:.4em .7em;
 border-radius:999px;border:1px solid color-mix(in srgb,var(--ink) 25%,transparent);background:var(--paper);
 color:var(--ink);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.18)}
@@ -80,6 +83,30 @@ FTBOX = ('<dialog class="ftbox" aria-label="Text in the picture"><div class="fth
          '<div class="fttext" tabindex="0"></div></dialog>')
 
 
+V.GROUP.setdefault("boxed", "body")                # v3: boxed text (JATS boxed-text), drawn as a box
+V.GROUP.setdefault("trans_title", "head")
+_KIND41 = MR.Doc.kind
+
+
+def kind43(self, el, role):
+    """experiment 41's kind, plus the elements jats43 moved into the front and back (their ids kept): a printed
+    translated title, a keywords group, the title of an abstract or of the endnotes, boxed text, ack / appendix."""
+    tg, par = el.tag, el.getparent()
+    ptg = par.tag if par is not None else ""
+    if tg == "trans-title":
+        return "trans_title", {}
+    if tg == "kwd-group":
+        return "keywords", {}
+    if tg == "title" and ptg in ("abstract", "trans-abstract", "fn-group", "ack", "app"):
+        return "heading", dict(level="2")
+    if tg == "p" and ptg == "boxed-text":
+        return "boxed", {}
+    return _KIND41(self, el, role)
+
+
+MR.Doc.kind = kind43
+
+
 def load43(a):
     doc = MR.load(a)
     other, orn = set(), set()
@@ -93,6 +120,11 @@ def load43(a):
             rec["type"] = "other_article"
         if rec["type"] == "figure":
             el = doc["D"].by_id.get(rec.get("target"))
+            alts = el.findall("alt-text") if el is not None else []
+            rec["descriptions"] = {(x.get(MR.XML_LANG) or doc["lang"]): (x.text or "") for x in alts}
+            here = rec["descriptions"].get(doc["lang"])
+            if here:                                       # the description in the article's language first
+                rec["description"] = here
             ps = el.findall("p[@content-type='text-in-figure']") if el is not None else []
             if ps:
                 rec["fig_text"] = "\n".join(" ".join("".join(p.itertext()).split()) for p in ps)
@@ -252,7 +284,9 @@ def build_layout43(a, doc):
                 px, py = 4 * W / 1000, 4 * H / 1000            # the crop's margin (masters.py crop, rel_pad)
                 bx = [max(0, x0 - px), max(0, y0 - py), min(W, x1 + px), min(H, y1 + py)]
                 num += 1
-                im = (f'<img src="../{src}" alt="{E(rec.get("description") or "")}" loading="lazy">' if src else
+                both = " | ".join(f"{k}: {v}" for k, v in (rec.get("descriptions") or {}).items() if v)
+                im = (f'<img src="../{src}" alt="{E(rec.get("description") or "")}" title="{E(both)}" '
+                      f'loading="lazy">' if src else
                       f'<span class="fig-missing">[{E(rec.get("description") or "figure")}]</span>')
                 ftx = rec.get("fig_text") or ""
                 btn = (f'<button type="button" class="figtx" title="The words printed in this picture" '
@@ -400,7 +434,8 @@ def build_layout43(a, doc):
               '<input type="range" id="ov" min="0" max="100" value="60" aria-label="page opacity"></label>')
     legend = ('<div class="legend" dir="ltr">' + "".join(
         f'<span class="lg t-{t}">{t.replace("_", " ")}</span>' for t in
-        ("title", "heading", "byline", "paragraph", "abstract", "verse", "quote", "list_item", "reference", "table",
+        ("title", "trans_title", "heading", "byline", "paragraph", "abstract", "boxed", "verse", "quote", "list_item",
+         "reference", "table",
          "equation", "caption", "figure", "footnote", "header", "footer", "other")) +
         '<span class="lg noise">not in any block</span></div>')
     page = PAGE_TPL.format(lang=E(lang), title=E(title[:90]), fonts=FONTS, katex=KATEX, css=BASE_CSS + V.MIRROR_CSS + LAYOUT_CSS + CSS43,

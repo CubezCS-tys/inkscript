@@ -41,6 +41,10 @@ from lxml import etree  # noqa: E402
 
 OUT = HERE / "out"
 ST.COARSE.setdefault("other_article", "other")
+ST.COARSE.setdefault("trans_title", "heading")     # v3: a printed translated title (rules43 from "translated": true)
+ST.COARSE.setdefault("boxed", "body")              # v3: text in a frame or tinted box (JATS boxed-text)
+M.ROLE.setdefault("trans_title", "title")
+import jats43 as J  # noqa: E402
 ORIG_STORE = ST.Store
 
 
@@ -144,6 +148,12 @@ class Master43(M.Master):
             if rec["type"] == "other_article":
                 rec["type"], rec["_other"] = "header", True
         super().__init__(a, cap)
+        J.retype_trans_title(self)
+
+    def build(self):
+        """experiment 41's article, then the JATS slots it left empty (jats43: abstracts, keywords, translated title,
+        history dates, affiliation parts, boxed text, endnotes, acknowledgements / appendices)."""
+        return J.fill_slots(self, super().build())
 
     def tb(self, p, bid, role, ids, target=None, lang=None, seq=None, own=True):
         if role in ("pageHeader", "pageFooter", "pageNumber") and seq is None and \
@@ -157,7 +167,26 @@ class Master43(M.Master):
         figure "lines") as the figure's own text: <p content-type="text-in-figure"> after the graphic (JATS allows
         paragraphs in fig after caption / alt-text / graphic). In the ALTO they stay role.pictureText (41)."""
         n0 = len(parent.findall("fig"))
+        desc = rec.get("description")
+        both = {}
+        if isinstance(desc, dict):        # v3: {"ar": ..., "en": ...}; the article's language first
+            both = {str(k): v.strip() for k, v in desc.items() if isinstance(v, str) and v.strip()}
+            rec = dict(rec, description=both.get(self.lang) or next(iter(both.values()), None))
         super().figure(rec, parent, cap_rec, caption_into)
+        figs = parent.findall("fig")
+        if len(figs) > n0:
+            alt = figs[-1].find("alt-text")
+            if alt is not None:
+                first = next((k for k, v in both.items() if v == alt.text), None) or M.lang_of(alt.text or "")
+                if first != self.lang:
+                    alt.set(M.XML_LANG, first)
+                for k, v in both.items():
+                    if k != first:
+                        e = etree.Element("alt-text", {M.XML_LANG: k} if k != self.lang else {})
+                        e.text = v
+                        alt.addnext(e)
+                        self.stats["figure_alt_text_second_language"] += 1
+                self.stats[f"figure_alt_text_{first}_first"] += 1
         ids = [i for i in rec.get("ids") or [] if self.S.lines[i]["text"].split()]
         figs = parent.findall("fig")
         if not ids or len(figs) <= n0:
@@ -223,7 +252,7 @@ def prompt_text(name: str) -> str | None:
     if name == "v1":
         return ST.PROMPT
     import prompt43 as P
-    return P.PROMPT_V2 if name == P.PROMPT_VERSION else None
+    return P.PROMPTS[name][0] if name in P.PROMPTS else None
 
 
 def versions(prompt: str = "v2") -> dict:
