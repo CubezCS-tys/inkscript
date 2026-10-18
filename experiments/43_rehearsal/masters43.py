@@ -10,12 +10,20 @@ code that v2 needs. Experiment 41's modules are imported and extended here; noth
     capture43(a, raw_dir, rules=True)  -> experiment 41's capture (structure.assemble on the answers in raw_dir)
     build43(a, raw_dir, mast_dir, rules=True) -> writes <mast_dir>/<stem>.jats.xml, .alto.xml, crops, stats
 With rules=False the answers and code are exactly experiment 41's (the harness check: same masters as 41's).
+
+Version stamp (rules=True only): every master says which prompt (name + hash of its text), which code (hash of
+rules43.py, masters43.py and experiment 41's structure/reader/masters.py), which model and run made it, and when:
+JATS custom-meta "stamp-*" and a sidecar <stem>.stamp.json. versions() gives the current ones; strip_stamp() takes
+the stamp out of JATS bytes (byte comparisons with experiment 41).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import re
 import shutil
+import time
 import sys
 import tempfile
 from pathlib import Path
@@ -179,6 +187,72 @@ class Master43(M.Master):
         return A
 
 
+# ------------------------------------------------------------------------------------------------ version stamp
+
+CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
+RAW41 = E41 / "out" / "argon" / "raw"
+DEFAULT_MODEL = "gemini-4-argon"
+
+
+def _h(b: bytes) -> str:
+    return hashlib.sha1(b).hexdigest()[:10]
+
+
+def prompt_text(name: str) -> str | None:
+    if name == "v1":
+        return ST.PROMPT
+    import prompt43 as P
+    return P.PROMPT_V2 if name == P.PROMPT_VERSION else None
+
+
+def versions(prompt: str = "v2") -> dict:
+    """The current prompt (name + hash of its text) and code (hash of the rule and masters sources)."""
+    t = prompt_text(prompt)
+    return dict(prompt=prompt, prompt_hash=_h(t.encode()) if t else None,
+                rules_hash=_h(b"".join(f.read_bytes() for f in CODE_FILES)))
+
+
+def run_name(raw_dir: Path) -> str:
+    raw_dir = Path(raw_dir).resolve()
+    if raw_dir == RAW41.resolve():
+        return "41-argon"
+    if raw_dir == (OUT / "replay" / "raw").resolve():
+        return "replay (41-argon answers)"
+    return raw_dir.parent.name if raw_dir.name in ("raw", "rules") else raw_dir.name
+
+
+def stamp_of(a: dict, raw_dir: Path, run: str | None = None) -> dict:
+    """What made this article's masters: prompt and model from the answers (a v1 answer has no "prompt"), code now."""
+    prompts, models = set(), set()
+    for x, y in ST.chunks(a):
+        f = Path(raw_dir) / f"{a['stem']}_c{x:03d}-{y:03d}.json"
+        if f.exists():
+            r = ST.jl(f)
+            prompts.add(r.get("prompt") or "v1")
+            models.add(r.get("model") or DEFAULT_MODEL)
+    pr = sorted(prompts)[-1] if prompts else "?"
+    v = versions(pr)
+    return dict(v, prompt="+".join(sorted(prompts)) or "?", model="+".join(sorted(models)) or "?",
+                run=run or run_name(raw_dir), made=time.strftime("%Y-%m-%d %H:%M"))
+
+
+def put_stamp(art, st: dict):
+    cmg = art.find(".//article-meta/custom-meta-group")
+    if cmg is None:
+        return
+    for k in ("prompt", "prompt_hash", "rules_hash", "model", "run", "made"):
+        c = etree.SubElement(cmg, "custom-meta", {"id": f"stamp-{k.replace('_', '-')}"})
+        etree.SubElement(c, "meta-name").text = f"pipeline-{k.replace('_', '-')}"
+        etree.SubElement(c, "meta-value").text = str(st.get(k))
+
+
+STAMP_RE = re.compile(rb'\s*<custom-meta id="stamp-[^"]*">.*?</custom-meta>', re.S)
+
+
+def strip_stamp(b: bytes) -> bytes:
+    return STAMP_RE.sub(b"", b)
+
+
 def verse_calls(a, raw_dir: Path) -> dict:
     out = {}
     for x, y in ST.chunks(a):
@@ -217,7 +291,7 @@ def capture43(a: dict, raw_dir: Path, rules: bool = True) -> dict | None:
     return cap
 
 
-def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True) -> dict:
+def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | None = None) -> dict:
     cap = capture43(a, raw_dir, rules)
     if cap is None:
         return dict(stem=a["stem"], error="no answers")
@@ -234,6 +308,9 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True) -> dict:
         alto = Mo.alto_xml()
     finally:
         M.MAST = real_mast
+    st = stamp_of(a, raw_dir, run) if rules else None
+    if st:
+        put_stamp(art, st)
     doctype = ('<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with '
                'MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">')
     (mast / f"{a['stem']}.jats.xml").write_bytes(etree.tostring(art, xml_declaration=True, encoding="UTF-8",
@@ -254,6 +331,8 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True) -> dict:
     if rules:
         r["split_lines_word_boxed"] = getattr(cap["S"], "word_boxed", 0)
         r["ornaments"] = len(getattr(cap["S"], "ornaments", []))
+    if st:
+        (mast / f"{a['stem']}.stamp.json").write_text(json.dumps(st, ensure_ascii=False, indent=1))
     (mast / "stats").mkdir(parents=True, exist_ok=True)
     (mast / "stats" / f"{a['stem']}.json").write_text(json.dumps(r, ensure_ascii=False, indent=1))
     return r

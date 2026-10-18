@@ -157,7 +157,7 @@ def cmd_compare(mast: Path, name: str):
             continue
         w41, w43 = jats_words(f41 / f"{s}.jats.xml"), jats_words(f43 / f"{s}.jats.xml")
         r41, r43 = alto_roles(f41 / f"{s}.alto.xml"), alto_roles(f43 / f"{s}.alto.xml")
-        same_j = (f41 / f"{s}.jats.xml").read_bytes() == (f43 / f"{s}.jats.xml").read_bytes()
+        same_j = (f41 / f"{s}.jats.xml").read_bytes() == M43.strip_stamp((f43 / f"{s}.jats.xml").read_bytes())
         same_a = (f41 / f"{s}.alto.xml").read_bytes() == (f43 / f"{s}.alto.xml").read_bytes().replace(
             b"experiments/43_rehearsal/masters43.py (on experiments/41_azure_structure/masters.py)",
             b"experiments/41_azure_structure/masters.py").replace(TAGS43, b"")
@@ -251,7 +251,7 @@ def assemble_run(run: str, arts: list[dict]):
                 rec = ST.jl(f)
                 ans, log = apply_rules(a, rec)
                 jdump(dst / f.name, dict(rec, answer=ans, rules43=log))
-        r = M43.build43(a, dst, OUT / run / "masters", True)
+        r = M43.build43(a, dst, OUT / run / "masters", True, run=run)
         print(f"  {a['stem']:24} {'ERROR ' + r['error'] if r.get('error') else 'ok'}", flush=True)
 
 
