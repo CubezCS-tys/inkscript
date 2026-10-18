@@ -12,6 +12,9 @@ issues, version stamps) is built and tested without calls (section "Feedback loo
 the owner's review of it led to three code rules and view changes (section "Owner's review of the 55") and three
 prompt proposals (section "Decisions pending"), which the owner decided: prompt v3 is live, with the empty JATS
 slots filled in code; a 6-article Batch test cost $0.62 (section "Prompt v3 and JATS coverage").
+v3 lost pictures; a code rule now draws every ink region without text as a figure (another article's pictures muted,
+out of the JATS) and prompt v3.1 asks for symbols / hieroglyphs / cartoons as figures: $0.19 test on 0493 and 1769
+(section "A picture is never lost").
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -411,6 +414,97 @@ Files: `jats43.py` (the slots), `test_jats43.py`, `coverage43.py` (build + count
 `jats_coverage.md`; outputs `out/v3_test/` (raw, rules, masters, v2_now = v2 answers through today's code, views with
 v2/ inside, shots, v3_vs_v2.txt/.json, coverage_v2.md, progress.md, run.log).
 
+## A picture is never lost: code rule + prompt v3.1 (2026-10-18; owner-approved, cap $1; **$0.189 billed**, log $4.293)
+
+**Problem** (owner, on the scans): prompt v3 lost pictures v2 drew. 1769 pp3–5: the hieroglyph strips were no longer
+figures and Azure's reading of them («FRES safd.», «=DO», «DOA», «D A», «#») ran in quote blocks of the body text;
+0493 p1: the cartoon beside «مقالات» was not drawn; 0493 p4: the other article's photos were filed under other_article
+and not drawn at all.
+
+**Code rule `rules43.pictures`** (after the answer; `ink43.py` measures the page; no calls):
+1. *Ink without text.* On the 300 dpi render read at 100 dpi, ink = grey < 110 or a saturated colour (not on tinted
+   paper); blanked: every Azure line box (grown 0.3 line heights) except narrow junk lines, and every figure / table /
+   equation the answer has; thin rules (straight runs ≥ 8% of the page, < 1.5 mm thick) removed; strokes joined at
+   2.5 mm; pieces of one strip joined (same row, gap ≤ 2.5 heights, strips ≤ 50/1000 high); two pieces with printed
+   words between them joined (a cover cut by its own title), two photos with bare paper between them kept apart. Kept:
+   ≥ 25 × 15 / 1000, area ≥ 1500, ≥ 6% ink in its box, not a shadow / solid tab at the page edge. Not a picture:
+   a region holding or touching the title / a heading / the byline, or round a white-on-black title (0355 pp1–2's
+   banners, 0331's hand-lettered title), a bar (≥ 10:1 and ≥ 35% full), the box round a page number, and anything at
+   the same place (or mirrored) on another page of the chunk (running-head logos, page-number ornaments).
+2. *Junk.* A line with no real word (Arabic ≥ 2 letters at confidence ≥ 0.5, or Latin with lower case, ≥ 3 letters,
+   ≥ 0.6: transliteration «nbt», «hk3t» is text; «FRES», «DoC», «=10», digits, lone marks are not) touching a found
+   picture is the picture's: out of every block, ALTO only as **`role.pictureJunk`**. Inside a figure the model drew,
+   a line is junk only with no 2-letter Arabic word, no real word and Azure unsure (mean confidence < 0.6, < 0.4 with
+   digits): a diagram's labels («EGR» «POV» at 0.9+, a chart's scale, 0041's Arabic labels) stay its text.
+3. A found picture becomes a JATS `fig` (crop of the page) with `specific-use="ink-without-text"`, and
+   `fig-type="decoration"` when < 150/1000 both ways with no words read from it (0493 p1's cartoon, 0197's end fleuron).
+4. *Another article's picture* (the running text nearest to it is other_article): **not in this article's JATS**; its
+   crop and an ALTO `Illustration` tagged `role.otherArticle` with the crop as `FILEID`; the Layout view draws it muted
+   with that article's region and hides it with "Hide other articles". Chosen over keeping it in the JATS tagged: the
+   JATS is this article (editions print it), and the ALTO already holds the other article's text the same way.
+5. *Swapped box.* A figure box over ≥ 3 lines of text whose x/y-swapped box covers none is swapped back (v3's 0355 p1
+   photo came as [y0, x0, y1, x1]); this runs before text-in-figure.
+
+**How often it fires** (`pictures43.py --run R` → `out/R/pictures.json`, contact sheets `out/R/pictures/*.jpg`; every
+firing looked at on the sheets):
+| answers | new figures from ink | junk lines out of text / figure text | figures of another article | skipped (furniture, banners, bars, page-number boxes) |
+|---|---|---|---|---|
+| v2, the 55 | 6 in 6 articles (0197 end fleuron, 0355 p2 arrow, 0732 key-pattern band, 0498 p8 swash, 1769 p5 two inline groups) | 1 / 11 (1769 «FRES safd.», «LITERAT», «ifwants mound the branded»…, 1147 «72») | 4 (0493 p4) | 72 |
+| v3 test (6) | 16 (1769 pp3–5: 10 hieroglyph strips and groups; 0493 p1 cartoon, p4 three photos + cover; 0355 p2 arrow) + 0355 p1 box swapped | 15 / 2 | 4 | 4 |
+| v3.1 (2) | 1 (1769 p5) | 1 / 10 | 4 | 0 |
+Before tuning, the same detector also took running-head logos (0498, 0418, 0920, 7956, 2502: 37 firings), a stroke
+of 0331's hand-lettered title, 0498's page-number box, 1140's black bars, 2571's thumb tab and 0513's tinted page;
+each is now a named skip above. **Replay of the 55 v2 answers** (`out/v31_test/v2_now/`, against the same answers
+through this morning's code `out/v3_test/v2_now/`): 55/55 DTD + XSD valid; JATS text identical in 48; 0197, 0355, 0498,
+0732 +1 figure each, 1769 +2 figures, 15 junk words out of figure text and «lo» out of a paragraph, 1147 one «72» out of a chart's text, 0493
+four figures (and 55 words printed in them) moved out of the JATS as the other article's. No word of body text lost,
+nothing doubled (a found picture never overlaps one the answer has: those are blanked). `gold43.py check`: 5/5 the
+same. `flags43.py --run v2_55`: unchanged (51 flags).
+
+**Prompt v3.1** (`prompt43.PROMPT_V31`, `V31_CHANGES`; `run43.py --prompt v3.1`): the figure entry gains "symbols,
+hieroglyphs, logos, stamps, cartoons and decorative pictures are figures too, even small ones; what Azure read from
+them ("FORM", "DoC", "=10", digit soup) is not text: put those lines in the figure's "lines", never in body text; such
+junk inside a line of real text goes in "ornaments" with "picture": true". Code: a `"picture": true` ornament may have
+letters (normal ornaments ≤ 1), but is refused where Azure read a real word; it leaves the text and its ink is ALTO
+`role.pictureJunk`.
+
+**Retest on Batch** (`run43.py --set a --prompt v3.1 --run v31_test --stems 0493… 1769… --cap 5.10`): 3 requests, all
+STOP, $0.043 + $0.101 + $0.045 = **$0.189**. All three answers through today's code (`out/v31_test/masters`,
+`v3_now/`, `v2_now/`), looked at next to the scan (`out/v31_test/shots/{v31,v3,v2}/side_*.jpg`):
+| page | v2 | v3 | v3.1 |
+|---|---|---|---|
+| 1769 p3 | 3 strips figures (one with «FRES safd.» as its text, now out) | strips were quotes; now 3 figures from ink, junk out | 3 strips figures, junk out of body and figure text |
+| 1769 p4 | 4 strips figures | now 3 figures from ink (one strip whole) | 3 figures |
+| 1769 p5 | figures + 2 inline groups from ink | now 4 figures from ink | 3 figures + 1 from ink; FORM-like words out |
+| inline signs in Arabic lines (FORM, 2996776, =10, lo, ARD…) | in the body (as in v3) | in the body | **10 out of the body** (picture ornaments); 001880, «جدـ» still in (not listed) |
+| 0493 p1 cartoon | figure | now figure from ink (decoration) | figure |
+| 0493 p4 photos + cover | figures in 0493's JATS; now out of the JATS, drawn muted | none; now 4 from ink, drawn muted | 4 figures, drawn muted, out of the JATS |
+Views: `out/v31_test/views/index.html` (v3.1, v3, v2 per article), http://127.0.0.1:8899/v31_test/index.html (symlink
+`experiments/41_azure_structure/out/views/v31_test`).
+
+**Fewer fixes on 1769** (v2 44, v3 18, v3.1 20). The gap is orthography: the dotted ي in على / إلى that the print
+shows (v2 12, v3 0, v3.1 0) and hamza the print lacks (أمام → امام: v2 8, v3 3, v3.1 1). Azure reads 20 على and 10 إلى
+on pp1–8 against 45 علي and 8 إلي, so the print's dotted form is the rule there. Both v3 answers make the other fixes
+(footnote markers, ش in شكل, superscripts) as v2 did. Prompt v3 did not touch the fix passage; it adds two-language
+descriptions, quotes and boxes to the same output (tokens: v2 18.7k, v3 18.2k, v3.1 18.9k, all STOP), so the model
+now spends less attention on orthography: a prompt-length effect, repeated in two v3 runs, not variance. Not changed:
+loosening D30 is not the answer (each of these is a real ink-exact fix, the rule allows it); options for the owner:
+(1) one sentence in the fix passage naming ى/ي and hamza as misreadings to fix when the ink shows them; (2) a code
+flag (no fix) on Azure's low-confidence على / إلى (`flags43` `fixes_orth` counts the opposite direction today).
+
+**Limits / worse.** A picture inside a printed line (1769's inline groups) drawn from the ink overlaps that line's text
+in the Layout view (the text box is the whole line); 0493 p4's round photo already did. Single letters read at high
+confidence inside a figure («D A», «#») stay the figure's text (they cannot be told from a diagram's «K»). Furniture
+is recognised only within one chunk (a one-page chunk cannot see a repeat). The junk words inside Arabic lines need
+the model (v3.1): confidence alone is not enough (166 low-confidence Latin / digit words in Arabic lines over the 55,
+most real).
+
+Files: `ink43.py`, `pictures43.py` (counts, sheets, `--build`), `rules43.py` (`pictures`, `figure_swap`,
+`junk_line`, `bridged`…), `masters43.py` (`other_figure`, `pictureJunk`), `views43.py` (`other_pictures`),
+`prompt43.py` (v3.1), `test_rules43.py` (+4 tests, 35 pass with jats / flags); outputs `out/v31_test/` (raw, rules,
+masters, v3_now, v2_now, views, shots, run.log, v2_now_vs_before.txt, pictures.json), `out/v2_55/pictures*`,
+`out/v3_test/pictures*`.
+
 ## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
 
 300 whole articles of 1–30 pages, none in experiment 35's sample or editions, 40's sample or 41's 55; ≤ 3 per
@@ -503,7 +597,8 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
 2. ~~A small Batch check~~ (done, "Batch test"), ~~then `run43.py --set a --cap 10`~~ (done, "Run of the 55": $3.18).
    Owner looks at `out/v2_55/views/index.html` (the 9 marked first); decide the list-vs-references rule.
-3. Prompt v3 is live (owner's (a)–(c) + boxed text, quotations, history, affiliation parts): run the rehearsal with
+3. Prompt v3.1 (v3 + pictures) is the candidate for the rehearsal (`--prompt v3.1`; section "A picture is never lost");
+   decide the fix-count question there (ى/ي and hamza). Prompt v3 (owner's (a)–(c) + boxed text, quotations, history, affiliation parts): run the rehearsal with
    `--prompt v3`; watch pictures filed as other_article / noise and the fix count (section "Prompt v3 and JATS coverage").
 4. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
    rehearsal (`--set b`).

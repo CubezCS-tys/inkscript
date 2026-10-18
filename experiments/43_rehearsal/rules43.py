@@ -703,6 +703,19 @@ def junk_line(lid, lines, words, max_conf=None) -> bool:
     return not any(real_word(t, None) for t in lines[lid]["text"].split())
 
 
+def junk_in_figure(lid, lines, words) -> bool:
+    """Inside a picture the bar is higher: no word with two Arabic letters, no real word, and Azure unsure (mean
+    confidence < 0.6: «FRES safd.»; < 0.4 when a word holds a digit). Single letters read at high confidence («D A»
+    from a hieroglyph, «K» «j» of a diagram) cannot be told apart: they stay the figure's text."""
+    toks = lines[lid]["text"].split()
+    if any(len(AR_LET.findall(t)) >= 2 for t in toks) or not junk_line(lid, lines, words):
+        return False
+    digits = any(re.search(r"\d", t) for t in toks)      # a chart's scale (1147 p6, 0041 p10): its own text
+    ws = words(lid) if words is not None else None
+    cs = [w.get("conf") for w in ws or [] if w.get("conf") is not None]
+    return bool(cs) and sum(cs) / len(cs) < (0.4 if digits else 0.6)
+
+
 def swapped_box(f, blocks, lines) -> bool:
     """A figure box given as [y0, x0, y1, x1] (v3, 0355 p1: the photo's box lay over the text column): swap it when
     it covers >= 3 lines of the page's text and the swapped box covers none."""
@@ -818,6 +831,18 @@ def pictures(ans, lines, words, log):
         figs = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]
         keep_ids = {base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") in PIC_KEEP
                     for i in block_ids(b)} - {None}
+        # (0) Azure's junk read from the answer's own pictures (v3.1 puts it in the figure's lines): out of the
+        # figure's text (ALTO only), but never a diagram's labels (2382 p5 «EGR» «POV» at 0.9+, 0041's Arabic)
+        for f in figs:
+            fb = fig_box(f)
+            out = [i for i in f.get("lines") or [] if str(i) in lines and inside(lines[str(i)]["b"], fb) >= 0.5
+                   and junk_in_figure(str(i), lines, words)]
+            if out:
+                f["lines"] = [i for i in f["lines"] if i not in out]
+                junk_all.update(str(i) for i in out)
+                log["picture_junk"] += len(out)
+                log["pictures"].append(dict(page=p, action="junk out of the figure's text", lines=out,
+                                            text=" | ".join(lines[str(i)]["text"] for i in out)[:80]))
         if ink is None or not ids_p:
             continue
         # (1) ink that no line, picture, table or equation accounts for
