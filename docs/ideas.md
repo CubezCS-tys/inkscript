@@ -442,3 +442,12 @@ reason is recorded), **open** (voiced, not yet judged).
 - **eScriptorium as the correction platform for helpers at archive scale**: *parked*. It reads
   and writes ALTO, so the yardstick's pages open there too.
 
+- **Close-ups for dense spots, as a retry tool** (owner liked it, 2026-10-18): *open*. The normal request
+  stays as it is (whole pages, 300 dpi render scaled to 2,400 px, HIGH resolution; owner: change nothing that
+  works). When the feedback loop flags a chunk (calls without notes, ragged table, bad verse cut), rerun only
+  that chunk with extra full-sharpness crops of the flagged regions from the 300 dpi render ("Image 3b: close-up
+  of page 3, region [x0,y0,x1,y1]"), found from Azure alone (small line heights, packed lines, tables,
+  equations, vowelled verse). About 1,100 tokens a close-up ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
+- **Sending the PDF file instead of page images**: *not chosen for now*. Gemini turns PDF pages into images
+  itself at a size we don't control, adds born-digital text layers that are often broken, and Azure's boxes
+  are measured on our own render; an A/B test (~$1–2) stays available if needed.
