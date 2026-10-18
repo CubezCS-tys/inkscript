@@ -152,7 +152,8 @@ class Store43(ORIG_STORE):
                 T["px"] = [round(v, 1) for v in ST.union(rest)]
                 T["b"] = px_to_b(T["px"], *self.dims[T["page"]])
         self.ornaments.append(dict(id=f"{base}o{w}", base=base, at=target, page=T["page"], text=o["text"],
-                                   px=[round(v, 1) for v in wbox] if wbox else None, source=o.get("source")))
+                                   px=[round(v, 1) for v in wbox] if wbox else None, source=o.get("source"),
+                                   picture=bool(o.get("picture"))))
 
 
 class Master43(M.Master):
@@ -281,7 +282,8 @@ class Master43(M.Master):
             self.S.lines[o["id"]] = dict(id=o["id"], page=o["page"], text=o["text"], px=o["px"],
                                          b=px_to_b(o["px"], W, H), split_of=o["base"])
             self.seq = seq_of_line.get(o["at"], 10 ** 9 - 1)
-            self.tb(o["page"], self.bid(o["page"]), "ornament", [o["id"]], seq=self.seq, own=False)
+            self.tb(o["page"], self.bid(o["page"]), "pictureJunk" if o.get("picture") else "ornament", [o["id"]],
+                    seq=self.seq, own=False)
             self.stats["ornaments_alto"] += 1
 
     def alto_xml(self):

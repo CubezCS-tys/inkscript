@@ -286,10 +286,15 @@ def ornaments(ans, lines, words, log):
         if lid and not (1 <= w <= len(toks) and (not t or toks[w - 1] == t)):
             near = [k + 1 for k, x in enumerate(toks) if x == t]            # word number off: the nearest same mark
             w = min(near, key=lambda k: abs(k - w)) if near else 0
-        if not lid or not 1 <= w <= len(toks) or letters(toks[w - 1]) > 1:
+        pic = bool(o.get("picture"))
+        if pic and lid and 1 <= w <= len(toks) and words is not None:       # v3.1: junk read from a sign in a line
+            ws = words(lid)
+            if len(ws) == len(toks) and real_word(ws[w - 1]["text"], ws[w - 1].get("conf")):
+                pic = None                     # Azure read a real word there: kept (the model's word is not enough)
+        if not lid or not 1 <= w <= len(toks) or (letters(toks[w - 1]) > 1 and not pic):
             log["ornaments_rejected"].append(o)
             continue
-        found[(lid, w)] = dict(line=lid, word=w, text=toks[w - 1], source="model")
+        found[(lid, w)] = dict(line=lid, word=w, text=toks[w - 1], source="model", **({"picture": True} if pic else {}))
     # code: lone marks at the inner edge of a verse half
     parts = split_parts(ans, lines)
     calls = {}
@@ -778,6 +783,19 @@ def bridged(cands, line_boxes):
     return cands
 
 
+def figure_swap(ans, lines, log):
+    """A figure box with x and y swapped (before text_in_figure, which would take the text under the wrong box)."""
+    for pg in ans.get("pages") or []:
+        blocks = pg.get("blocks") if isinstance(pg, dict) else None
+        if not isinstance(blocks, list):
+            continue
+        for f in [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]:
+            old = fig_box(f)
+            if swapped_box(f, blocks, lines):
+                log["pictures"].append(dict(page=pg.get("page"), action="figure box x/y swapped back", box=f["box"],
+                                            old=old, lines=[], text=""))
+
+
 def pictures(ans, lines, words, log):
     """A picture is never lost (see the module doc). Needs words.ink and words.dark (masters43.azure_words);
     without them only the swapped-box check and the other-article tag of the answer's own figures run."""
@@ -800,12 +818,6 @@ def pictures(ans, lines, words, log):
         figs = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]
         keep_ids = {base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") in PIC_KEEP
                     for i in block_ids(b)} - {None}
-        # (0) a figure box with x and y swapped
-        for f in figs:
-            old = fig_box(f)
-            if swapped_box(f, blocks, lines):
-                log["pictures"].append(dict(page=p, action="figure box x/y swapped back", box=f["box"], old=old,
-                                            lines=[], text=""))
         if ink is None or not ids_p:
             continue
         # (1) ink that no line, picture, table or equation accounts for
@@ -937,6 +949,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     ornaments(ans, lines, words, log)
     never_noise(ans, lines, log)
     exclamation(ans, log)
+    figure_swap(ans, lines, log)
     text_in_figure(ans, lines, log)
     figure_trim(ans, lines, log)
     pictures(ans, lines, words, log)

@@ -274,7 +274,23 @@ def _apply(text: str, changes) -> str:
 
 PROMPT_V3 = _apply(PROMPT_V2, V3_CHANGES)
 META_FULL_V3 = _apply(META_FULL_V2, META_V3_CHANGES)
-PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3)}
+
+# ------------------------------------------------------------------------------------------------ prompt v3.1
+# 2026-10-18 (owner): v3 lost pictures v2 drew (1769 pp3-5 hieroglyph strips left as quote text, 0493 p1's cartoon).
+# One passage of v3 extended: symbols, hieroglyphs, logos, stamps, cartoons and decorative pictures are figures, and
+# Azure's junk reading of them is the figure's (or, inside a line of text, an ornament with "picture": true).
+V31_CHANGES = [
+    ("""                        Arabic and English, {{"ar": "...", "en": "..."}} (the same description in each language)
+""",
+     """                        Arabic and English, {{"ar": "...", "en": "..."}} (the same description in each language).
+                        v3.1: symbols, hieroglyphs, logos, stamps, cartoons and decorative pictures are figures too,
+                        even small ones; what Azure read from them ("FORM", "DoC", "=10", digit soup) is not text:
+                        put those lines in the figure's "lines", never in body text; such junk inside a line of real
+                        text goes in "ornaments" with "picture": true
+"""),
+]
+PROMPT_V31 = _apply(PROMPT_V3, V31_CHANGES)
+PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3)}
 # the names the earlier README section used for the (then not live) draft of (a)-(c)
 PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
 

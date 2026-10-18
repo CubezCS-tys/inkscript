@@ -197,3 +197,66 @@ def test_a_background_picture_under_the_title_keeps_its_text():
     out, log = RU.normalize(ans, lines)
     assert [b["type"] for b in out["pages"][0]["blocks"]] == ["title", "figure", "abstract", "paragraph"]
     assert not log["text_in_figure"]
+
+
+# ---------------------------------------------------------------- a picture is never lost (rules43.pictures)
+
+def _words(table):
+    def w(lid):
+        return [dict(text=t, box=None, conf=c) for t, c in table.get(lid, [])]
+    return w
+
+
+def test_junk_line_and_real_words():
+    lines = {"3:31": dict(text="FRES safd.", b=[591, 659, 831, 689], page=3),
+             "3:21": dict(text="nbt pr Imn- Re", b=[136, 488, 363, 506], page=3),
+             "3:29": dict(text="نقرأ بعض النقوش", b=[701, 638, 906, 656], page=3)}
+    w = _words({"3:31": [("FRES", .29), ("safd.", .37)], "3:21": [("nbt", .96), ("pr", .99), ("Imn-", .98), ("Re", .35)],
+                "3:29": [("نقرأ", .94), ("بعض", .98), ("النقوش", .97)]})
+    assert RU.junk_line("3:31", lines, w)
+    assert not RU.junk_line("3:21", lines, w)          # transliteration is text
+    assert not RU.junk_line("3:29", lines, w)
+
+
+def test_new_figure_from_ink_takes_the_junk_out_of_the_text():
+    lines = {"3:29": dict(text="نقرأ بعض النقوش", b=[701, 638, 906, 656], page=3),
+             "3:31": dict(text="FRES safd.", b=[591, 659, 831, 689], page=3),
+             "3:32": dict(text="ترتيل يقال بواسطة المعبودة", b=[128, 691, 868, 707], page=3)}
+    w = _words({"3:29": [("نقرأ", .94), ("بعض", .98), ("النقوش", .97)], "3:31": [("FRES", .29), ("safd.", .37)],
+                "3:32": [("ترتيل", .98), ("يقال", .98), ("بواسطة", .99), ("المعبودة", .98)]})
+    w.ink = lambda p, mask: [dict(box=[202, 660, 590, 688], fill=0.15, dark=900)]
+    ans = {"pages": [{"page": 3, "blocks": [{"type": "paragraph", "lines": ["3:29"]},
+                                            {"type": "quote", "lines": ["3:31", "3:32"]}]}], "noise": []}
+    out, log = RU.normalize(ans, lines, w)
+    bl = out["pages"][0]["blocks"]
+    figs = [b for b in bl if b["type"] == "figure"]
+    assert len(figs) == 1 and figs[0]["level"] == "ink" and figs[0]["box"][2] >= 831
+    assert all("3:31" not in (b.get("lines") or []) for b in bl)
+    assert "3:31" in out["_picture_junk"] and "3:31" in out["noise"]
+
+
+def test_furniture_two_photos_and_bridge():
+    assert RU.same_place([463, 28, 561, 95], [463, 30, 560, 96])
+    assert RU.same_place([840, 902, 928, 967], [72, 903, 160, 968])            # mirrored on the facing page
+    two = [dict(box=[95, 190, 499, 326], fill=.5, dark=1), dict(box=[527, 190, 929, 326], fill=.6, dark=1)]
+    assert len(RU.bridged([dict(x) for x in two], [])) == 2                     # bare paper between: two photos
+    cover = [dict(box=[113, 695, 179, 887], fill=.3, dark=1), dict(box=[252, 695, 297, 887], fill=.6, dark=1)]
+    assert len(RU.bridged(cover, [[185, 700, 250, 730]])) == 1                  # printed words between: one
+
+
+def test_picture_among_other_article_and_swapped_box():
+    lines = {f"4:{k}": dict(text="نص مقالة أخرى هنا", b=[100, 100 + 40 * k, 900, 130 + 40 * k], page=4)
+             for k in range(1, 6)}
+    ans = {"pages": [{"page": 4, "blocks": [
+        {"type": "other_article", "lines": ["4:1", "4:2", "4:3", "4:4", "4:5"]},
+        {"type": "figure", "box": [100, 400, 500, 600], "lines": []}]}]}
+    out, log = RU.normalize(ans, lines)
+    f = [b for b in out["pages"][0]["blocks"] if b["type"] == "figure"][0]
+    assert f["level"] == "other"
+    lines2 = {f"1:{k}": dict(text="سطر من النص الجاري", b=[70, 340 + 30 * k, 300, 360 + 30 * k], page=1)
+              for k in range(1, 6)}
+    ans2 = {"pages": [{"page": 1, "blocks": [{"type": "paragraph", "lines": list(lines2)},
+                                             {"type": "figure", "box": [65, 342, 474, 848], "lines": []}]}]}
+    out2, _ = RU.normalize(ans2, lines2)
+    f2 = [b for b in out2["pages"][0]["blocks"] if b["type"] == "figure"][0]
+    assert f2["box"] == [342, 65, 848, 474]
