@@ -1,0 +1,2865 @@
+{
+ "stem": "1140-000-021-003",
+ "run": "replay",
+ "raw": "experiments/41_azure_structure/out/argon/raw",
+ "scope": "article",
+ "checked": [
+  {
+   "date": "2026-10-18",
+   "source": "owner, by eye: whole article right, no faults found (experiment 41 hand check, 2026-10-16; not marked block by block)",
+   "scope": "article",
+   "note": ""
+  }
+ ],
+ "stamp": {
+  "prompt": "v1",
+  "prompt_hash": "42aba15df4",
+  "rules_hash": "ec2212f05f",
+  "model": "gemini-4-argon",
+  "run": "replay",
+  "made": "2026-10-18 16:07"
+ },
+ "snapshot": {
+  "blocks": [
+   {
+    "n": 1,
+    "page": 1,
+    "type": "title",
+    "level": null,
+    "ids": [
+     "1:1"
+    ],
+    "text": "Curriculum vitae",
+    "calls": []
+   },
+   {
+    "n": 2,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:2"
+    ],
+    "text": "Prénom : Abdallah",
+    "calls": []
+   },
+   {
+    "n": 3,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:3"
+    ],
+    "text": "Nom : SAAF",
+    "calls": []
+   },
+   {
+    "n": 4,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:4"
+    ],
+    "text": "Date et lieu de naissance : 19 septembre 1949 Kenitra (Maroc)",
+    "calls": []
+   },
+   {
+    "n": 5,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:5"
+    ],
+    "text": "Situation familiale : Marié, père d&#x27;une fille",
+    "calls": []
+   },
+   {
+    "n": 6,
+    "page": 1,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "1:6"
+    ],
+    "text": "1-FONCTIONS ACTUELLES",
+    "calls": []
+   },
+   {
+    "n": 7,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:7",
+     "1:8"
+    ],
+    "text": "Professeur à la Faculté des Sciences Juridiques, Economiques et Sociales de Rabat-Agdal",
+    "calls": []
+   },
+   {
+    "n": 8,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:9"
+    ],
+    "text": "Directeur du Centre des Etudes et Recherches en Sciences Sociales",
+    "calls": []
+   },
+   {
+    "n": 9,
+    "page": 1,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "1:10"
+    ],
+    "text": "2-ETUDES",
+    "calls": []
+   },
+   {
+    "n": 10,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:11",
+     "1:12",
+     "1:13"
+    ],
+    "text": "- Docteur d&#x27;Etat en droit Public (Thèse préparée en Droit International public sous la direction de Paul Reuter à Paris II « L&#x27;obligation de négocier en Droit International Public » (1979)",
+    "calls": []
+   },
+   {
+    "n": 11,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:14"
+    ],
+    "text": "- Diplôme d&#x27;Etudes Supérieures en Droit Public (1979):",
+    "calls": []
+   },
+   {
+    "n": 12,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:15"
+    ],
+    "text": "- Diplôme d&#x27;Etudes Supérieures Sciences Politiques (1973) II,",
+    "calls": []
+   },
+   {
+    "n": 13,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:16"
+    ],
+    "text": "- Diplôme d&#x27;Etudes Supérieures Philosophie du droit (1978).",
+    "calls": []
+   },
+   {
+    "n": 14,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:17"
+    ],
+    "text": "- Licence en droit (Faculté de droit de Rabat).",
+    "calls": []
+   },
+   {
+    "n": 15,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:18"
+    ],
+    "text": "- Licence de philosophie, Paris, Sorbonne (Paris IV).",
+    "calls": []
+   },
+   {
+    "n": 16,
+    "page": 1,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "1:19"
+    ],
+    "text": "3- AUTRES FORMATIONS :",
+    "calls": []
+   },
+   {
+    "n": 17,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:20"
+    ],
+    "text": "Plusieurs formations en analyse des politiques publiques",
+    "calls": []
+   },
+   {
+    "n": 18,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:21"
+    ],
+    "text": "Evaluation des politiques publiques",
+    "calls": []
+   },
+   {
+    "n": 19,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:22"
+    ],
+    "text": "Capitalisation des politiques publiques",
+    "calls": []
+   },
+   {
+    "n": 20,
+    "page": 1,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "1:23"
+    ],
+    "text": "Médiation et résolution des conflits",
+    "calls": []
+   },
+   {
+    "n": 21,
+    "page": 1,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "1:24"
+    ],
+    "text": "4. MATIÈRES ENSEIGNÉES :",
+    "calls": []
+   },
+   {
+    "n": 22,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:25",
+     "1:26",
+     "1:27",
+     "1:28"
+    ],
+    "text": "- Matières enseignées de 1974 à 2015 : Méthode des sciences sociales, Sciences politiques, Relations internationales, philosophie du droit, Histoires des idées politiques, Analyse des politiques publiques, Politiques et stratégies de développement, Les politiques publiques sociales, Théories de la justice sociale ...",
+    "calls": []
+   },
+   {
+    "n": 23,
+    "page": 1,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "1:29"
+    ],
+    "text": "5- CARRIERE PROFESSIONNELLE :",
+    "calls": []
+   },
+   {
+    "n": 24,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:30",
+     "1:31"
+    ],
+    "text": "- Professeur à la Faculté des sciences juridiques, économiques et sociales de Rabat, Université de Mohammed V.",
+    "calls": []
+   },
+   {
+    "n": 25,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:32",
+     "1:33",
+     "1:34",
+     "1:35"
+    ],
+    "text": "- 2003 - 2015 : Responsable de l&#x27;UFR Développement politique et social, Faculté des sciences juridiques, économiques et sociales de Rabat, Université Mohammed V., devenue à partir de 2005 Master Management du développement Social, Faculté des Sciences juridiques, économiques et sociales, Université Mohamed V, Rabat Agdal",
+    "calls": []
+   },
+   {
+    "n": 26,
+    "page": 1,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "1:36"
+    ],
+    "text": "- 2003 - 2004 : Professeur - visiteur à l&#x27;I.E.P de Lyon",
+    "calls": []
+   },
+   {
+    "n": 27,
+    "page": 1,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "1:37"
+    ],
+    "text": "| 6 |",
+    "calls": []
+   },
+   {
+    "n": 28,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:1"
+    ],
+    "text": "- 2004 - 2006 : Professeur à l&#x27;Institut Supérieur du journalisme, Rabat.",
+    "calls": []
+   },
+   {
+    "n": 29,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:3"
+    ],
+    "text": "- 2000 - 2002: Ministre de l&#x27;Education Nationale",
+    "calls": []
+   },
+   {
+    "n": 30,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:4"
+    ],
+    "text": "- 1998 - 2000 : Ministre chargé de l&#x27;Enseignement Secondaire et Technique",
+    "calls": []
+   },
+   {
+    "n": 31,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:5",
+     "2:6"
+    ],
+    "text": "- 1996 - 1998 : Doyen de la Faculté des Sciences Juridiques, Economiques et Sociales de Mohammedia.",
+    "calls": []
+   },
+   {
+    "n": 32,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:7",
+     "2:8"
+    ],
+    "text": "- 1992 - 1996 : Chef du département de droit public et de sciences politiques de la Faculté de Droit de l&#x27;Université Mohammed V de Rabat Agdal.",
+    "calls": []
+   },
+   {
+    "n": 33,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:9",
+     "2:10"
+    ],
+    "text": "- 1989 : Professeur visiteur à l&#x27;Université de Nanterre / Paris X, cours d&#x27;histoire des idées politiques comparées.",
+    "calls": []
+   },
+   {
+    "n": 34,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:11",
+     "2:12"
+    ],
+    "text": "- De 1982 à 2015 : Professeur à la Faculté des Sciences Juridiques, Economiques et Sociales de Rabat, Université Mohammed V.",
+    "calls": []
+   },
+   {
+    "n": 35,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:13"
+    ],
+    "text": "-Professeur à l&#x27;Ecole Nationale d&#x27;Administration Marocaine,",
+    "calls": []
+   },
+   {
+    "n": 36,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:14"
+    ],
+    "text": "-Professeur au Centre d&#x27;Etudes Stratégiques de Rabat,",
+    "calls": []
+   },
+   {
+    "n": 37,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:15"
+    ],
+    "text": "- 1978 - 1980 : Maître de conférence",
+    "calls": []
+   },
+   {
+    "n": 38,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:16"
+    ],
+    "text": "- 1976 - 1978 : Maître - Assistant",
+    "calls": []
+   },
+   {
+    "n": 39,
+    "page": 2,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "2:17"
+    ],
+    "text": "- 1974 : Assistant",
+    "calls": []
+   },
+   {
+    "n": 40,
+    "page": 2,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "2:18"
+    ],
+    "text": "6. LANGUES",
+    "calls": []
+   },
+   {
+    "n": 41,
+    "page": 2,
+    "type": "table",
+    "level": null,
+    "ids": [
+     "2:19",
+     "2:20",
+     "2:21",
+     "2:22",
+     "2:23",
+     "2:24",
+     "2:25",
+     "2:26",
+     "2:27",
+     "2:28",
+     "2:29",
+     "2:30",
+     "2:31",
+     "2:32",
+     "2:33",
+     "2:34",
+     "2:35",
+     "2:36",
+     "2:37",
+     "2:38"
+    ],
+    "text": "Langue Lu Parlé Écrit Français Excellent Excellent Excellent Arabe Excellent Excellent Excellent Anglais Bon Bon Bon espagnol Bon Bon Bon",
+    "calls": []
+   },
+   {
+    "n": 42,
+    "page": 2,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "2:39"
+    ],
+    "text": "7- PUBLICATIONS :",
+    "calls": []
+   },
+   {
+    "n": 43,
+    "page": 2,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "2:40"
+    ],
+    "text": "7. 1 Ouvrages de l&#x27;auteur :",
+    "calls": []
+   },
+   {
+    "n": 44,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:41"
+    ],
+    "text": "* La gauche marocaine : tensions et nécessités, Dafatir Siyassiya, Rabat, 2015.",
+    "calls": []
+   },
+   {
+    "n": 45,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:42",
+     "2:43"
+    ],
+    "text": "* Le conquérant de l&#x27;empire imaginaire, roman historique, La Croisée des Chemins, Casablanca, 2014.",
+    "calls": []
+   },
+   {
+    "n": 46,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:44"
+    ],
+    "text": "* Une année considérable, La Croisée des Chemins, Casablanca, 2012.",
+    "calls": []
+   },
+   {
+    "n": 47,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:45"
+    ],
+    "text": "* Violence et politique dans le monde arabe, Cahiers de Chaillot, Paris, 2010.",
+    "calls": []
+   },
+   {
+    "n": 48,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:46"
+    ],
+    "text": "* La transition au Maroc 2 : le purgatoire, Eddif, Casablanca, 2009.",
+    "calls": []
+   },
+   {
+    "n": 49,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:47",
+     "2:48"
+    ],
+    "text": "* Les enjeux du changement politique au Maroc, Publications Dafatir siyassiya, Rabat, 2004.",
+    "calls": []
+   },
+   {
+    "n": 50,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:49"
+    ],
+    "text": "* Entretiens sur la réforme de l&#x27;enseignement, Rabat, 2002.",
+    "calls": []
+   },
+   {
+    "n": 51,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:50"
+    ],
+    "text": "* Causeries sur la politique marocaine, Publication Azzaman, Rabat, 2002.",
+    "calls": []
+   },
+   {
+    "n": 52,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:51"
+    ],
+    "text": "* La transition au Maroc 1 : l&#x27;Invitation, Eddif, Casablanca, 2001.",
+    "calls": []
+   },
+   {
+    "n": 53,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:52"
+    ],
+    "text": "* Maroc, l&#x27;Espérance de l&#x27;Etat Moderne Afrique Orient, Casablanca 1999.",
+    "calls": []
+   },
+   {
+    "n": 54,
+    "page": 2,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "2:53"
+    ],
+    "text": "* Carnets de bus, Eddif, Casablanca, 1999.",
+    "calls": []
+   },
+   {
+    "n": 55,
+    "page": 2,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "2:54"
+    ],
+    "text": "|7|",
+    "calls": []
+   },
+   {
+    "n": 56,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:1",
+     "3:2"
+    ],
+    "text": "* La réforme du système de l&#x27;éducation et de l&#x27;enseignement, Editions « Savoir pour tous », Rabat, 1998.",
+    "calls": []
+   },
+   {
+    "n": 57,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:3"
+    ],
+    "text": "* Histoire d&#x27;Anh Ma, récit, ED. L&#x27;Harmattan, paris, 1995.",
+    "calls": []
+   },
+   {
+    "n": 58,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:4",
+     "3:5"
+    ],
+    "text": "* Le discours stratégique arabe. Constantes et variations. Cahiers du Lumiar. I.E.E.I, Lisbonne, 1994.",
+    "calls": []
+   },
+   {
+    "n": 59,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:6",
+     "3:7"
+    ],
+    "text": "* Chroniques des jours de reflux, ED, l&#x27;Harmatttan ; Paris, 1993, traduction arabe , Dar attakafa, Casablanca, 2002.",
+    "calls": []
+   },
+   {
+    "n": 60,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:8"
+    ],
+    "text": "* Feuillets sur la crise du golfe, Publication Abhath, Rabat, 1992.",
+    "calls": []
+   },
+   {
+    "n": 61,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:9"
+    ],
+    "text": "* Politique et savoir au Maroc, SMER, Rabat, 1992.",
+    "calls": []
+   },
+   {
+    "n": 62,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:10"
+    ],
+    "text": "* Images Politiques du Maroc, Okkad, Rabat, 1991.",
+    "calls": []
+   },
+   {
+    "n": 63,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:11",
+     "3:12",
+     "3:13"
+    ],
+    "text": "* Ecrits marxistes sur le Maroc (1860 - 1925) k. Marx, F. Engels, R. Luxembourg, la 3ème internationale, éditions le contacté, Salé, 1986 (traduit aussi en arabe, Dar Toubkal, 1987).",
+    "calls": []
+   },
+   {
+    "n": 64,
+    "page": 3,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "3:14"
+    ],
+    "text": "7-2. Ouvrages en collaboration :",
+    "calls": []
+   },
+   {
+    "n": 65,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:15",
+     "3:16"
+    ],
+    "text": "o L&#x27;islam et les deux France, dans Ce qui nous somme, Editions La Croisée des Chemins, Casablanca, 2015.",
+    "calls": []
+   },
+   {
+    "n": 66,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:17"
+    ],
+    "text": "o Le Maroc politique d&#x27;aujourd&#x27;hui, Centre Jacques Berque, Actes Sud, Paris 2015.",
+    "calls": []
+   },
+   {
+    "n": 67,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:18",
+     "3:19"
+    ],
+    "text": "· Le processus de prise de décision au Maroc, in Le processus de prise de décision dans le monde arabe, Centre des Etudes de l&#x27;Unité Arabe, Beyrout, ...",
+    "calls": []
+   },
+   {
+    "n": 68,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:20",
+     "3:21",
+     "3:22"
+    ],
+    "text": "· La question de la sécurité et de la réforme de l&#x27;Etat. Perspectives comparées entre l&#x27;Afrique de l&#x27;Ouest et la région arabe, 14ème Assemblée Générale, Codesria, Dakar, Juin 2015",
+    "calls": []
+   },
+   {
+    "n": 69,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:23",
+     "3:24"
+    ],
+    "text": "o Le métier d&#x27;intellectuel. Dialogues avec quinze penseurs du Maroc, Les Presses de l&#x27;Université citoyenne, Casablanca, 2014.",
+    "calls": []
+   },
+   {
+    "n": 70,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:25"
+    ],
+    "text": "o The Arab democratic wave. How the EU can seize the moment, report, n 9, 2011",
+    "calls": []
+   },
+   {
+    "n": 71,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:26"
+    ],
+    "text": "· Sécurité et perspectives de stabilisation au Maroc, ed.Cerss, Rabat, 2010.",
+    "calls": []
+   },
+   {
+    "n": 72,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:27",
+     "3:28",
+     "3:29"
+    ],
+    "text": "o Crise des élites et restructuration du champ politique par le haut. Eléments de lecture du champ politique marocain, Cercle d&#x27;Analyse Politique, Fondation Abderrahim Bouabid, les cahiers bleus, n 13, 2009",
+    "calls": []
+   },
+   {
+    "n": 73,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:30",
+     "3:31"
+    ],
+    "text": "o Union pour la Méditerranée. Le potentiel de l&#x27;acquis de Barcelone, Institut d&#x27;Etudes de la Sécurité de l&#x27;Union Européenne, Paris, 2008.",
+    "calls": []
+   },
+   {
+    "n": 74,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:32",
+     "3:33",
+     "3:34"
+    ],
+    "text": "· L&#x27;expérience de réforme de l&#x27;Education et de l&#x27;Enseignement au Maroc à travers l&#x27;expérience de l&#x27;alternance 1998-2002, dans « La réforme de l&#x27;Education dans les pays arabes », Beyrouth, 2005.",
+    "calls": []
+   },
+   {
+    "n": 75,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:35",
+     "3:36",
+     "3:37"
+    ],
+    "text": "o Réforme économique politique sociale et démocratisation Mélanges Mohamed Jalal Essaîd, Editions du centre Marocain des Etudes juridiques, Rabat, 2005 pp 25-33.",
+    "calls": []
+   },
+   {
+    "n": 76,
+    "page": 3,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "3:38",
+     "3:39"
+    ],
+    "text": "o Parcours d&#x27;intellectuels maghrébins Scolarité, formation, socialisation et positionnements, Karthala, Institut Maghreb-Europe, Paris, 1999",
+    "calls": []
+   },
+   {
+    "n": 77,
+    "page": 3,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "3:40"
+    ],
+    "text": "| 8 |",
+    "calls": []
+   },
+   {
+    "n": 78,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:1",
+     "4:2"
+    ],
+    "text": "o « Parcours maghrébins d&#x27;Indochine\" Miroirs maghrébins, Itinéraires de soi et paysages de rencontre CNRS, Paris, 1998.",
+    "calls": []
+   },
+   {
+    "n": 79,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:3",
+     "4:4"
+    ],
+    "text": "o Dictionnaire biographique du mouvement ouvrier, sous la direction de René Galissot, Eddif, Casablanca, 1998",
+    "calls": []
+   },
+   {
+    "n": 80,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:5",
+     "4:6",
+     "4:7"
+    ],
+    "text": "o Mehdi Ben barka, de l&#x27;Indépendance marocaine à la Tricontinentale Karthala - Institut Maghreb Europe, 1997, 214P ; « Ben Barka et les communistes », pp 105- 114",
+    "calls": []
+   },
+   {
+    "n": 81,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:8",
+     "4:9"
+    ],
+    "text": "o Etudes marocaines sur la Ligue des Etats arabes. Bilan et perspectives, Département de Droit public, Université Mohamed V Agdal, 1997",
+    "calls": []
+   },
+   {
+    "n": 82,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:10",
+     "4:11"
+    ],
+    "text": "· Les ONG au Maghreb de la prospective Urbain à l&#x27;action au quotidien. Séminaire régional, rabat (Maroc) 26 /28 Octobre 1995. Enda Maghreb. Amsed, Rabat 1996.",
+    "calls": []
+   },
+   {
+    "n": 83,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:12",
+     "4:13"
+    ],
+    "text": "o L&#x27;Islamisme et la politique dans les rapports entre l&#x27;Europe et le Maghreb, I.E.I.S, Lisbonne.1996",
+    "calls": []
+   },
+   {
+    "n": 84,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:14"
+    ],
+    "text": "· Sistemos politico del Maghreb actual, Madrid, Mapfre, 1996.",
+    "calls": []
+   },
+   {
+    "n": 85,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:15",
+     "4:16"
+    ],
+    "text": "o Inclusion y Exclusion en el espacio politico marroqui sociologia, nº 14, 1996, pp 159-175.",
+    "calls": []
+   },
+   {
+    "n": 86,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:17",
+     "4:18"
+    ],
+    "text": "o Et si le processus de paix au Moyen-Orient devait échouer ? Thème de la 2ème session 1996, de l&#x27;Académie du royaume du Maroc, Amman 10 décembre1996.",
+    "calls": []
+   },
+   {
+    "n": 87,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:19",
+     "4:20"
+    ],
+    "text": "o Sciences sociales, Sciences morales. Itinéraires et pratiques de Recherche, Alif IRMC, Tunis, 1995, 140 P.",
+    "calls": []
+   },
+   {
+    "n": 88,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:21",
+     "4:22"
+    ],
+    "text": "o Stratégies de privatisation, co-ed / Toubkal / L&#x27;harmattan, Casablanca / Paris, 1995.",
+    "calls": []
+   },
+   {
+    "n": 89,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:23",
+     "4:24"
+    ],
+    "text": "o Le Maroc et les droits de l&#x27;homme. Positions, réalisations et perspectives, Collection Edification d&#x27;un Etat Moderne, Paris, l&#x27;Harmattan 1994.",
+    "calls": []
+   },
+   {
+    "n": 90,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:25",
+     "4:26"
+    ],
+    "text": "o Les pays en voie de développement entre l&#x27;exigence démocratie et la priorité économique, session 1994, édité par l&#x27;Académie dans la collection « Sessions »,",
+    "calls": []
+   },
+   {
+    "n": 91,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:27"
+    ],
+    "text": "o L&#x27;Etat et la société au Maroc, Afrique-Orient, Rabat 1992.",
+    "calls": []
+   },
+   {
+    "n": 92,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:28"
+    ],
+    "text": "o Stratégie - 1, Peuples Méditerranées, Marseille, 1992.",
+    "calls": []
+   },
+   {
+    "n": 93,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:29",
+     "4:30"
+    ],
+    "text": "o La société civile dans le monde arabe et le processus de démocratisation, Centre des Etudes de l&#x27;Unité Arabe, Beyrout, 1992.",
+    "calls": []
+   },
+   {
+    "n": 94,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:31",
+     "4:32"
+    ],
+    "text": "o Le Maroc Actuel, une modernisation au miroir de la tradition, CRNS, Paris 1992.",
+    "calls": []
+   },
+   {
+    "n": 95,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:33",
+     "4:34"
+    ],
+    "text": "o Elections, Participation et transition Politique en Afrique du Nord, Instituto de Coperacio con el Mundo Arabe, Madrid, 1991.",
+    "calls": []
+   },
+   {
+    "n": 96,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:35",
+     "4:36",
+     "4:37"
+    ],
+    "text": "· Perspectives de la coopération inter-arabe à l&#x27;horizon de l&#x27;an 2000, Centre d&#x27;Etudes Stratégiques et politique d&#x27;El Ahram et Forum de la Pensée Arabe, le Caire-Amman, 1991 (en langue arabe).",
+    "calls": []
+   },
+   {
+    "n": 97,
+    "page": 4,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "4:38",
+     "4:39"
+    ],
+    "text": "· L&#x27;Europe des douze et les autres, session de l&#x27;Académie du Royaume du Maroc, 19 - 21 novembre 1991 édité par l&#x27;Académie dans la collection « Sessions ».",
+    "calls": []
+   },
+   {
+    "n": 98,
+    "page": 4,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "4:40"
+    ],
+    "text": "| 9 |",
+    "calls": []
+   },
+   {
+    "n": 99,
+    "page": 5,
+    "type": "header",
+    "level": null,
+    "ids": [
+     "5:1"
+    ],
+    "text": "السياسات العمومية",
+    "calls": []
+   },
+   {
+    "n": 100,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:2"
+    ],
+    "text": "o De Gaulle et le Maroc, Publisud / Sochepresse, Paris, 1990.",
+    "calls": []
+   },
+   {
+    "n": 101,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:3"
+    ],
+    "text": "o De l&#x27;information à l&#x27;opinion, Maghreb Arabe Presse, rabat 1990.",
+    "calls": []
+   },
+   {
+    "n": 102,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:4"
+    ],
+    "text": "o Changement politiques au Maghreb (1979 - 1989) CNRS, Paris, 1990.",
+    "calls": []
+   },
+   {
+    "n": 103,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:5"
+    ],
+    "text": "o Du Grand Maghreb, Economica, Paris 1989.",
+    "calls": []
+   },
+   {
+    "n": 104,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:6",
+     "5:7"
+    ],
+    "text": "o Droit et environnement social au Maghreb, CNRS, Paris / Fondation Ibn Saoud - Casablanca 1989.",
+    "calls": []
+   },
+   {
+    "n": 105,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:8",
+     "5:9"
+    ],
+    "text": "o La fin des conflits régionaux. Pour une ère nouvelle dans les relations internationales. Rabat, 1989",
+    "calls": []
+   },
+   {
+    "n": 106,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:10"
+    ],
+    "text": "· Bilan et perspectives des relations maroco-soviétiques, Rabat, 1988",
+    "calls": []
+   },
+   {
+    "n": 107,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:11",
+     "5:12"
+    ],
+    "text": "· La durée de l&#x27;Etat, Edino-Pubisud-Codersia, Rabat-Paris-Dakar, 1987 (traduit aussi en anglais, Codesria, .. ).",
+    "calls": []
+   },
+   {
+    "n": 108,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:13"
+    ],
+    "text": "o Le Maghreb dans les relations inter-arabes, CNRS, Paris 1987.",
+    "calls": []
+   },
+   {
+    "n": 109,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:14"
+    ],
+    "text": "o L&#x27;espace de l&#x27;Etat, Edino, Rabat, 1986.",
+    "calls": []
+   },
+   {
+    "n": 110,
+    "page": 5,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "5:15"
+    ],
+    "text": "7-3 Direction et co-direction d&#x27;ouvrages :",
+    "calls": []
+   },
+   {
+    "n": 111,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:16"
+    ],
+    "text": "Coopération décentralisée Publication du Cerss, Rabat, 2013",
+    "calls": []
+   },
+   {
+    "n": 112,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:17",
+     "5:18"
+    ],
+    "text": "Rapport sur l&#x27;état de la recherche dans les sciences sociales du développement, Publication du Cerss, Rabat, 2010",
+    "calls": []
+   },
+   {
+    "n": 113,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:19"
+    ],
+    "text": "Le Maroc et l&#x27;Afrique, Institut d&#x27;Etudes Africaines, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 114,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:20",
+     "5:21"
+    ],
+    "text": "Mélanges « Taher Masmoudi », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 115,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:22",
+     "5:23"
+    ],
+    "text": "Mélanges « Abderrahmane Kadiri », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 116,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:25",
+     "5:26"
+    ],
+    "text": "Etudes marocaines sur la Ligue Arabe, département de Droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 117,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:27"
+    ],
+    "text": "Le Maroc et l&#x27;Europe, Ouest éditions, Nantes 1996.",
+    "calls": []
+   },
+   {
+    "n": 118,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:28"
+    ],
+    "text": "Publication annuelle du Rapport Stratégique depuis 1995",
+    "calls": []
+   },
+   {
+    "n": 119,
+    "page": 5,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "5:29"
+    ],
+    "text": "7-4 : Traduction",
+    "calls": []
+   },
+   {
+    "n": 120,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:30",
+     "5:31"
+    ],
+    "text": "· Al Hajoui (Mohammed), « Récit de voyage en France et en Angleterre », Afrique- Orient, Casablanca, 2002.",
+    "calls": []
+   },
+   {
+    "n": 121,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:32",
+     "5:33"
+    ],
+    "text": "· Mohammed Ibn Abdellah Al- Muàqqital, Marrâkuchi, « Les gens du navire », Afrique-Orient, Casablanca, 2000.",
+    "calls": []
+   },
+   {
+    "n": 122,
+    "page": 5,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "5:34"
+    ],
+    "text": "7-5 Préfaces:",
+    "calls": []
+   },
+   {
+    "n": 123,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:35",
+     "5:36"
+    ],
+    "text": "- Zahra Hmimid « Analyse du discours politique de la gauche à travers la presse. Cas d&#x27;Al Bayane et Libération durant les élections législatives 1977-2011 », 2014",
+    "calls": []
+   },
+   {
+    "n": 124,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:37",
+     "5:38"
+    ],
+    "text": "-Préface au livre de Said Khomri, « L&#x27;esprit de la constitution. Pouvoir et légitimité au Maroc » de collec Critique de la politique, Publications Dafatir Siyassi, Rabat, 2012",
+    "calls": []
+   },
+   {
+    "n": 125,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:39"
+    ],
+    "text": "- Préface au livre Mohamed Bennani, Mémoires d&#x27;un résistant », Rabat, 2012",
+    "calls": []
+   },
+   {
+    "n": 126,
+    "page": 5,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "5:40",
+     "5:41"
+    ],
+    "text": "-Préface au livre de Said Bennis, « Territoires, région et langues au Maroc », Rabat, Edition Lina, 2011.",
+    "calls": []
+   },
+   {
+    "n": 127,
+    "page": 5,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "5:42"
+    ],
+    "text": "|10|",
+    "calls": []
+   },
+   {
+    "n": 128,
+    "page": 6,
+    "type": "header",
+    "level": null,
+    "ids": [
+     "6:1"
+    ],
+    "text": "السياسات العمومية ..",
+    "calls": []
+   },
+   {
+    "n": 129,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:2"
+    ],
+    "text": "-Introduction au premier numéro de la revue marocaine de sciences politique, 2010",
+    "calls": []
+   },
+   {
+    "n": 130,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:3",
+     "6:4"
+    ],
+    "text": "-Préface à la traduction arabe du livre de Cynthia Fleury, « La fin du courage », Paris, Fayard, 2010.",
+    "calls": []
+   },
+   {
+    "n": 131,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:5",
+     "6:6",
+     "6:7"
+    ],
+    "text": "-Préface au livre de Ghassane Lamrani, « Crise passagére ou prémisses d&#x27;un déclin annoncé, Sociologie électorale de l&#x27;Union Socialiste des Forces Populaires », Ittissalat Sebou, Marrakech, 2009",
+    "calls": []
+   },
+   {
+    "n": 132,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:8"
+    ],
+    "text": "-Introduction au premier numéro de la revue marocaine de science politique, 2009",
+    "calls": []
+   },
+   {
+    "n": 133,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:9",
+     "6:10",
+     "6:11"
+    ],
+    "text": "-Préface au livre de Ahmed Lamihi, « L&#x27;éducation à la citoyenneté. L&#x27;expérience de Janusz Korczak ou pour une pédagogie des pauvres » .. Publications Dossiers pédagogiques, Tétouan, 2008",
+    "calls": []
+   },
+   {
+    "n": 134,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:12",
+     "6:13"
+    ],
+    "text": "- Préface à l&#x27;ouvrage d&#x27;Azzeddine Al Allam, « La pensée politique sultanienne », Dar Al Amane, Rabat, 2006",
+    "calls": []
+   },
+   {
+    "n": 135,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:14",
+     "6:15",
+     "6:16"
+    ],
+    "text": "-Recueil de textes traduits de Mohammed Lachheb, « Philosophie et politique chez Habermas. Le débat sur la modernité, la légitimité et la communication dans l&#x27;espace démocratique », collec. Critique de la politique, Publications Dafatir Siyassi, Rabat,2006",
+    "calls": []
+   },
+   {
+    "n": 136,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:17",
+     "6:18",
+     "6:19"
+    ],
+    "text": "-Présentation du recueil de textes publiés de son vivant par la revue Abhath, « Sociologie politique du Maroc profond, A propos de l&#x27;œuvre de Paul Pascon », collec Critique de la politique, Publications Dafatir Siyassi, Rabat, 2005",
+    "calls": []
+   },
+   {
+    "n": 137,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:20",
+     "6:21"
+    ],
+    "text": "-Préface au livre de Mohammed Lamrani, « Insurrections et révoltes au Maroc de la période des Almohades », Dar Nachr Al Maarifa, 2005",
+    "calls": []
+   },
+   {
+    "n": 138,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:22",
+     "6:23"
+    ],
+    "text": "-Préface de Moussa Hormat-Allah, « Chroniques sahariennes. Les enjeux géoplitiques et géostratégiques du conflit du Sahara », Mils, Casablanca, 2004",
+    "calls": []
+   },
+   {
+    "n": 139,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:24",
+     "6:25"
+    ],
+    "text": "-Introduction du XXiéme anniversaire d&#x27;Abhath, numéro spécial sur « Les mutations sociales et politiques au Maroc », Casablanca, 2003",
+    "calls": []
+   },
+   {
+    "n": 140,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:26"
+    ],
+    "text": "- Le débat sur la jeunesse et sur l&#x27;enseignement au Maroc 1966-1988, Rabat, 2002.",
+    "calls": []
+   },
+   {
+    "n": 141,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:27",
+     "6:28"
+    ],
+    "text": "- Préface au livre de Moncef Slimi, « Le processus de prise de décision en matière de politique étrangère aux Etat-Unis », Centre des Etudes Euro-arabes, Paris, 1997.",
+    "calls": []
+   },
+   {
+    "n": 142,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:29",
+     "6:30"
+    ],
+    "text": "- Préface aux Mélanges « Taher Masmoudi », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 143,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:31",
+     "6:32"
+    ],
+    "text": "- Préface aux mélanges « Abderrahmane Kadiri », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 144,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:33",
+     "6:34"
+    ],
+    "text": "- Préface à l&#x27;ouvrage sur « Etudes marocaines sur la Ligue Arabe », Département de Droit de Rabat-Agdal, Casablanca 1997.",
+    "calls": []
+   },
+   {
+    "n": 145,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:35",
+     "6:36"
+    ],
+    "text": "- Introduction aux Actes du colloque sur « Communication et collectivités locales, Repères », Université de Mohammedia, en collaboration avec la Fondation Friedrich, Ebert, 1997.",
+    "calls": []
+   },
+   {
+    "n": 146,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:37",
+     "6:38"
+    ],
+    "text": "- Introduction aux « Etudes d&#x27;histoire sociale marocaine », d&#x27;Albert Ayache, Okad, Rabat 1996 .",
+    "calls": []
+   },
+   {
+    "n": 147,
+    "page": 6,
+    "type": "reference",
+    "level": null,
+    "ids": [
+     "6:39",
+     "6:40"
+    ],
+    "text": "-Préface au livre de Houroro (Mohammed), « Sociologie politique de Michaux- Bellaire », Afrique-Orient, Casablanca, 1985.",
+    "calls": []
+   },
+   {
+    "n": 148,
+    "page": 6,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "6:41"
+    ],
+    "text": "|11 |",
+    "calls": []
+   },
+   {
+    "n": 149,
+    "page": 7,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "7:1"
+    ],
+    "text": "7-6 - Consultations, communications, enquêtes, recherches de terrain.",
+    "calls": []
+   },
+   {
+    "n": 150,
+    "page": 7,
+    "type": "heading",
+    "level": 4,
+    "ids": [
+     "7:2"
+    ],
+    "text": "7-6-1 Droits fondamentaux, droits culturels (Publications et activités)",
+    "calls": []
+   },
+   {
+    "n": 151,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:3",
+     "7:4",
+     "7:5",
+     "7:6",
+     "7:7",
+     "7:8"
+    ],
+    "text": "Participation à l&#x27;élaboration d&#x27;un Master International (au sein du réseau d&#x27;instituts d&#x27;enseignements supérieur Profadel regroupant Delta C/Bamako, Irfodel (Togo, FFF/Madagascar, Ciedel/Lyon, Escuella Del Desarollo/ Lima, Cerss/Rabat) sur « Citoyenneté et développement » (accordant une place importante à la perspective interculturelle dans les processus de formation de la citoyenneté), en tout trois ateliers en 2014 et 2015.",
+    "calls": []
+   },
+   {
+    "n": 152,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:9",
+     "7:10"
+    ],
+    "text": "Membre du Comité scientifique international du Forum Mondial des Droits de l&#x27;homme de Marrakech 2014",
+    "calls": []
+   },
+   {
+    "n": 153,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:11"
+    ],
+    "text": "Président du festival du film du désert, Zagora 2014.",
+    "calls": []
+   },
+   {
+    "n": 154,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:12"
+    ],
+    "text": "Président du jury du festival national du film de Tanger, 2014.",
+    "calls": []
+   },
+   {
+    "n": 155,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:13",
+     "7:14",
+     "7:15"
+    ],
+    "text": "O Organisateur d&#x27;universités d&#x27;été et d&#x27;hiver (deux sessions par an) à l&#x27;intention des militants associatifs qui se spécialisent dans le développement social(de 2003 à Aujourd&#x27;hui).",
+    "calls": []
+   },
+   {
+    "n": 156,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:16",
+     "7:17",
+     "7:18"
+    ],
+    "text": "Fondateur de l&#x27;Université du Développement Social, Foyer de débat public, de formation en présentiel et à distance fondée dans le cadre du CERSS, notamment sur les questions des droits culturels (de 2003 à Aujourd&#x27;hui)",
+    "calls": []
+   },
+   {
+    "n": 157,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:19",
+     "7:20",
+     "7:21",
+     "7:22",
+     "7:23"
+    ],
+    "text": "O Responsable de la création et de la mise en place d&#x27;un nouveau Master (Master de Management du Développement Social), qui accorde une place de choix aux enseignements et pratiques liées aux questions de développement : politiques publiques du développement, institutions, droits, culture, gestion des associations, action associative, partenariat, rapports Etat-société civile(2004-2015).",
+    "calls": []
+   },
+   {
+    "n": 158,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:24",
+     "7:25"
+    ],
+    "text": "Communication sur « La politique culturelle et le développement au Maroc », Publications de l&#x27;Académie du Royaume du Maroc, Rabat, 2014,",
+    "calls": []
+   },
+   {
+    "n": 159,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:26",
+     "7:27"
+    ],
+    "text": "@ Cours inaugural sur « Culture et Développement », Ecole Normale Supérieure, Rabat, décembre, 2014",
+    "calls": []
+   },
+   {
+    "n": 160,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:28",
+     "7:29"
+    ],
+    "text": "« Politique linguistique, politique culturelle et développement au Maroc », leçon inaugurale à la Faculté des Sciences et Techniques, Safi, novembre, 2014",
+    "calls": []
+   },
+   {
+    "n": 161,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:30",
+     "7:31"
+    ],
+    "text": "O Membre de la commission de recours concernant la régularisation des immigrés et des demandeurs d&#x27;asile 2013",
+    "calls": []
+   },
+   {
+    "n": 162,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:32",
+     "7:33"
+    ],
+    "text": "O Président de la commission nationale sur l&#x27;avenir de la politique du cinéma au Maroc, auteure du livre blanc sur le cinéma, 2012-2013",
+    "calls": []
+   },
+   {
+    "n": 163,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:34"
+    ],
+    "text": "O Président de la Fondation Mohamed Abed El Jabiri pour la pensée et la Culture, 2011",
+    "calls": []
+   },
+   {
+    "n": 164,
+    "page": 7,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "7:35",
+     "7:36"
+    ],
+    "text": "O Organisation d&#x27;une seconde session d&#x27;hiver de l&#x27;UDS sur « Processus et articulation du développement social et des droits économiques, sociaux, culturels et linguistiques »,",
+    "calls": []
+   },
+   {
+    "n": 165,
+    "page": 7,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "7:37"
+    ],
+    "text": "|12|",
+    "calls": []
+   },
+   {
+    "n": 166,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:1"
+    ],
+    "text": "janvier 2010, en partenariat avec la Faculté Polydisciplinaire de Taza",
+    "calls": []
+   },
+   {
+    "n": 167,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:2",
+     "8:3"
+    ],
+    "text": "o Rapport sur « Politique de sécurité et Etat de droit au Maroc », Rabat, 2010",
+    "calls": []
+   },
+   {
+    "n": 168,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:4"
+    ],
+    "text": "Membre fondateur du Groupe International du Droit à l&#x27;Education, 2009.",
+    "calls": []
+   },
+   {
+    "n": 169,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:5",
+     "8:6"
+    ],
+    "text": "o Rapport sur « La sécurité humaine dans le monde arabe », UNESCO, Paris, 2009",
+    "calls": []
+   },
+   {
+    "n": 170,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:7"
+    ],
+    "text": "Multiculturalisme et multilinguisme au Maroc, leçon inaugurale de l&#x27;IRCAM, Rabat,",
+    "calls": []
+   },
+   {
+    "n": 171,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:8",
+     "8:9"
+    ],
+    "text": "Keynote sur Pluralisme linguistique et transition démocratique, Université du printemps, Fès 2009 .",
+    "calls": []
+   },
+   {
+    "n": 172,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:10",
+     "8:11"
+    ],
+    "text": "O Organisation de la session d&#x27;hiver de l&#x27;UDS sur »Culture nationale : singularité et pluralisme. Le cas de l&#x27;amazighité » à Immouzer 2006",
+    "calls": []
+   },
+   {
+    "n": 173,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:12",
+     "8:13",
+     "8:14",
+     "8:15",
+     "8:16"
+    ],
+    "text": "Durant son mandat ministériel, le candidat a mis en place une commission chargée de réviser les programmes sous l&#x27;angle des différentes catégories des Droits de l&#x27;Homme, d&#x27;expurger les matières porteuses des éléments incompatibles avec les droits de l&#x27;homme et d&#x27;œuvrer pour promouvoir la perspective des Droits de l&#x27;Homme dans les curricula (2000-2002)",
+    "calls": []
+   },
+   {
+    "n": 174,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:17",
+     "8:18",
+     "8:19"
+    ],
+    "text": "O Mise en place d&#x27;une commission nationale permanente chargée de veiller au développement d&#x27;une culture des droits de l&#x27;homme dans les programmes éducatifs du ministère(2001)",
+    "calls": []
+   },
+   {
+    "n": 175,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:20",
+     "8:21"
+    ],
+    "text": "· Initiation et supervision de la première conception des curricula de la langue amazigh en 2000 et en 2002",
+    "calls": []
+   },
+   {
+    "n": 176,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:22",
+     "8:23"
+    ],
+    "text": "O Le Maroc et les droits de l&#x27;homme. Positions, réalisations et perspectives, Collection Edification d&#x27;un Etat Moderne, Paris, l&#x27;Harmattan 1994.",
+    "calls": []
+   },
+   {
+    "n": 177,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:24",
+     "8:25"
+    ],
+    "text": "Les pays en voie de développement entre l&#x27;exigence démocratie et la priorité économique, session 1994, édité par l&#x27;Académie dans la collection « Sessions »",
+    "calls": []
+   },
+   {
+    "n": 178,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:26",
+     "8:27"
+    ],
+    "text": "« Les droits de l&#x27;homme au Maroc : acteurs, discours, actions », consultation effectuée pour l&#x27;Institut arabe des droits de l&#x27;homme, Tunis, 1993.",
+    "calls": []
+   },
+   {
+    "n": 179,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:28",
+     "8:29"
+    ],
+    "text": "Droit et environnement social au Maghreb, CNRS, Paris / Fondation Ibn Saoud - Casablanca 1989.",
+    "calls": []
+   },
+   {
+    "n": 180,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:30",
+     "8:31"
+    ],
+    "text": "« La politique culturelle au Maroc », Communication à la table-ronde de l&#x27;ittihad Al Ichtiraki, avril 1989.",
+    "calls": []
+   },
+   {
+    "n": 181,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:32",
+     "8:33"
+    ],
+    "text": "O « La politique culturelle au Maroc », Communication à Madrid, rencontre hispano- maghrébine, Gredos, janvier 1988.",
+    "calls": []
+   },
+   {
+    "n": 182,
+    "page": 8,
+    "type": "heading",
+    "level": 4,
+    "ids": [
+     "8:34"
+    ],
+    "text": "7-6-2- La participation communautaire, les collectivités locales et la santé :",
+    "calls": []
+   },
+   {
+    "n": 183,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:35",
+     "8:36"
+    ],
+    "text": "· Evaluation de la décentralisation au Maroc. PAD, en collaboration de Christophe Mestre, 2014.",
+    "calls": []
+   },
+   {
+    "n": 184,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:37",
+     "8:38"
+    ],
+    "text": "· Contribution au 4iéme congrès mondial de CGLU. Second sommet mondial des dirigeants locaux et régionaux, Rabat, 2013",
+    "calls": []
+   },
+   {
+    "n": 185,
+    "page": 8,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "8:39",
+     "8:40"
+    ],
+    "text": "· Elaboration d&#x27;une étude sur la coopération décentralisée franco-marocaine (2001- 2008) 20O9",
+    "calls": []
+   },
+   {
+    "n": 186,
+    "page": 8,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "8:41"
+    ],
+    "text": "|13|",
+    "calls": []
+   },
+   {
+    "n": 187,
+    "page": 9,
+    "type": "header",
+    "level": null,
+    "ids": [
+     "9:1"
+    ],
+    "text": "المجاما\"الجمودين",
+    "calls": []
+   },
+   {
+    "n": 188,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:2"
+    ],
+    "text": "· Etude sur l&#x27;Etat arabe PNUD 2008",
+    "calls": []
+   },
+   {
+    "n": 189,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:3",
+     "9:4"
+    ],
+    "text": "Elaboration d&#x27;une étude sur la maison de l&#x27;élu, en collaboration avec Bernard Husson, 2005",
+    "calls": []
+   },
+   {
+    "n": 190,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:5",
+     "9:6",
+     "9:7",
+     "9:8"
+    ],
+    "text": "· Représentations du personnel de santé et de la population sur les services de santé de base et les stratégies mobiles en milieu rural. Etude sociologique Ministère de la santé Publique / Institut National d&#x27;administration de la santé / Banque Mondiale, janvier 1995.",
+    "calls": []
+   },
+   {
+    "n": 191,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:9",
+     "9:10"
+    ],
+    "text": "· Enquête sur les agents de santé itinérants. Contribution au séminaire sur « La politique de la santé au Maroc », Faculté de droit, Rabat, 1994.",
+    "calls": []
+   },
+   {
+    "n": 192,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:11",
+     "9:12"
+    ],
+    "text": "· Etude sur la participation des collectivités locales aux soins de santé de base au Maroc. Consultation pour l&#x27;OMS, ronéotypé, 1990.",
+    "calls": []
+   },
+   {
+    "n": 193,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:13",
+     "9:14",
+     "9:15"
+    ],
+    "text": "· Problématique de la démocratie locale au Maroc en Afrique\" : Le cas marocain, Communication au colloque organisé par l&#x27;association des politologues et Publicistes africaines (APPA), Faculté de Droit de Rabat , février 1989.",
+    "calls": []
+   },
+   {
+    "n": 194,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:16",
+     "9:17",
+     "9:18",
+     "9:19"
+    ],
+    "text": "· Sociologie politique d&#x27;une palmeraie dans le sud-est marocaine : l&#x27;application des politiques publiques nationales à l&#x27;échelon local, le cas de Tissint, Etude réalisée en mars 1987 dans le cadre d&#x27;un projet de recherche collectif multidisciplinaire, Institut Agronomique d&#x27;Agadir.",
+    "calls": []
+   },
+   {
+    "n": 195,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:20",
+     "9:21",
+     "9:22"
+    ],
+    "text": "· L&#x27;expérience de la démocratie locale au Maroc\" Dans le cadre de la rencontre organisée par la Fédération des villes jumelées francophones, Biarritz (France), 1987.",
+    "calls": []
+   },
+   {
+    "n": 196,
+    "page": 9,
+    "type": "heading",
+    "level": 4,
+    "ids": [
+     "9:23"
+    ],
+    "text": "7-6-3. Recherche sur les politiques publiques :",
+    "calls": []
+   },
+   {
+    "n": 197,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:24",
+     "9:25",
+     "9:26",
+     "9:27"
+    ],
+    "text": "O Etude sur l&#x27;organisation effective de passerelles entre le secteur de l&#x27;alphabétisation et les autres secteurs économiques et ministériels susceptibles d&#x27;accueillir des alphabétisés, Sofreco /Union Européenne, Rabat, 2012",
+    "calls": []
+   },
+   {
+    "n": 198,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:28",
+     "9:29",
+     "9:30"
+    ],
+    "text": "o Rapport sur « l&#x27;Enseignement supérieur et la recherche en Cote d&#x27;Ivoire, état des lieux et perspectives de développement », Sofreco/ Banque Mondiale, Abidjan, 2012",
+    "calls": []
+   },
+   {
+    "n": 199,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:31",
+     "9:32"
+    ],
+    "text": "o Rapport sur « La cohésion sociale dans le monde arabe », Ligue arabe, Oman, 2007",
+    "calls": []
+   },
+   {
+    "n": 200,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:33"
+    ],
+    "text": "o Les politiques des proximité, ouvrage collectif, Rabat, 2005",
+    "calls": []
+   },
+   {
+    "n": 201,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:34",
+     "9:35",
+     "9:36",
+     "9:37",
+     "9:38"
+    ],
+    "text": "o Direction de nombreux travaux universitaires sur les Politiques publiques sociales au Maroc ( Politique de l&#x27;enseignement, de la santé, de l&#x27;habitat, de l&#x27;emploi, de la parité, de lutte contre la pauvreté, de la protection sociale ... « la politique de santé au Maroc », « La politique hospitalière au Maroc », « La politique du sang » etc ...",
+    "calls": []
+   },
+   {
+    "n": 202,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:39"
+    ],
+    "text": "o La réforme de l&#x27;enseignement dans les pays arabes, Beyrouth, 2005",
+    "calls": []
+   },
+   {
+    "n": 203,
+    "page": 9,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "9:40",
+     "9:41",
+     "9:42"
+    ],
+    "text": "o « Inclusion et exclusion dans le système politique marocain », «Communication présentée au Congrès de l&#x27;association Américaine de Science politique, New York,",
+    "calls": []
+   },
+   {
+    "n": 204,
+    "page": 9,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "9:43"
+    ],
+    "text": "|14|",
+    "calls": []
+   },
+   {
+    "n": 205,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:1"
+    ],
+    "text": "1-4 Septembre 1994.",
+    "calls": []
+   },
+   {
+    "n": 206,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:2",
+     "10:3"
+    ],
+    "text": "o « La privatisation, une nouvelle politique publique » ENAP-Rabat / Québec actes du séminaire, 1991.",
+    "calls": []
+   },
+   {
+    "n": 207,
+    "page": 10,
+    "type": "heading",
+    "level": 4,
+    "ids": [
+     "10:4"
+    ],
+    "text": "7-6-4. Recherche sur le mouvement associatif/ la société civile:",
+    "calls": []
+   },
+   {
+    "n": 208,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:5",
+     "10:6"
+    ],
+    "text": "Texte introductif des travaux de l&#x27;Appel de Rabat sur la société civile marocaine, Bouznika, novembre, 2014",
+    "calls": []
+   },
+   {
+    "n": 209,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:7",
+     "10:8"
+    ],
+    "text": "O Le métier d&#x27;intellectuel. Dialogues avec quinze penseurs du Maroc, Les Presses de l&#x27;Université citoyenne, Casablanca, 2014.",
+    "calls": []
+   },
+   {
+    "n": 210,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:9",
+     "10:10"
+    ],
+    "text": "O Réforme économique politique sociale et démocratisation Mélanges Mohamed Jalal Essaîd, Editions du centre Marocain des Etudes juridiques, Rabat, 2005 pp 25-33.",
+    "calls": []
+   },
+   {
+    "n": 211,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:11",
+     "10:12"
+    ],
+    "text": "O Des intellectuels indépendants au Maroc, in Parcours d&#x27;intellectuels maghrébins, Paris, Karthala, 1999",
+    "calls": []
+   },
+   {
+    "n": 212,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:13",
+     "10:14"
+    ],
+    "text": "Les ONG au Maghreb de la prospective Urbain à l&#x27;action au quotidien. Séminaire régional, Rabat (Maroc) 26 /28 Octobre 1995. Enda Maghreb. Amsed, Rabat 1996.",
+    "calls": []
+   },
+   {
+    "n": 213,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:15",
+     "10:16"
+    ],
+    "text": "« Les droits de l&#x27;homme au Maroc : acteurs, discours, actions », consultation effectuée pour l&#x27;Institut arabe des droits de l&#x27;homme, Tunis, 1993.",
+    "calls": []
+   },
+   {
+    "n": 214,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:17",
+     "10:18"
+    ],
+    "text": "L&#x27;hypothèse de la société civile au Maroc, in El Aoufi, La société civile au Maroc, Rabat, SMER, 1992",
+    "calls": []
+   },
+   {
+    "n": 215,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:19",
+     "10:20"
+    ],
+    "text": "O « Révoltes, soulèvements et mouvements populaires au Maroc » étude pour le Centre de Développement Arabe, Beyrouth, 1991",
+    "calls": []
+   },
+   {
+    "n": 216,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:21",
+     "10:22"
+    ],
+    "text": "· La société civile dans le monde arabe et le processus de démocratisation, Centre des Etudes de l&#x27;Unité Arabe, Beyrouth, 1991.",
+    "calls": []
+   },
+   {
+    "n": 217,
+    "page": 10,
+    "type": "heading",
+    "level": 3,
+    "ids": [
+     "10:23"
+    ],
+    "text": "7-7 Articles :",
+    "calls": []
+   },
+   {
+    "n": 218,
+    "page": 10,
+    "type": "paragraph",
+    "level": null,
+    "ids": [
+     "10:24",
+     "10:25",
+     "10:26",
+     "10:27",
+     "10:28",
+     "10:29",
+     "10:30",
+     "10:31",
+     "10:32",
+     "10:33",
+     "10:34"
+    ],
+    "text": "Nombre aux textes publiés depuis 1976 dans Lamalif, Casablanca ; Al Assas, salé ; Sindibad, revue marocain des Sciences juridiques économiques et sociales, revue Coopération et indépendance, Paris ; Peuples méditerranéens, Paris ; Annuaire de l&#x27;afrique du nord, Nakd (Alger), Al Ihssan (Paris) Al Mustakbal al Arabi (Beyrouth) Al wahda (Rabat), Signes du président (Rabat), Horizons Maghrébins (Toulouse), Maghreb - magazine (Marrakech), Libération (Casablanca) ; Al Ittihad Al Ichtiraki, (Casablanca) Al Alam, Rabat ; Anwal, Rabat Jussor (the arab american journal of cultural exchange ans thought for the future Bethesda, Maryland). Alif (Centro Al Farabi, Palermo). Afak (Rabat), Attakafa Al Jadida (Mohammedia), Annales d&#x27;études stratégiques de Rabat, Correspondance (IRMC, Tunis/ Rabat), Lejournal, Casablanca ;Maghreb Machrek(Lyon) ; Afkar(IEMED Barcelone),Revue marocaine de science politique, Dafatir Siyassiya, Le Journal/ Tel Quel ...",
+    "calls": []
+   },
+   {
+    "n": 219,
+    "page": 10,
+    "type": "heading",
+    "level": 2,
+    "ids": [
+     "10:35"
+    ],
+    "text": "8- AUTRES ACTIVITES :",
+    "calls": []
+   },
+   {
+    "n": 220,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:36",
+     "10:37"
+    ],
+    "text": "- Directeur de la revue Marocaine des Sciences Sociales « ABHATH » (Recherches) (de 1984 à 2015)",
+    "calls": []
+   },
+   {
+    "n": 221,
+    "page": 10,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "10:38"
+    ],
+    "text": "- Directeur du Centre d&#x27;Etudes et de Recherches en Sciences Sociales de 1993 à 2015",
+    "calls": []
+   },
+   {
+    "n": 222,
+    "page": 10,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "10:39"
+    ],
+    "text": "|15|",
+    "calls": []
+   },
+   {
+    "n": 223,
+    "page": 11,
+    "type": "header",
+    "level": null,
+    "ids": [
+     "11:1"
+    ],
+    "text": "• السياسات:٢ ٣ الجموعية",
+    "calls": []
+   },
+   {
+    "n": 224,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:2",
+     "11:3"
+    ],
+    "text": "- Président du Forum National de l&#x27;action Associative ( de 2000 à 20015 ), devenu depuis 2005 Forum Civil Démocratique Marocain (FCDM)",
+    "calls": []
+   },
+   {
+    "n": 225,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:4",
+     "11:5"
+    ],
+    "text": "- Président du Conseil d&#x27;Administration de l&#x27;Association du Centre International des Etudes du Développement Local (Lyon/ France) 2014",
+    "calls": []
+   },
+   {
+    "n": 226,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:6"
+    ],
+    "text": "- Membre du Secrétariat National de la Dynamique de l&#x27;Appel de Rabat 2013-2014",
+    "calls": []
+   },
+   {
+    "n": 227,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:7",
+     "11:8"
+    ],
+    "text": "- Président de l&#x27;Association marocaine de Sciences Politiques du Maroc de 1996 à 2012 et en est Président fondateur depuis 2013.",
+    "calls": []
+   },
+   {
+    "n": 228,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:9"
+    ],
+    "text": "- Prix du Maroc du livre des sciences sociales en 2013",
+    "calls": []
+   },
+   {
+    "n": 229,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:10",
+     "11:11"
+    ],
+    "text": "- Membre du Conseil d&#x27;Administration du Centre des Etudes et recherches sur les politiques publiques de Doha (Qatar) depuis 2013",
+    "calls": []
+   },
+   {
+    "n": 230,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:12",
+     "11:13",
+     "11:14"
+    ],
+    "text": "- Membre actif de Profadel (réseau de centres de formation de plusieurs continents : Ciedel/ Lyon, Delta C/ Bamako, Irfodel/ Lomé, FFF/ Madagascar, Escuela del Desarollo/Lima, et le CERSS Rabat)depuis 2010",
+    "calls": []
+   },
+   {
+    "n": 231,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:15",
+     "11:16"
+    ],
+    "text": "- Membre fondateur du réseau Arab Reform Initiative en 2004, et Président de son Conseil d&#x27;Administration depuis 2009 jusquà 2015",
+    "calls": []
+   },
+   {
+    "n": 232,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:17"
+    ],
+    "text": "- Directeur du mensuel d&#x27;analyse politique Dafatir siyassiya depuis 1999",
+    "calls": []
+   },
+   {
+    "n": 233,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:18",
+     "11:19"
+    ],
+    "text": "- Président de la Fédération Nationale d&#x27;Appui aux réformes (FNAR) devenue Fédération Nationale d&#x27;Appui aux réformes (FNARIL)(1998-2007)*",
+    "calls": []
+   },
+   {
+    "n": 234,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:20"
+    ],
+    "text": "- Membre de la commission de suivi des relations maroco-européenne 1995-1997",
+    "calls": []
+   },
+   {
+    "n": 235,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:21"
+    ],
+    "text": "- Directeur du Rapport stratégique du Maroc (publication annuelle depuis 1995).",
+    "calls": []
+   },
+   {
+    "n": 236,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:22",
+     "11:23",
+     "11:24"
+    ],
+    "text": "- Membre du comité de rédaction de la Revue d&#x27;études juridiques économiques et sociales de la Faculté de Droit de Rabat, Directeur de la Revue marocaine de science politique, Maghreb-Machreq,",
+    "calls": []
+   },
+   {
+    "n": 237,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:25",
+     "11:26",
+     "11:27"
+    ],
+    "text": "- Membre de nombreuses associations : Association arabe de Sciences politiques, Association Internationale de Sociologie, Membre du Bureau de l&#x27;Association des politologues et publicistes africains, membre du Codesria ...",
+    "calls": []
+   },
+   {
+    "n": 238,
+    "page": 11,
+    "type": "list_item",
+    "level": null,
+    "ids": [
+     "11:28",
+     "11:29"
+    ],
+    "text": "- Consultant de l&#x27;OMS, Banque Mondiale, PNUD, UNESCO, Ligue Arabe, Union Européenne ....",
+    "calls": []
+   },
+   {
+    "n": 239,
+    "page": 11,
+    "type": "footer",
+    "level": null,
+    "ids": [
+     "11:30"
+    ],
+    "text": "|16|",
+    "calls": []
+   }
+  ],
+  "jats": {
+   "text": "1140 المجلة المغربية للسياسات العمومية Moroccan Journal of Public Policies 2489-0758 جمال حطابى المغرب 1140-000-021-003 0161443 العلوم السياسية القانون Political Science Law بحوث ومقالات Article Curriculum vitae Abdallah SAAF Faculté des Sciences Juridiques, Economiques et Sociales de Rabat-Agdal ربيع 2016 ربيع 2016 21 6 16 ساعف، عبدالله سيرة ذاتية text-direction ltr text-source Azure Document Intelligence prebuilt-read (API 2024-11-30); Gemini 4 Argon's fixes of Azure misreadings applied (strict rule v5, experiment 40); the printed text is kept (D30: suspected misprints flagged, never corrected) structure-source Gemini 4 Argon (experiment 41): blocks in reading order as Azure line ids, block types, heading levels, continuations across pages, footnote calls, tables, verse halves, equations as LaTeX, figures; converted by experiments/41_azure_structure/masters.py. Owner's hand check: five articles. front-sources journal, ids, subjects, date, volume, issue, pages and subject terms: Mandumah's catalogue (experiment 29's master); title and authors: as printed (Argon) faithful-pdf 1140-000-021-003.scan.pdf (the scan, each word drawn with its own ink: inkscript native) alto-file 1140-000-021-003.alto.xml counts 14 reader fixes applied, 4 suspected misprints flagged, 0 noise lines with words and 0 dropped lines with words kept in the ALTO only, 0 lines Azure missed added from Argon printed-journal السياسات العمومية Prénom : Abdallah Nom : SAAF Date et lieu de naissance : 19 septembre 1949 Kenitra (Maroc) Situation familiale : Marié, père d'une fille 1-FONCTIONS ACTUELLES Professeur à la Faculté des Sciences Juridiques, Economiques et Sociales de Rabat-Agdal Directeur du Centre des Etudes et Recherches en Sciences Sociales 2-ETUDES - Docteur d'Etat en droit Public (Thèse préparée en Droit International public sous la direction de Paul Reuter à Paris II « L'obligation de négocier en Droit International Public » (1979) - Diplôme d'Etudes Supérieures en Droit Public (1979): - Diplôme d'Etudes Supérieures Sciences Politiques (1973) II, - Diplôme d'Etudes Supérieures Philosophie du droit (1978). - Licence en droit (Faculté de droit de Rabat). - Licence de philosophie, Paris, Sorbonne (Paris IV). 3- AUTRES FORMATIONS : Plusieurs formations en analyse des politiques publiques Evaluation des politiques publiques Capitalisation des politiques publiques Médiation et résolution des conflits 4. MATIÈRES ENSEIGNÉES : - Matières enseignées de 1974 à 2015 : Méthode des sciences sociales, Sciences politiques, Relations internationales, philosophie du droit, Histoires des idées politiques, Analyse des politiques publiques, Politiques et stratégies de développement, Les politiques publiques sociales, Théories de la justice sociale ... 5- CARRIERE PROFESSIONNELLE : - Professeur à la Faculté des sciences juridiques, économiques et sociales de Rabat, Université de Mohammed V. - 2003 - 2015 : Responsable de l'UFR Développement politique et social, Faculté des sciences juridiques, économiques et sociales de Rabat, Université Mohammed V., devenue à partir de 2005 Master Management du développement Social, Faculté des Sciences juridiques, économiques et sociales, Université Mohamed V, Rabat Agdal - 2003 - 2004 : Professeur - visiteur à l'I.E.P de Lyon - 2004 - 2006 : Professeur à l'Institut Supérieur du journalisme, Rabat. - 2000 - 2002: Ministre de l'Education Nationale - 1998 - 2000 : Ministre chargé de l'Enseignement Secondaire et Technique - 1996 - 1998 : Doyen de la Faculté des Sciences Juridiques, Economiques et Sociales de Mohammedia. - 1992 - 1996 : Chef du département de droit public et de sciences politiques de la Faculté de Droit de l'Université Mohammed V de Rabat Agdal. - 1989 : Professeur visiteur à l'Université de Nanterre / Paris X, cours d'histoire des idées politiques comparées. - De 1982 à 2015 : Professeur à la Faculté des Sciences Juridiques, Economiques et Sociales de Rabat, Université Mohammed V. -Professeur à l'Ecole Nationale d'Administration Marocaine, -Professeur au Centre d'Etudes Stratégiques de Rabat, - 1978 - 1980 : Maître de conférence - 1976 - 1978 : Maître - Assistant - 1974 : Assistant 6. LANGUES Langue Lu Parlé Écrit Français Excellent Excellent Excellent Arabe Excellent Excellent Excellent Anglais Bon Bon Bon espagnol Bon Bon Bon 7- PUBLICATIONS : 7-6 - Consultations, communications, enquêtes, recherches de terrain. 7-6-1 Droits fondamentaux, droits culturels (Publications et activités) Participation à l'élaboration d'un Master International (au sein du réseau d'instituts d'enseignements supérieur Profadel regroupant Delta C/Bamako, Irfodel (Togo, FFF/Madagascar, Ciedel/Lyon, Escuella Del Desarollo/ Lima, Cerss/Rabat) sur « Citoyenneté et développement » (accordant une place importante à la perspective interculturelle dans les processus de formation de la citoyenneté), en tout trois ateliers en 2014 et 2015. Membre du Comité scientifique international du Forum Mondial des Droits de l'homme de Marrakech 2014 Président du festival du film du désert, Zagora 2014. Président du jury du festival national du film de Tanger, 2014. O Organisateur d'universités d'été et d'hiver (deux sessions par an) à l'intention des militants associatifs qui se spécialisent dans le développement social(de 2003 à Aujourd'hui). Fondateur de l'Université du Développement Social, Foyer de débat public, de formation en présentiel et à distance fondée dans le cadre du CERSS, notamment sur les questions des droits culturels (de 2003 à Aujourd'hui) O Responsable de la création et de la mise en place d'un nouveau Master (Master de Management du Développement Social), qui accorde une place de choix aux enseignements et pratiques liées aux questions de développement : politiques publiques du développement, institutions, droits, culture, gestion des associations, action associative, partenariat, rapports Etat-société civile(2004-2015). Communication sur « La politique culturelle et le développement au Maroc », Publications de l'Académie du Royaume du Maroc, Rabat, 2014, @ Cours inaugural sur « Culture et Développement », Ecole Normale Supérieure, Rabat, décembre, 2014 « Politique linguistique, politique culturelle et développement au Maroc », leçon inaugurale à la Faculté des Sciences et Techniques, Safi, novembre, 2014 O Membre de la commission de recours concernant la régularisation des immigrés et des demandeurs d'asile 2013 O Président de la commission nationale sur l'avenir de la politique du cinéma au Maroc, auteure du livre blanc sur le cinéma, 2012-2013 O Président de la Fondation Mohamed Abed El Jabiri pour la pensée et la Culture, 2011 O Organisation d'une seconde session d'hiver de l'UDS sur « Processus et articulation du développement social et des droits économiques, sociaux, culturels et linguistiques », janvier 2010, en partenariat avec la Faculté Polydisciplinaire de Taza o Rapport sur « Politique de sécurité et Etat de droit au Maroc », Rabat, 2010 Membre fondateur du Groupe International du Droit à l'Education, 2009. o Rapport sur « La sécurité humaine dans le monde arabe », UNESCO, Paris, 2009 Multiculturalisme et multilinguisme au Maroc, leçon inaugurale de l'IRCAM, Rabat, Keynote sur Pluralisme linguistique et transition démocratique, Université du printemps, Fès 2009 . O Organisation de la session d'hiver de l'UDS sur »Culture nationale : singularité et pluralisme. Le cas de l'amazighité » à Immouzer 2006 Durant son mandat ministériel, le candidat a mis en place une commission chargée de réviser les programmes sous l'angle des différentes catégories des Droits de l'Homme, d'expurger les matières porteuses des éléments incompatibles avec les droits de l'homme et d'œuvrer pour promouvoir la perspective des Droits de l'Homme dans les curricula (2000-2002) O Mise en place d'une commission nationale permanente chargée de veiller au développement d'une culture des droits de l'homme dans les programmes éducatifs du ministère(2001) · Initiation et supervision de la première conception des curricula de la langue amazigh en 2000 et en 2002 O Le Maroc et les droits de l'homme. Positions, réalisations et perspectives, Collection Edification d'un Etat Moderne, Paris, l'Harmattan 1994. Les pays en voie de développement entre l'exigence démocratie et la priorité économique, session 1994, édité par l'Académie dans la collection « Sessions » « Les droits de l'homme au Maroc : acteurs, discours, actions », consultation effectuée pour l'Institut arabe des droits de l'homme, Tunis, 1993. Droit et environnement social au Maghreb, CNRS, Paris / Fondation Ibn Saoud - Casablanca 1989. « La politique culturelle au Maroc », Communication à la table-ronde de l'ittihad Al Ichtiraki, avril 1989. O « La politique culturelle au Maroc », Communication à Madrid, rencontre hispano- maghrébine, Gredos, janvier 1988. 7-6-2- La participation communautaire, les collectivités locales et la santé : · Evaluation de la décentralisation au Maroc. PAD, en collaboration de Christophe Mestre, 2014. · Contribution au 4iéme congrès mondial de CGLU. Second sommet mondial des dirigeants locaux et régionaux, Rabat, 2013 · Elaboration d'une étude sur la coopération décentralisée franco-marocaine (2001- 2008) 20O9 · Etude sur l'Etat arabe PNUD 2008 Elaboration d'une étude sur la maison de l'élu, en collaboration avec Bernard Husson, 2005 · Représentations du personnel de santé et de la population sur les services de santé de base et les stratégies mobiles en milieu rural. Etude sociologique Ministère de la santé Publique / Institut National d'administration de la santé / Banque Mondiale, janvier 1995. · Enquête sur les agents de santé itinérants. Contribution au séminaire sur « La politique de la santé au Maroc », Faculté de droit, Rabat, 1994. · Etude sur la participation des collectivités locales aux soins de santé de base au Maroc. Consultation pour l'OMS, ronéotypé, 1990. · Problématique de la démocratie locale au Maroc en Afrique\" : Le cas marocain, Communication au colloque organisé par l'association des politologues et Publicistes africaines (APPA), Faculté de Droit de Rabat , février 1989. · Sociologie politique d'une palmeraie dans le sud-est marocaine : l'application des politiques publiques nationales à l'échelon local, le cas de Tissint, Etude réalisée en mars 1987 dans le cadre d'un projet de recherche collectif multidisciplinaire, Institut Agronomique d'Agadir. · L'expérience de la démocratie locale au Maroc\" Dans le cadre de la rencontre organisée par la Fédération des villes jumelées francophones, Biarritz (France), 1987. 7-6-3. Recherche sur les politiques publiques : O Etude sur l'organisation effective de passerelles entre le secteur de l'alphabétisation et les autres secteurs économiques et ministériels susceptibles d'accueillir des alphabétisés, Sofreco /Union Européenne, Rabat, 2012 o Rapport sur « l'Enseignement supérieur et la recherche en Cote d'Ivoire, état des lieux et perspectives de développement », Sofreco/ Banque Mondiale, Abidjan, 2012 o Rapport sur « La cohésion sociale dans le monde arabe », Ligue arabe, Oman, 2007 o Les politiques des proximité, ouvrage collectif, Rabat, 2005 o Direction de nombreux travaux universitaires sur les Politiques publiques sociales au Maroc ( Politique de l'enseignement, de la santé, de l'habitat, de l'emploi, de la parité, de lutte contre la pauvreté, de la protection sociale ... « la politique de santé au Maroc », « La politique hospitalière au Maroc », « La politique du sang » etc ... o La réforme de l'enseignement dans les pays arabes, Beyrouth, 2005 o « Inclusion et exclusion dans le système politique marocain », «Communication présentée au Congrès de l'association Américaine de Science politique, New York, 1-4 Septembre 1994. o « La privatisation, une nouvelle politique publique » ENAP-Rabat / Québec actes du séminaire, 1991. 7-6-4. Recherche sur le mouvement associatif/ la société civile: Texte introductif des travaux de l'Appel de Rabat sur la société civile marocaine, Bouznika, novembre, 2014 O Le métier d'intellectuel. Dialogues avec quinze penseurs du Maroc, Les Presses de l'Université citoyenne, Casablanca, 2014. O Réforme économique politique sociale et démocratisation Mélanges Mohamed Jalal Essaîd, Editions du centre Marocain des Etudes juridiques, Rabat, 2005 pp 25-33. O Des intellectuels indépendants au Maroc, in Parcours d'intellectuels maghrébins, Paris, Karthala, 1999 Les ONG au Maghreb de la prospective Urbain à l'action au quotidien. Séminaire régional, Rabat (Maroc) 26 /28 Octobre 1995. Enda Maghreb. Amsed, Rabat 1996. « Les droits de l'homme au Maroc : acteurs, discours, actions », consultation effectuée pour l'Institut arabe des droits de l'homme, Tunis, 1993. L'hypothèse de la société civile au Maroc, in El Aoufi, La société civile au Maroc, Rabat, SMER, 1992 O « Révoltes, soulèvements et mouvements populaires au Maroc » étude pour le Centre de Développement Arabe, Beyrouth, 1991 · La société civile dans le monde arabe et le processus de démocratisation, Centre des Etudes de l'Unité Arabe, Beyrouth, 1991. 7-7 Articles : Nombre aux textes publiés depuis 1976 dans Lamalif, Casablanca ; Al Assas, salé ; Sindibad, revue marocain des Sciences juridiques économiques et sociales, revue Coopération et indépendance, Paris ; Peuples méditerranéens, Paris ; Annuaire de l'afrique du nord, Nakd (Alger), Al Ihssan (Paris) Al Mustakbal al Arabi (Beyrouth) Al wahda (Rabat), Signes du président (Rabat), Horizons Maghrébins (Toulouse), Maghreb - magazine (Marrakech), Libération (Casablanca) ; Al Ittihad Al Ichtiraki, (Casablanca) Al Alam, Rabat ; Anwal, Rabat Jussor (the arab american journal of cultural exchange ans thought for the future Bethesda, Maryland). Alif (Centro Al Farabi, Palermo). Afak (Rabat), Attakafa Al Jadida (Mohammedia), Annales d'études stratégiques de Rabat, Correspondance (IRMC, Tunis/ Rabat), Lejournal, Casablanca ;Maghreb Machrek(Lyon) ; Afkar(IEMED Barcelone),Revue marocaine de science politique, Dafatir Siyassiya, Le Journal/ Tel Quel ... 8- AUTRES ACTIVITES : - Directeur de la revue Marocaine des Sciences Sociales « ABHATH » (Recherches) (de 1984 à 2015) - Directeur du Centre d'Etudes et de Recherches en Sciences Sociales de 1993 à 2015 - Président du Forum National de l'action Associative ( de 2000 à 20015 ), devenu depuis 2005 Forum Civil Démocratique Marocain (FCDM) - Président du Conseil d'Administration de l'Association du Centre International des Etudes du Développement Local (Lyon/ France) 2014 - Membre du Secrétariat National de la Dynamique de l'Appel de Rabat 2013-2014 - Président de l'Association marocaine de Sciences Politiques du Maroc de 1996 à 2012 et en est Président fondateur depuis 2013. - Prix du Maroc du livre des sciences sociales en 2013 - Membre du Conseil d'Administration du Centre des Etudes et recherches sur les politiques publiques de Doha (Qatar) depuis 2013 - Membre actif de Profadel (réseau de centres de formation de plusieurs continents : Ciedel/ Lyon, Delta C/ Bamako, Irfodel/ Lomé, FFF/ Madagascar, Escuela del Desarollo/Lima, et le CERSS Rabat)depuis 2010 - Membre fondateur du réseau Arab Reform Initiative en 2004, et Président de son Conseil d'Administration depuis 2009 jusquà 2015 - Directeur du mensuel d'analyse politique Dafatir siyassiya depuis 1999 - Président de la Fédération Nationale d'Appui aux réformes (FNAR) devenue Fédération Nationale d'Appui aux réformes (FNARIL)(1998-2007)* - Membre de la commission de suivi des relations maroco-européenne 1995-1997 - Directeur du Rapport stratégique du Maroc (publication annuelle depuis 1995). - Membre du comité de rédaction de la Revue d'études juridiques économiques et sociales de la Faculté de Droit de Rabat, Directeur de la Revue marocaine de science politique, Maghreb-Machreq, - Membre de nombreuses associations : Association arabe de Sciences politiques, Association Internationale de Sociologie, Membre du Bureau de l'Association des politologues et publicistes africains, membre du Codesria ... - Consultant de l'OMS, Banque Mondiale, PNUD, UNESCO, Ligue Arabe, Union Européenne .... 7. 1 Ouvrages de l'auteur : * La gauche marocaine : tensions et nécessités, Dafatir Siyassiya, Rabat, 2015. * Le conquérant de l'empire imaginaire, roman historique, La Croisée des Chemins, Casablanca, 2014. * Une année considérable, La Croisée des Chemins, Casablanca, 2012. * Violence et politique dans le monde arabe, Cahiers de Chaillot, Paris, 2010. * La transition au Maroc 2 : le purgatoire, Eddif, Casablanca, 2009. * Les enjeux du changement politique au Maroc, Publications Dafatir siyassiya, Rabat, 2004. * Entretiens sur la réforme de l'enseignement, Rabat, 2002. * Causeries sur la politique marocaine, Publication Azzaman, Rabat, 2002. * La transition au Maroc 1 : l'Invitation, Eddif, Casablanca, 2001. * Maroc, l'Espérance de l'Etat Moderne Afrique Orient, Casablanca 1999. * Carnets de bus, Eddif, Casablanca, 1999. * La réforme du système de l'éducation et de l'enseignement, Editions « Savoir pour tous », Rabat, 1998. * Histoire d'Anh Ma, récit, ED. L'Harmattan, paris, 1995. * Le discours stratégique arabe. Constantes et variations. Cahiers du Lumiar. I.E.E.I, Lisbonne, 1994. * Chroniques des jours de reflux, ED, l'Harmatttan ; Paris, 1993, traduction arabe , Dar attakafa, Casablanca, 2002. * Feuillets sur la crise du golfe, Publication Abhath, Rabat, 1992. * Politique et savoir au Maroc, SMER, Rabat, 1992. * Images Politiques du Maroc, Okkad, Rabat, 1991. * Ecrits marxistes sur le Maroc (1860 - 1925) k. Marx, F. Engels, R. Luxembourg, la 3ème internationale, éditions le contacté, Salé, 1986 (traduit aussi en arabe, Dar Toubkal, 1987). 7-2. Ouvrages en collaboration : o L'islam et les deux France, dans Ce qui nous somme, Editions La Croisée des Chemins, Casablanca, 2015. o Le Maroc politique d'aujourd'hui, Centre Jacques Berque, Actes Sud, Paris 2015. · Le processus de prise de décision au Maroc, in Le processus de prise de décision dans le monde arabe, Centre des Etudes de l'Unité Arabe, Beyrout, ... · La question de la sécurité et de la réforme de l'Etat. Perspectives comparées entre l'Afrique de l'Ouest et la région arabe, 14ème Assemblée Générale, Codesria, Dakar, Juin 2015 o Le métier d'intellectuel. Dialogues avec quinze penseurs du Maroc, Les Presses de l'Université citoyenne, Casablanca, 2014. o The Arab democratic wave. How the EU can seize the moment, report, n 9, 2011 · Sécurité et perspectives de stabilisation au Maroc, ed.Cerss, Rabat, 2010. o Crise des élites et restructuration du champ politique par le haut. Eléments de lecture du champ politique marocain, Cercle d'Analyse Politique, Fondation Abderrahim Bouabid, les cahiers bleus, n 13, 2009 o Union pour la Méditerranée. Le potentiel de l'acquis de Barcelone, Institut d'Etudes de la Sécurité de l'Union Européenne, Paris, 2008. · L'expérience de réforme de l'Education et de l'Enseignement au Maroc à travers l'expérience de l'alternance 1998-2002, dans « La réforme de l'Education dans les pays arabes », Beyrouth, 2005. o Réforme économique politique sociale et démocratisation Mélanges Mohamed Jalal Essaîd, Editions du centre Marocain des Etudes juridiques, Rabat, 2005 pp 25-33. o Parcours d'intellectuels maghrébins Scolarité, formation, socialisation et positionnements, Karthala, Institut Maghreb-Europe, Paris, 1999 o « Parcours maghrébins d'Indochine\" Miroirs maghrébins, Itinéraires de soi et paysages de rencontre CNRS, Paris, 1998. o Dictionnaire biographique du mouvement ouvrier, sous la direction de René Galissot, Eddif, Casablanca, 1998 o Mehdi Ben barka, de l'Indépendance marocaine à la Tricontinentale Karthala - Institut Maghreb Europe, 1997, 214P ; « Ben Barka et les communistes », pp 105- 114 o Etudes marocaines sur la Ligue des Etats arabes. Bilan et perspectives, Département de Droit public, Université Mohamed V Agdal, 1997 · Les ONG au Maghreb de la prospective Urbain à l'action au quotidien. Séminaire régional, rabat (Maroc) 26 /28 Octobre 1995. Enda Maghreb. Amsed, Rabat 1996. o L'Islamisme et la politique dans les rapports entre l'Europe et le Maghreb, I.E.I.S, Lisbonne.1996 · Sistemos politico del Maghreb actual, Madrid, Mapfre, 1996. o Inclusion y Exclusion en el espacio politico marroqui sociologia, nº 14, 1996, pp 159-175. o Et si le processus de paix au Moyen-Orient devait échouer ? Thème de la 2ème session 1996, de l'Académie du royaume du Maroc, Amman 10 décembre1996. o Sciences sociales, Sciences morales. Itinéraires et pratiques de Recherche, Alif IRMC, Tunis, 1995, 140 P. o Stratégies de privatisation, co-ed / Toubkal / L'harmattan, Casablanca / Paris, 1995. o Le Maroc et les droits de l'homme. Positions, réalisations et perspectives, Collection Edification d'un Etat Moderne, Paris, l'Harmattan 1994. o Les pays en voie de développement entre l'exigence démocratie et la priorité économique, session 1994, édité par l'Académie dans la collection « Sessions », o L'Etat et la société au Maroc, Afrique-Orient, Rabat 1992. o Stratégie - 1, Peuples Méditerranées, Marseille, 1992. o La société civile dans le monde arabe et le processus de démocratisation, Centre des Etudes de l'Unité Arabe, Beyrout, 1992. o Le Maroc Actuel, une modernisation au miroir de la tradition, CRNS, Paris 1992. o Elections, Participation et transition Politique en Afrique du Nord, Instituto de Coperacio con el Mundo Arabe, Madrid, 1991. · Perspectives de la coopération inter-arabe à l'horizon de l'an 2000, Centre d'Etudes Stratégiques et politique d'El Ahram et Forum de la Pensée Arabe, le Caire-Amman, 1991 (en langue arabe). · L'Europe des douze et les autres, session de l'Académie du Royaume du Maroc, 19 - 21 novembre 1991 édité par l'Académie dans la collection « Sessions ». o De Gaulle et le Maroc, Publisud / Sochepresse, Paris, 1990. o De l'information à l'opinion, Maghreb Arabe Presse, rabat 1990. o Changement politiques au Maghreb (1979 - 1989) CNRS, Paris, 1990. o Du Grand Maghreb, Economica, Paris 1989. o Droit et environnement social au Maghreb, CNRS, Paris / Fondation Ibn Saoud - Casablanca 1989. o La fin des conflits régionaux. Pour une ère nouvelle dans les relations internationales. Rabat, 1989 · Bilan et perspectives des relations maroco-soviétiques, Rabat, 1988 · La durée de l'Etat, Edino-Pubisud-Codersia, Rabat-Paris-Dakar, 1987 (traduit aussi en anglais, Codesria, .. ). o Le Maghreb dans les relations inter-arabes, CNRS, Paris 1987. o L'espace de l'Etat, Edino, Rabat, 1986. 7-3 Direction et co-direction d'ouvrages : Coopération décentralisée Publication du Cerss, Rabat, 2013 Rapport sur l'état de la recherche dans les sciences sociales du développement, Publication du Cerss, Rabat, 2010 Le Maroc et l'Afrique, Institut d'Etudes Africaines, Casablanca 1997. Mélanges « Taher Masmoudi », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997. Mélanges « Abderrahmane Kadiri », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997. Etudes marocaines sur la Ligue Arabe, département de Droit de Rabat-Agdal, Casablanca 1997. Le Maroc et l'Europe, Ouest éditions, Nantes 1996. Publication annuelle du Rapport Stratégique depuis 1995 7-4 : Traduction · Al Hajoui (Mohammed), « Récit de voyage en France et en Angleterre », Afrique- Orient, Casablanca, 2002. · Mohammed Ibn Abdellah Al- Muàqqital, Marrâkuchi, « Les gens du navire », Afrique-Orient, Casablanca, 2000. 7-5 Préfaces: - Zahra Hmimid « Analyse du discours politique de la gauche à travers la presse. Cas d'Al Bayane et Libération durant les élections législatives 1977-2011 », 2014 -Préface au livre de Said Khomri, « L'esprit de la constitution. Pouvoir et légitimité au Maroc » de collec Critique de la politique, Publications Dafatir Siyassi, Rabat, 2012 - Préface au livre Mohamed Bennani, Mémoires d'un résistant », Rabat, 2012 -Préface au livre de Said Bennis, « Territoires, région et langues au Maroc », Rabat, Edition Lina, 2011. -Introduction au premier numéro de la revue marocaine de sciences politique, 2010 -Préface à la traduction arabe du livre de Cynthia Fleury, « La fin du courage », Paris, Fayard, 2010. -Préface au livre de Ghassane Lamrani, « Crise passagére ou prémisses d'un déclin annoncé, Sociologie électorale de l'Union Socialiste des Forces Populaires », Ittissalat Sebou, Marrakech, 2009 -Introduction au premier numéro de la revue marocaine de science politique, 2009 -Préface au livre de Ahmed Lamihi, « L'éducation à la citoyenneté. L'expérience de Janusz Korczak ou pour une pédagogie des pauvres » .. Publications Dossiers pédagogiques, Tétouan, 2008 - Préface à l'ouvrage d'Azzeddine Al Allam, « La pensée politique sultanienne », Dar Al Amane, Rabat, 2006 -Recueil de textes traduits de Mohammed Lachheb, « Philosophie et politique chez Habermas. Le débat sur la modernité, la légitimité et la communication dans l'espace démocratique », collec. Critique de la politique, Publications Dafatir Siyassi, Rabat,2006 -Présentation du recueil de textes publiés de son vivant par la revue Abhath, « Sociologie politique du Maroc profond, A propos de l'œuvre de Paul Pascon », collec Critique de la politique, Publications Dafatir Siyassi, Rabat, 2005 -Préface au livre de Mohammed Lamrani, « Insurrections et révoltes au Maroc de la période des Almohades », Dar Nachr Al Maarifa, 2005 -Préface de Moussa Hormat-Allah, « Chroniques sahariennes. Les enjeux géoplitiques et géostratégiques du conflit du Sahara », Mils, Casablanca, 2004 -Introduction du XXiéme anniversaire d'Abhath, numéro spécial sur « Les mutations sociales et politiques au Maroc », Casablanca, 2003 - Le débat sur la jeunesse et sur l'enseignement au Maroc 1966-1988, Rabat, 2002. - Préface au livre de Moncef Slimi, « Le processus de prise de décision en matière de politique étrangère aux Etat-Unis », Centre des Etudes Euro-arabes, Paris, 1997. - Préface aux Mélanges « Taher Masmoudi », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997. - Préface aux mélanges « Abderrahmane Kadiri », Département de droit Public, Faculté de droit de Rabat-Agdal, Casablanca 1997. - Préface à l'ouvrage sur « Etudes marocaines sur la Ligue Arabe », Département de Droit de Rabat-Agdal, Casablanca 1997. - Introduction aux Actes du colloque sur « Communication et collectivités locales, Repères », Université de Mohammedia, en collaboration avec la Fondation Friedrich, Ebert, 1997. - Introduction aux « Etudes d'histoire sociale marocaine », d'Albert Ayache, Okad, Rabat 1996 . -Préface au livre de Houroro (Mohammed), « Sociologie politique de Michaux- Bellaire », Afrique-Orient, Casablanca, 1985. Suspected misprints (D30: the printed text is kept; proposed corrections only) 20O9 → 2009 ( capital O printed instead of digit 0 ) [line 8:40 ] Nombre aux → Nombreux ( word split and extra letter inserted ) [line 10:24 ] ans → and ( typo in English title ) [line 10:30 ] 20015 → 2015 ( extra zero in year ) [line 11:2 ] Azure misreadings fixed by Gemini 4 Argon (Azure's reading → the print) 16 → | 6 | ( page number | 6 | misread as 16 ) [line 1:37 ] Langue® → Langue ( speck in shading read as ® ) [line 2:19 ] Bon® → Bon ( speck in shading read as ® ) [line 2:34 ] l'Harmattan → l'Harmatttan ( printed with three t's ) [line 3:6 ] 8 → | 8 | ( page number bars dropped ) [line 3:40 ] 191 → | 9 | ( page number | 9 | misread as 191 ) [line 4:40 ] Cas d'AI → Cas d'Al ( lowercase l misread as I ) [line 5:35 ] >> → » ( guillemet misread as >> ) [line 5:38 ] enquêtes. → enquêtes, ( comma misread as period ) [line 7:1 ] fondamentaux. → fondamentaux, ( comma misread as period ) [line 7:2 ] |12 → |12| ( closing vertical bar missed ) [line 7:37 ] 2009 → 20O9 ( printed with capital O ) [line 8:40 ] 0 → o ( bullet misread as zero ) [line 9:40 ] la système → le système ( le misread as la ) [line 9:41 ]",
+   "links": [],
+   "fns": []
+  }
+ },
+ "accepted": [],
+ "basis": "Snapshot = experiment 41's answers through rules43 (2026-10-18); identical masters to what the owner saw in 41."
+}

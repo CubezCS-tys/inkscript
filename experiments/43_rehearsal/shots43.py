@@ -1,8 +1,10 @@
 """Experiment 43: screenshots of Layout-view pages (headless Chromium; run with experiment 40's Playwright venv).
 
     experiments/40_gemini4_vlm/out/venv/bin/python shots43.py OUT_PREFIX HTML PAGE [PAGE ...]
-writes OUT_PREFIX_pNNN.png (the page box only, our side of the view). No model calls.
+writes OUT_PREFIX_pNNN.png (the page box only, our side of the view). No model calls. SHOTS_SCALE=2 doubles the
+pixels (review43.py's crops).
 """
+import os
 import sys
 from pathlib import Path
 
@@ -11,7 +13,7 @@ from playwright.sync_api import sync_playwright
 prefix, html, pages = sys.argv[1], Path(sys.argv[2]).resolve(), [int(x) for x in sys.argv[3:]]
 with sync_playwright() as p:
     b = p.chromium.launch()
-    pg = b.new_page(viewport=dict(width=1400, height=1600), device_scale_factor=1, color_scheme="light")
+    pg = b.new_page(viewport=dict(width=1400, height=1600), device_scale_factor=float(os.environ.get("SHOTS_SCALE", "1")), color_scheme="light")
     pg.goto(html.as_uri(), wait_until="load", timeout=120000)
     try:
         pg.wait_for_function("window.__fit", timeout=60000)
