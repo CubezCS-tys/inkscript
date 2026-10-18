@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inkscript - Stroke Study</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/vendor/lucide.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="mark">i</span><strong>inkscript</strong><span class="separator">/</span><span>Stroke study</span><span class="experiment">42</span></div>
+    <nav aria-label="Views">
+      <button class="tab active" data-view="samples"><i data-lucide="scan-line"></i>Samples</button>
+      <button class="tab" data-view="capture"><i data-lucide="pen-tool"></i>Record</button>
+      <button class="tab" data-view="results"><i data-lucide="chart-no-axes-combined"></i>Results</button>
+    </nav>
+    <span class="local"><span></span>Local experiment</span>
+  </header>
+
+  <main id="samples-view" class="workspace">
+    <aside class="sidebar">
+      <div class="library-head"><h1>Samples</h1><span id="sample-count" class="muted"></span></div>
+      <label class="search"><i data-lucide="search"></i><input id="search" type="search" placeholder="Find text or sample" aria-label="Find text or sample"></label>
+      <div class="filters">
+        <label>Split<select id="split"><option value="test">Test</option><option value="valid">Validation</option><option value="train">Training</option><option value="unassigned">Recorded</option><option value="all">All</option></select></label>
+        <label>Order<select id="sort"><option value="id">Sample ID</option><option value="coverage">Lowest coverage</option><option value="length">Longest text</option></select></label>
+      </div>
+      <div id="sample-list" class="sample-list" role="listbox" aria-label="Samples"></div>
+      <div class="list-footer"><span id="list-range"></span><button id="more" class="text-button">Load more</button></div>
+    </aside>
+
+    <section class="inspection">
+      <div class="sample-heading">
+        <div><div class="eyebrow" id="sample-id">Loading samples</div><h2 id="transcription" lang="ar" dir="rtl"></h2></div>
+        <div class="sample-actions">
+          <button id="previous" class="icon-button" title="Previous sample" aria-label="Previous sample"><i data-lucide="chevron-left"></i></button>
+          <button id="next" class="icon-button" title="Next sample" aria-label="Next sample"><i data-lucide="chevron-right"></i></button>
+          <button id="download" class="icon-button" title="Download sample JSON" aria-label="Download sample JSON"><i data-lucide="download"></i></button>
+        </div>
+      </div>
+      <div class="provenance-row"><span id="provenance" class="badge"></span><span id="segmentation" class="muted"></span><label class="reader-mode">Reader<select id="reader-mode"><option value="retrieval">Nearest example</option><option value="sequence">Sequence pilot</option></select></label></div>
+
+      <div class="comparison">
+        <section class="pane"><div class="pane-heading"><h3>Rendered ink</h3><span class="pane-number">01</span></div><div class="canvas-frame"><img id="raster" alt="Rasterised reference traces of the selected sample"></div><div class="pane-facts"><span>Image baseline</span><span id="image-size"></span></div><div class="reading"><span>Retrieval match</span><b id="image-reading" lang="ar" dir="rtl"></b></div></section>
+        <section class="pane"><div class="pane-heading"><h3><span class="key reference"></span>Reference trace</h3><span class="pane-number">02</span></div><div class="canvas-frame"><canvas id="reference-canvas" width="768" height="256" aria-label="Reference trace playback"></canvas></div><div class="pane-facts"><span id="reference-count"></span><span id="reference-time"></span></div><div class="reading"><span>Retrieval match</span><b id="reference-reading" lang="ar" dir="rtl"></b></div></section>
+        <section class="pane"><div class="pane-heading"><h3><span class="key recovered"></span>Recovered path</h3><span class="pane-number">03</span></div><div class="canvas-frame"><canvas id="recovered-canvas" width="768" height="256" aria-label="Recovered path playback"></canvas></div><div class="pane-facts"><span id="recovered-count"></span><span>Inferred order</span></div><div class="reading"><span>Retrieval match</span><b id="recovered-reading" lang="ar" dir="rtl"></b></div></section>
+      </div>
+
+      <div class="playback">
+        <button id="play" class="icon-button primary" title="Play traces" aria-label="Play traces"><i data-lucide="play"></i></button>
+        <button id="restart" class="icon-button" title="Restart traces" aria-label="Restart traces"><i data-lucide="rotate-ccw"></i></button>
+        <label class="progress-label">Path distance<input id="progress" type="range" min="0" max="1000" value="1000"><output id="progress-value">100%</output></label>
+        <label class="speed-label">Speed<select id="speed"><option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option></select></label>
+        <label class="check"><input id="ghost" type="checkbox" checked>Ink beneath</label>
+      </div>
+
+      <div class="measurements">
+        <div><span>Ink covered</span><strong id="coverage">-</strong></div>
+        <div><span>Ink overlap</span><strong id="iou">-</strong></div>
+        <div><span>Components</span><strong id="components">-</strong></div>
+        <div><span>Unresolved</span><strong id="failures">-</strong></div>
+      </div>
+      <div class="evidence">
+        <h3>Source record</h3>
+        <dl><dt>Dataset</dt><dd id="source-dataset"></dd><dt>Parent drawing</dt><dd id="source-parent"></dd><dt>Motion record</dt><dd id="source-motion"></dd><dt>Transcription</dt><dd id="source-transcription"></dd></dl>
+        <p class="data-note" id="data-note"></p>
+      </div>
+      <div id="sample-error" class="error" role="alert" hidden></div>
+    </section>
+  </main>
+
+  <main id="capture-view" class="single-view" hidden>
+    <div class="section-heading"><div><div class="eyebrow">New observation</div><h1>Record writing</h1></div><span id="device" class="badge">No input yet</span></div>
+    <div class="capture-toolbar"><button id="undo" class="icon-button" title="Undo stroke" aria-label="Undo stroke"><i data-lucide="undo-2"></i></button><button id="clear" class="icon-button" title="Clear recording" aria-label="Clear recording"><i data-lucide="trash-2"></i></button><span id="capture-count" class="muted">0 strokes · 0 points</span></div>
+    <div class="writing-surface"><canvas id="capture-canvas" width="1200" height="420" aria-label="Writing surface"></canvas></div>
+    <form id="capture-form">
+      <label class="transcription-field">Transcription<input id="capture-text" lang="ar" dir="rtl" autocomplete="off"></label>
+      <label>Writer ID<input id="writer" maxlength="100" autocomplete="off"></label>
+      <label>Writing<select id="style"><option value="handwriting">Handwriting</option><option value="calligraphy">Calligraphy</option></select></label>
+      <label class="check"><input id="checked" type="checkbox">Transcription checked</label>
+      <button id="save" type="submit" class="command"><i data-lucide="save"></i>Save observation</button>
+    </form>
+    <div id="capture-status" class="status" role="status"></div>
+  </main>
+
+  <main id="results-view" class="single-view" hidden>
+    <div class="section-heading"><div><div class="eyebrow">Matched inputs · fixed splits</div><h1>Recognition comparisons</h1></div><button id="refresh" class="icon-button" title="Refresh results" aria-label="Refresh results"><i data-lucide="refresh-cw"></i></button></div>
+    <section class="result-section"><h2>Nearest-example control</h2><p id="retrieval-note" class="data-note"></p><div class="table-scroll"><table id="retrieval-table"><thead><tr><th>Input</th><th>Test words</th><th>Exact</th><th>Character error</th><th>Seen words</th><th>Unseen words</th></tr></thead><tbody></tbody></table></div></section>
+    <section class="result-section"><h2>Sequence-reader pilot</h2><p id="neural-note" class="data-note"></p><div class="table-scroll"><table id="neural-table"><thead><tr><th>Input</th><th>Parameters</th><th>Test words</th><th>Exact</th><th>Character error</th><th>Best validation CER</th></tr></thead><tbody></tbody></table></div></section>
+    <section class="result-section"><h2>Dataset audit</h2><dl id="audit" class="audit-grid"></dl><ul id="limits" class="limits"></ul></section>
+    <div id="results-error" class="error" role="alert" hidden></div>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

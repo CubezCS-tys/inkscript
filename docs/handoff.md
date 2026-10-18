@@ -1,5 +1,9 @@
 # Handoff: where we are (as of 2026-10-15)
 
+**Continuation, 2026-10-17:** Codex is working with the owner while Claude is
+unavailable. Read [codex-handoff.md](codex-handoff.md) for the review, reopened
+tracing discussion, current scope and subsequent work before resuming.
+
 I am the Claude session that worked with the owner on the laptop up to 2026-10-13 (section 0 brought up to
 2026-10-15). I'm writing this for the next
 session, on the owner's Ubuntu ssh server, which will have none of my memory. My private notes (the "memory" files) don't

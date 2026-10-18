@@ -1,7 +1,34 @@
 # Status
 
-*Last updated 2026-10-14. Update this file whenever a headline number or a
+*Last updated 2026-10-18. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
+
+## Stroke study (2026-10-18)
+
+[Experiment 42](../experiments/42_stroke_recovery/README.md) reopens the
+back-writing question with a local inspection/recording instrument. Calliar's
+2,500 source drawings yield 7,507 validated words; 30 drawings rejected for
+annotation mismatch. These are human retracings in prescribed character
+order, not the original calligraphers' motion; word segmentation is supplied
+by the annotations. The component-wise experiment-16 traversal covers 98.1%
+of the controlled raster's ink within 1 px on average. No archive performance
+is implied.
+
+A fixed nearest-training-example control (2,000 train / 500 test words):
+reference traces 31.8% exact, recovered paths 24.0%, rendered images 21.6%.
+All are closed vocabulary; 170 unseen-text test words get 0% exact in all
+arms. The initial 12-epoch CTC readers were undertrained (88.7-100% CER), so
+they cannot rank representations. The completed 72-epoch extension gets
+39.2% exact from reference traces, 12.2% from recovered paths, 1.8% from the
+weak image baseline (CER 25.5% / 61.8% / 78.7%); reference gets 27/170
+unseen-text words right. These repeated test results are exploratory, and
+prescribed annotation order favours the reference representation.
+
+Viewer and pointer recorder: `http://127.0.0.1:8842`. Raw event time, pressure
+and tilt are retained when supplied, with pen/mouse/touch provenance. Captures
+remain unassigned to train/test. No production pipeline change; zero paid
+model calls and zero GPU rental. Work for the returning Claude session:
+[codex-handoff.md](codex-handoff.md).
 
 ## What the PDFs do
 

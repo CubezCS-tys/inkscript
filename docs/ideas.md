@@ -185,6 +185,32 @@ reason is recorded), **open** (voiced, not yet judged).
 
 ## Letters
 
+- **Revisit recognition through writing motion** (owner, 2026-10-17/18).
+  *experiment 42 built after the owner asked for autonomous implementation.*
+  [The local instrument](../experiments/42_stroke_recovery/README.md) imports
+  Calliar retracings, compares raster/reference/recovered inputs, replays both
+  paths, and records actual pointer input. The nearest-example control favours
+  reference traces (31.8% exact vs recovered 24.0%, images 21.6%, 500 words),
+  but is closed vocabulary and benefits from prescribed annotation order.
+  The short CTC pilot is undertrained; the completed 72-epoch extension gets
+  reference 39.2% exact vs recovered 12.2% and a weak image baseline 1.8%.
+  This repeated test comparison remains exploratory and favours the
+  reference arm through prescribed annotation order.
+  Natural-motion benefit and archive transfer are still open. The owner is reopening the
+  back-writing idea and asking whether calligraphy needs a different angle.
+  Experiment 16 already tested trained sequence readers, and experiment 17
+  remains evidence against the tested reader replacing/checking Azure. The
+  distinction to investigate is captured pen motion versus a traversal
+  constructed from static ink: feel.py walks skeleton branches out and back;
+  model_lib.py summarises those walks along the trunk. Neither observes the
+  historical writing sequence. A proposed diagnostic compares actual captured
+  strokes with recovered paths from the same rasterised writing, with a
+  matched image baseline, to isolate extraction loss from recognition loss.
+  Several plausible paths combined with image evidence are another hypothesis,
+  not a measured improvement. Keep inferred paths labelled as hypotheses;
+  preservation and text still need separate representations. Unicode, InkML
+  and the existing masters should be examined before proposing a new format.
+  Context, references and work record: [codex-handoff.md](codex-handoff.md).
 - **Follow the pen** (owner, 2026-09-19/20: "a human can do OCR with their
   eyes closed… feel the strokes"). *built* — `geometry/penpath.py`,
   [letters.md](letters.md). 96.8% letter coverage at scale.

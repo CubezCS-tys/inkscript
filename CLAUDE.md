@@ -9,6 +9,9 @@ version needs no image. Why this exists, in the owner's words:
 
 ## Read in this order
 
+For the latest conversation and work since the handoff, read
+[docs/codex-handoff.md](docs/codex-handoff.md) (Codex continuation, 2026-10-17/18).
+
 0. [docs/handoff.md](docs/handoff.md) — where we are as of 2026-10-13, written for a fresh session on the server.
 1. [docs/STATUS.md](docs/STATUS.md) — what works today, with the numbers and their dates; what is in flight.
 2. [docs/ideas.md](docs/ideas.md) — every idea discussed: done, tried-and-dropped, parked, open — with where to pick each up.

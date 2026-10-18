@@ -4,6 +4,7 @@ Start with [`../CLAUDE.md`](../CLAUDE.md). Each fact lives in one place:
 
 | You want | Read |
 |---|---|
+| Codex's continuation since 2026-10-17: assessment, revived tracing question, work for the returning Claude session | [codex-handoff.md](codex-handoff.md) |
 | Where we are as of 2026-10-13: the owner, the specialists, exp 39, round 2, Vast, the server move | [handoff.md](handoff.md) |
 | Why the project exists, in the owner's words | [vision.md](vision.md) |
 | What works today, the numbers and their dates, where outputs are | [STATUS.md](STATUS.md) |

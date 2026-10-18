@@ -412,3 +412,18 @@ D27's text-layer finishing kept (Chromium's lam-alef ToUnicode is reversed, the 
 bake-off). Read back with pdfium: Layout 503 words lost of 134k besides the stray lines the view leaves out by
 design (LuaLaTeX 661), one-column 97 of 125k (LuaLaTeX 37), reading order better in both. One look for screen and
 print; a fix to the view reaches the PDF ([experiments/41_azure_structure](../experiments/41_azure_structure/README.md)).
+
+**D32 - Experiment 42 distinguishes captured input, human retracing and inferred
+paths (2026-10-18; experiment only).** The owner reopened the back-writing
+idea and authorised a local diagnostic. Calliar is available with stroke
+annotations, but its paper describes annotators tracing existing images in
+prescribed character-component order, generally omitting vowels/decorations.
+Chosen: use it for an explicitly labelled retracing diagnostic, and provide a
+separate recorder for freely drawn input. Rejected: treating Calliar as the
+original calligrapher's motion, calling path-distance playback physical time,
+or presenting small retrieval/undertrained CTC baselines as an OCR ranking.
+Source-drawing splits are preserved, annotation mismatches are rejected, and
+recognisers do not receive primitive stroke labels. An experimental JSON
+record links evidence and predictions; no new interchange standard is adopted.
+This does not revise D19 or the archive's production pipeline. Evidence and
+limits: [experiment 42](../experiments/42_stroke_recovery/README.md).
