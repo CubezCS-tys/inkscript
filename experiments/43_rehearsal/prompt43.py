@@ -290,7 +290,41 @@ V31_CHANGES = [
 """),
 ]
 PROMPT_V31 = _apply(PROMPT_V3, V31_CHANGES)
-PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3)}
+
+# ------------------------------------------------------------------------------------------------ prompt v3.2
+# CANDIDATE, NOT LIVE (2026-10-18; no calls made with it). v3.1 plus three passages:
+#  (i)   the fix passage: the print's dotted ي and its hamzas are fixed where Azure lost them (owner-approved after
+#        1769: v2 made 12 such fixes, v3 / v3.1 none); dots or hamzas the print lacks are never added;
+#  (ii)  structured references: each reference entry returns its parts ("parsed"), each an exact substring;
+#  (iii) citations in footnotes / endnotes: each note that cites works returns the same parts per work ("cites").
+# Masters: refs43.add_parsed (element-citation beside the printed mixed-citation; in a note, a p
+# content-type="parsed-citations" after its text). run43.py --prompt v3.2 would select it; the default stays v2.
+V32_CHANGES = [
+    # (i) ي / hamza as printed
+    ("""  ha, old or Quranic orthography, names, dialect, word spacing or punctuation. Most pages need no fix at all.
+""",
+     """  ha, old or Quranic orthography, names, dialect, word spacing or punctuation. Most pages need no fix at all.
+  v3.2: if the ink shows ي (dotted) or a hamza and Azure read ى or no hamza, fix it to what is printed; never add
+  dots or hamzas the print lacks.
+"""),
+    # (ii) + (iii) parsed references and the works a note cites
+    ("""FOOTNOTE AND ENDNOTE CALLS: on EVERY block""",
+     """PARSED REFERENCES (v3.2): every reference block adds "parsed": [W] (usually one work), and every footnote or
+endnote that cites works (a book, an article, a manuscript, a web page) adds "cites": [W, W, ...], one W per work
+it cites, in the order printed (a note that only comments cites nothing: no "cites"). W = {{"type": "book" |
+"journal" | "chapter" | "thesis" | "web" | "other", "authors": [{{"surname": "...", "given": "..."}}], "year": "...",
+"title": "...", "source": "...", "volume": "...", "issue": "...", "pages": "...", "publisher": "...", "place": "...",
+"doi": "...", "url": "...", "lang": "ar" | "fr" | "en"}}: "source" = the journal, or the book a chapter is in;
+"title" = the work's own title; every value an EXACT substring of that block's text as printed (after your fixes),
+never translated, completed or normalised: a Hijri year, «د.ت» or «د.ن» stays as printed; an author printed as one
+string («ابن خلدون») goes whole in "surname"; null (or leave out) what the entry does not print; «المرجع السابق»,
+«نفسه», «op. cit.», «ibid.» cite nothing new: no W for them.
+FOOTNOTE AND ENDNOTE CALLS: on EVERY block"""),
+]
+PROMPT_V32 = _apply(PROMPT_V31, V32_CHANGES)
+META_FULL_V32 = META_FULL_V3                    # the metadata spec is unchanged
+PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3),
+           "v3.2": (PROMPT_V32, META_FULL_V32)}
 # the names the earlier README section used for the (then not live) draft of (a)-(c)
 PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
 

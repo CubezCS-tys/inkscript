@@ -122,6 +122,133 @@ def is_rtl(t: str) -> bool:
     return len(AR_LET.findall(t)) >= len(LA_LET.findall(t))
 
 
+# ------------------------------------------------------------------------------------------------ layout rules
+# (2026-10-18, owner's marks on 0478 p4: blocks drawn on top of each other in the Layout view)
+
+TEXT_TYPES = {"paragraph", "list_item", "quote", "reference", "abstract", "keywords", "other", "boxed", "footnote"}
+HEAD_MAX_ROWS = 3
+NUM_MARK = re.compile(r"^\s*[\(\[]?[0-9٠-٩]{1,3}\s*[-–\.)\]]|^\s*[•\-–▪■●]|^\s*[أبجدهـو]\s*[-–\.)]")
+JOURNALISH = re.compile(r"مجلة|المجلد|العدد|السنة|ISSN|Vol\.?|No\.?|Journal|Revue|تاريخ|الترقيم|جامعة|كلية",
+                        re.I)
+
+
+def printed_rows(ids, lines) -> list[list[str]]:
+    """Azure lines grouped into printed rows (Azure cuts one printed row at a wide gap), top to bottom."""
+    rows = []
+    for i in sorted(ids, key=lambda i: (lines[i]["b"][1] + lines[i]["b"][3]) / 2):
+        b = lines[i]["b"]
+        c, h = (b[1] + b[3]) / 2, b[3] - b[1]
+        if rows:
+            rb = union([lines[j]["b"] for j in rows[-1]])
+            if abs(c - (rb[1] + rb[3]) / 2) < 0.45 * max(h, rb[3] - rb[1]):
+                rows[-1].append(i)
+                continue
+        rows.append([i])
+    return rows
+
+
+def long_headings(ans, lines, log):
+    """A heading of more than 3 printed rows (or 3 rows and far more words than the article's other headings)
+    that runs into the text under it (0478 p4, owner: «١ -قيود الأسبقيه / Precedence Requirements» typed as one
+    heading with the paragraph below): its short top rows stay the heading, the rest becomes a paragraph after it.
+    Kept whole (flagged only) when the rows after the top do not look like running text (a display title in big
+    type: 0447 p1, 4 rows, 5 words)."""
+    heads = [b for pg in ans.get("pages") or [] if isinstance(pg, dict) for b in pg.get("blocks") or []
+             if isinstance(b, dict) and b.get("type") == "heading"]
+    nw = sorted(len(" ".join(lines[i]["text"] for i in block_ids(b) if i in lines).split()) for b in heads)
+    med = nw[len(nw) // 2] if nw else 0
+    for pg in ans.get("pages") or []:
+        if not isinstance(pg, dict):
+            continue
+        bl = pg.get("blocks") or []
+        k = 0
+        while k < len(bl):
+            b = bl[k]
+            k += 1
+            if not isinstance(b, dict) or b.get("type") != "heading":
+                continue
+            ids = [i for i in block_ids(b) if i in lines]
+            if not ids:
+                continue
+            rows = printed_rows(ids, lines)
+            words = len(" ".join(lines[i]["text"] for i in ids).split())
+            if not (len(rows) > HEAD_MAX_ROWS or (len(rows) == HEAD_MAX_ROWS and med and words > 4 * med)):
+                continue
+            wid = [union([lines[i]["b"] for i in r]) for r in rows]
+            maxw = max(w[2] - w[0] for w in wid)
+            rw = [len(" ".join(lines[i]["text"] for i in r).split()) for r in rows]
+            cut = next((j for j in range(1, min(HEAD_MAX_ROWS, len(rows) - 1) + 1)
+                        if wid[j][2] - wid[j][0] >= 0.7 * maxw and rw[j] >= 5), None)
+            tail = sum(rw[cut:]) if cut else 0
+            ent = dict(page=pg.get("page"), lines=ids, rows=len(rows), words=words, text=" ".join(
+                lines[i]["text"] for i in ids)[:80])
+            if not cut or tail < 12 or len(rows) - cut < 2:
+                log["long_headings"].append(dict(ent, action="kept (flag only)"))
+                continue
+            top = {i for r in rows[:cut] for i in r}
+            b["lines"] = [i for i in ids if i in top]
+            rest = dict(type="paragraph", lines=[i for i in ids if i not in top], from_heading=True)
+            bl.insert(k, rest)
+            k += 1
+            log["long_headings"].append(dict(ent, action=f"split: {cut} row(s) heading, {len(rows) - cut} rows "
+                                                         f"paragraph"))
+
+
+def header_text(ans, lines, log):
+    """A header / footer block holding a line of running text (0478 p4, owner: the page number «٥٩» and the first
+    list item «١-تقليل الوقت غير المستغل …» in one header block): a line of >= 5 words, not like the running head
+    or footer of the chunk's other pages, not journal / date furniture, that sits in the text column next to the
+    page's running text, goes back into the article: a list item when it opens with a number and the block below is
+    a list item, else a paragraph; at the top of the page's flow (header) or its end (footer)."""
+    pages = [pg for pg in ans.get("pages") or [] if isinstance(pg, dict)]
+    furn = {}
+    for pg in pages:
+        for b in pg.get("blocks") or []:
+            if isinstance(b, dict) and b.get("type") in ("header", "footer"):
+                for i in block_ids(b):
+                    if i in lines:
+                        furn.setdefault(pg.get("page"), []).append(set(re.findall(r"\w+", lines[i]["text"])))
+    for pg in pages:
+        bl = pg.get("blocks") or []
+        body = [i for b in bl if isinstance(b, dict) and b.get("type") in TEXT_TYPES | {"heading"}
+                for i in block_ids(b) if i in lines]
+        if not body:
+            continue
+        col = union([lines[i]["b"] for i in body])
+        for b in list(bl):
+            if not isinstance(b, dict) or b.get("type") not in ("header", "footer"):
+                continue
+            for i in [i for i in block_ids(b) if i in lines]:
+                L = lines[i]
+                t, lb = L["text"], L["b"]
+                ws = set(re.findall(r"\w+", t))
+                if len(t.split()) < 5 or JOURNALISH.search(t) or letters(t) < 15:
+                    continue
+                if any(len(ws & o) >= 0.5 * max(1, min(len(ws), len(o))) for p2, os_ in furn.items()
+                       if p2 != pg.get("page") for o in os_):
+                    continue                                   # the running head of the other pages
+                h = lb[3] - lb[1]
+                near = [lines[j]["b"] for j in body if xoverlap(lines[j]["b"], lb) > 0.3]
+                if not near or min(abs(nb[1] - lb[3]) if nb[1] >= lb[1] else abs(lb[1] - nb[3]) for nb in near) > 1.5 * h:
+                    continue
+                if lb[0] < col[0] - 0.02 * 1000 or lb[2] > col[2] + 0.02 * 1000:
+                    continue
+                b["lines"] = [x for x in b.get("lines") or [] if str(x) != i]
+                top = b["type"] == "header"
+                flow = [x for x in bl if isinstance(x, dict) and x.get("type") not in ("header", "footer")]
+                nb = flow[0] if top and flow else (flow[-1] if flow else None)
+                typ = "list_item" if NUM_MARK.match(t) and nb is not None and nb.get("type") == "list_item" \
+                    else "paragraph"
+                nbk = dict(type=typ, lines=[i], from_furniture=True)
+                if typ == "list_item" and nb.get("list"):
+                    nbk["list"] = nb["list"]
+                at = bl.index(nb) if (top and nb is not None) else (bl.index(nb) + 1 if nb is not None else len(bl))
+                bl.insert(at, nbk)
+                log["header_text"].append(dict(page=pg.get("page"), line=i, was=b["type"], now=typ, text=t[:80]))
+            if not b.get("lines"):
+                bl.remove(b)
+
+
 # ------------------------------------------------------------------------------------------------ the rules
 
 def endnotes(ans, log):
@@ -955,7 +1082,8 @@ def new_log() -> dict:
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
-                pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0)
+                pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
+                long_headings=[], header_text=[], inline_pictures=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -973,6 +1101,8 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)
     never_noise(ans, lines, log)
+    long_headings(ans, lines, log)
+    header_text(ans, lines, log)
     exclamation(ans, log)
     figure_swap(ans, lines, log)
     text_in_figure(ans, lines, log)

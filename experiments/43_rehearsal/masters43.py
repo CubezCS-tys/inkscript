@@ -306,7 +306,7 @@ class Master43(M.Master):
 
 # ------------------------------------------------------------------------------------------------ version stamp
 
-CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
+CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", HERE / "jats43.py", HERE / "refs43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
 RAW41 = E41 / "out" / "argon" / "raw"
 DEFAULT_MODEL = "gemini-4-argon"
 
@@ -422,6 +422,8 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | N
         art = Mo.build()
         if rules:
             Mo.add_ornaments()
+            import refs43                       # v3.2 parsed references / cited works (no-op on older answers)
+            refs43.add_parsed(Mo, art, raw_dir)
         alto = Mo.alto_xml()
     finally:
         M.MAST = real_mast

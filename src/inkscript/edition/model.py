@@ -455,7 +455,8 @@ def read_body(art) -> tuple[list, list, list, list]:
                 for fn in g.iter("fn"):
                     pm = re.match(r"fn-p(\d+)-", fn.get("id") or "")
                     notes.append(Note(fn.get("id") or "", txt(fn.find("label")),
-                                      [node("p", p) for p in fn.findall("p")], int(pm[1]) if pm else None))
+                                      [node("p", p) for p in fn.findall("p")      # parsed citations: data only
+                                       if p.get("content-type") != "parsed-citations"], int(pm[1]) if pm else None))
             elif tag == "ref-list":
                 t = g.find("title")
                 if t is not None:
@@ -465,8 +466,9 @@ def read_body(art) -> tuple[list, list, list, list]:
                 elif g.get("id") and BLOCK_ID.match(g.get("id")):
                     refs.append(Node("ref-head", [], g.get("id")))
                 for r in g.iter("ref"):
-                    for mc in r:
-                        if isinstance(mc.tag, str):
+                    printed = r.find("mixed-citation") is not None
+                    for mc in r:            # an element-citation beside the printed entry is its parts: not printed
+                        if isinstance(mc.tag, str) and not (printed and mc.tag == "element-citation"):
                             refs.append(node("ref", mc))
             elif tag in ("ack", "app-group", "app"):   # acknowledgements, appendices: read on after the body
                 walk([g], 0)

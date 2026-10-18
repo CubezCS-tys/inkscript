@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import statistics
 import sys
 from pathlib import Path
@@ -262,6 +263,164 @@ def wrap_floats(B, Ls, nrow, figs, W):
     return "".join(out)
 
 
+OLD_PIECES = bool(os.environ.get("VIEWS43_OLD_PIECES"))   # experiment 41's pieces_of (to measure "before")
+SAME_ROW_GAP = 0.35          # share of the page width: two Azure lines of one printed row this far apart stay one row
+WIDE_X = 1.5                 # a line this many times wider than its piece's lines ...
+WIDE_OUT = 0.25              # ... and reaching out of the piece by this share of its width starts a new box
+
+
+def row_groups(ids, LX):
+    """A piece's lines grouped into printed rows (Azure may cut one printed row into several lines), in order."""
+    rows = []
+    for x in ids:
+        b = LX[x]["px"]
+        if rows:
+            r = rows[-1]
+            rb = r["box"]
+            h = min(b[3] - b[1], rb[3] - rb[1]) or 1
+            if min(rb[3], b[3]) - max(rb[1], b[1]) > 0.5 * h:
+                r["ids"].append(x)
+                r["box"] = ST.union([rb, b])
+                continue
+        rows.append(dict(ids=[x], box=list(b)))
+    return rows
+
+
+def pieces43(ids, LX, W, group, inline_boxes=(), rtl=True):
+    """experiment 41's pieces_of (a block's lines cut where the reading turns a column), with three changes
+    (2026-10-18, owner's marks on 0478 p4, 1769 p3, 1010 p2):
+    * the lines of one printed row stay one row even when far apart (Azure cut the row at a picture or a wide
+      gap: 1769 p3's «منظر من الخارج لتابوت يحمل أسم [picture] نسي تا نب تاوي ...»); before, the row's left part
+      started a new box that ran over the row's right part;
+    * a box is cut where its lines change width sharply: a column paragraph whose last lines run across the whole
+      page (0478 p4) is a column part and a full-width part, so it no longer covers the other column;
+    * a row holding an inline picture (inline_boxes: pictures no taller than ~3 rows sitting in the row) is cut
+      round the picture: rows above, the row's words on each side of the picture (each its own box, from Azure's
+      word boxes), rows below. A piece may carry "html" (its own text) when a line was cut by words."""
+    if group in ("header", "footer"):
+        return pieces_of(ids, SimpleNamespace(lines=LX))
+    rows = row_groups(ids, LX)
+    out = []
+    for r in rows:
+        b = r["box"]
+        if out:
+            cur = out[-1]
+            ux = cur["box"]
+            last = cur["rows"][-1]["box"]
+            h = max(1, last[3] - last[1])
+            ov = min(ux[2], b[2]) - max(ux[0], b[0])
+            narrow = min(ux[2] - ux[0], b[2] - b[0]) or 1
+            up = b[1] < last[1] - 0.6 * h
+            gap = b[1] > last[3] + 3.5 * h
+            # a row Argon put out of order inside the same column (1010 p6: row 2 before row 1): not a column turn
+            if up and ov >= 0.3 * narrow and b[1] >= ux[1] - 1.5 * h:
+                up = False
+            if ov >= 0.3 * narrow and not up and not gap:
+                ws = sorted(x["box"][2] - x["box"][0] for x in cur["rows"])
+                med = ws[len(ws) // 2]
+                bw = b[2] - b[0]
+                out_by = max(0.0, ux[0] - b[0]) + max(0.0, b[2] - ux[2])
+                wide = bw > WIDE_X * med and out_by > WIDE_OUT * (ux[2] - ux[0]) and \
+                    len(cur["rows"]) >= 2 and med >= 0.1 * W            # a real column, not a speck above a row
+                # back to the column after a full-width part: this row and the next are narrow again
+                was_wide = cur.get("wide")
+                k = rows.index(r)
+                nxt = rows[k + 1]["box"] if k + 1 < len(rows) else None
+                back = was_wide and bw < med / WIDE_X and (nxt is None or (nxt[2] - nxt[0]) < med / WIDE_X) \
+                    and nxt is not None
+                if not wide and not back:
+                    cur["rows"].append(r)
+                    cur["box"] = ST.union([ux, b])
+                    continue
+                out.append(dict(rows=[r], box=list(b), wide=wide, cut="width"))
+                continue
+        out.append(dict(rows=[r], box=list(b), wide=False))
+    pcs = []
+    for pc in out:
+        cut_rows = []
+        for r in pc["rows"]:
+            rb = r["box"]
+            rh = rb[3] - rb[1]
+            pics = [F for F in inline_boxes
+                    if min(rb[3], F[3]) - max(rb[1], F[1]) > 0.5 * min(rh, F[3] - F[1])
+                    and F[3] - F[1] < 3.2 * max(rh, 1) and F[0] < rb[2] + 0.02 * W and F[2] > rb[0] - 0.02 * W]
+            cut_rows.append((r, pics))
+        if not any(p for _, p in cut_rows):
+            pcs.append(dict(ids=[x for r in pc["rows"] for x in r["ids"]], box=pc["box"], cut=pc.get("cut")))
+            continue
+        run = []
+        for r, pics in cut_rows:
+            if not pics:
+                run.append(r)
+                continue
+            if run:
+                pcs.append(dict(ids=[x for q in run for x in q["ids"]], box=ST.union([q["box"] for q in run]),
+                                cut="picture"))
+                run = []
+            pcs += row_round_pictures(r, pics, LX, rtl)
+        if run:
+            pcs.append(dict(ids=[x for q in run for x in q["ids"]], box=ST.union([q["box"] for q in run]),
+                            cut="picture"))
+    return pcs
+
+
+def row_round_pictures(r, pics, LX, rtl=True):
+    """One printed row cut round the pictures in it: the stretches of words between them, each a box of its own
+    (a whole Azure line keeps its HTML; a line the picture cuts is split by its words' boxes, plain text)."""
+    edges = sorted(pics, key=lambda F: F[0])
+    spans = []                                        # x-ranges free of pictures, left to right
+    x = -1e9
+    for F in edges:
+        spans.append((x, F[0]))
+        x = max(x, F[2])
+    spans.append((x, 1e9))
+    segs = {k: dict(ids=[], words=[], boxes=[]) for k in range(len(spans))}
+    for lid in r["ids"]:
+        L = LX[lid]
+        b = L["px"]
+        whole = next((k for k, (s0, s1) in enumerate(spans) if b[0] >= s0 - 2 and b[2] <= s1 + 2), None)
+        if whole is not None or not L.get("words"):
+            k = whole if whole is not None else min(range(len(spans)), key=lambda k: abs(
+                (spans[k][0] + spans[k][1]) / 2 - (b[0] + b[2]) / 2))
+            segs[k]["ids"].append(lid)
+            segs[k]["boxes"].append(b)
+            segs[k]["words"].append((None, L["html"] or ""))
+            continue
+        for w in L["words"]:
+            wb = MR._box(w)
+            c = (wb[0] + wb[2]) / 2
+            k = next((k for k, (s0, s1) in enumerate(spans) if s0 <= c <= s1), None)
+            if k is None:                             # a word under the picture: Azure's reading of its ink
+                continue
+            segs[k]["boxes"].append(wb)
+            segs[k]["words"].append((lid, E(w.get("CONTENT") or "")))
+            if lid not in segs[k]["ids"]:
+                segs[k]["ids"].append(lid)
+    out = []
+    for k in segs:
+        s = segs[k]
+        if not s["boxes"]:
+            continue
+        html = " ".join(t for _, t in s["words"] if t)
+        if not html.strip():
+            continue
+        out.append(dict(ids=s["ids"], box=ST.union(s["boxes"]), html=html, cut="picture", one_row=True))
+    return sorted(out, key=lambda pc: -pc["box"][2] if rtl else pc["box"][0])     # the row's reading order
+
+
+def overlaps(boxes, share=0.25):
+    """Pairs of text boxes on a page overlapping more than `share` of the smaller one's area (the overlap flag)."""
+    out = []
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            (ta, a), (tb, b) = boxes[i], boxes[j]
+            m = area(meet(a, b))
+            small = min(area(a), area(b))
+            if small > 0 and m > share * small:
+                out.append((i, j, round(m / small, 2)))
+    return out
+
+
 def build_layout43(a, doc):
     """experiment 41's views.build_layout (copied; 41 is never edited) with experiment 43's changes:
     * a figure with words printed inside it is drawn as the picture only, with a "text" button that opens its words
@@ -281,7 +440,7 @@ def build_layout43(a, doc):
     allbody = [hgt(L) for r in blocks if GROUP.get(r["type"]) == "body" for L in r["lines"]]
     doc_body = statistics.median(allbody) if allbody else 40
     rows, prints = [], []
-    stats = dict(blocks=0, pieces=0, turned=0, noise=0)
+    stats = dict(blocks=0, pieces=0, turned=0, noise=0, boxes={}, figures={}, cut_width=0, cut_picture=0)
     for i, pg in enumerate(doc["pages"]):
         p, W, H = pg["p"], pg["W"], pg["H"]
         recs = [r for r in blocks if r["page"] == p]
@@ -295,7 +454,9 @@ def build_layout43(a, doc):
         fnote = k(min(med.get("note", doc_body * 0.8), med.get("body", doc_body)))
         els, arrows_seq, num = [], [], 0
         regions, oa_figs = oa_regions(recs)
-        figs_px = [fig_px(r, W, H) for r in recs if r["type"] == "figure" and r.get("box")]
+        figs_px = [fig_px(r, W, H) for r in recs if r["type"] == "figure" and r.get("box") and not r.get("inline")]
+        inline_px = [list(r["box"]) for r in recs if r["type"] == "figure" and r.get("box") and r.get("inline")]
+        page_boxes = stats["boxes"].setdefault(p, [])
         fn_first = True
         for rec in recs:
             T, g = rec["type"], GROUP.get(rec["type"], "other")
@@ -323,6 +484,8 @@ def build_layout43(a, doc):
                            f'<span class="ob">{num}</span></div>')
                 arrows_seq.append((bx, num, False))
                 stats["blocks"] += 1
+                stats["figures"].setdefault(p, []).append((("inline " if rec.get("inline") else "") + "figure",
+                                                           list(rec["box"])))
                 continue
             if T == "equation" and rec.get("latex") is not None and rec.get("box"):
                 ids = [L["id"] for L in rec["extra_lines"]] or ids
@@ -331,7 +494,7 @@ def build_layout43(a, doc):
             if T in WHOLE:
                 pcs = [dict(ids=ids, box=ST.union([LX[x]["px"] for x in ids]))]
             else:
-                pcs = pieces_of(ids, SL)
+                pcs = (pieces_of(ids, SL) if OLD_PIECES else pieces43(ids, LX, W, g, inline_px, d == "rtl"))
             if len(pcs) == 1 and rec.get("box"):              # the ALTO block's box: also the ink of a line a fix
                 pcs[0]["box"] = list(rec["box"])                # emptied (Argon: not text), as the scan shows it
             num += 1
@@ -374,8 +537,8 @@ def build_layout43(a, doc):
                     nrow = 1
                     content = (f'<div class="tx eq" dir="ltr"><span class="math">\\[{E(rec["latex"])}\\]</span></div>')
                 else:
-                    nrow = rows_of([LX[x]["px"] for x in pc["ids"]])
-                    txt = " ".join(LX[x]["html"] or "" for x in pc["ids"])
+                    nrow = 1 if pc.get("one_row") else rows_of([LX[x]["px"] for x in pc["ids"]])
+                    txt = pc["html"] if pc.get("html") is not None else " ".join(LX[x]["html"] or "" for x in pc["ids"])
                     if j == 0 and rec["continued"]:
                         txt = '<span class="contmark" title="continues from the previous page">&#8627;</span>' + txt
                     if last_piece:
@@ -400,6 +563,12 @@ def build_layout43(a, doc):
                            f'style="{boxstyle(bx, W, H)};--f:{f0:.3f};--lh:{lh:.3f}">{content}{badge}</div>')
                 arrows_seq.append((bx, num, j > 0))
                 stats["pieces"] += 1
+                if g not in ("header", "footer") and T != "other_article" and id(rec) not in oa_figs:
+                    page_boxes.append((T, list(bx)))
+                if pc.get("cut") == "width":
+                    stats["cut_width"] += 1
+                elif pc.get("cut") == "picture":
+                    stats["cut_picture"] += 1
         # lines no block took (the ALTO's role.noise): shown only with "Blocks"
         for L in doc["noise"].get(p, []):
             h = hgt(L)
@@ -481,13 +650,38 @@ def main():
     ap.add_argument("--masters", required=True)
     ap.add_argument("--out", default=str(HERE / "out" / "views"))
     ap.add_argument("--stems", nargs="+", required=True)
+    ap.add_argument("--report", help="JSON file: per article the box cuts and the overlaps left")
     a = ap.parse_args()
     MR.MAST = Path(a.masters).resolve()
     V.VIEWS = Path(a.out).resolve()
     V.write_layout_print = lambda *x, **k: None              # the print page is not part of this check
+    rep = {}
     for s in a.stems:
         st = build_layout43(art_of(s), load43(art_of(s)))
-        print(s, st, "->", V.VIEWS / "mirror" / f"{s}.html")
+        ov = layout_overlaps(st)
+        rep[s] = dict(cut_width=st["cut_width"], cut_picture=st["cut_picture"], overlaps=ov)
+        print(s, {k: v for k, v in st.items() if k not in ("boxes", "figures")}, f"overlaps {len(ov)}",
+              "->", V.VIEWS / "mirror" / f"{s}.html")
+    if a.report:
+        Path(a.report).write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def layout_overlaps(st, share=0.25) -> list[dict]:
+    """The Layout view's own boxes, page by page: text boxes overlapping each other, and inline pictures over text
+    (both > share of the smaller box, by area)."""
+    out = []
+    for p, bs in st["boxes"].items():
+        for i, j, r in overlaps(bs, share):
+            out.append(dict(page=p, kind="text_text", a=bs[i][0], b=bs[j][0], share=r, box_a=bs[i][1], box_b=bs[j][1]))
+        for t, fb in st["figures"].get(p, []):
+            if not t.startswith("inline"):
+                continue
+            for tt, tb in bs:
+                m = area(meet(fb, tb))
+                if area(fb) and m > share * area(fb):
+                    out.append(dict(page=p, kind="picture_text", a="inline figure", b=tt, share=round(m / area(fb), 2),
+                                    box_a=fb, box_b=tb))
+    return out
 
 
 if __name__ == "__main__":

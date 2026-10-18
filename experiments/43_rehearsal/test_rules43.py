@@ -260,3 +260,56 @@ def test_picture_among_other_article_and_swapped_box():
     out2, _ = RU.normalize(ans2, lines2)
     f2 = [b for b in out2["pages"][0]["blocks"] if b["type"] == "figure"][0]
     assert f2["box"] == [342, 65, 848, 474]
+
+
+# ---- layout rules (2026-10-18: 0478 p4, blocks drawn on top of each other)
+
+P4 = {
+    "4:1": L("٥٩", [128, 112, 147, 122], 4),
+    "4:2": L("الاداري - القادسية للعلوم الادارية والاقتصادية المجلد (٧) العدد (٢)", [490, 113, 860, 125], 4),
+    "4:3": L("١ -تقليل الوقت غير المستغل أو خسارة", [526, 151, 856, 170], 4),
+    "4:4": L("الموازنه .", [784, 171, 858, 189], 4),
+    "4:5": L("٢ -تقليل عدد محطات العمل .", [641, 190, 858, 208], 4),
+    "4:21": L("١ -قيود الأسبقيه", [710, 457, 856, 475], 4),
+    "4:23": L("Precedence Requiements", [527, 459, 700, 474], 4),
+    "4:44": L("وهي عباره عن القيود الماديه ( الطبيعيه ) على", [529, 496, 860, 517], 4),
+    "4:58": L("على نوع المليات المؤداةفي خط التجميع ،اذ ان", [528, 516, 858, 535], 4),
+    "4:59": L("ان هذه القيود سوف تحد من قدرة مصمم خط", [527, 534, 860, 554], 4),
+    "4:60": L("خط التدفق لتحقيق الموازنه في مهام العمل", [529, 553, 858, 573], 4),
+}
+P5 = {"5:1": L("الاداري - القادسية للعلوم الادارية والاقتصادية المجلد (٧) العدد (٢)", [490, 113, 860, 125], 5),
+      "5:2": L("نص الصفحة التالية من المقال في العمود", [526, 151, 856, 170], 5)}
+
+
+def test_long_heading_split_into_heading_and_paragraph():
+    a = {"pages": [{"page": 4, "blocks": [
+        {"type": "heading", "level": 4, "lines": ["4:21", "4:23", "4:44", "4:58", "4:59", "4:60"]}]}]}
+    ans, log = RU.normalize(a, {k: v for k, v in P4.items() if k in ("4:21", "4:23", "4:44", "4:58", "4:59", "4:60")})
+    bl = ans["pages"][0]["blocks"]
+    assert bl[0]["type"] == "heading" and bl[0]["lines"] == ["4:21", "4:23"]
+    assert bl[1]["type"] == "paragraph" and bl[1]["lines"] == ["4:44", "4:58", "4:59", "4:60"]
+    assert log["long_headings"][0]["action"].startswith("split")
+
+
+def test_long_display_title_kept_whole():
+    lines = {f"1:{k}": L(w, [300, 100 + 40 * k, 700, 130 + 40 * k]) for k, w in
+             enumerate(["يبحثها", "المؤتمر الإسلامى", "لوزراء", "الخارجية"], 1)}
+    a = {"pages": [{"page": 1, "blocks": [{"type": "heading", "lines": list(lines)}]}]}
+    ans, log = RU.normalize(a, lines)
+    assert ans["pages"][0]["blocks"][0]["lines"] == list(lines)
+    assert log["long_headings"][0]["action"] == "kept (flag only)"
+
+
+def test_running_text_out_of_a_header_block():
+    lines = dict(P4, **P5)
+    a = {"pages": [{"page": 4, "blocks": [
+        {"type": "header", "lines": ["4:2", "4:1", "4:3"]},
+        {"type": "list_item", "list": "ol", "lines": ["4:4"]},
+        {"type": "list_item", "list": "ol", "lines": ["4:5"]}]},
+        {"page": 5, "blocks": [{"type": "header", "lines": ["5:1"]}, {"type": "paragraph", "lines": ["5:2"]}]}]}
+    ans, log = RU.normalize(a, lines)
+    bl = ans["pages"][0]["blocks"]
+    assert bl[0] == {"type": "header", "lines": ["4:2", "4:1"]}
+    assert bl[1]["type"] == "list_item" and bl[1]["lines"] == ["4:3"] and bl[1]["list"] == "ol"
+    assert len(log["header_text"]) == 1
+    assert ans["pages"][1]["blocks"][0]["lines"] == ["5:1"]            # the running head stays
