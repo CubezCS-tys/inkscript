@@ -156,6 +156,79 @@ works on a masters folder with only some articles. Nothing broke during the run.
 (dry run; this test landed on its estimate). The test's $0.30 is in the same spend log, so the cap counts it. Run
 before 1 Dec (prices double). Expect round 1 as one job (~1.4M tokens, under the 4.5M per-job limit).
 
+## Run of the 55 (prompt v2) (2026-10-18, owner-approved, cap $10): **$3.18 billed, 67/67 answers, no regression that matters**
+
+`run43.py --set a --cap 10` (Batch, inline images, HIGH resolution, thinking low; run `v2_55`). Outputs `out/v2_55/`
+(raw, rules, masters, views, shots/side_*.jpg, compare.json/.txt, flags.txt, hand5_blocks.txt, run.log, progress in
+`out/progress.md`).
+
+**Spend** (from `out/gemini_spend.jsonl`): the 67 requests **$3.1846** (1,347,148 input, 367,496 output tokens; the dry
+run said $3.35 expected, $9.42 worst); the log's total with the Batch test is **$3.4846**. All 67 finished STOP, the
+largest answer 17,189 output tokens. The console bill is still to be checked once against our token count.
+
+**Turnaround**: round 1 (55 requests, 216 MB of JSONL) 5.2 min from create to end, round 2 (10) 2.5 min, round 3 (2)
+3.4 min; 19 min wall from launch to the last answer, ~4 min of it building and uploading round 1's file.
+
+**Failures and retries**: one. The first launch was refused before any job existed (400: *Batch requests cannot ask for
+more than 32,768 output tokens*; three long chunks asked for up to 33k under 41's `max_out`). `run43.py` now caps Batch
+requests at `BATCH_MAX_OUT = 32768` (41's largest answer was 13.9k); relaunched, nothing was sent twice, $0 lost.
+Assembly: one master failed the JATS DTD (1148 p6: the model wrote an empty table row, every column covered by rowspans
+from the header; masters wrote `<tr/>`). New code rule `empty_rows` in `rules43.py` (row dropped, the rowspans over it
+shortened; test added); **55/55 JATS DTD + ALTO XSD valid**. `gold43.py check`: the 5 gold articles unchanged by the rule.
+
+**Against experiment 41** (`compare43.py --run v2_55`; 41 = its Argon answers and masters, replay = those answers
+through the v2 code rules):
+
+| over the 55 | 41 | replay | v2 |
+|---|---|---|---|
+| words in JATS body | 127,626 | 127,861 | 127,049 |
+| blocks | 4,646 | 4,648 | 4,638 |
+| footnotes + endnotes | 444 + 0 | 444 + 0 | 347 + **200** |
+| calls in the answers / linked | 467 / 360 | 467 / 360 | 490 / **483** |
+| verse cuts / ornaments out of the text | 0 / 0 | 0 / 1 | 22 / 60 |
+| other_article blocks | 0 | 0 | 39 (7 articles) |
+| misprints flagged (sic) | 178 | 178 | 219 |
+| fixes (only hamza / alif / ya / ta marbuta; only diacritics) | 1,146 (86; 23) | same | 997 (66; 17) |
+| noise lines with words in the masters | 41 | 15 | 16 |
+| flags43: high / medium / low | — | 5 / 56 / 25 | 3 / 27 / 20 |
+
+Reading order: the same as 41 in 48 articles; 77 lines move in 7, 42 of them in 1010 (its poem taken out) and 15 in
+1147 (equations re-cut). Block types are the same in most articles; where they change it is mostly references →
+endnotes (0355, 1769, 0049: now linked) and quote → paragraph (1769's figure notes).
+
+Where v2 differs, judged next to the scan (`out/v2_55/shots/side_*.jpg`):
+* **other_article, all right**: 1010 (a framed filler poem by another author, pp 2–8; 41 had it as 32 verse blocks
+  inside the article: −415 body words), 0924 p1 (the end of the previous report, signed), 0493 p4 (a separate news
+  report after the article ends), 0447 p3 (the column «ترياق الحياة»), 0690 p1 (the end of the previous letter, signed),
+  0656 p4 (as in the test). The 2 `other_middle` high flags (0447, 0493) are these right ones.
+* **Endnotes**: 0355 51/51, 1769 43/43, 0767 25/25, 0781 14/14, 0049 11/15 linked (41: 0, 0, 10, 14, 3).
+* **Lists vs references, inconsistent both ways**: 1140 (the author's publications, pp 2–11) references → list items in
+  the body (+1,617 body words, text identical); 0382 (a bibliography article) list items → references (body −1,003).
+  The text is the same; one rule is needed for "a list of works that *is* the article".
+* **Fixes**: 1769 has 21 that write the print's dotted ي in على / إلى (right on the scan, one over-reach on 2:13); 0549
+  has 2 (41: 33, mostly Azure's garbled calligraphic title, which v2 calls a figure; the title comes from the
+  catalogue); 0692 50 (41: 29).
+* **Figure descriptions** are now English (41: Arabic): the article-text diff of 1769 is mostly those, not print.
+* **Small regressions**: 0197 one call no longer linked (the model wrote Azure's «(!)» as the marker of «(١)»): 1/2;
+  0747 75/76 (the batch test had 76/76; one call given on a cut line as the whole line); 2382's English title and the
+  received/accepted dates are now "other" (41: a heading, and part of the byline).
+
+**The five hand-checked articles** (`out/v2_55/hand5_blocks.txt`, every block-level difference): **0747** and
+**0877** blocks identical to 41 (0747: 12 cuts, 33 ornaments out, 75/76 calls). **0924** better: page 1's top half
+(the previous report) is now another article; p4's table title a caption (right); p2 one line heading → paragraph and
+p7 two numbered items list → paragraph and a heading h3 → h2 (neutral). **1140** blocks the same except the
+references → list items above (text identical; owner's choice). **2382** p1 only: «الملخص:» and «Abstract:» headings
+split from the abstracts (right), the English title heading → other and the dates byline → other (the dates better, the
+title worse). None loses text. Verdict: at least as good, with 2382's English title the one step back.
+
+**Views**: `out/v2_55/views/index.html` (served as http://127.0.0.1:8899/v2_55/index.html), 55 articles, 9 marked
+"look first" (1010, 0924, 0493, 0447, 1140, 0382, 2382, 1769, 0197), each with one line on what changed vs 41.
+`out/v2_55/make_index.py` builds it from `compare.json`.
+
+**Verdict**: prompt v2 does what it was written for (another article, endnotes, verse cuts and ornaments) on the 55,
+for $3.18 on Batch, with no lost text and five small regressions listed above. To decide with the owner: the list vs
+references rule, the English figure descriptions, translated titles as "other".
+
 ## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
 
 300 whole articles of 1–30 pages, none in experiment 35's sample or editions, 40's sample or 41's 55; ≤ 3 per
@@ -246,9 +319,8 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
-2. ~~A small Batch check~~ (done, "Batch test"), then `run43.py --set a --cap 10`
-   (prompt v2 on the 55) before 1 Dec; compare with 41 (types, endnote links, list/body stability, sic vs fix on the
-   judged items, noise with words should be 0 before the code backstop).
+2. ~~A small Batch check~~ (done, "Batch test"), ~~then `run43.py --set a --cap 10`~~ (done, "Run of the 55": $3.18).
+   Owner looks at `out/v2_55/views/index.html` (the 9 marked first); decide the list-vs-references rule.
 3. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
    rehearsal (`--set b`).
 
@@ -258,7 +330,7 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 `views43.py` (Layout view from a masters folder) · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/ids.txt`.

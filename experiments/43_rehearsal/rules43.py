@@ -22,6 +22,8 @@ The rules, in order (each counted in the log):
                 block: 0355 21:63, where Argon retyped أن as ان inside the parts): when the parts hold as many words
                 as the line, they are rebuilt from Azure's own words at the same cut; otherwise the split is undone
                 (the first reference to a part becomes the whole line, the other references go)
+  empty rows    a table row with no cells (every column covered by a rowspan from above: 1148 p6 in the 55) is
+                dropped and the rowspans over it shortened by one (the JATS DTD wants th or td in every tr)
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
@@ -474,10 +476,31 @@ def fixes(ans, log):
     ans["fixes"] = keep
 
 
+def empty_rows(ans, log):
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            rows = b.get("rows") if isinstance(b, dict) and b.get("type") == "table" else None
+            if not isinstance(rows, list):
+                continue
+            i = 0
+            while i < len(rows):
+                if isinstance(rows[i], list) and not rows[i] and i > 0:
+                    for j in range(i):
+                        for c in rows[j] if isinstance(rows[j], list) else []:
+                            if isinstance(c, dict) and int(c.get("rowspan") or 1) > i - j:
+                                c["rowspan"] = int(c["rowspan"]) - 1
+                                if c["rowspan"] <= 1:
+                                    c.pop("rowspan")
+                    del rows[i]
+                    log["empty_rows"] += 1
+                    continue
+                i += 1
+
+
 def new_log() -> dict:
     return dict(endnotes=0, cuts=0, bad_cuts=[], ornaments_model=0, ornaments_code=0, ornaments_rejected=[],
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
-                other_article_lines=0)
+                other_article_lines=0, empty_rows=0)
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -494,6 +517,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)
     never_noise(ans, lines, log)
+    empty_rows(ans, log)
     fixes(ans, log)
     return ans, log
 

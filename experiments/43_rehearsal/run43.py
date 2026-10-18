@@ -86,6 +86,9 @@ def price(mode: str, when: str | None = None) -> tuple[float, float]:
     return (pin / 2, pout / 2) if mode == "batch" else (pin, pout)
 
 
+BATCH_MAX_OUT = 32768                                       # the Batch API's limit on maxOutputTokens
+
+
 def max_out(n_pages: int) -> int:
     return min(65000, 3000 * n_pages + 6000)                  # experiment 41's
 
@@ -239,7 +242,7 @@ def request_line(a, ci, x, y, run, upload, client) -> tuple[str, dict, int, int]
         parts.append(img)
     parts.append({"text": prompt})
     key = f"{run}_{a['stem']}_c{x:03d}-{y:03d}"
-    mo = max_out(y - x + 1)
+    mo = min(max_out(y - x + 1), BATCH_MAX_OUT)   # Batch refuses more (no decoding continuation); 41's largest answer: 13.9k
     req = {"contents": [{"role": "user", "parts": parts}],
            "generationConfig": {"maxOutputTokens": mo, "responseMimeType": "application/json",
                                 "thinkingConfig": {"thinkingLevel": THINKING.upper()}}}

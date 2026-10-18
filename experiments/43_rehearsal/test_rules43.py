@@ -135,3 +135,13 @@ def test_fixes_counted_not_changed():
                                 {"line": "3:34", "from": "أكثر", "to": "اكثر"}]}
     ans, log = RU.normalize(a, lines)
     assert len(ans["fixes"]) == 2 and len(log["fixes_spacing"]) == 1 and len(log["fixes_orthographic"]) == 1
+
+
+def test_empty_table_row_is_dropped_and_rowspans_shortened():
+    ans = {"pages": [{"page": 6, "blocks": [{"type": "table", "rows": [
+        [{"lines": ["6:1"], "th": True, "rowspan": 2}, {"lines": ["6:2"], "th": True, "rowspan": 3}],
+        [], [{"lines": ["6:3"]}]]}]}]}
+    out, log = RU.normalize(ans, {})
+    rows = out["pages"][0]["blocks"][0]["rows"]
+    assert log["empty_rows"] == 1 and len(rows) == 2
+    assert "rowspan" not in rows[0][0] and rows[0][1]["rowspan"] == 2
