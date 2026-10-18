@@ -27,7 +27,7 @@ The rules, in order (each counted in the log):
   exclamation   a "(!)" Azure read (the author's parenthetical exclamation) is never turned into a call: a fix that
                 writes it as a digit "(١)" / "(1)" is refused and a footnote call whose marker is that "(!)" (or the
                 digit the fix wrote) on that line is dropped (0197 p2: the owner's judgement on the scan)
-  text in fig.  a block of running text (paragraph, abstract, quote, other, list item, keywords, verse) whose every
+  text in fig.  a block of running text (paragraph, abstract, quote, other, list item, keywords, verse, boxed) whose every
                 line lies inside a figure's box on its page (>= 80% of each line's area) is the figure's own text
                 (0493 p1: a paragraph printed on a drawn TV screen), unless the figure also holds a title, heading
                 or byline line (then it is a background picture under the page's own text: 0881 p1): its lines become the figure's "lines" (the
@@ -39,13 +39,16 @@ The rules, in order (each counted in the log):
                 «شكل رقم (N)» above a picture inside its box, drawn twice)
   v3 types      (prompt v3) a title block with "translated": true becomes type "trans_title" (the masters write it as
                 JATS trans-title-group); a "boxed" block keeps its type and its "box" number rides in "level" (the
-                assembly keeps level, not unknown keys): the masters group one box's blocks into one boxed-text
+                assembly keeps level, not unknown keys): the masters group one box's blocks into one boxed-text;
+                a figure's description {"ar", "en"} becomes its JSON text (experiment 41's assembly escapes the
+                description as a string), which masters43 reads back into one alt-text per language
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
 from __future__ import annotations
 
 import copy
+import json
 import re
 from collections import Counter
 
@@ -140,6 +143,10 @@ def v3_types(ans, log):
             if b.get("type") == "title" and b.get("translated") in (True, "true", 1):
                 b["type"] = "trans_title"
                 log["trans_titles"] += 1
+            elif b.get("type") == "figure" and isinstance(b.get("description"), dict):
+                d = {str(k): v for k, v in b["description"].items() if isinstance(v, str) and v.strip()}
+                b["description"] = json.dumps(d, ensure_ascii=False) if d else None
+                log["descriptions_two_languages"] += len(d) > 1
             elif b.get("type") == "boxed":
                 k = b.get("box")
                 b["level"] = str(k) if k is not None else None
@@ -564,7 +571,7 @@ def exclamation(ans, log):
             b["calls"] = cs
 
 
-FIG_TEXT = {"paragraph", "abstract", "quote", "other", "list_item", "keywords", "verse"}
+FIG_TEXT = {"boxed", "paragraph", "abstract", "quote", "other", "list_item", "keywords", "verse"}
 HEAD = {"title", "heading", "byline"}
 
 
@@ -658,7 +665,7 @@ def new_log() -> dict:
     return dict(endnotes=0, cuts=0, bad_cuts=[], ornaments_model=0, ornaments_code=0, ornaments_rejected=[],
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
-                text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0)
+                text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0)
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:

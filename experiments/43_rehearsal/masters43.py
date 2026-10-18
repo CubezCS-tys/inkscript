@@ -169,6 +169,11 @@ class Master43(M.Master):
         n0 = len(parent.findall("fig"))
         desc = rec.get("description")
         both = {}
+        if isinstance(desc, str) and desc.startswith("{"):     # v3 via rules43: {"ar": ..., "en": ...} as JSON
+            try:
+                desc = json.loads(desc)
+            except ValueError:
+                pass
         if isinstance(desc, dict):        # v3: {"ar": ..., "en": ...}; the article's language first
             both = {str(k): v.strip() for k, v in desc.items() if isinstance(v, str) and v.strip()}
             rec = dict(rec, description=both.get(self.lang) or next(iter(both.values()), None))

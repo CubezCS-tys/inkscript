@@ -10,7 +10,8 @@ through the Gemini Batch API under a cap.
 request shape, costs and the new labels are confirmed. The feedback loop (flags → review page → marks → gold set +
 issues, version stamps) is built and tested without calls (section "Feedback loop"). The run of the 55 cost $3.18 (section "Run of the 55");
 the owner's review of it led to three code rules and view changes (section "Owner's review of the 55") and three
-prompt proposals (section "Decisions pending").
+prompt proposals (section "Decisions pending"), which the owner decided: prompt v3 is live, with the empty JATS
+slots filled in code; a 6-article Batch test cost $0.62 (section "Prompt v3 and JATS coverage").
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -294,7 +295,7 @@ changed in 7 articles (0041, 0197, 0408, 0493, 1147, 1769, 2382). Gold check: 23
 same. Unit tests: test_rules43 16 pass (4 new). **Layout PDFs not regenerated**: this experiment's views never wrote
 the print pages (`views43.py` skips `write_layout_print`), so the v2 run has no Layout PDFs to remake.
 
-## Decisions pending (proposals only; no prompt change made, no calls)
+## Decisions pending (proposals only; no prompt change made, no calls) — decided 2026-10-18, now prompt v3 (next section)
 
 Drafted as `prompt43.PROMPT_V3_CANDIDATE` / `META_FULL_V3_CANDIDATE` (each change a replacement of one v2 passage,
 `V3_CHANGES`; not used by `make_prompt` or `run43.py`).
@@ -310,6 +311,105 @@ Drafted as `prompt43.PROMPT_V3_CANDIDATE` / `META_FULL_V3_CANDIDATE` (each chang
   title is "other" in v2, a heading in 41: both wrong).
 * **(c) Figure descriptions in the article's language** (Arabic for an Arabic article; v2 wrote English, 41 Arabic).
   Recommendation: yes; they are alt-text for readers of the article.
+
+## Prompt v3 and JATS coverage (2026-10-18; owner's decisions (a)–(c); paid test $0.62 on Batch)
+
+**Prompt v3 is live** (`prompt43.PROMPT_V3` / `META_FULL_V3`, each change one replaced passage of v2 in `V3_CHANGES`;
+`run43.py --prompt v3`; answers record `"prompt": "v3"`, the masters' stamp hashes the v3 text; v2 stays the default
+name so the run of the 55 keeps its stamp). What v3 adds to v2:
+* **(a) references vs list** (owner): reference = an entry of a section the article presents as its sources (المراجع،
+  المصادر، Bibliographie, References …) or of an article that *is* a bibliography; an author's list of own works or works
+  listed in the body = list_item.
+* **(b) translated title** (owner): the title printed in another language is a title block with `"translated": true`
+  (code: type `trans_title`), plus `trans_titles` in the metadata. Masters: `trans-title-group[@xml:lang]
+  [@specific-use="printed"]/trans-title` holding the printed lines (ids → ALTO), `trans-subtitle` split off when it
+  matches the catalogue's; **printed wins**: the catalogue's copy is dropped when it has the same words, else kept as
+  `alt-title[@alt-title-type="catalogue-translation"]`. For older answers a code rule finds it (a Latin block on page 1
+  matching the catalogue's translated title: 2382 in v1 and v2 answers).
+* **(c) figure descriptions in Arabic and English** (owner): `"description": {"ar", "en"}`. JATS 1.4 (checked against the
+  local DTD: `fig` takes `(alt-text | long-desc)*`) → **two `alt-text`**, the article's language first, `xml:lang` on the
+  other; all valid. The Layout view uses the article's language for the image's alt and shows both on hover.
+* **boxed** — a block type for text in a frame or tinted box (pull-quote, highlighted fact, sidebar), `"box": K` groups
+  one box's blocks → JATS `boxed-text`, drawn as a tinted box. The text-in-figure rule now also covers boxed blocks
+  (v3 called 0493 p1's TV-screen paragraph "boxed"; it stays the picture's text, the owner's earlier choice).
+* **quotations** — every Quran verse or quotation printed on its own lines is a quote block (→ `disp-quote`); inline
+  quotations stay in the paragraph.
+* **metadata**: `history` (received / revised / accepted / published / online, the printed date and its line) and
+  `aff_parts` (department, institution, city, country, each an exact substring of the printed affiliation).
+Not changed: the prompt still shows its metadata example with doubled braces `{{` (inherited from experiment 41's
+template: the spec is passed as a value, not formatted); the model reads it fine, left as it is so v2 and v3 differ only
+by the changes above.
+
+**JATS slots filled in code** (`jats43.py`, called by `Master43.build`; ids kept so every ALTO block still points at its
+element and the Layout view draws it where printed). Counts over the 55 (v2 answers through today's code,
+`out/v3_test/v2_now`, against the masters of the morning; full table and the slots not filled, with why:
+**`jats_coverage.md`**):
+
+| slot | before → now (55) | from |
+|---|---|---|
+| `abstract` / `trans-abstract[@xml:lang]` (`abstract-type="printed"`, heading as its `title`) | 0 → 8 + 6 (all 20 abstract paragraphs; 0 left in the body) | blocks "abstract" (or paragraphs the metadata lists) |
+| `kwd-group[@kwd-group-type="author-printed"]`, one `kwd` each | 0 → 10 groups, 52 kwd in 7 articles | blocks "keywords", else the metadata's strings; catalogue groups stay, `specific-use="catalogue"` |
+| `trans-title-group` printed (+ `trans-subtitle`) | 0 → 1 (2382) | (b) |
+| `history/date` (+ printed `pub-date` with day) | 0 → 9 dates in 4 articles (2382, 1147, 1148, 0767) + 1 | v3 `history`; else printed labels on the first / last page followed directly by a date (تاريخ الاستلام / الإستقبال / التحكيم / القبول / النشر، مقبول للنشر بتاريخ، Received …) |
+| `aff` parts: `institution[@content-type=dept\|orgname]`, `country` | 0 → 21 dept, 25 orgname, 7 country in 29 affiliations | v3 `aff_parts`; else a country list and institution words; tagged in place, string unchanged |
+| `contrib-id`, `name-alternatives` (ar + en names), `role` | 0 → 39 authors | the catalogue person whose printed / Arabic name matches |
+| `fn-group[@content-type="endnotes"]` (heading → its `title`) | 0 → 200 notes in 6 articles, 5 titles; footnotes in `fn-group[@content-type="footnotes"]` | endnote ids `en-…`; calls unchanged, still linked |
+| `boxed-text` | 0 → 0 (v2 has no type) | v3 "boxed" |
+| `ack`, `app-group/app` | 0 → 0 (no such heading in the 55) | a section headed شكر وتقدير / Acknowledgements, ملحق / الملاحق / Appendix |
+| `fig/alt-text` with `xml:lang` | 32 English descriptions now say so | (c) |
+
+Editions: `inkscript edition` already reads front abstracts, keywords and translated titles, so with the abstracts out of
+the body each prints once; a dates-only block goes to the printed front-matter blocks. **One line in `src/`**:
+`edition/model.py` now reads `back/ack` and `back/app-group` after the body (before, text moved there would have been
+lost from editions); `pytest -q` 118 pass. Quotations: the 55 hold 9 `disp-quote` and **no** paragraph that is only a
+Quran verse (37 paragraphs quote one inline); inline Quran (`named-content[@content-type="quran"]`) is not tagged yet
+(the verse crosses printed-line targets; next candidate, see `jats_coverage.md`).
+**Validation**: 55/55 (v2 answers, today's code) and 6/6 (v3) JATS DTD + ALTO XSD valid (`coverage43.py build`).
+Unit tests: `test_jats43.py` (6: dates, history labels, section heads, keywords and affiliation parts, the v3 rule,
+the edition reading ack / appendix); `test_rules43.py`, `test_flags43.py` unchanged, 31 pass in all.
+**Gold check**: three items changed, each accepted with the reason (`gold43.py accept`): 0747 and 1140 by the catalogue
+person / affiliation tags only (no printed text changed); 2382 by (b), the history dates and the abstracts / keywords
+moving to the front (blocks and printed text unchanged). Then 5/5 the same.
+
+**Paid test** (`run43.py --set a --prompt v3 --run v3_test --cap 5.48`: the log stood at $3.4846, so at most $2 more):
+6 articles chosen for the changes (2382 title / dates / abstracts, 0493 boxes / figures, 1140 and 0382 list vs
+references, 1769 and 0355 endnotes and figures); 10 requests in 3 rounds, all STOP, **$0.6194** (247,105 input, 74,455
+output tokens; dry run said $0.63 expected, $1.58 worst); log total now **$4.104**. v3 answers are 4% shorter than v2's
+on the same chunks (74k vs 77k output tokens). `v3diff43.py` → `out/v3_test/v3_vs_v2.txt` (both through today's code, so
+only the prompt differs); pages looked at next to the scan: `out/v3_test/shots/views/side_*` (v3) and
+`out/v3_test/shots/views_v2/side_*` (v2).
+
+| article | v3 vs v2 (judged on the scan) |
+|---|---|
+| 2382 | **Better.** p1: the English title is a translated title block (v2: other); `history` returned exactly (2022/05/12, 07/01, 07/15, lines 1:8–1:10); `aff_parts` institution جامعة المرقب, country ليبيا. «الملخص:» left inside the abstract block (v2 split it as a heading; both fine). Text identical. |
+| 0493 | **Better, one view loss.** The three pull-quotes (p1 «١٠ ساعات متوسط مشاهدة الأطفال يومياً لبرامج التلفزيون», p2, p3) are boxed (v2: quote) and drawn as boxes. Affiliation split right (كلية التربية للطفولة المبكرة / جامعة القاهرة / مصر). p4: v3 put the other article's photos into other_article, so they leave 0493's JATS (right: the owner's earlier "limit" closed) but the Layout view no longer draws those pictures (worse to look at). |
+| 1140 | **Better (a).** p1's four publications are list items like pp 2–11 (v2: paragraphs on p1). Text identical. |
+| 0382 | **Same (a).** The bibliography stays references. |
+| 1769 | **Mixed.** Endnotes 43/43 linked, 16 figure descriptions in both languages. **Worse**: 8 hieroglyph lines are no longer figures (pp 3–5; v3 left Azure's junk for them as noise, 19 lines without words, so their pictures are not drawn), and only 18 fixes against v2's 44 (v2's 21 fixes that wrote the print's dotted ي in على / إلى are not made: the text keeps Azure's reading there). Inscription translations pp 3–6 are now quotes (11), defensible. |
+| 0355 | **Same.** Endnotes 51/51 linked; 9 numbered items decided list vs paragraph the other way on p7 / p11; fixes differ (v2 joined kashida-split words such as «التـ ـطور», v3 did not): run-to-run variance, not the v3 changes. |
+
+**Worse with v3, to watch in the rehearsal**: pictures the model now files under other_article or leaves as noise are
+not drawn (0493 p4, 1769 pp 3–5); fewer fixes on 1769 (variance or the longer prompt). Views:
+`out/v3_test/views/index.html` (v3 and v2 per article), served as http://127.0.0.1:8899/v3_test/index.html (symlink
+`experiments/41_azure_structure/out/views/v3_test`).
+
+**Structured references (plan, not built).** Today a reference is `ref/mixed-citation`: the printed entry, untouched.
+Parsed parts (`element-citation` with `person-group`, `year`, `article-title`, `source`, `volume`, `fpage` …) would let
+the corpus link citations. Options: (1) **prompt**: v3 returns `"parsed": {authors, year, title, source, volume, issue,
+pages, publisher, place}` per reference / endnote, each an exact substring; cost ~+30 output tokens per entry (the 55
+have 186 references and 200 endnotes: ~+12k tokens, ~$0.07 on Batch; the 300 rehearsal ~+$0.4); quality unknown on
+Arabic entries with Hijri dates and «د.ت» / «د.ن». (2) **parser** (no calls): Arabic and Latin patterns plus AnyStyle /
+GROBID-style CRF for the Latin entries; free but weak on Arabic. (3) **both**: the model's parts checked by code
+(substring, year range), the parser where the model is silent. Storage: `ref` with the printed `mixed-citation` *and*
+an `element-citation` (JATS allows several citations in one `ref`); this needs one change in `inkscript edition`
+(`model.read_body` now renders every child of `ref`, so a second citation would print the reference twice). Test:
+hand-mark the parts of ~100 entries from 20 articles (Arabic, French, English; references and endnotes), score
+per-field exact match; build it only if the parts are right on ≥ 90% of fields. Not done in v3: the edition change,
+and no gold to measure against yet.
+
+Files: `jats43.py` (the slots), `test_jats43.py`, `coverage43.py` (build + count), `v3diff43.py` (v3 vs v2),
+`jats_coverage.md`; outputs `out/v3_test/` (raw, rules, masters, v2_now = v2 answers through today's code, views with
+v2/ inside, shots, v3_vs_v2.txt/.json, coverage_v2.md, progress.md, run.log).
 
 ## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
 
@@ -403,13 +503,15 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
 2. ~~A small Batch check~~ (done, "Batch test"), ~~then `run43.py --set a --cap 10`~~ (done, "Run of the 55": $3.18).
    Owner looks at `out/v2_55/views/index.html` (the 9 marked first); decide the list-vs-references rule.
-3. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
+3. Prompt v3 is live (owner's (a)–(c) + boxed text, quotations, history, affiliation parts): run the rehearsal with
+   `--prompt v3`; watch pictures filed as other_article / noise and the fix count (section "Prompt v3 and JATS coverage").
+4. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
    rehearsal (`--set b`).
 
 ## Files
 
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
-`views43.py` (Layout view from a masters folder) · `flags43.py` + `test_flags43.py` (doubtful spots) ·
+`views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`

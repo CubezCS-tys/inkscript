@@ -64,7 +64,7 @@ Mandumah's MARC record (experiment 29's merged JATS, `experiments/29_catalogue/o
 | `fig/alt-text` | 12 / 51 | same; `@xml:lang` set when not the article's language (32 English) | print (Gemini's description) | owner's decision (c): **v3 asks for Arabic and English**, stored as two `alt-text` (`xml:lang` on the one not in the article's language; JATS allows repeated alt-text). v2 answers have one (mostly English) |
 | `fig/p[@content-type=text-in-figure]` | 6 / 26 | same | print | |
 | `disp-formula` / `inline-formula` (MathML + LaTeX) | 6 / 77; 2 / 88 | same | print | |
-| **`boxed-text`** | 0 | 0 (v2 has no type for it) | print: v3 block type "boxed", one box = same "box" number on a page | the Layout view draws it as a tinted box |
+| **`boxed-text`** | 0 | 0 (v2 has no type for it; v3 test: 3 in 0493) | print: v3 block type "boxed", one box = same "box" number on a page | the Layout view draws it as a tinted box |
 | `xref[@ref-type=fn]` (note calls) | 30 / 483 | same | print | |
 | `named-content[@content-type=sic]` | 45 / 212 | same | print (D30) | |
 | `def-list`, `glossary`, `statement`, `code`, `chem-struct`, `supplementary-material`, `media` | 0 | 0 | — | not met in the 55 |
