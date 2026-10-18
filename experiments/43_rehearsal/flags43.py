@@ -321,12 +321,13 @@ def check_other(B):
         if not any(flags):
             continue
         ids = [i for b in seq if b["type"] == "other_article" for i in b["ids"]]
-        k0, k1 = flags.index(True), len(flags) - 1 - flags[::-1].index(True)
-        pre = all(flags[:k1 + 1])                                   # one run at the top
-        suf = all(flags[k0:])                                       # one run at the bottom
-        both = not pre and not suf and all(flags[:flags.index(False)]) and all(flags[len(flags) - 1 - flags[::-1].index(False) + 1:]) \
-            and not any(flags[flags.index(False):len(flags) - flags[::-1].index(False)])
-        if not (pre or suf or both):
+        k0 = 0
+        while k0 < len(flags) and flags[k0]:                       # a run at the top
+            k0 += 1
+        k1 = len(flags)
+        while k1 > k0 and flags[k1 - 1]:                            # a run at the bottom
+            k1 -= 1
+        if any(flags[k0:k1]):
             out.append(flag(B, "other_middle", "high", p, ids, "text labelled «another article» sits between this "
                                                                 "article's blocks on the page, not at its top or bottom"))
         if p not in (a["first"], a["last"]) and p not in (pages[0], pages[-1]):

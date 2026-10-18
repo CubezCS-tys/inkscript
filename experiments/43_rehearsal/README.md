@@ -7,7 +7,8 @@ rehearsal on ~300 unseen articles: close the known gaps (another article on a sh
 through the Gemini Batch API under a cap.
 
 **Status (2026-10-18).** Step 1 done; a 4-article Batch test ran ($0.30, section "Batch test"): the Batch
-request shape, costs and the new labels are confirmed.
+request shape, costs and the new labels are confirmed. The feedback loop (flags → review page → marks → gold set +
+issues, version stamps) is built and tested without calls (section "Feedback loop").
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -178,6 +179,70 @@ catalogue part is mostly old decades, where verse is common, so its layouts are 
 ($59 from 1 Dec), Standard $59 ($118 from 1 Dec)**; worst case Batch $79 now. Round 1 alone is ~7.5M input
 tokens: two jobs under the Tier 1 enqueue limit.
 
+## Feedback loop (2026-10-18; owner-approved; no calls)
+
+So that the 300-article rehearsal points at its own doubtful pages, the owner marks them, each pattern becomes a
+code rule or a prompt change, and nothing regresses on what the owner has already checked.
+
+**How to use it** (any run of `run43.py`; `replay` = experiment 41's 55 answers through today's rules):
+1. *run* — `run43.py --set b --cap …`, then `run43.py --set b --assemble` (rules + masters, version-stamped).
+2. *flags* — `flags43.py --run v2_fresh` → `out/<run>/flags.json` + `flags.txt` (per article: high / medium / low,
+   first reason). Works on whatever answers exist (unfinished articles listed as pending); only reads the run.
+3. *review* — `review43.py --run v2_fresh` → `out/<run>/review.html`: spots most serious first, each with the scan
+   and our Layout view cropped to the same place (spot outlined), the reason, **yes, right / no, wrong** + note,
+   filter by severity, "next unmarked", **Export my marks** (JSON). Self-contained, works on a phone; marks kept in
+   the browser (localStorage, try/catch). Layout screenshots by experiment 40's Playwright venv (about 1 s a page).
+4. *import* — `gold43.py import review_v2_fresh.json`: "yes" spots join the gold set (`gold/<stem>__<run>.json`,
+   snapshot of today's output, scope = those lines); "no" spots become open issues (`issues.json` → `issues.md`,
+   with the note and a pattern name = the flag kind).
+5. *rule* — fix the pattern in `rules43.py` (free, replayed on saved answers) or in the prompt (needs calls); set
+   the issue's status: `gold43.py issue i3 --status "code rule" --pattern list-vs-body --rule "…"`.
+6. *gold check* — `gold43.py check`: today's rules + masters on every gold article's saved answers, diffed with its
+   snapshot (block kinds and levels, lines, text, reading order, call → note links; for whole articles also the JATS
+   text, links and notes). Plain report; **exit 1 on any change**. A change on purpose:
+   `gold43.py accept STEM --run R --why "…"`. `gold43.py stale`: masters made with older code or prompt text.
+
+**Flags** (`flags43.py`, thresholds in `T`; unit tests `test_flags43.py`, 9 pass): failed / cut-off / retried
+calls, cost far above the run's median per page; lines with words called noise or left out (what rules43 rescued:
+a run of ≥ 3 lines = high) and specks still left as noise; a line placed twice; calls without a note (per page;
+article-wide high when ≥ 5 and ≥ half the calls), calls whose marker is not in the line, notes without a call;
+verse cuts that do not fit Azure's words, repaired splits, ornaments the code could not take out; "another article"
+in the middle of a page, on an inner page, or over 40% of the lines; a page whose running-text mix (body / list /
+verse) is far from both neighbours' (list vs body); heading levels jumping by 2; ragged table rows (spans counted);
+LaTeX that does not convert to MathML; a page with ≥ 8 and ≥ 3× the article's median fixes; ≥ 3 hamza/ya-only
+fixes on a page (D30: ink or silent repair?). The type-mix rule first used every block type and fired on table
+and reference pages (2382, 0924): it now looks at running text only, and only between two neighbours.
+
+**On experiment 41's 55 (replay; prompt v1 answers)**: 5 high, 56 medium, 25 low.
+| kind | high | medium | low |
+|---|---|---|---|
+| call_no_note | 4 (0355 29/29, 1769 43/43, 0049 9/12, 0767 15/25 calls unlinked: endnotes v1 did not know) | 31 (pages) | |
+| noise_rescued | 1 (0656 p4, 26 lines: the other article) | | |
+| math_failed | | 15 (1148, 1147: `\begin{aligned}`) | |
+| fixes_many | | 7 (2382 p6, p7; 0629, 0682, 0870, 0881) | |
+| note_no_call | | 2 (0694: 59/59 notes uncalled) | 7 |
+| verse_cut | | 1 (0355 21:63, the repaired split) | |
+| type_mix | | | 9 (list vs body: 0498, 1106, 0474, 0881, 0478, 0058, 1769) |
+| fixes_orth / noise_left / cost_high | | | 6 / 2 / 1 |
+
+**The owner's five**: 0747, 0877, 0924, 1140 — no flags; 2382 — two medium `fixes_many` (p6 10, p7 13 fixes:
+Azure's "In" for "ln" in regression tables; right fixes, so these would be "yes" in a review). No high flag.
+**Batch test (prompt v2, 4 articles)**: 0 high, 0 medium, 2 low (0747 p3, p5: the 3 ornaments glued to words).
+The four high `call_no_note` of the replay are what v2's endnotes fixed: 0767 on v2 has none.
+
+**Gold set** (`gold/`, 5 items, all whole articles, run `replay`): 0747 from the owner's block-by-block marks
+(183/183 yes, imported from `41_azure_structure/out/handcheck/marks/`), 2382, 0877, 0924, 1140 "right by eye, no
+faults found" (41's hand check, 2026-10-16). Snapshots are today's rules on 41's answers; each file's `basis` says
+how that differs from what the owner saw (0747: one ornament out, 13 verse lines re-boxed; 0924: 29 lines re-boxed;
+the rest identical). `gold43.py check`: **5/5 the same**, exit 0. Issues: none yet (`issues.json`, `issues.md`).
+
+**Version stamp** (`masters43.py`): every master built with the rules carries JATS `custom-meta` `stamp-prompt`,
+`stamp-prompt-hash` (sha1 of the prompt text: v1 = 41's `structure.PROMPT`, v2 = `prompt43.PROMPT_V2`),
+`stamp-rules-hash` (sha1 of rules43.py, masters43.py and 41's structure/reader/masters.py), `stamp-model`,
+`stamp-run`, `stamp-made`, and a sidecar `<stem>.stamp.json`. `replay43.py compare` strips the stamp (still 52/55
+JATS identical to 41). Limit: a raw answer records only the prompt *name* (run43.py writes `prompt: "v2"`), so the
+prompt hash is of today's text under that name; if the v2 text is edited, give it a new name.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -190,7 +255,8 @@ tokens: two jobs under the Tier 1 enqueue limit.
 ## Files
 
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
-`views43.py` (Layout view from a masters folder) · `replay43.py` (harness, rules, masters, compare, simulate) ·
+`views43.py` (Layout view from a masters folder) · `flags43.py` + `test_flags43.py` (doubtful spots) ·
+`review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`

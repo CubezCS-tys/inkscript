@@ -16,7 +16,7 @@ with sync_playwright() as p:
     pg = b.new_page(viewport=dict(width=1400, height=1600), device_scale_factor=float(os.environ.get("SHOTS_SCALE", "1")), color_scheme="light")
     pg.goto(html.as_uri(), wait_until="load", timeout=120000)
     try:
-        pg.wait_for_function("window.__fit", timeout=60000)
+        pg.wait_for_function("window.__fit || document.body.classList.contains('fitted')", timeout=60000)
     except Exception:
         pass
     pg.evaluate("document.fonts.ready.then(() => true)")
