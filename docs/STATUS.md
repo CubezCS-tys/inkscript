@@ -164,6 +164,11 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
     chunk failed; words wrong on 34 truth pages Argon 1.55%, Flash 1.77%, Azure 1.80%; Argon for the edition, Flash
     for training labels. Reader and views of the 55 articles in `out/reader/`, `out/views/`. Owner's hand check
     2026-10-16: 0747 183/183 blocks right; the other four checked by eye, no faults. Gemini credit ran out 2026-10-15.
+- **Experiment 43, code fixes before the 300-article rehearsal (2026-10-18, no calls)**: D33 metadata
+  corrected with the printed form kept and logged (0355's cut title and author, 0422's title misprint), Layout-view
+  overlaps over the 55 11 → 3, pictures inside a printed line as JATS `inline-graphic` (1769), 4 new flags, MathML
+  names; prompt v3.2 candidate with parsed references (masters ready, not live; ~$1.7 more on the 300). 55/55 valid,
+  gold 5/5 ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "Code fixes before the 300").
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

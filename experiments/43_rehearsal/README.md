@@ -15,6 +15,8 @@ slots filled in code; a 6-article Batch test cost $0.62 (section "Prompt v3 and 
 v3 lost pictures; a code rule now draws every ink region without text as a figure (another article's pictures muted,
 out of the JATS) and prompt v3.1 asks for symbols / hieroglyphs / cartoons as figures: $0.19 test on 0493 and 1769
 (section "A picture is never lost").
+Code fixes before the 300 (D33 metadata, overlapping blocks, pictures inside a line, new flags, MathML names; prompt
+v3.2 candidate with parsed references, not live): section "Code fixes before the 300".
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -591,6 +593,112 @@ the rest identical). `gold43.py check`: **5/5 the same**, exit 0. Issues: none y
 `stamp-run`, `stamp-made`, and a sidecar `<stem>.stamp.json`. `replay43.py compare` strips the stamp (still 52/55
 JATS identical to 41). Limit: a raw answer records only the prompt *name* (run43.py writes `prompt: "v2"`), so the
 prompt hash is of today's text under that name; if the v2 text is edited, give it a new name.
+
+## Code fixes before the 300 (2026-10-18; owner-approved; no calls)
+
+Five fixes from the owner's marks on the Layout views, plus a prompt v3.2 candidate (not live). Everything replayed
+free on the saved answers: the 55 (v2), the v3 test (6) and the v3.1 test (2), through today's code
+(`pictures43.py --run R --build out/fixes/R_after`): **55/55, 6/6, 2/2 JATS DTD + ALTO XSD valid**. Before / after,
+scan beside our view: `out/fixes/shots/before/`, `before_v31/` and `out/fixes/shots/after/`, `after_v31/`,
+`after_v3/` (0355 p1–2, 0478 p4, 1769 p3–5, 1010 p2 / p6, 1148 p3, 0924 p5, 0422 p1); views of the 55:
+`out/fixes/views/mirror/<stem>.html`. JATS text of the 55 against this morning's masters (`out/fixes/v2_jats_diff.txt`):
+**51 identical**; 0355 and 0422 (D33 title / author), 2382 (MathML names), 1769 («٥ D D 0», Azure's reading of a
+hieroglyph strip now an inline picture, leaves the text; it stays in the ALTO as pictureText). Issues i6–i10.
+
+1. **D33 metadata** (`meta43.py`, called at the end of `Master43.build`). A title or byline printed visibly as a
+   fragment of a fuller form (every printed word inside it, a word cut by the design: tatweel at its edge, and
+   longer than any printed piece) → the full form, from the catalogue first, unless the catalogue is only the
+   printed fragments run together (then it was read from the cut print), else Gemini's reading; spelt word by word as
+   the print / Gemini spell it where they are the same word (ى / ي, hamza, tashkeel aside). A title with a misprint
+   flag → the flag's correction. JATS: `article-title` = corrected; the printed lines, with their id and line targets
+   (the ALTO points at them), in `alt-title[@alt-title-type="printed"]` (a title piece on page 2 leaves the body the
+   same way); author: `string-name` = corrected, `string-name[@specific-use="printed-on-the-page"]` = the printed
+   pieces; a misprint flag in a keyword / affiliation / translated title is corrected in place (none in the tests).
+   Log: one `custom-meta` "metadata-change" per change and `<stem>.metachanges.json` beside the masters (printed,
+   corrected, source, reason, the other sources' forms). A person's correction wins: `corrections/<stem>.json`
+   (`{"by", "title", "authors": {"1": ...}, "reason"}`, the hook for the future correction tool; none exists yet).
+   View: the header shows the corrected title / author with a small "corrected" mark; hover / focus shows the
+   printed form, the source and the reason. **Fires**: 0355 (v2) title «أثر التطور الاجتماعى على تطور الأشكال الفنية
+   في القصة المصرية الحديثة» (source catalogue; printed «أثر التـ عَلى تطـ فنى القـ … ـور الاجتماعى ـور الأشكال الفنية
+   ـصَة المصريّة الحديثة»; the owner's «فى» comes out «في»: the print's word is a flagged misreading «فنى», so the
+   catalogue's spelling is used) and author **«يوسف الشارونى» (source Gemini, not the catalogue)**: the catalogue's
+   authority 130243 reads «الشوني، يوسف», exactly the visible pieces «يوسف الشـ» (p1) + «ونى» (p2) joined; the letters
+   «ار» are lost in the spread's gutter, and Gemini's «الشارونى» is the critic Yusuf al-Sharouni (the subject, the
+   Egyptian story, fits). The catalogue's form is in the log; **a person should confirm** (and the catalogue record
+   may need the same fix). v3 answer of 0355: title the same; author not changed (v3's Gemini gave the fragments
+   «يوسف الشـ ونى» as the name: no source holds a fuller form). 0422 title misprint «تضمنتة» → «تضمنته» (Gemini's
+   sic flag). Other cut or decorative titles in the 55: none fires (0331's hand-lettered title and 0447's display title
+   print whole; 0355 is the only title cut by the design). Not done: author names Gemini silently normalised where no
+   byline block exists (26 contribs have no printed byline block on page 1; their printed form is not known to code).
+2. **Blocks on top of each other** (0478 p4). The Layout view's boxes (`views43.pieces43`, replacing 41's
+   `pieces_of` for text): (a) a box is cut where its lines change width sharply (a line ≥ 1.5× the piece's lines and
+   reaching out of it by ≥ 25%, in a piece of ≥ 2 real rows), and again where the column resumes; the text flows
+   through the parts (0478 p4's «يعرف وقت الدوره…» ends in two full-width lines: now a column box and a full-width box);
+   Azure lines of one printed row stay one row however far apart (they started a new box before: 1010 p2 «Hirschfeld»
+   / «Tanner», 1769 p3 / p5 first rows); a row Argon put out of order inside the same column is not a column turn (1010
+   p6). (b) `rules43.long_headings`: a heading of > 3 printed rows (or 3 and > 4× the article's median heading words)
+   keeps its short top rows, the rest (≥ 2 rows, ≥ 12 words, wide rows) becomes a paragraph; kept whole and flagged
+   otherwise. (c) `rules43.header_text`: a header / footer line of ≥ 5 words, ≥ 15 letters, not journal / date
+   furniture, unlike the running heads of the chunk's other pages, sitting next to the running text in its column →
+   back into the article (list item when it opens with a number and the next block is a list item). **On the saved
+   answers (b) and (c) do not occur**: v2's 0478 p4 has the heading as 4 Azure lines on 2 printed rows and the page
+   number with the running head in its own header block (the overlap was (a) alone); 41's v1 answer had the heading
+   and paragraph in one list item. Both rules are unit-tested on a 0478-like page; over the 55 (b) keeps 2 headings
+   whole and flags them (0447 p1 display title, 7956 p2 English title), (c) fires 0 times (every long header line is a
+   running head: 0058, 0200, 0478, 1000, 1148, 1769 …). **Overlaps over the 55** (two text boxes > 25% of the
+   smaller): **11 → 3**: 0478 p4 (4 → 0), p7, 1010 p2, p6, 1769 p5 fixed; left: 0682 p26 (Azure's own boxes of two
+   footnote lines overlap), 0924 p5 (the unit words «مليم جنيه» print on the heading's row), 1148 p3 (an equation
+   on two rows round a text line). 10 width cuts (0422, 0478 ×2, 0877 ×4, 1010 ×3).
+3. **Pictures inside a printed line** (1769 pp3–5). Masters: a picture inside a row of running text (≤ 3.2 of the
+   row's line heights, overlapping it by half, within 3 line heights of its words) is an `<inline-graphic
+   specific-use="picture-in-line">` at its place in the paragraph (after the words that come before it; ALTO
+   `Illustration` pointing at it); a v3.1 picture ornament (Azure's junk word inside a line) becomes the same, its box
+   from the ink round the junk word (real words blanked, signs of one group joined); a picture on a line of its own
+   stays a `fig`. View: the row is cut round the picture (the words on each side their own boxes, from Azure's word
+   boxes). p3's top lines overlapping themselves: the row's two Azure lines (Azure cut it at the picture) became two
+   boxes, the second covering the rows below (fixed by keeping rows together, 2 above). **Fires**: v2 3 inline
+   pictures (1769 p5: 2 from the ink rule + 1 model figure), v3 3, v3.1 11 (8 from picture ornaments). Left: groups
+   neither the model nor the ink rule found (1769 p3 «يخص [group] nbt», «001880») are not drawn.
+4. **New flags** (`flags43.py`): `overlap` (two text boxes of the view after its box cutting overlapping > 25% of the
+   smaller by area; masters built in a temporary folder, `views43.measure`), `inline_picture_over_text`,
+   `long_heading` (split: low, kept: medium), `header_running_text` (medium). On the 55: overlap 3, long_heading 2,
+   inline_picture_over_text 0, header_running_text 0; all flags: high 3, medium 32, low 24 (`out/v2_55/flags.txt`).
+5. **Tidy-ups**. (a) MathML (`masters43.mathml43`): a run of 3+ capitals with a subscript or under \ln / \log /
+   \Delta is one `mml:mi`; plain ln / log / sin … the function; matrix products stay letters (1147's VRV', IWX,
+   WRW: first draft merged them, narrowed). 2382: 12 names (END, EGR, POV), the only change; gold accepted. (b) The
+   figure "text" button only for ≥ 4 words or ≥ 20 letters; the words stay in the JATS (1769: 8 buttons → 2).
+   (c) **Byline / dates from their JATS slots: left as is.** 30 of the 33 printed front-matter blocks hold printed
+   words no slot holds (role phrases «بقلم»، «إعداد»، titles «د.», labels «تاريخ الاستلام», emails, affiliations run
+   in); the view shows the print, so reading from the slots would drop printed words. The custom-meta is the printed
+   block, not a duplicate.
+
+**Gold check**: 2382 changed by 5a only (MathML names; LaTeX, blocks, printed text unchanged): accepted; then **5/5
+the same**. Unit tests: `test_rules43.py` +3 (long heading split / kept, running text out of a header), all 41
+pass in the experiment (rules, jats, flags, refs).
+
+**Prompt v3.2 candidate (not live; `prompt43.PROMPT_V32`, `V32_CHANGES`; `run43.py --prompt v3.2` would select it)**
+= v3.1 plus (i) in the fix passage: "if the ink shows ي (dotted) or a hamza and Azure read ى or no hamza, fix it to
+what is printed; never add dots or hamzas the print lacks" (owner-approved; 1769: v2 12 such fixes, v3 / v3.1 none);
+(ii)–(iii) a "PARSED REFERENCES" paragraph: each reference block adds `"parsed": [W]`, each footnote / endnote
+citing works `"cites": [W, …]`, W = {type, authors [{surname, given}], year, title, source, volume, issue, pages,
+publisher, place, doi, url, lang}, every value an exact substring of the printed entry, Hijri years and «د.ت» /
+«د.ن» as printed, ibid-style notes none (prompt +1,232 characters). Masters ready (`refs43.add_parsed`, called by
+`build43`; reads the fields from the answer files since `structure.assemble` drops unknown block keys): `ref` keeps
+the printed `mixed-citation` and gains one `element-citation[@publication-type]` per work (person-group / name,
+article-title or chapter-title, source, year, volume, issue, fpage / lpage, publisher, pub-id doi, ext-link);
+a note gets `<p content-type="parsed-citations">` holding its element-citations; a field that is not a substring of
+the print is dropped and counted; no-op on today's answers. Tested on a hand-made answer marked SIMULATED
+(`test_refs43.py`, 3 pass, DTD-valid). `src/inkscript/edition/model.py`: a `ref` with a mixed-citation skips its
+element-citation, a note skips the parsed-citations p, so an edition prints each reference once (`pytest -q` 118
+pass). **Cost**: the 55 hold 186 references and ~264 notes citing ~310 works: ~1.24 works a page, ~80 output tokens
+a work (155 at worst) → ~+100 output tokens a page, ~+700 an article (+10%); **the 300 sample: ~0.35M extra output
+tokens, ~$1.7 on Batch now ($3.5 from 1 Dec), worst ~$3.4 ($6.8)**, plus ~0.17M input for the longer prompt (+$0.17).
+
+Files: `meta43.py` (D33), `refs43.py` + `test_refs43.py` (parsed references), `views43.py` (`pieces43`,
+`row_round_pictures`, `overlaps`, `measure`, the corrected mark, the figure-text threshold), `masters43.py` (inline
+pictures, `tight_picture`, `mathml43`, the D33 / refs hooks, `<stem>.metachanges.json`), `rules43.py`
+(`long_headings`, `header_text`), `flags43.py` (4 kinds), `prompt43.py` (v3.2); outputs `out/fixes/` (`*_before`,
+`*_after`, `views*`, `shots/`, `overlaps_*.json`, `gold_check.log`, `flags_v2_55.txt`, `v2_jats_diff.txt`).
 
 ## What's next
 

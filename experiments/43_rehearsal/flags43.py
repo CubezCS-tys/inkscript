@@ -30,6 +30,11 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   fixes_many        many more reader fixes on a page than the article's norm                          medium
   fixes_orth        several fixes on a page that only change hamza / ya / ta marbuta (D30: is it the
                     ink or a silent repair of the print?)                                             low
+  long_heading      a heading of more than 3 printed rows: split by rules43 (low) or kept whole (medium)
+  header_running_text  a line of running text rules43 took out of a header / footer block           medium
+  overlap           two text boxes of the Layout view (after its box cutting) overlapping > 25% of the
+                    smaller one by area (2026-10-18; 0478 p4)                                         medium
+  inline_picture_over_text  a picture inside a printed line still over > 25% of the text           medium
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
 """
@@ -475,8 +480,37 @@ def check_fixes(B):
     return out
 
 
+def check_layout_rules(B):
+    """What the layout rules of 2026-10-18 did (0478 p4): a heading of more than 3 printed rows split or kept,
+    a line of running text taken out of a header / footer block."""
+    out = []
+    for log in B["logs"]:
+        for e in log.get("long_headings") or []:
+            split = e["action"].startswith("split")
+            out.append(flag(B, "long_heading", "low" if split else "medium", e["page"], e["lines"],
+                            f"heading of {e['rows']} printed rows, {e['words']} words ({e['action']}): «{e['text'][:50]}»"))
+        for e in log.get("header_text") or []:
+            out.append(flag(B, "header_running_text", "medium", e["page"], [e["line"]],
+                            f"a line of running text was in a {e['was']} block, now a {e['now']}: «{e['text'][:50]}»"))
+    return out
+
+
+def check_overlaps(B):
+    """The Layout view's boxes (after its box cutting) on top of each other: two text boxes overlapping > 25% of
+    the smaller one by area, or an inline picture > 25% over text. Built from the masters in a temporary folder."""
+    if B.get("layout") is None:
+        return []
+    out = []
+    for o in B["layout"]["overlaps"]:
+        kind = "overlap" if o["kind"] == "text_text" else "inline_picture_over_text"
+        out.append(dict(flag(B, kind, "medium", o["page"], [],
+                             f"{o['a']} and {o['b']} drawn on top of each other ({o['share']:.0%} of the smaller box)"),
+                        box_px=[o["box_a"], o["box_b"]]))
+    return out
+
+
 CHECKS = [check_noise, check_lines, check_notes, check_verse, check_other, check_mix, check_headings, check_tables,
-          check_math, check_fixes]
+          check_math, check_fixes, check_layout_rules, check_overlaps]
 
 
 def flags_of(B, norms) -> list[dict]:
@@ -506,6 +540,11 @@ def run_flags(run: str, stems=None) -> dict:
         with tempfile.TemporaryDirectory() as td:
             try:
                 B = load(a, d["raw"], Path(td))
+                B["layout"] = None
+                if B["cap"] is not None:
+                    import views43
+                    M43.build43(a, Path(td), Path(td) / "m", True, run="flags")
+                    B["layout"] = views43.measure(a, Path(td) / "m", Path(td) / "v")
             except Exception as e:                       # one article's bug must not stop the rest
                 arts[a["stem"]] = dict(error=f"{type(e).__name__}: {e}")
                 continue

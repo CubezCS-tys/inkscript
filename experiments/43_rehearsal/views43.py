@@ -52,6 +52,10 @@ body.hideoa .pc.t-other_article,body.hideoa .pc.oa,body.hideoa .oa-reg{visibilit
 .pc.t-boxed{background:color-mix(in srgb,var(--ink) 6%,var(--paper));outline:1.5px solid color-mix(in srgb,var(--ink) 35%,transparent);
 outline-offset:.5cqw;border-radius:2px}
 .pc.t-trans_title .tx{font-weight:600}
+.cfix{font:600 max(10px,.7rem)/1 var(--ui);margin-inline-start:.4em;padding:.15em .45em;border-radius:999px;
+border:1px solid color-mix(in srgb,var(--ink) 30%,transparent);color:var(--muted);cursor:help;vertical-align:super}
+.cfix:focus-visible{outline:2px solid var(--ink)}
+.cauth{margin:.2em 0;font:500 1.05rem/1.4 var(--text)}
 .figtx{position:absolute;bottom:.5em;left:.5em;z-index:5;font:600 max(10px,1.1cqw)/1 var(--ui);padding:.4em .7em;
 border-radius:999px;border:1px solid color-mix(in srgb,var(--ink) 25%,transparent);background:var(--paper);
 color:var(--ink);cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.18)}
@@ -98,6 +102,8 @@ def kind43(self, el, role):
     ptg = par.tag if par is not None else ""
     if tg == "trans-title":
         return "trans_title", {}
+    if tg == "alt-title" and el.get("alt-title-type") == "printed":      # D33: the printed title lines
+        return "title", {}
     if tg == "kwd-group":
         return "keywords", {}
     if tg == "title" and ptg in ("abstract", "trans-abstract", "fn-group", "ack", "app"):
@@ -134,8 +140,22 @@ def other_pictures(doc, a):
             doc["blocks"].insert(k + 1, rec)
 
 
+def meta_changes(doc):
+    """D33 changes the masters logged (custom-meta "metadata-change", and the sidecar beside the masters)."""
+    f = MR.MAST / f"{doc['D'].stem}.metachanges.json"
+    try:
+        return json.loads(f.read_text(encoding="utf-8")).get("changes") or []
+    except (OSError, ValueError):
+        return []
+
+
 def load43(a):
     doc = MR.load(a)
+    doc["meta_changes"] = meta_changes(doc)
+    if any(c["field"] == "title" for c in doc["meta_changes"]):          # the corrected title heads the view
+        at = doc["D"].J.find("front/article-meta/title-group/article-title")
+        if at is not None:
+            doc["title"] = " ".join("".join(at.itertext()).split())
     other_pictures(doc, a)
     other, orn = set(), set()
     for b in doc["D"].A.iter(MR._q("TextBlock")):
@@ -146,6 +166,13 @@ def load43(a):
     for rec in doc["blocks"]:
         if rec.get("alto") in other:
             rec["type"] = "other_article"
+        el = doc["D"].by_id.get(rec.get("target")) if rec["type"] == "figure" else None
+        if el is not None and el.tag == "inline-graphic":       # a picture inside a printed line (masters43)
+            rec["src"] = el.get(MR.XL + "href")
+            rec["inline"] = True
+            alt = el.find("alt-text")
+            rec["description"] = (alt.text or "") if alt is not None else ""
+            continue
         if rec["type"] == "figure" and not rec.get("other"):
             el = doc["D"].by_id.get(rec.get("target"))
             alts = el.findall("alt-text") if el is not None else []
@@ -343,7 +370,7 @@ def pieces43(ids, LX, W, group, inline_boxes=(), rtl=True):
             rh = rb[3] - rb[1]
             pics = [F for F in inline_boxes
                     if min(rb[3], F[3]) - max(rb[1], F[1]) > 0.5 * min(rh, F[3] - F[1])
-                    and F[3] - F[1] < 3.2 * max(rh, 1) and F[0] < rb[2] + 0.02 * W and F[2] > rb[0] - 0.02 * W]
+                    and F[3] - F[1] < 3.2 * max(rh, 1) and F[0] < rb[2] + 3 * rh and F[2] > rb[0] - 3 * rh]
             cut_rows.append((r, pics))
         if not any(p for _, p in cut_rows):
             pcs.append(dict(ids=[x for r in pc["rows"] for x in r["ids"]], box=pc["box"], cut=pc.get("cut")))
@@ -406,6 +433,16 @@ def row_round_pictures(r, pics, LX, rtl=True):
             continue
         out.append(dict(ids=s["ids"], box=ST.union(s["boxes"]), html=html, cut="picture", one_row=True))
     return sorted(out, key=lambda pc: -pc["box"][2] if rtl else pc["box"][0])     # the row's reading order
+
+
+FIG_TEXT_WORDS, FIG_TEXT_LETTERS = 4, 20
+
+
+def real_text(t: str) -> bool:
+    """A figure's words worth a "text" button: at least 4 words or 20 letters (2026-10-18: 1769's strips held
+    «D A», «#», «٥»; such words stay searchable in the JATS, the button is not offered)."""
+    t = t or ""
+    return len(t.split()) >= FIG_TEXT_WORDS or sum(ch.isalpha() for ch in t) >= FIG_TEXT_LETTERS
 
 
 def overlaps(boxes, share=0.25):
@@ -477,6 +514,11 @@ def build_layout43(a, doc):
                       f'loading="lazy">' if src else
                       f'<span class="fig-missing">[{E(rec.get("description") or "figure")}]</span>')
                 ftx = rec.get("fig_text") or ""
+                if not real_text(ftx):          # a few letters or junk: searchable in the JATS, no button
+                    ftx = ""
+                    stats["fig_text_no_button"] = stats.get("fig_text_no_button", 0) + 1
+                elif ftx:
+                    stats["fig_text_button"] = stats.get("fig_text_button", 0) + 1
                 btn = (f'<button type="button" class="figtx" title="The words printed in this picture" '
                        f'data-text="{E(ftx)}" data-lang="{E(rec.get("lang") or lang)}">text</button>' if ftx else "")
                 oa = " oa" if id(rec) in oa_figs or rec.get("other") else ""
@@ -609,7 +651,15 @@ def build_layout43(a, doc):
             f'</div></section>')
     fix_n = sum(r.count('class="fix"') for r in rows)
     sic_n = sum(r.count('class="sic"') for r in rows)
-    head = (f'<header class="vhead" dir="{ddir}"><h1 dir="auto">{E(title)}</h1><p class="kicker" dir="auto">{E(sub)}</p>'
+    marks = {}
+    for c in doc.get("meta_changes") or []:
+        tip = f'printed: {c["printed"]} · corrected from {c["source"]} ({c["reason"].split(";")[0]})'
+        marks.setdefault(c["field"].split("[")[0], []).append((c, tip))
+    mk = lambda tip: (f'<sup class="cfix" tabindex="0" title="{E(tip)}" aria-label="{E(tip)}">'  # noqa: E731
+                      f'corrected</sup>')
+    tmark = "".join(mk(t) for _, t in marks.get("title", []))
+    amark = "".join(f'<p class="cauth" dir="auto">{E(c["corrected"])}{mk(t)}</p>' for c, t in marks.get("author", []))
+    head = (f'<header class="vhead" dir="{ddir}"><h1 dir="auto">{E(title)}{tmark}</h1>{amark}<p class="kicker" dir="auto">{E(sub)}</p>'
             f'<p class="provenance" dir="ltr">{len(doc["pages"])} pages · scan on the left; on the right each block of the '
             f'printed page at its own place, its text set in our type (Scheherazade New), flowing and justified, one '
             f'size per kind of block on each page · {stats["blocks"]} blocks in {stats["pieces"]} boxes '
@@ -664,6 +714,22 @@ def main():
               "->", V.VIEWS / "mirror" / f"{s}.html")
     if a.report:
         Path(a.report).write_text(json.dumps(rep, ensure_ascii=False, indent=1), encoding="utf-8")
+
+
+def measure(a, masters: Path, tmp: Path) -> dict:
+    """The Layout view's boxes of one article built from a masters folder, without making scans or crops (for
+    flags43): overlaps left, box cuts."""
+    global scan, crop
+    keep = (MR.MAST, V.VIEWS, scan, crop, V.write_layout_print)
+    MR.MAST, V.VIEWS = Path(masters), Path(tmp)
+    scan, crop = (lambda a_, p_: ""), (lambda a_, src: src)
+    V.write_layout_print = lambda *x, **k: None
+    try:
+        st = build_layout43(a, load43(a))
+    finally:
+        MR.MAST, V.VIEWS, scan, crop, V.write_layout_print = keep
+    return dict(overlaps=layout_overlaps(st), cut_width=st["cut_width"], cut_picture=st["cut_picture"],
+                fig_text_no_button=st.get("fig_text_no_button", 0))
 
 
 def layout_overlaps(st, share=0.25) -> list[dict]:

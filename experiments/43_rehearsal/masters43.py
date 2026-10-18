@@ -151,9 +151,103 @@ class Store43(ORIG_STORE):
             if rest:
                 T["px"] = [round(v, 1) for v in ST.union(rest)]
                 T["b"] = px_to_b(T["px"], *self.dims[T["page"]])
+        gap = None
+        if wbox and o.get("picture"):                  # the picture fills the gap between its real neighbours
+            others = [x["box"] for j, x in enumerate(ws) if j != w - 1 and x["box"] not in T.get("orn_boxes", [])]
+            c = (wbox[0] + wbox[2]) / 2
+            lh = (T["px"][3] - T["px"][1]) or (wbox[3] - wbox[1])
+            left = max([b[2] for b in others if b[2] <= c] or [wbox[0] - 2 * lh])
+            right = min([b[0] for b in others if b[0] >= c] or [wbox[2] + 2 * lh])
+            x0, x1 = max(left + 0.1 * lh, wbox[0] - 3 * lh), min(right - 0.1 * lh, wbox[2] + 3 * lh)
+            x0, x1 = min(x0, wbox[0]), max(x1, wbox[2])
+            gap = [round(x0, 1), round(min(wbox[1], T["px"][1]) - 0.25 * lh, 1), round(x1, 1),
+                   round(max(wbox[3], T["px"][3]) + 0.25 * lh, 1)]
         self.ornaments.append(dict(id=f"{base}o{w}", base=base, at=target, page=T["page"], text=o["text"],
                                    px=[round(v, 1) for v in wbox] if wbox else None, source=o.get("source"),
-                                   picture=bool(o.get("picture"))))
+                                   picture=bool(o.get("picture")), k=local - 1, pic_px=gap))
+
+
+# ------------------------------------------------------------------------------------------------ MathML names
+NAME_RUN = re.compile(r"(?:(?<=\\ln )|(?<=\\log )|(?<=\\Delta )|(?<![\\A-Za-z{]))([A-Z]{3,})(?=_|\s*\))"
+                      r"|(?:(?<=\\ln )|(?<=\\log )|(?<=\\Delta ))([A-Z]{3,})(?![A-Za-z])")
+FUNC = re.compile(r"(?<![\\A-Za-z])(ln|log|exp|sin|cos|tan|max|min|lim|det)(?![A-Za-z])")
+_MATHML41 = M.mathml
+
+
+def latex_names(latex: str) -> str:
+    r"""Multi-letter names written plain in the LaTeX: a run of 3+ capitals with a subscript or under \ln / \log /
+    \Delta becomes \mathrm{...} (one name: END_{it}, \ln EGR in 2382's regressions); a plain ln / log / sin ...
+    becomes the function. Other capital runs are products of matrices (VRV', IWX in 1147) and stay letters;
+    so do two capitals (VX, AT) and lower-case runs (xy)."""
+    latex = FUNC.sub(lambda m: "\\" + m.group(1) + " ", latex)
+    return NAME_RUN.sub(lambda m: "\\mathrm{" + (m.group(1) or m.group(2)) + "}", latex)
+
+
+def mathml43(parent, latex: str, display: str):
+    """experiment 41's latex2mathml conversion, with multi-letter names as one <mml:mi> (fix 5a)."""
+    m = _MATHML41(parent, latex_names(latex), display)
+    if m is None:
+        return None
+    MI = f"{{{M.MML}}}mi"
+    for row in list(m.iter()):
+        kids = list(row)
+        k = 0
+        while k < len(kids):
+            e = kids[k]
+            if e.tag == MI and e.get("mathvariant") == "normal" and len(e.text or "") == 1:
+                j = k
+                while j + 1 < len(kids) and kids[j + 1].tag == MI and kids[j + 1].get("mathvariant") == "normal" \
+                        and len(kids[j + 1].text or "") == 1 and not (kids[j].tail or "").strip():
+                    j += 1
+                if j > k:
+                    e.text = "".join(x.text for x in kids[k:j + 1])
+                    del e.attrib["mathvariant"]
+                    e.tail = kids[j].tail
+                    for x in kids[k + 1:j + 1]:
+                        row.remove(x)
+                    MATH_STATS["mi_merged"] += 1
+                k = j + 1
+            else:
+                k += 1
+    # an mrow holding one element is that element
+    return m
+
+
+from collections import Counter as _Counter  # noqa: E402
+MATH_STATS = _Counter()
+M.mathml = mathml43
+
+
+def insert_after_words(t, k, el):
+    """Put el into the text of the printed line that target t starts, after its first k words (an element inside
+    the line, e.g. a fix or a note call, counts as its words and is never cut)."""
+    node, text = t, t.tail or ""
+    count = 0
+    while True:
+        toks = list(re.finditer(r"\S+", text))
+        if count + len(toks) >= k and k > count:
+            cut = toks[k - count - 1].end()
+            node.tail, el.tail = text[:cut] + " ", text[cut:]
+            node.addnext(el)
+            return
+        if k <= count:                                   # before this text run
+            node.tail = ""
+            el.tail = (" " + text.lstrip()) if text.strip() else text
+            node.addnext(el)
+            return
+        count += len(toks)
+        nxt = node.getnext()
+        if nxt is None or (isinstance(nxt.tag, str) and nxt.tag == "target"):
+            node.addnext(el)                             # the end of the line
+            el.tail = " "
+            return
+        count += len(" ".join(nxt.itertext()).split())
+        node, text = nxt, nxt.tail or ""
+        if count >= k:
+            el.tail = text
+            nxt.tail = " "
+            nxt.addnext(el)
+            return
 
 
 class Master43(M.Master):
@@ -167,7 +261,13 @@ class Master43(M.Master):
     def build(self):
         """experiment 41's article, then the JATS slots it left empty (jats43: abstracts, keywords, translated title,
         history dates, affiliation parts, boxed text, endnotes, acknowledgements / appendices)."""
-        return J.fill_slots(self, super().build())
+        self.pending_inline = []
+        A = super().build()
+        self.put_inline(A)
+        A = J.fill_slots(self, A)
+        import meta43                                  # D33: metadata corrected, printed kept, changes logged
+        meta43.apply(self, A)
+        return A
 
     def tb(self, p, bid, role, ids, target=None, lang=None, seq=None, own=True):
         if role in ("pageHeader", "pageFooter", "pageNumber") and seq is None and \
@@ -219,6 +319,8 @@ class Master43(M.Master):
         lv = str(rec.get("level") or "")
         if "other" in lv.split():
             return self.other_figure(rec, cap_rec)
+        if cap_rec is None and self.inline_figure(rec):
+            return
         n0 = len(parent.findall("fig"))
         desc = rec.get("description")
         both = {}
@@ -263,6 +365,168 @@ class Master43(M.Master):
         self.fill(p, ids)
         self.stats["figure_text_blocks"] += 1
 
+    # ---------------------------------------------------------------- pictures inside a printed line (fix 3)
+    INLINE_TYPES = {"paragraph", "list_item", "quote", "footnote", "heading", "abstract", "reference", "boxed",
+                    "keywords"}
+
+    def inline_place(self, p, box):
+        """(line id, words before the picture) when a picture sits inside a printed row of running text: no taller
+        than ~3 of the row's lines, overlapping the row vertically by half, with the row's words beside it or
+        round it (1769 p5: hieroglyph groups inside a sentence). None otherwise."""
+        kind = {}
+        for r in self.recs:
+            if r["type"] in self.INLINE_TYPES and r["page"] == p:
+                for i in r.get("ids") or []:
+                    kind[i] = r["type"]
+        fh = box[3] - box[1]
+        cand = []
+        for i in kind:
+            L = self.S.lines.get(i)
+            if not L or not L["text"].split():
+                continue
+            lb = L["px"]
+            lh = lb[3] - lb[1]
+            vo = min(lb[3], box[3]) - max(lb[1], box[1])
+            if lh <= 0 or vo < 0.5 * min(lh, fh) or fh > 3.2 * lh:
+                continue
+            hgap = max(box[0] - lb[2], lb[0] - box[2], 0)
+            if hgap > 3 * lh:
+                continue
+            cand.append((hgap, i, lb))
+        if not cand:
+            return None
+        straddle = [c for c in cand if c[0] == 0 and c[2][0] < box[0] and c[2][2] > box[2]]
+        rtl = self.lang == "ar"
+        cx = (box[0] + box[2]) / 2
+        if straddle:
+            _, i, lb = straddle[0]
+            ws = self.az_words(self.S.lines[i]) if hasattr(self, "az_words") else []
+            n = len(self.S.lines[i]["text"].split())
+            if ws and len(ws) == n:
+                k = sum(1 for w in ws if ((w["box"][0] + w["box"][2]) / 2 > cx) == rtl)
+            else:
+                k = round(n * ((lb[2] - cx) if rtl else (cx - lb[0])) / max(1, lb[2] - lb[0]))
+            return i, k
+        before = [c for c in cand if ((c[2][0] + c[2][2]) / 2 > cx) == rtl]       # the text that comes first
+        if before:
+            _, i, _ = min(before, key=lambda c: c[0])
+            return i, len(self.S.lines[i]["text"].split())
+        _, i, _ = min(cand, key=lambda c: c[0])
+        return i, 0
+
+    def inline_figure(self, rec, box=None, place=None, desc=None) -> bool:
+        """A picture inside a printed line: an <inline-graphic> at its place in the paragraph's text (put in after
+        the article is built, put_inline), its crop, an ALTO Illustration pointing at it."""
+        p = rec["page"]
+        W, H = self.S.dims[p]
+        if box is None:
+            x0, y0, x1, y1 = rec["fig_box"]
+            box = [min(x0, x1) * W / 1000, min(y0, y1) * H / 1000, max(x0, x1) * W / 1000, max(y0, y1) * H / 1000]
+        place = place or self.inline_place(p, box)
+        if place is None:
+            return False
+        fid = self.kid(p, "f")
+        g = self.crop(p, box, f"{fid}.jpg", rel_pad=True)
+        if not g:
+            return False
+        el = etree.Element("inline-graphic", {"id": fid, f"{{{M.XL}}}href": g, "specific-use": "picture-in-line"})
+        d = desc if desc is not None else rec.get("description")
+        if isinstance(d, dict):
+            d = d.get(self.lang) or next(iter(d.values()), None)
+        if isinstance(d, str) and d.strip():
+            etree.SubElement(el, "alt-text").text = d.strip()
+        self.pending_inline.append((place[0], place[1], el))
+        self.alto[self.lp(p)].append(dict(kind="ill", id=fid, type="figure", box=box, target=fid,
+                                          seq=self.seq if rec.get("_seq") is None else rec["_seq"]))
+        if rec.get("ids"):
+            self.tb(p, self.bid(p), "pictureText", rec["ids"])
+        self.stats["inline_pictures"] += 1
+        return True
+
+    def tight_picture(self, p, win, seed):
+        """The ink of a picture Azure read as a junk word: inside the search window (the gap between the line's real
+        words, the row's height and a little more), the dark pixels outside every real word's box, joined; the
+        pieces touching the junk word's box (seed) give the picture's box. The window itself if no ink is found."""
+        import cv2
+        import numpy as np
+        import ink43
+        d0 = ink43._dark(str(ST.page_image(self.a, p)))
+        if d0 is None:
+            return win
+        k = ink43.SCALE
+        d = d0.copy()
+        for L in self.S.lines.values():
+            if L["page"] != p or L.get("split") or not L["text"].split():
+                continue
+            for w in self.az_words(L):
+                b = w["box"]
+                if b[2] < win[0] or b[0] > win[2] or b[3] < win[1] or b[1] > win[3]:
+                    continue
+                ib = [max(b[0], seed[0]), max(b[1], seed[1]), min(b[2], seed[2]), min(b[3], seed[3])]
+                if ib[2] > ib[0] and ib[3] > ib[1] and \
+                        (ib[2] - ib[0]) * (ib[3] - ib[1]) > 0.5 * max(1, (b[2] - b[0]) * (b[3] - b[1])):
+                    continue                             # the junk word itself (its ink is the picture)
+                d[int(b[1] // k):int(b[3] // k) + 1, int(b[0] // k):int(b[2] // k) + 1] = 0
+        x0, y0 = max(0, int(win[0] // k)), max(0, int(win[1] // k))
+        x1, y1 = min(d.shape[1], int(win[2] // k) + 1), min(d.shape[0], int(win[3] // k) + 1)
+        sub_ = d[y0:y1, x0:x1]
+        if sub_.size == 0 or not sub_.any():
+            return win
+        lh = max(3, int((seed[3] - seed[1]) / k))
+        j = cv2.morphologyEx(sub_, cv2.MORPH_CLOSE, np.ones((3, max(3, int(0.8 * lh))), np.uint8))   # signs of a group
+        n, lab, st, _ = cv2.connectedComponentsWithStats(j, 8)
+        sx0, sy0, sx1, sy1 = (seed[0] // k - x0, seed[1] // k - y0, seed[2] // k - x0, seed[3] // k - y0)
+        keep = []
+        for c in range(1, n):
+            cx, cy, cw, ch, ca = st[c]
+            if ca < 4:
+                continue
+            if cx <= sx1 + 3 and cx + cw >= sx0 - 3 and cy <= sy1 + 3 and cy + ch >= sy0 - 3:
+                keep.append((cx, cy, cx + cw, cy + ch))
+        if not keep:
+            return win
+        bx = [min(b[0] for b in keep), min(b[1] for b in keep), max(b[2] for b in keep), max(b[3] for b in keep)]
+        self.stats["picture_boxes_from_ink"] += 1
+        return [round((bx[0] + x0) * k, 1), round((bx[1] + y0) * k, 1), round((bx[2] + x0) * k, 1),
+                round((bx[3] + y0) * k, 1)]
+
+    def picture_fig(self, p, box):
+        """A picture (v3.1 picture ornament) on a line of its own: a fig after the block printed just above it."""
+        above = [(L["px"][3], L["id"]) for L in self.S.lines.values() if L["page"] == p and L["px"][3] <= box[1] + 5
+                 and L["id"] in self.tl_of and L["text"].split()]
+        tg = {t.get("id"): t for t in self.A.iter("target")}
+        anchor = None
+        for _, lid in sorted(above, reverse=True):
+            t = tg.get(self.tl_of[lid])
+            if t is not None:
+                anchor = t
+                break
+        while anchor is not None and anchor.getparent() is not None and \
+                anchor.getparent().tag not in ("body", "sec", "boxed-text"):
+            anchor = anchor.getparent()
+        fid = self.kid(p, "f")
+        g = self.crop(p, box, f"{fid}.jpg", rel_pad=True)
+        if not g or anchor is None or anchor.getparent() is None:
+            self.stats["picture_ornaments_lost"] += 1
+            return
+        fig = etree.Element("fig", {"id": fid, "specific-use": "ink-without-text"})
+        etree.SubElement(fig, "graphic", {f"{{{M.XL}}}href": g})
+        anchor.addnext(fig)
+        self.alto[self.lp(p)].append(dict(kind="ill", id=fid, type="figure", box=box, target=fid, seq=self.seq))
+        self.stats["figures_from_picture_ornaments"] += 1
+
+    def put_inline(self, A):
+        """Each pending inline picture into its line's text, after the words that come before it."""
+        tg = {t.get("id"): t for t in A.iter("target")}
+        for lid, k, el in self.pending_inline:
+            t = tg.get(self.tl_of.get(lid))
+            if t is None:
+                self.stats["inline_pictures_unplaced"] += 1
+                continue
+            insert_after_words(t, k, el)
+            self.stats["inline_pictures_placed"] += 1
+        self.pending_inline = []
+
     def az_words(self, L):
         ws = super().az_words(L)
         ob = L.get("orn_boxes")
@@ -285,6 +549,27 @@ class Master43(M.Master):
             self.tb(o["page"], self.bid(o["page"]), "pictureJunk" if o.get("picture") else "ornament", [o["id"]],
                     seq=self.seq, own=False)
             self.stats["ornaments_alto"] += 1
+        # v3.1 picture ornaments: the picture itself, inline at its place (consecutive junk words: one picture)
+        groups = []
+        for o in sorted((o for o in getattr(self.S, "ornaments", []) if o.get("picture") and o.get("pic_px")),
+                        key=lambda o: (o["at"], o["k"])):
+            g = groups[-1] if groups else None
+            if g and g["at"] == o["at"] and o["k"] <= g["k"] + 1:
+                g["box"] = ST.union([g["box"], o["pic_px"]])
+                g["seed"] = ST.union([g["seed"], o["px"]])
+                continue
+            groups.append(dict(at=o["at"], k=o["k"], page=o["page"], box=list(o["pic_px"]), seed=list(o["px"])))
+        for g in groups:
+            g["box"] = self.tight_picture(g["page"], g["box"], g["seed"])
+            self.seq = seq_of_line.get(g["at"], 10 ** 9 - 1)
+            in_text = g["at"] in seq_of_line and self.S.lines[g["at"]]["text"].split()
+            rec = dict(page=g["page"], ids=[])
+            if self.inline_figure(rec, box=g["box"], place=(g["at"], g["k"]) if in_text else None, desc=""):
+                self.stats["inline_pictures_from_ornaments"] += 1
+            else:                                        # a line that was only the picture: a figure of its own
+                self.picture_fig(g["page"], g["box"])
+        if self.pending_inline:
+            self.put_inline(self.A)
 
     def alto_xml(self):
         A = super().alto_xml()
@@ -306,7 +591,7 @@ class Master43(M.Master):
 
 # ------------------------------------------------------------------------------------------------ version stamp
 
-CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", HERE / "jats43.py", HERE / "refs43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
+CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", HERE / "jats43.py", HERE / "refs43.py", HERE / "meta43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
 RAW41 = E41 / "out" / "argon" / "raw"
 DEFAULT_MODEL = "gemini-4-argon"
 
@@ -452,6 +737,10 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | N
         r["ornaments"] = len(getattr(cap["S"], "ornaments", []))
     if st:
         (mast / f"{a['stem']}.stamp.json").write_text(json.dumps(st, ensure_ascii=False, indent=1))
+    if rules:                                          # D33 change log (empty list: nothing corrected)
+        (mast / f"{a['stem']}.metachanges.json").write_text(json.dumps(
+            dict(stem=a["stem"], rule="docs/decisions.md D33", changes=getattr(Mo, "meta_changes", [])),
+            ensure_ascii=False, indent=1))
     (mast / "stats").mkdir(parents=True, exist_ok=True)
     (mast / "stats" / f"{a['stem']}.json").write_text(json.dumps(r, ensure_ascii=False, indent=1))
     return r

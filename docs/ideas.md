@@ -448,6 +448,10 @@ reason is recorded), **open** (voiced, not yet judged).
   that chunk with extra full-sharpness crops of the flagged regions from the 300 dpi render ("Image 3b: close-up
   of page 3, region [x0,y0,x1,y1]"), found from Azure alone (small line heights, packed lines, tables,
   equations, vowelled verse). About 1,100 tokens a close-up ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
+- **Structured references and cited works** (parsed authors / year / title / source … per reference and per
+  note): *candidate* in prompt v3.2 (not live; each field an exact substring of the print), masters code ready
+  (`element-citation` beside the printed `mixed-citation`, editions print each once), ~$1.7 more on the 300
+  sample; measure on hand-marked entries before trusting it ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
 - **Sending the PDF file instead of page images**: *not chosen for now*. Gemini turns PDF pages into images
   itself at a size we don't control, adds born-digital text layers that are often broken, and Azure's boxes
   are measured on our own render; an A/B test (~$1–2) stays available if needed.
