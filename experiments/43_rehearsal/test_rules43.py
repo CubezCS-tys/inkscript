@@ -145,3 +145,55 @@ def test_empty_table_row_is_dropped_and_rowspans_shortened():
     rows = out["pages"][0]["blocks"][0]["rows"]
     assert log["empty_rows"] == 1 and len(rows) == 2
     assert "rowspan" not in rows[0][0] and rows[0][1]["rowspan"] == 2
+
+
+def test_exclamation_is_not_turned_into_a_call():
+    lines = {"2:8": L("واخرى رقم ٧ وهكذا (!) .", [100, 400, 900, 420], 2),
+             "2:25": L("١ - المترجم", [700, 900, 900, 920], 2)}
+    ans = {"pages": [{"page": 2, "blocks": [
+        {"type": "paragraph", "lines": ["2:8"], "calls": [{"line": "2:8", "marker": "(!)", "fn": "fn-2-1"}]},
+        {"type": "footnote", "lines": ["2:25"], "marker": "١", "id": "fn-2-1"}]}],
+        "fixes": [{"line": "2:8", "from": "(!)", "to": "(١)"},
+                  {"line": "2:8", "from": "وهكذا (!)", "to": "وهكذى (١)"}]}
+    out, log = RU.normalize(ans, lines)
+    assert out["fixes"] == [{"line": "2:8", "from": "وهكذا (!)", "to": "وهكذى (!)"}]   # the other change stays
+    assert out["pages"][0]["blocks"][0]["calls"] == []
+    assert len(log["exclamation_kept"]) == 2 and len(log["exclamation_calls_dropped"]) == 1
+
+
+def test_a_glued_exclamation_call_is_left_to_the_model():
+    lines = {"5:6": L("تَخْتَالُ!", [100, 400, 900, 420], 5)}
+    ans = {"pages": [{"page": 5, "blocks": [{"type": "paragraph", "lines": ["5:6"],
+                                             "calls": [{"line": "5:6", "marker": "١", "fn": "fn-5-1"}]}]}],
+           "fixes": [{"line": "5:6", "from": "تَخْتَالُ!", "to": "تَخْتَالُ١"}]}
+    out, log = RU.normalize(ans, lines)
+    assert len(out["fixes"]) == 1 and len(out["pages"][0]["blocks"][0]["calls"]) == 1
+    assert not log["exclamation_kept"]
+
+
+def fig_page(extra_blocks, fig_box=(400, 250, 900, 650)):
+    lines = {"1:2": L("الأطفال وأولياء الأمور والمعلمات", [175, 205, 807, 254]),
+             "1:5": L("ترى من يختار البرامج التلفزيونية التي", [480, 415, 810, 442]),
+             "1:6": L("يشاهدها الأطفال على شاشات التلفزيون", [480, 445, 825, 465]),
+             "1:9": L("تلعب المواد الإعلامية دوراً مهماً في تنشئة", [500, 700, 900, 720])}
+    blocks = [{"type": "title", "lines": ["1:2"]},
+              {"type": "figure", "box": list(fig_box), "lines": [], "description": "tv"}] + extra_blocks
+    return {"pages": [{"page": 1, "blocks": blocks}]}, lines
+
+
+def test_text_inside_a_figure_becomes_the_figures_text_and_the_box_leaves_the_title():
+    ans, lines = fig_page([{"type": "abstract", "lines": ["1:5", "1:6"]},
+                           {"type": "paragraph", "lines": ["1:9"]}])
+    out, log = RU.normalize(ans, lines)
+    bl = out["pages"][0]["blocks"]
+    assert [b["type"] for b in bl] == ["title", "figure", "paragraph"]
+    assert bl[1]["lines"] == ["1:5", "1:6"] and len(log["text_in_figure"]) == 1
+    assert bl[1]["box"][1] == 258 and len(log["figure_trim"]) == 1       # cut back below the title's line
+
+
+def test_a_background_picture_under_the_title_keeps_its_text():
+    ans, lines = fig_page([{"type": "abstract", "lines": ["1:5", "1:6"]}, {"type": "paragraph", "lines": ["1:9"]}],
+                          fig_box=(100, 150, 950, 650))
+    out, log = RU.normalize(ans, lines)
+    assert [b["type"] for b in out["pages"][0]["blocks"]] == ["title", "figure", "abstract", "paragraph"]
+    assert not log["text_in_figure"]

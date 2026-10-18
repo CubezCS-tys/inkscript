@@ -1,1 +1,81 @@
-[]
+[
+ {
+  "id": "i1",
+  "date": "2026-10-18",
+  "stem": "0197-002-001-003",
+  "run": "v2_55",
+  "page": 1,
+  "lines": [],
+  "kind": "page_number_missing",
+  "note": "Page number «-٨-» missing at the foot of the first page (later pages show theirs). Same article as the (!) issue.",
+  "pattern": "page_number_missing",
+  "status": "won't fix",
+  "rule": "Azure never read it: no line or word at the foot of p1 in Azure's JSON (p2's «- ٩ -» is read and placed). Every page-number line Azure read in the 55 is already furniture (185 lines). Not invented in code.",
+  "source": "owner's review of the run of the 55 (Layout view), 2026-10-18"
+ },
+ {
+  "id": "i2",
+  "date": "2026-10-18",
+  "stem": "0197-002-001-003",
+  "run": "v2_55",
+  "page": 2,
+  "lines": [
+   "2:8"
+  ],
+  "kind": "exclamation_as_call",
+  "note": "Text shows (١) where the print has (!) after «وهكذا»: the author's exclamation, not a footnote call. Same article as the missing page number.",
+  "pattern": "exclamation_as_call",
+  "status": "code rule",
+  "rule": "rules43.exclamation: a fix turning Azure's «(!)» into «(١)» is refused and a call on it dropped. 41 and v2 both made the fix (41 also linked it to fn-2-1); the run report's 'regression' was wrong. Now «(!)», unlinked; the page's note «١ - المترجم» has no call.",
+  "source": "owner's review of the run of the 55 (Layout view), 2026-10-18"
+ },
+ {
+  "id": "i3",
+  "date": "2026-10-18",
+  "stem": "0493-000-029-001",
+  "run": "v2_55",
+  "page": 1,
+  "lines": [
+   "1:5",
+   "1:6",
+   "1:7",
+   "1:8",
+   "1:9",
+   "1:10"
+  ],
+  "kind": "text_in_figure",
+  "note": "TV drawing whose screen holds a paragraph: Azure's text drawn over the picture; the picture drawn over the title.",
+  "pattern": "text_in_figure",
+  "status": "code rule",
+  "rule": "rules43.text_in_figure (block wholly inside a figure box -> the figure's lines; not when the figure also holds a title/heading/byline: 0881's banner photo) + masters43 <p content-type=text-in-figure> + view 'text' button; rules43.figure_trim (figure box cut back to the title line's edge).",
+  "source": "owner's review of the run of the 55 (Layout view), 2026-10-18"
+ },
+ {
+  "id": "i4",
+  "date": "2026-10-18",
+  "stem": "0493-000-029-001",
+  "run": "v2_55",
+  "page": 4,
+  "lines": [],
+  "kind": "other_article_marking",
+  "note": "'Another article' fading and a label on every block ruins the reading.",
+  "pattern": "other_article_marking",
+  "status": "code rule",
+  "rule": "views43: one quiet mark per contiguous region (thin rule, one label), muted text, pictures inside the region belong to it, bar toggle 'Hide other articles' (localStorage). p4 (printed 7) is truly another article: a news report on the Arab Council's debate, after the article ends on printed 6.",
+  "source": "owner's review of the run of the 55 (Layout view), 2026-10-18"
+ },
+ {
+  "id": "i5",
+  "date": "2026-10-18",
+  "stem": "0493-000-029-001",
+  "run": "v2_55",
+  "page": 4,
+  "lines": [],
+  "kind": "text_under_figure",
+  "note": "A round photo sits in the text; our text runs under it (print flows round it).",
+  "pattern": "text_under_figure",
+  "status": "code rule",
+  "rule": "views43.wrap_floats: per printed line, floats as wide as the print leaves the line short (Azure's line boxes), so the text flows round the picture.",
+  "source": "owner's review of the run of the 55 (Layout view), 2026-10-18"
+ }
+]

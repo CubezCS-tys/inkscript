@@ -197,3 +197,52 @@ def prompt_text_only(a: dict, ci: int, x: int, y: int, state: dict | None) -> st
     return PROMPT_V2.format(images_note=(ST.IMG_CTX if x > 1 else ST.IMG_WHOLE).format(first=x), context=context,
                             lines="\n".join(lines), first=x, last=y,
                             metadata_spec=META_FULL_V2 if ci == 0 else ST.META_NONE)
+
+
+# ------------------------------------------------------------------------------------------------ v3 candidate
+# NOT LIVE: make_prompt and run43.py use PROMPT_V2 only. Three changes proposed after the owner looked at the run of
+# the 55 (README "Decisions pending"); each is PROMPT_V2 with one passage replaced, so the diff is exact. To make it
+# live: give it its own PROMPT_VERSION name (the masters' stamp hashes the text under that name) and add the masters
+# side of (b) (JATS trans-title-group) before any call.
+
+V3_CHANGES = [
+    # (a) references vs list: one rule for "a list of works"
+    ("""  reference             one entry of a bibliography / reference list (sources, without call numbers in the text)
+""",
+     """  reference             v3: one entry of a section the article presents as ITS SOURCES: the entries under a heading
+                        such as المراجع، المصادر، قائمة المراجع، مصادر البحث، Bibliographie, References, Sources (without
+                        call numbers in the text), or every entry when the whole article IS a bibliography (a list
+                        of works on a subject compiled for the reader). An author's list of his or her own works,
+                        or works listed inside the body as part of what the article says, are list_item, not
+                        reference. One decision per article.
+"""),
+    # (b) a translated title is the title in another language, not "other"
+    ("""  title                 the article's main title (once in the article)
+""",
+     """  title                 the article's main title (once in the article). v3: the same title printed in another
+                        language (often English under an Arabic title, or above an English abstract) is a title
+                        block too, with "lang" and "translated": true; never other, never a heading
+"""),
+    # (c) figure descriptions in the article's language
+    ("""                        text printed inside it, "description": a few words saying what it shows
+""",
+     """                        text printed inside it, "description": a few words saying what it shows, v3: written in
+                        the article's language (Arabic for an Arabic article)
+"""),
+]
+
+META_V3_CHANGES = [
+    ("""   "journal": "...",""",
+     """   "trans_titles": [{{"lang": "en", "title": "..."}}], "journal": "...","""),
+]
+
+
+def _apply(text: str, changes) -> str:
+    for old, new in changes:
+        assert text.count(old) == 1, old[:60]
+        text = text.replace(old, new)
+    return text
+
+
+PROMPT_V3_CANDIDATE = _apply(PROMPT_V2, V3_CHANGES)
+META_FULL_V3_CANDIDATE = _apply(META_FULL_V2, META_V3_CHANGES)

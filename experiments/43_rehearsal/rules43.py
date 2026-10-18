@@ -32,9 +32,11 @@ The rules, in order (each counted in the log):
                 (0493 p1: a paragraph printed on a drawn TV screen), unless the figure also holds a title, heading
                 or byline line (then it is a background picture under the page's own text: 0881 p1): its lines become the figure's "lines" (the
                 masters keep them as the figure's text, the view shows the picture only); its calls are dropped
-  figure trim   a figure box that runs over a line of a title / heading / byline (less than half of the line inside
-                the box) is cut back to that line's edge (+ the crop's 4/1000 margin), when the cut is under 30% of
-                the box's height (0493 p1: the TV drawing's box began inside the title's second line)
+  figure trim   a figure box that runs over a line of a title / heading / byline / caption (less than half of the
+                line inside the box; a caption line also when wholly inside but in the box's top or bottom fifth) is
+                cut back to that line's edge (+ the crop's 4/1000 margin), when the cut is under 30% of the box's
+                height (0493 p1: the TV drawing's box began inside the title's second line; 1769: the label
+                «شكل رقم (N)» above a picture inside its box, drawn twice)
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
@@ -609,16 +611,18 @@ def figure_trim(ans, lines, log):
             if not fb:
                 continue
             for b in blocks:
-                if not isinstance(b, dict) or b.get("type") not in HEAD:
+                if not isinstance(b, dict) or b.get("type") not in HEAD | {"caption"}:
                     continue
                 for x in (base_of(i, lines) for i in block_ids(b)):
                     if not x:
                         continue
                     lb = lines[x]["b"]
                     share = inside(lb, fb)
-                    if share <= 0 or share >= 0.5:
-                        continue
                     h = fb[3] - fb[1]
+                    cy = (lb[1] + lb[3]) / 2
+                    edge = cy < fb[1] + 0.2 * h or cy > fb[3] - 0.2 * h        # in the box's top or bottom band
+                    if share <= 0 or (share >= 0.5 and not (b.get("type") == "caption" and edge)):
+                        continue
                     old = list(fb)
                     if (lb[1] + lb[3]) / 2 < (fb[1] + fb[3]) / 2:
                         y = lb[3] + 4
