@@ -468,6 +468,8 @@ def read_body(art) -> tuple[list, list, list, list]:
                     for mc in r:
                         if isinstance(mc.tag, str):
                             refs.append(node("ref", mc))
+            elif tag in ("ack", "app-group", "app"):   # acknowledgements, appendices: read on after the body
+                walk([g], 0)
             elif tag == "notes" and g.get("notes-type") == "quran-quotations":
                 for p in g.findall("p"):
                     ext, nc = p.find("ext-link"), p.find("named-content")

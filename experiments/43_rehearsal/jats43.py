@@ -26,6 +26,9 @@ history, aff_parts) and, as a fallback for answers that lack a v3 field, the pri
   affiliations       contrib/aff keeps the printed string; its parts tagged in place: institution
                      [@content-type="dept" | "orgname"], addr-line[@content-type="city"], country, email (v3
                      aff_parts; else a country list and institution words)
+  catalogue people   a printed author the catalogue names too: its authority id (contrib-id), structured names
+                     (name-alternatives: Arabic and Latin surname / given-names, the printed string-name kept) and
+                     role
   boxed text         p[@content-type="boxed"] (v3 block type "boxed"; one box = the blocks with the same "box"
                      number on a page, carried in the block's level) -> boxed-text
   endnotes           fn of an endnote (id en-...) -> back/fn-group[@content-type="endnotes"]; the heading just above
@@ -249,6 +252,7 @@ class Slots:
         self.keywords()
         self.history()
         self.affs()
+        self.people()
         self.boxed()
         self.endnotes()
         self.ack_app()
@@ -566,6 +570,50 @@ class Slots:
                 continue
             out.append(sp)
         return out
+
+    # ---------------------------------------------------------------- the catalogue's people
+    def people(self):
+        """A printed author the catalogue also names (its printed-on-the-page string or its Arabic name, letters
+        only): the catalogue's authority id (contrib-id) and structured names in Arabic and Latin script
+        (name-alternatives, the printed string-name kept inside) and its role."""
+        if not self.M.a.get("jats"):
+            return
+        try:
+            cat = etree.parse(self.M.a["jats"], etree.XMLParser(load_dtd=False, no_network=True)).getroot()
+        except Exception:
+            return
+        cc = []
+        for c in cat.iterfind("front/article-meta/contrib-group/contrib"):
+            keys = {norm(tx(x)) for x in c.iter("string-name")}
+            for nm in c.iter("name"):
+                if nm.get(XML_LANG) in (None, "ar"):
+                    keys.add(norm(tx(nm.find("given-names")) + tx(nm.find("surname"))))
+            cc.append((keys - {""}, c))
+        for c in self.am.iterfind("contrib-group/contrib"):
+            sn = c.find("string-name")
+            if sn is None:
+                continue
+            k = norm(sn.text or "")
+            hit = next((x for keys, x in cc if k and any(k == q or (len(q) > 6 and (q in k or k in q))
+                                                          for q in keys)), None)
+            if hit is None:
+                continue
+            for cid in reversed(hit.findall("contrib-id")):
+                c.insert(0, copy.deepcopy(cid))
+            names = [copy.deepcopy(n) for n in hit.iter("name")]
+            if names:
+                na = etree.Element("name-alternatives")
+                sn.addprevious(na)
+                for n in names:
+                    na.append(n)
+                na.append(sn)
+                sn.set("specific-use", "printed-on-the-page")
+            role = hit.find("role")
+            if role is not None and c.find("role") is None:
+                r = copy.deepcopy(role)
+                last = [e for e in c if e.tag in ("contrib-id", "name-alternatives", "string-name")][-1]
+                last.addnext(r)
+            self.st["jats_contrib_from_catalogue"] += 1
 
     # ---------------------------------------------------------------- boxed text
     def boxed(self):
