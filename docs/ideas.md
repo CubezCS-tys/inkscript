@@ -451,3 +451,11 @@ reason is recorded), **open** (voiced, not yet judged).
 - **Sending the PDF file instead of page images**: *not chosen for now*. Gemini turns PDF pages into images
   itself at a size we don't control, adds born-digital text layers that are often broken, and Azure's boxes
   are measured on our own render; an A/B test (~$1–2) stays available if needed.
+- **A correction tool on the Layout view** (owner, 2026-10-18): *planned*. Version 1 first, for the owner
+  alone in the browser: fix a word (Azure's reading and the scan crop shown; "Azure misread" or "misprint"),
+  change a block's kind, mark/unmark another article, rescue noise, link a call to its note, reorder, merge or
+  split blocks. Corrections are stored beside the master as patches keyed to Azure's line ids (never edits to
+  the master), exported like the hand-check marks and applied by a command, so they survive reruns and feed the
+  feedback loop's gold set and issues log. Build it after the 300-article sample shows which corrections are
+  common. Version 2 (logins, shared server, review of others' corrections, a queue of flagged pages) saved for
+  later; where it lives is the owner's call ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
