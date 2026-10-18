@@ -6,7 +6,8 @@ rehearsal on ~300 unseen articles: close the known gaps (another article on a sh
 "noise" with words, verse Azure read as one line, silently repaired misprints), and get the rehearsal ready to run
 through the Gemini Batch API under a cap.
 
-**Status (2026-10-18).** Step 1 done, **no Gemini calls** (spending starts after the owner has seen the changes).
+**Status (2026-10-18).** Step 1 done; a 4-article Batch test ran ($0.30, section "Batch test"): the Batch
+request shape, costs and the new labels are confirmed.
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -60,7 +61,7 @@ text (flagged) in the article. On 0747 p3 the verse halves moved little: Azure g
 ("أسد؟(٥"), which no word-level rule can separate. List vs body, endnotes, the misprint rule and the small prompt gaps
 can only be measured with calls.
 
-## Running it (`run43.py`; not run with calls)
+## Running it (`run43.py`; first calls: the Batch test below)
 
 `--set a` = 41's 55 articles (run `v2_55`), `--set b` = `sample43.json` (run `v2_fresh`). `--mode batch` (default)
 or `standard`; `--cap USD` required; `--dry-run`; resume from `out/<run>/raw/`; spend in `out/gemini_spend.jsonl`
@@ -90,9 +91,69 @@ enqueued). Requests are JSONL lines `{"key", "request"}` with images inline (bas
   `client.batches.get`; states PENDING / RUNNING / SUCCEEDED / FAILED / CANCELLED / EXPIRED (> 48 h); target 24 h;
   results `job.dest.file_name` → `client.files.download`, matched by key, kept 6 weeks. Limits: 100 concurrent batch
   jobs; Argon enqueued tokens 5M (Tier 1) / 500M (Tier 2) / 1B (Tier 3).
-* **Not confirmed in the docs**: base64 `inline_data` images inside the JSONL (the REST request shape; `--upload-images`
+* **Not confirmed in the docs** (all three answered by the Batch test below): base64 `inline_data` images inside the JSONL (the REST request shape; `--upload-images`
   sends pages through the File API instead), the per-part `media_resolution` field name in Batch, usage metadata per
   response (read as `usageMetadata`). A first small job (two or three articles) should check these before the 55.
+
+## Batch test (2026-10-18, owner-approved, cap $2): **$0.30 billed**, everything worked first time
+
+`run43.py --set a --run batch_test --stems 0656-016-001-011 0747-001-003-001 0781-010-055-015 0767-010-002-007
+--cap 2` (prompt v2, Argon, thinking low, images inline) plus `probe43.py` (one page, five ways of sending it).
+Four of 41's articles, chosen for the new labels: 0656 (another article on p4), 0747 (verse halves with ornaments),
+0781 (endnotes under «المراجع:» on p6, calls on pp1-6), 0767 (endnotes under «التهميش:» on p11-12 for calls in
+the *first* chunk: two chunks, so it also tests round 2 and the carried state). Outputs `out/batch_test/` (raw,
+rules, masters, views, shots/side_*.jpg = scan beside Layout view, batch/round*.jsonl, probe.json, run.log).
+
+**The unknowns.**
+1. *Images*: base64 `inlineData` inside the JSONL works (all 5 requests); File API `fileData` (`--upload-images`)
+   works too and costs the same tokens. Inline it is: no extra uploads, the JSONL is ~1 MB a page
+   (18.7 MB for round 1's 18 pages; the 55's ~400 pages ≈ 0.4 GB, under the 2 GB file limit).
+2. *Resolution field*: the part field is `"mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"}` (the SDK's REST
+   shape, camelCase, now what `run43.py` sends); snake_case `media_resolution` is read too. Measured on one page:
+   no field 1107 image tokens, HIGH 1107, LOW 260 (camel and snake alike). HIGH is the default; we keep it explicit.
+3. *Usage metadata*: every response carries `usageMetadata` (`promptTokenCount`, `candidatesTokenCount`,
+   `promptTokensDetails` by modality); no `thoughtsTokenCount` at thinking "low" (41's Standard calls had none
+   either). The spend log is therefore real tokens × the Batch price. Note: it is *our* computation from the
+   tokens, not Google's invoice; the console bill should be checked once after the 55.
+4. *Turnaround*: probe 2.6 min; round 1 (4 requests, 18 pages) 4.1 min from create to end; round 2 (1 request)
+   2.5 min. Total wall time ~8 min for both rounds, nowhere near the 24 h target. (One day's evidence, small jobs.)
+5. *Parsing and resume*: the result file is JSONL `{"key", "response"}`, parsed by `collect()` unchanged; 5/5
+   usable (finish STOP). Round 2 was built from round 1's saved answer (0767's second chunk numbered its endnotes
+   en-15… after the first chunk's en-1…en-14). A rerun printed "nothing left to send" without calls.
+6. *Cost*: **$0.2952** for the 5 requests (109,682 input, 37,111 output tokens) + $0.0048 probes = **$0.300**
+   logged. The dry run said $0.29 expected, $0.71 worst; the same five chunks cost $0.5555 on Standard in 41
+   (Batch = exactly half at the same token counts: v2's prompt adds ~1,400 input tokens a chunk; output ±10%).
+
+**Did the new labels fire?** (masters `out/batch_test/masters/` vs 41's masters vs the replay of 41's answers)
+
+| article | prompt v2 on Batch | 41 (v1) | replay (v1 + code rules) |
+|---|---|---|---|
+| 0656 p4 | **other_article**: 6 blocks = lines 4:1–4:26 (the top half, the other article), faded and labelled in the view; JATS body 1,478 words | 1,479 (those lines silently noise) | 1,695 (kept, flagged `from_noise`) |
+| 0747 verse | **12 cuts** (`"cut"`), **33 ornaments** listed, 30 accepted, 3 rejected by code (glued to a word: «أسد؟(٥», «دائمةً»», «وإن»»), 0 sic; ALTO `role.ornament` 32 | 0 ornaments out | 1 |
+| 0747 notes | 76 footnotes, **76/76 calls linked** | 69/76 | 69/76 |
+| 0781 p6 | **14 endnotes** (`en-1…14`), 14/14 linked | 14/14 (as footnotes) | 14/14 |
+| 0767 p11-12 | **24 endnotes**, **24/24 linked across the chunk boundary** | 10/24 (the first chunk's 14 calls unlinked) | 10/24 |
+
+The 33 ornaments are Azure's readings of the ✿ between verse halves: ٥ « » . ! = * ، ﴿ at the end of a first
+half (`out/batch_test/shots/side_0747_p003.jpg`, `_p005.jpg`: halves side by side, the stars gone, the three glued
+ones still visible as in the replay). 0656 p4 (`side_0656_p004.jpg`): the "بقية ص ٣٣" continuation below the rule
+stays this article, as it should. 0781 p6 (`side_0781_p006.jpg`): the endnotes sit in their column with linked calls.
+0656, 0781, 0767 body text otherwise identical to 41 (±1 word).
+
+**Gaps found.** (a) The masters lose `note_kind`: endnotes are written as ordinary `<fn id="fn-pP-N">` in JATS
+(linked correctly, but not marked as endnotes; JATS would want them in a `<fn-group content-type="endnotes">`).
+Not fixed here: it changes the masters the replay checks byte for byte. (b) 0747 had 108 "fixes" (41's Argon fixed
+too); the misprint rule only shows when the owner's judged items come back in the 55.
+
+**Changes to run43.py.** Request JSON now camelCase as the SDK sends it (`inlineData`, `mediaResolution`,
+`generationConfig`, `thinkingConfig.thinkingLevel: "LOW"`; the lower-case "low" enum was the one real risk);
+`--run NAME` (a separate output folder, so the test does not resume into `v2_55`); each round records its create /
+end time; an answer without usage metadata would log its worst-case share instead of $0. `replay43.cmd_compare`
+works on a masters folder with only some articles. Nothing broke during the run.
+
+**For the 55**: `run43.py --set a --cap 10` (Batch, inline images, HIGH, 60 s poll). Expected $3.35, worst $9.42
+(dry run; this test landed on its estimate). The test's $0.30 is in the same spend log, so the cap counts it. Run
+before 1 Dec (prices double). Expect round 1 as one job (~1.4M tokens, under the 4.5M per-job limit).
 
 ## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
 
@@ -120,7 +181,7 @@ tokens: two jobs under the Tier 1 enqueue limit.
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
-2. A small Batch check (2–3 articles) to confirm the JSONL image and media-resolution fields, then `run43.py --set a`
+2. ~~A small Batch check~~ (done, "Batch test"), then `run43.py --set a --cap 10`
    (prompt v2 on the 55) before 1 Dec; compare with 41 (types, endnote links, list/body stability, sic vs fix on the
    judged items, noise with words should be 0 before the code backstop).
 3. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
@@ -131,7 +192,7 @@ tokens: two jobs under the Tier 1 enqueue limit.
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
+(Batch / Standard runner, dry run) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/ids.txt`.

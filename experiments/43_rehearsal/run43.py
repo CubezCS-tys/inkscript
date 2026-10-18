@@ -1,6 +1,6 @@
 """Experiment 43: run prompt v2 on (a) experiment 41's 55 articles or (b) the fresh sample (sample43.json), through
 the Gemini Batch API (default) or one call at a time (Standard), with a cost cap, a live spend log, resume and a
-dry run. NOTHING HERE HAS BEEN RUN WITH CALLS (2026-10-18): the owner sees prompt v2 first.
+dry run. First run with calls 2026-10-18: the Batch test (README "Batch test"; 4 articles, $0.30, `--run batch_test`).
 
     .venv/bin/python run43.py --set a --dry-run                     request count, tokens, cost (Batch and Standard)
     .venv/bin/python run43.py --set a --cap 5 [--mode batch]        submit, poll, collect, round after round
@@ -26,8 +26,10 @@ gemini-3.8-flash both list Batch "Supported"; Batch = 50% of Standard, and both 
 1 Dec 2026, Flash 1 Jan 2027); thinking billed as output; JSONL file input up to 2 GB via the File API, one line
 {"key", "request"}; Argon Tier 1 enqueues at most 5M tokens across active jobs (a job here is cut at
 --max-enqueued, 4.5M; the rest goes in the next job); results kept 6 weeks, a job pending or running > 48 h expires; target turnaround 24 h.
-Not confirmed in the docs: base64 inline_data images inside the JSONL (the REST GenerateContentRequest shape, used
-here; --upload-images sends each page through the File API instead) and the per-part media_resolution field name.
+Confirmed by the Batch test (probe43.py, 2026-10-18): base64 inlineData images inside the JSONL work (so do File API
+fileData, --upload-images); the per-part field is "mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"} (snake_case
+media_resolution is read too; HIGH is also the default: 1107 tokens a page either way, LOW 260); every answer carries
+usageMetadata (promptTokenCount, candidatesTokenCount; no thoughtsTokenCount at thinking "low", as in Standard).
 """
 from __future__ import annotations
 
@@ -230,17 +232,17 @@ def request_line(a, ci, x, y, run, upload, client) -> tuple[str, dict, int, int]
         if upload:
             import io
             f = client.files.upload(file=io.BytesIO(im), config=dict(mime_type="image/jpeg"))
-            img = {"file_data": {"file_uri": f.uri, "mime_type": "image/jpeg"}}
+            img = {"fileData": {"fileUri": f.uri, "mimeType": "image/jpeg"}}
         else:
-            img = {"inline_data": {"mime_type": "image/jpeg", "data": base64.b64encode(im).decode()}}
-        img["media_resolution"] = {"level": "MEDIA_RESOLUTION_HIGH"}
+            img = {"inlineData": {"mimeType": "image/jpeg", "data": base64.b64encode(im).decode()}}
+        img["mediaResolution"] = {"level": "MEDIA_RESOLUTION_HIGH"}     # the SDK's REST shape (camelCase)
         parts.append(img)
     parts.append({"text": prompt})
     key = f"{run}_{a['stem']}_c{x:03d}-{y:03d}"
     mo = max_out(y - x + 1)
     req = {"contents": [{"role": "user", "parts": parts}],
-           "generation_config": {"max_output_tokens": mo, "response_mime_type": "application/json",
-                                 "thinking_config": {"thinking_level": THINKING}}}
+           "generationConfig": {"maxOutputTokens": mo, "responseMimeType": "application/json",
+                                "thinkingConfig": {"thinkingLevel": THINKING.upper()}}}
     return key, {"key": key, "request": req}, ST.est_tokens(prompt, nimg), mo
 
 
@@ -282,6 +284,9 @@ def collect(job, run, meta, client):
                        if not p.get("thought"))
         if tin or tout:
             log_spend(key, tin, tout, think, usd, fin, "batch")
+        elif resp:                     # an answer without usage metadata: log the worst case, never nothing
+            usd = meta.get("worst_usd", 0) / max(1, len(meta.get("keys") or [1]))
+            log_spend(key, 0, 0, 0, usd, fin + " (no usage metadata: worst-case share logged)", "batch")
         rec = dict(stem=stem, first=x, last=y, pages=y - x + 1, usd=usd, mode="batch", prompt=P.PROMPT_VERSION,
                    finish=fin, tin=tin, tout=tout, think=think, job=job.name)
         ans = None
@@ -318,7 +323,8 @@ def run_batch(arts, run, cap, upload, poll, max_enqueued):
                 time.sleep(poll)
             if st == "JOB_STATE_SUCCEEDED":
                 collect(job, run, r, client)
-            r.update(collected=True, final_state=st)
+            r.update(collected=True, final_state=st, done=time.strftime("%Y-%m-%d %H:%M:%S"),
+                     create_time=str(getattr(job, "create_time", "")), end_time=str(getattr(job, "end_time", "")))
             jdump(sf, state)
             continue
         todo = ready_chunks(arts, run)
@@ -369,13 +375,14 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--assemble", action="store_true", help="rules43 + masters of what is answered (no calls)")
     ap.add_argument("--stems", nargs="*")
+    ap.add_argument("--run", help="output folder name under out/ (default v2_55 / v2_fresh)")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--upload-images", action="store_true", help="batch: pages through the File API, not inline")
     ap.add_argument("--poll", type=int, default=60, help="seconds between job polls")
     ap.add_argument("--max-enqueued", type=int, default=4_500_000,
                     help="input tokens per job (Argon Tier 1 allows 5M enqueued tokens across active jobs)")
     args = ap.parse_args()
-    run = SETS[args.set][0]
+    run = args.run or SETS[args.set][0]
     if args.set == "b":                       # page renders of the fresh sample stay in this experiment
         ST.PAGES = OUT / "pages"
     arts = [a for a in articles(args.set) if not args.stems or a["stem"] in args.stems]

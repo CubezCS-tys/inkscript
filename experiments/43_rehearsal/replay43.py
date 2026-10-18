@@ -146,7 +146,7 @@ def string_boxes(p: Path) -> int:
 
 def cmd_compare(mast: Path, name: str):
     global TAGS43
-    t = (mast / f"{ST.sample()[0]['stem']}.alto.xml").read_bytes()
+    t = next(f for f in (mast / f"{x['stem']}.alto.xml" for x in ST.sample()) if f.exists()).read_bytes()  # any article
     i, j = t.find(b'<StructureTag ID="role.otherArticle"'), t.find(b'<OtherTag ID="kind.formula"')
     TAGS43 = t[i:j]                     # the two role tags v2 adds (and their indentation), ignored when comparing
     rows = {}
