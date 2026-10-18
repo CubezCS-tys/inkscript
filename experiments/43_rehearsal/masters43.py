@@ -61,9 +61,20 @@ def azure_words(a):
             ws = []
             for w in M.line_words(pg, M.nonempty_lines(pg)[k - 1]):
                 xs, ys = w["polygon"][0::2], w["polygon"][1::2]
-                ws.append(dict(text=w["content"], box=[min(xs) * s, min(ys) * s, max(xs) * s, max(ys) * s]))
+                ws.append(dict(text=w["content"], box=[min(xs) * s, min(ys) * s, max(xs) * s, max(ys) * s],
+                               conf=w.get("confidence")))
             cache[lid] = ws
         return cache[lid]
+
+    def ink(p, mask):
+        """rules43.pictures: dark regions of page p that no box in mask (0-1000) accounts for (ink43)."""
+        import ink43
+        return ink43.blobs(ST.page_image(a, p), mask)
+    def dark(p, box):
+        import ink43
+        return ink43.dark_share(ST.page_image(a, p), box)
+    words.ink = ink
+    words.dark = dark
     return words
 
 
@@ -100,9 +111,11 @@ class Store43(ORIG_STORE):
                     x["b"] = px_to_b(bx, W, H)
                     x["word_span"] = (k - n, k)
             self.word_boxed += 1
+        self.picture_junk = set()
         for ans in answers:
             for o in ans.get("_ornaments") or []:
                 self.take_ornament(o, words)
+            self.picture_junk.update(str(i) for i in ans.get("_picture_junk") or [])
 
     def take_ornament(self, o, words):
         base = o["line"]
@@ -160,12 +173,51 @@ class Master43(M.Master):
                 0 <= self.seq < len(self.recs) and self.recs[self.seq].get("_other"):
             role = "otherArticle"
             self.stats["other_article_lines"] += len(ids)
+        if role == "noise" and ids and all(i in getattr(self.S, "picture_junk", ()) for i in ids):
+            role = "pictureJunk"                    # rules43.pictures: Azure's reading of a picture's ink
+            self.stats["picture_junk_lines"] += len(ids)
         return super().tb(p, bid, role, ids, target, lang, seq, own)
+
+    def other_figure(self, rec, cap_rec):
+        """A picture of another article (rules43.pictures: level "other"): not in this article's JATS; its crop and
+        an ALTO Illustration tagged role.otherArticle (FILEID = the crop) so the Layout view draws it, muted with
+        the other article's text; its caption and words as otherArticle text."""
+        p = rec["page"]
+        W, H = self.S.dims[p]
+        x0, y0, x1, y1 = rec["fig_box"]
+        box = [min(x0, x1) * W / 1000, min(y0, y1) * H / 1000, max(x0, x1) * W / 1000, max(y0, y1) * H / 1000]
+        fid = self.kid(p, "f")
+        g = self.crop(p, box, f"{fid}.jpg", rel_pad=True)
+        self.alto[self.lp(p)].append(dict(kind="ill", id=fid, type="figure", box=box, target=None, seq=self.seq,
+                                          role="otherArticle", file=g))
+        if cap_rec is not None and cap_rec.get("ids"):
+            M.Master.tb(self, p, self.bid(p), "otherArticle", cap_rec["ids"])
+        if rec.get("ids"):                         # words printed in the picture: the picture shows them
+            M.Master.tb(self, p, self.bid(p), "pictureText", rec["ids"])
+        self.stats["figures_other_article"] += 1
+
+    def alto_block(self, parent, b, lp, q):
+        if b.get("kind") == "ill" and (b.get("role") or b.get("file")):
+            el = M.sub(parent, q("Illustration"), {"ID": b["id"], "TYPE": b["type"]})
+            for k, v in zip(("HPOS", "VPOS", "WIDTH", "HEIGHT"),
+                            (b["box"][0], b["box"][1], b["box"][2] - b["box"][0], b["box"][3] - b["box"][1])):
+                el.set(k, f"{max(0.0, v):.1f}".removesuffix(".0"))
+            if b.get("file"):
+                el.set("FILEID", b["file"])
+            if b.get("role"):
+                el.set("TAGREFS", f"role.{b['role']}")
+            return
+        return super().alto_block(parent, b, lp, q)
 
     def figure(self, rec, parent, cap_rec, caption_into):
         """experiment 41's fig, then the words printed inside the picture (rules43 text_in_figure, or Argon's
         figure "lines") as the figure's own text: <p content-type="text-in-figure"> after the graphic (JATS allows
-        paragraphs in fig after caption / alt-text / graphic). In the ALTO they stay role.pictureText (41)."""
+        paragraphs in fig after caption / alt-text / graphic). In the ALTO they stay role.pictureText (41).
+        rules43.pictures: a picture of another article goes to other_figure; a picture found from the ink is a fig
+        with specific-use="ink-without-text" (fig-type="decoration" when small and wordless)."""
+        lv = str(rec.get("level") or "")
+        if "other" in lv.split():
+            return self.other_figure(rec, cap_rec)
         n0 = len(parent.findall("fig"))
         desc = rec.get("description")
         both = {}
@@ -179,6 +231,11 @@ class Master43(M.Master):
             rec = dict(rec, description=both.get(self.lang) or next(iter(both.values()), None))
         super().figure(rec, parent, cap_rec, caption_into)
         figs = parent.findall("fig")
+        if "ink" in lv.split() and len(figs) > n0:
+            figs[-1].set("specific-use", "ink-without-text")
+            if "decoration" in lv.split():
+                figs[-1].set("fig-type", "decoration")
+            self.stats["figures_from_ink"] += 1
         if len(figs) > n0:
             alt = figs[-1].find("alt-text")
             if alt is not None:
@@ -235,7 +292,10 @@ class Master43(M.Master):
         for r, d in (("otherArticle", "text of a different article printed on a page this article shares "
                                       "(experiment 43, prompt v2 other_article): not in the JATS"),
                      ("ornament", "a decorative mark Azure read as a word (between the halves of a verse): left out "
-                                  "of the text, its ink kept here")):
+                                  "of the text, its ink kept here"),
+                     ("pictureJunk", "what Azure read from a picture's ink (hieroglyphs, symbols, a drawing): not text, "
+                                     "left out of the JATS; the picture is drawn from the page image (experiment 43, "
+                                     "rules43.pictures)")):
             el = etree.Element(f"{{{ns}}}StructureTag", {"ID": f"role.{r}", "TYPE": "paragraph-role", "LABEL": r,
                                                          "DESCRIPTION": d})
             first_other.addprevious(el)
@@ -244,7 +304,7 @@ class Master43(M.Master):
 
 # ------------------------------------------------------------------------------------------------ version stamp
 
-CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
+CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
 RAW41 = E41 / "out" / "argon" / "raw"
 DEFAULT_MODEL = "gemini-4-argon"
 

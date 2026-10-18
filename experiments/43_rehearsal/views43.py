@@ -5,7 +5,9 @@ build_layout43 with the changes below).
 * text of another article (ALTO role.otherArticle): slightly muted text, one quiet mark per contiguous region (a
   thin rule on its outer side, one small label "from another article" at its top); pictures and captions inside the
   region belong to it; the bar's "Hide other articles" hides them all (remembered in the browser);
-* ornaments (ALTO role.ornament) are left to the scan;
+* ornaments (ALTO role.ornament) and what Azure read from a picture's ink (role.pictureJunk) are left to the scan;
+* a picture of another article (ALTO Illustration role.otherArticle with its crop as FILEID, not in the JATS) is
+  drawn muted with that article's region;
 * a figure with words printed inside it (JATS <p content-type="text-in-figure">) is the picture only, with a small
   "text" button that opens its words in a box to read and copy;
 * running text wraps round a figure that intrudes into its box (per printed line, from Azure's line boxes).
@@ -107,18 +109,43 @@ def kind43(self, el, role):
 MR.Doc.kind = kind43
 
 
+def other_pictures(doc, a):
+    """Pictures of another article (masters43.other_figure: ALTO Illustration role.otherArticle, FILEID = the crop,
+    not in the JATS): figure records placed after the block that precedes them in the ALTO."""
+    at = {r.get("alto"): k for k, r in enumerate(doc["blocks"])}
+    ins = []
+    for P in doc["D"].A.iter(MR._q("Page")):
+        p = int(P.get("PHYSICAL_IMG_NR")) + a["first"] - 1
+        prev = None
+        for b in P.find(MR._q("PrintSpace")):
+            if b.get("ID") in at:
+                prev = b.get("ID")
+            if MR.etree.QName(b).localname == "Illustration" and b.get("FILEID") and \
+                    "role.otherArticle" in (b.get("TAGREFS") or ""):
+                rec = dict(page=p, alto=b.get("ID"), lines=[], extra_lines=[], continued=False, added=[],
+                           box=MR._box(b), type="figure", src=b.get("FILEID"), description="", other=True)
+                ins.append((at.get(prev, -1), p, rec))
+    for k, p, rec in sorted(ins, key=lambda t: -t[0]):
+        if k < 0:                                           # first on its page
+            k = next((j for j, r in enumerate(doc["blocks"]) if r["page"] >= p), len(doc["blocks"]))
+            doc["blocks"].insert(k, rec)
+        else:
+            doc["blocks"].insert(k + 1, rec)
+
+
 def load43(a):
     doc = MR.load(a)
+    other_pictures(doc, a)
     other, orn = set(), set()
     for b in doc["D"].A.iter(MR._q("TextBlock")):
         if "role.otherArticle" in (b.get("TAGREFS") or ""):
             other.add(b.get("ID"))
-        if "role.ornament" in (b.get("TAGREFS") or ""):
+        if "role.ornament" in (b.get("TAGREFS") or "") or "role.pictureJunk" in (b.get("TAGREFS") or ""):
             orn.add(b.get("ID"))
     for rec in doc["blocks"]:
         if rec.get("alto") in other:
             rec["type"] = "other_article"
-        if rec["type"] == "figure":
+        if rec["type"] == "figure" and not rec.get("other"):
             el = doc["D"].by_id.get(rec.get("target"))
             alts = el.findall("alt-text") if el is not None else []
             rec["descriptions"] = {(x.get(MR.XML_LANG) or doc["lang"]): (x.text or "") for x in alts}
@@ -291,7 +318,7 @@ def build_layout43(a, doc):
                 ftx = rec.get("fig_text") or ""
                 btn = (f'<button type="button" class="figtx" title="The words printed in this picture" '
                        f'data-text="{E(ftx)}" data-lang="{E(rec.get("lang") or lang)}">text</button>' if ftx else "")
-                oa = " oa" if id(rec) in oa_figs else ""
+                oa = " oa" if id(rec) in oa_figs or rec.get("other") else ""
                 els.append(f'<div class="pc fg t-figure{oa}" data-t="figure" style="{boxstyle(bx, W, H)}">{im}{btn}'
                            f'<span class="ob">{num}</span></div>')
                 arrows_seq.append((bx, num, False))

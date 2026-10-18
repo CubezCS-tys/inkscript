@@ -661,11 +661,264 @@ def figure_trim(ans, lines, log):
                         log["figure_trim"].append(dict(page=pg.get("page"), line=x, old=old, new=f["box"]))
 
 
+# ------------------------------------------------------------------------------------------------ pictures
+
+PIC_KEEP = {"title", "trans_title", "heading", "byline", "header", "footer", "caption", "table", "equation",
+            "footnote", "reference"}                       # a line of these is never taken as a picture's junk
+PIC_MASK = {"figure", "table", "equation"}                 # their boxes are pictures / ink already accounted for
+BRIDGE = 120                                               # 0-1000: widest run of words between two halves
+NARROW = 60                                                # 0-1000: a junk line narrower than this is not masked
+SMALL = 150                                                # 0-1000: a found picture smaller both ways, with no
+                                                           # words read from it, is a decoration (0493 p1's cartoon)
+
+
+def real_word(t: str, c) -> bool:
+    """A word Azure read with some confidence: Arabic (>= 2 letters, confidence >= 0.5) or Latin with lower case
+    (>= 3 letters, >= 2 lower case, >= 0.6: transliteration such as «nbt», «hk3t»). Capital soup («FRES», «DOA»,
+    «DoC»), digits and lone marks are not."""
+    c = 1.0 if c is None else c
+    if len(AR_LET.findall(t)) >= 2 and c >= 0.5:
+        return True
+    return len(LA_LET.findall(t)) >= 3 and sum(ch.islower() for ch in t) >= 2 and c >= 0.6
+
+
+def junk_line(lid, lines, words, max_conf=None) -> bool:
+    """A line without one real word (see real_word): what Azure reads from a hieroglyph, a symbol or a drawing.
+    max_conf: also require Azure's mean word confidence below it (inside a figure the model drew: «EGR» «POV» «END»
+    are a diagram's real labels, read at 0.9+; «FRES safd.» at 0.3)."""
+    ws = words(lid) if words is not None else None
+    if ws and len(ws) == len(lines[lid]["text"].split()):
+        if max_conf is not None:
+            cs = [w.get("conf") for w in ws if w.get("conf") is not None]
+            if not cs or sum(cs) / len(cs) >= max_conf:
+                return False
+        return not any(real_word(w["text"], w.get("conf")) for w in ws)
+    if max_conf is not None:
+        return False
+    return not any(real_word(t, None) for t in lines[lid]["text"].split())
+
+
+def swapped_box(f, blocks, lines) -> bool:
+    """A figure box given as [y0, x0, y1, x1] (v3, 0355 p1: the photo's box lay over the text column): swap it when
+    it covers >= 3 lines of the page's text and the swapped box covers none."""
+    fb = fig_box(f)
+    if not fb:
+        return False
+    sw = [fb[1], fb[0], fb[3], fb[2]]
+    own = {base_of(i, lines) for i in block_ids(f)}
+    txt = [base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") not in ("figure", "header",
+                                                                                              "footer")
+           for i in block_ids(b)]
+    txt = [x for x in txt if x and x not in own]
+    n = sum(1 for x in txt if inside(lines[x]["b"], fb) >= 0.8)
+    m = sum(1 for x in txt if inside(lines[x]["b"], sw) >= 0.3)
+    if n >= 3 and m == 0:
+        f["box"] = sw
+        return True
+    return False
+
+
+def grow(b, dx, dy):
+    return [b[0] - dx, b[1] - dy, b[2] + dx, b[3] + dy]
+
+
+def other_region(box, blocks, lines) -> bool:
+    """A picture belongs to another article when the running text nearest to it is that article's."""
+    best = None
+    for b in blocks:
+        if not isinstance(b, dict) or b.get("type") in ("header", "footer", "figure") or not b.get("lines"):
+            continue
+        bb = block_box(b, lines)
+        if not bb:
+            continue
+        dx = max(0, bb[0] - box[2], box[0] - bb[2])
+        dy = max(0, bb[1] - box[3], box[1] - bb[3])
+        d = (dx * dx + dy * dy) ** .5
+        if best is None or d < best[0]:
+            best = (d, b.get("type"))
+    return bool(best) and best[1] == "other_article"
+
+
+def same_place(a, b, tol=15) -> bool:
+    """Two boxes at the same place of their pages, or mirrored (odd / even pages)."""
+    m = [1000 - b[2], b[1], 1000 - b[0], b[3]]
+    return all(abs(u - v) <= tol for u, v in zip(a, b)) or all(abs(u - v) <= tol for u, v in zip(a, m))
+
+
+def bridged(cands, line_boxes):
+    """Two pieces of one picture side by side with printed words between them (0493 p4: a booklet cover whose
+    title Azure read; the mask cut the cover in two): one picture. Two photos side by side have bare paper between
+    them and stay two."""
+    changed = True
+    while changed:
+        changed = False
+        for i in range(len(cands)):
+            for j in range(len(cands)):
+                if i == j:
+                    continue
+                a, b = cands[i]["box"], cands[j]["box"]
+                if a[0] > b[0]:
+                    continue
+                ha, hb = a[3] - a[1], b[3] - b[1]
+                vo = min(a[3], b[3]) - max(a[1], b[1])
+                gap = b[0] - a[2]
+                if not (0 <= gap <= BRIDGE and vo >= 0.8 * min(ha, hb) and min(ha, hb) > 50):
+                    continue
+                g = [a[2], max(a[1], b[1]), b[0], min(a[3], b[3])]
+                if not any(inside(lb, g) >= 0.5 for lb in line_boxes):
+                    continue
+                u = union([a, b])
+                cands[i] = dict(cands[i], box=u, hit=cands[i].get("hit", []) + cands[j].get("hit", []),
+                                fill=round(min(cands[i]["fill"], cands[j]["fill"]), 3))
+                del cands[j]
+                changed = True
+                break
+            if changed:
+                break
+    return cands
+
+
+def pictures(ans, lines, words, log):
+    """A picture is never lost (see the module doc). Needs words.ink and words.dark (masters43.azure_words);
+    without them only the swapped-box check and the other-article tag of the answer's own figures run."""
+    ink, dark = getattr(words, "ink", None), getattr(words, "dark", None)
+    junk_all = set(ans.get("_picture_junk") or [])
+    pages = []
+    for pg in ans.get("pages") or []:
+        blocks = pg.get("blocks") if isinstance(pg, dict) else None
+        if not isinstance(blocks, list):
+            continue
+        try:
+            p = int(pg.get("page"))
+        except (TypeError, ValueError):
+            continue
+        pages.append((p, pg))
+    found = {}
+    for p, pg in pages:
+        blocks = pg["blocks"]
+        ids_p = [i for i, L in lines.items() if L["page"] == p]
+        figs = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]
+        keep_ids = {base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") in PIC_KEEP
+                    for i in block_ids(b)} - {None}
+        # (0) a figure box with x and y swapped
+        for f in figs:
+            old = fig_box(f)
+            if swapped_box(f, blocks, lines):
+                log["pictures"].append(dict(page=p, action="figure box x/y swapped back", box=f["box"], old=old,
+                                            lines=[], text=""))
+        if ink is None or not ids_p:
+            continue
+        # (1) ink that no line, picture, table or equation accounts for
+        mask = []
+        for i in ids_p:
+            b = lines[i]["b"]
+            h = b[3] - b[1]
+            if b[2] - b[0] < NARROW and i not in keep_ids and junk_line(i, lines, words):
+                continue                       # a sign Azure read as «DoC» or «#»: its ink is the picture's
+            mask.append(grow(b, 0.3 * h, 0.3 * h))
+        for b in blocks:
+            if isinstance(b, dict) and b.get("type") in PIC_MASK:
+                bb = fig_box(b) if b.get("type") == "figure" else block_box(b, lines)
+                if bb:
+                    mask.append(grow(bb, 8, 8))
+        heads = [base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") in HEAD | {"trans_title"}
+                 for i in block_ids(b)]
+        heads = [x for x in heads if x]
+        inverted = [x for x in heads if dark is not None and dark(p, lines[x]["b"]) >= 0.5]
+        foot = [base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") == "footer"
+                for i in block_ids(b)]
+        foot = [x for x in foot if x]
+        cands = []
+        for bl in ink(p, mask):
+            box = list(bl["box"])
+            bw, bh = box[2] - box[0], box[3] - box[1]
+            if any(inside(lines[x]["b"], box) >= 0.8 for x in heads):
+                log["pictures_skipped"].append(dict(page=p, box=box, why="holds the title / a heading / byline"))
+                continue                           # a banner under the page's own title: background
+            if any(inside(lines[x]["b"], grow(box, 15, 15)) > 0 for x in inverted):
+                log["pictures_skipped"].append(dict(page=p, box=box, why="the dark ground of a title"))
+                continue                           # white title on black (0355 pp1-2): the ground round its lines
+            if any(inside(lines[x]["b"], grow(box, 0.5 * (lines[x]["b"][3] - lines[x]["b"][1]), 8)) > 0 for x in heads):
+                log["pictures_skipped"].append(dict(page=p, box=box, why="touches the title / a heading / byline"))
+                continue                           # a stroke of a hand-lettered title outside Azure's box (0331 p1)
+            if box[1] >= 920 and any(inside(lines[x]["b"], grow(box, 10, 10)) > 0 for x in foot):
+                log["pictures_skipped"].append(dict(page=p, box=box, why="the page number's ornament"))
+                continue                           # 0498 p5: the dark box round the page number
+            if max(bw, bh) >= 10 * min(bw, bh) and bl["fill"] >= 0.35:
+                log["pictures_skipped"].append(dict(page=p, box=box, why="a bar"))
+                continue
+            hit = []
+            for i in ids_p:
+                if i in keep_ids or i in junk_all:
+                    continue
+                lb = lines[i]["b"]
+                h = lb[3] - lb[1]
+                if inside(lb, grow(box, 2.0 * h, 0.5 * h)) > 0 and junk_line(i, lines, words):
+                    hit.append(i)
+            if hit:
+                box = union([box] + [lines[i]["b"] for i in hit])
+            cands.append(dict(bl, box=box, hit=hit))
+        if cands:
+            from ink43 import rows                 # a strip cut in two by the junk lines between: one
+            cands = rows(cands)
+            cands = bridged(cands, [lines[i]["b"] for i in ids_p])
+        found[p] = cands
+    # (2) a picture at the same place on two pages of the chunk is page furniture (a running head's logo, a page
+    # number's ornament): not the article's picture
+    for p, cands in found.items():
+        for c in cands:
+            c["furniture"] = any(same_place(c["box"], d["box"]) for q, ds in found.items() if q != p for d in ds)
+    for p, pg in pages:
+        blocks = pg["blocks"]
+        figs = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]
+        for c in found.get(p, []):
+            box, hit = c["box"], sorted(set(c.get("hit") or []))
+            if c["furniture"] and not hit:
+                log["pictures_skipped"].append(dict(page=p, box=box, why="the same place on another page"))
+                continue
+            bw, bh = box[2] - box[0], box[3] - box[1]
+            gone = []
+            for b in blocks:                                  # the junk leaves the blocks that held it
+                if not isinstance(b, dict) or b.get("type") == "table" or not hit:
+                    continue
+                had = block_ids(b)
+                if b.get("lines"):
+                    b["lines"] = [i for i in b["lines"] if base_of(i, lines) not in hit]
+                if b.get("type") == "verse" and b.get("hemistichs"):
+                    b["hemistichs"] = [[i for i in (h if isinstance(h, list) else [h])
+                                        if base_of(i, lines) not in hit] for h in b["hemistichs"]]
+                    b["hemistichs"] = [h for h in b["hemistichs"] if h]
+                if had and not block_ids(b) and b.get("type") != "figure":
+                    gone.append(id(b))
+            if gone:
+                blocks[:] = [b for b in blocks if id(b) not in gone]
+            junk_all.update(hit)
+            small = not hit and bw < SMALL and bh < SMALL
+            nf = {"type": "figure", "box": [round(float(v), 1) for v in box], "lines": [],
+                  "level": "ink decoration" if small else "ink", "from_ink": dict(fill=c["fill"], junk=hit)}
+            blocks.insert(place(blocks, box, lines), nf)
+            figs.append(nf)
+            log["picture_junk"] += len(hit)
+            log["pictures"].append(dict(page=p, action="new figure from ink", box=nf["box"], fill=c["fill"],
+                                        lines=hit, small=small, text=" | ".join(lines[i]["text"] for i in hit)[:80]))
+        # (3) a picture among another article's text is that article's
+        for f in figs:
+            if other_region(fig_box(f), blocks, lines):
+                lv = str(f.get("level") or "")
+                f["level"] = (lv + " other") if lv.startswith("ink") else "other"
+                log["pictures_other_article"] += 1
+    if junk_all:
+        ans["_picture_junk"] = sorted(junk_all)
+        noise = [str(x) for x in ans.get("noise") or []]
+        ans["noise"] = noise + [i for i in sorted(junk_all) if i not in noise]
+
+
 def new_log() -> dict:
     return dict(endnotes=0, cuts=0, bad_cuts=[], ornaments_model=0, ornaments_code=0, ornaments_rejected=[],
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
-                text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0)
+                text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
+                pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0)
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -686,6 +939,8 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     exclamation(ans, log)
     text_in_figure(ans, lines, log)
     figure_trim(ans, lines, log)
+    pictures(ans, lines, words, log)
+    text_in_figure(ans, lines, log)            # again: words printed inside a picture the ink rule found
     empty_rows(ans, log)
     fixes(ans, log)
     return ans, log
