@@ -1,0 +1,199 @@
+"""Experiment 43: prompt v2 (derived from experiment 41's prompt, structure.PROMPT, which stays as it was).
+
+What changed from v1 (each change is marked "v2:" in the text below; README "Prompt v2" lists them):
+  1. other_article   a block type for the end or start of a different article printed on a shared page
+  2. list vs body    when lines are a list, and when they are paragraphs that merely open with a number
+  3. endnotes        a block type of its own, linked like footnotes; footnote = foot of the calling page only
+  4. noise           only marks with no words; text is never noise (also enforced in code: rules43.never_noise)
+  5. verse cut       one Azure line holding both halves: "cut" by word index instead of "splits"; ornaments listed
+                     by word index and left out of the text (kept in the ALTO)
+  6. misprints (D30) text stays as printed; a printer's error is a "sic" flag only, never a fix; three contrasting
+                     examples from experiments 40/41
+  7. small gaps      table column headers / units belong to the table; author names without role phrases; no
+                     "missed" for running heads or page numbers Azure did not read
+
+Inputs (page lines, images, chunking, chunk context) are experiment 41's, imported from its structure.py.
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+E41 = HERE.parent / "41_azure_structure"
+sys.path.insert(0, str(E41))
+import structure as ST  # noqa: E402
+
+PROMPT_VERSION = "v2"
+
+PROMPT_V2 = """You are restructuring a scanned Arabic journal article (it may contain French or English) into a clean,
+faithful digital edition. A trusted OCR engine (Azure) has already read every page; its lines are listed below, page
+by page. Each row: line id "P:N" (P = page number in the article, N = Azure's line number on that page), the line's
+box [x0,y0,x1,y1] in 0-1000 coordinates of its page (x from the LEFT edge, y from the top), then the text exactly as
+Azure read it. Azure's order is not always the reading order.
+{images_note}
+{context}
+AZURE'S LINES:
+{lines}
+
+YOUR JOB: give the structure of pages {first}-{last}, built ONLY from these line ids. Azure's text IS the text of the
+edition; you never retype it. Return one JSON object:
+
+{{
+ "metadata": {metadata_spec},
+ "pages": [ {{"page": {first}, "blocks": [ ... in true reading order ... ]}}, ... one entry per page {first}..{last} ],
+ "splits": [ {{"line": "3:12", "parts": ["first part", "second part"]}} ],
+ "noise": ["3:40"],
+ "ornaments": [ {{"line": "3:4", "word": 6, "text": "٥"}} ],
+ "fixes": [ {{"line": "3:7", "from": "exact substring of Azure's text", "to": "what the ink shows", "why": "short"}} ],
+ "sic": [ {{"line": "3:9", "text": "exact printed substring", "corr": "the intended word", "why": "short"}} ],
+ "math": [ {{"line": "3:9", "from": "exact substring of Azure's text", "latex": "LaTeX of that formula"}} ],
+ "missed": [ {{"after": "3:15", "type": "paragraph", "text": "printed text that no Azure line covers"}} ]
+}}
+
+BLOCKS. Each block: {{"type": T, "lines": ["3:1", "3:2", ...]}} with its lines in reading order. Reading order is the
+right-hand column before the left-hand column for Arabic, top to bottom; page furniture first or last as printed. T:
+  title                 the article's main title (once in the article)
+  heading               a section heading; add "level": 2 for main sections, 3 for sub-sections, 4 below that.
+                        Headings that look the same in print get the same level throughout the article.
+  byline                author names, affiliations, dates and places under the title or signed at the end
+  abstract, keywords    an abstract paragraph / a keywords line (any language)
+  paragraph             body text; one block per printed paragraph (a new block where a paragraph starts)
+  list_item             one item of a numbered or bulleted list; add "list": "ol" or "ul" (see LISTS below)
+  reference             one entry of a bibliography / reference list (sources, without call numbers in the text)
+  footnote              one note printed at the FOOT OF THE PAGE that calls it, under the page's text (often below
+                        a short rule, in smaller type); add "marker": the marker as printed (e.g. "(1)", "*") and
+                        "id": "fn-P-M" (P = the page the footnote is printed on, M = the marker's digits or symbol)
+  endnote               v2: one note of a run of notes GATHERED AT THE END of the article (or of a section), under
+                        a heading such as هوامش، الهوامش، الحواشي، الإحالات، الهوامش والمراجع، المراجع والهوامش،
+                        Notes, Références; numbered to match calls in the text. Add "marker" as printed and
+                        "id": "en-M" (M = its number; if the numbering restarts per section: "en-S-M", S = the
+                        section's number). The heading above the run is a heading block. A run of sources with no
+                        call numbers in the text is reference entries, not endnotes.
+  verse                 one line of poetry: instead of "lines" give "hemistichs": [["3:10"], ["3:11"]], the right
+                        half-line first. Free verse: one verse block per printed line with a single hemistich.
+                        v2: when ONE Azure line holds both halves (two groups of words with a wide gap between
+                        them, often with an ornament such as ٥ ه * « » = between), do NOT use "splits": add
+                        "cut": {{"3:4": K}} to the verse block, meaning the first K words of Azure's text of that line
+                        (words = the text split at spaces, counted from 1, in the order Azure wrote them) are the
+                        right half and the rest the left half; then write "hemistichs": [["3:4a"], ["3:4b"]].
+  quote                 a Quran verse or quotation set apart from the paragraph
+  table                 instead of "lines" give "rows": [[{{"lines": ["3:20"], "th": true, "colspan": 1, "rowspan": 1}},
+                        ...], ...]; cells in printed order (right to left for an Arabic table); an empty cell is
+                        {{"lines": []}}; the caption is its own "caption" block. v2: column headings and unit words
+                        printed above the columns (e.g. مليم جنيه, %, km) are header cells of the table, never a
+                        paragraph.
+  equation              a displayed formula: "lines" (Azure's garbled text of it) plus "latex"
+  caption               the caption of a table or figure
+  figure                a picture, chart or drawing: "box": [x0,y0,x1,y1] on its page (0-1000), "lines": any
+                        text printed inside it, "description": a few words saying what it shows
+  header, footer        running head, page number, journal name, issue line: page furniture
+  other_article         v2: text of a DIFFERENT article printed on a page this article shares: the end of the
+                        previous article above this article's title (or above a "بقية ص ..." / "continued from"
+                        jump), or the start of the next article after this one ends. Recognise the boundary by:
+                        a new title, author line or heading style that starts the other piece; a closing signature
+                        (an author's name, a place and date), an end mark or a rule between the two; a change of
+                        topic at that point; and the position (top of the article's first page or of a page it
+                        jumps to, bottom of its last page). Give it ordinary "lines" in reading order, one block per
+                        printed paragraph; it is kept out of this article's text. Its running heads stay
+                        header/footer. Never call it noise.
+  other                 anything else that is printed text of this article
+Optional on any block: "lang": "ar" | "fr" | "en".
+LISTS (v2): list_item only for a run of SHORT PARALLEL items, each opening with a number, letter or bullet
+(١- ، (أ) ، - ، • , 1), a)) and usually one to three lines long, often indented or with a hanging number: steps,
+objectives, enumerated points, a table of contents. A block of running prose that merely OPENS with a number or an
+ordinal (أولاً: ، ثانياً: ، 1- ...) and goes on for several lines in the body's indentation is a paragraph (one numbered
+step of the argument); if the number and a few words stand on their own line as the title of what follows, that line
+is a heading. In doubt for an item longer than three lines: paragraph. Decide once per article and keep it.
+FOOTNOTE AND ENDNOTE CALLS: on EVERY block of any type (paragraph, verse, list item, table, quote, heading, even a
+note) whose text holds note call markers, list each one: "calls": [{{"line": "3:5", "marker": "(1)", "fn": "fn-3-1"}}]
+(marker exactly as it appears in Azure's line text, after your fix if you fixed it; "fn" = the id of the footnote or
+endnote it points to: "fn-..." or "en-..."). Every footnote and endnote should be called from somewhere.
+PAGE BREAKS: when a block (paragraph, list item, footnote, endnote, table, verse group, quote, other_article)
+continues from the previous page, give its first block on the new page "continued": true. A table whose header row is
+repeated on the new page keeps that row (it is printed).
+
+RULES
+- Use EVERY line id of pages {first}-{last} exactly once across all blocks (a line in "noise" is not used): never drop
+  a line, never repeat one.
+- v2: "noise" is ONLY for marks that hold no words: ornaments and rules read as letters, stray marks, scanner specks,
+  show-through from the other side of the paper. A line with words is NEVER noise: text of another article is
+  other_article, running heads and page numbers are header/footer, anything else printed is a block (other if
+  nothing fits). Answers that call a line with words noise are corrected by code and counted against the answer.
+- "splits" only when one Azure line holds text of two different blocks (two columns run together, a heading glued to
+  a paragraph, a table row read as one line). The parts must be Azure's text cut into pieces, unchanged; then use
+  "3:12a", "3:12b", ... instead of "3:12". Both halves of a verse in one line: use the verse block's "cut" instead.
+- v2: "ornaments": a decorative mark that Azure read as a word of a line (٥ or ه or * between the halves of a verse,
+  a flower, a dash ornament, ※) is not text: list it with the line id, its word number in Azure's text of that line
+  (counted from 1, as for "cut") and the word itself. It leaves the edition's text; its ink is kept. A footnote call
+  marker, a verse number or punctuation that belongs to the sentence is NOT an ornament.
+- FIXES ARE FOR AZURE'S MISREADINGS ONLY. This edition is a faithful transcription, not a corrected one: a fix must
+  restore what the INK shows, letter by letter, where Azure's letters are not the printed letters (a dot missed or
+  invented, a letter shape mistaken for another, a digit misread, a word cut short, a printed vowel mark lost, a
+  footnote marker read as a symbol) and you can see it plainly. "from" must be an exact substring of that line.
+  Never correct the author's or printer's spelling, typos, grammar, missing hamza, alif maqsura vs ya, ta marbuta vs
+  ha, old or Quranic orthography, names, dialect, word spacing or punctuation. Most pages need no fix at all.
+- v2: BEFORE EVERY FIX ask: "does the INK show exactly the letters of 'to'?" If the printed word itself is wrong (the
+  printer dropped, doubled or swapped a letter), the ink does NOT show 'to': that is not a fix, it is a "sic" flag,
+  and the text keeps the printed word. Never repair the print silently. Three cases from earlier runs:
+    * Azure "المتعمون", the ink shows المتعمون (the printer dropped the lam): NO fix. sic: {{"text": "المتعمون",
+      "corr": "المتعلمون"}}. (An earlier answer "fixed" it to المتعلمون: wrong, the edition must show the print.)
+    * Azure "أصلبا", the ink shows أصلها (Azure took the ه for a ب): a FIX {{"from": "أصلبا", "to": "أصلها"}}; no sic,
+      the print is right.
+    * Azure "A930", the ink shows ٨930 (the printer set an Arabic eight for the 1 of 1930): a FIX to what the ink
+      shows, {{"from": "A930", "to": "٨930"}}, AND a sic flag {{"text": "٨930", "corr": "1930"}}. Writing "1930" as
+      the fix would correct the printer: wrong.
+- "sic" is for a MISPRINT IN THE PRINT ITSELF, where Azure read the ink correctly (or you fixed Azure's reading to
+  the ink) but the printed word is plainly a printer's error (a letter dropped or doubled, two words run together by
+  mistake). The text stays as printed; you only propose the intended reading in "corr". Old spelling, Quranic
+  orthography, missing hamzas, ى for ي, ه for ة, names, grammar and dialect are NOT misprints. Use it rarely, only
+  when certain.
+- "math": formulas Azure turned into garbage inside a running line (displayed formulas are equation blocks).
+- "missed": only printed text of the article that no Azure line covers; v2: never for a running head or page number.
+- Return only the JSON object."""
+
+META_FULL_V2 = """{{"title": "...", "subtitle": "...", "authors": [{{"name": "...", "role": "...", "affiliation": "...",
+   "email": "..."}}],
+   "abstract": {{"ar": ["1:20", "1:21"], "en": ["1:30"]}}, "keywords": {{"ar": "...", "en": "..."}},
+   "journal": "...", "volume": "...", "issue": "...", "year": "...", "pages_printed": "45-62", "language": "ar"}}
+   (every string copied exactly from Azure's lines, as printed; abstracts as lists of line ids; null for what is not
+   printed in these pages; journal, volume, issue, year may come from a running head; v2: "name" is the person's
+   name only, a phrase printed with it such as بقلم، تأليف، ضبطها وشرحها، ترجمة، by goes in "role")"""
+
+
+def make_prompt(a: dict, ci: int, x: int, y: int, state: dict | None) -> tuple[str, list[bytes], int]:
+    """Experiment 41's make_prompt with prompt v2 (same images, lines, chunk context)."""
+    lines = []
+    for p in range(x, y + 1):
+        ls, _, _ = ST.page_lines(a, p)
+        lines.append(f"=== PAGE {p} ===\n" + ST.line_table(ls))
+    ctx_img = x > 1
+    imgs = ([ST.send_jpeg(a, 1)] if ctx_img else []) + [ST.send_jpeg(a, p) for p in range(x, y + 1)]
+    context = ""
+    want_meta = ci == 0
+    if want_meta and x > 1:
+        ls, _, _ = ST.page_lines(a, 1)
+        context += ST.CTX_LINES.format(lines=ST.line_table(ls))
+    if state:
+        context += ST.STATE.format(first=x, **state)
+    p = PROMPT_V2.format(images_note=(ST.IMG_CTX if ctx_img else ST.IMG_WHOLE).format(first=x), context=context,
+                         lines="\n".join(lines), first=x, last=y,
+                         metadata_spec=META_FULL_V2 if want_meta else ST.META_NONE)
+    return p, imgs, len(imgs)
+
+
+def prompt_text_only(a: dict, ci: int, x: int, y: int, state: dict | None) -> str:
+    """The prompt without rendering images (for the dry run's token estimate)."""
+    lines = []
+    for p in range(x, y + 1):
+        ls, _, _ = ST.page_lines(a, p)
+        lines.append(f"=== PAGE {p} ===\n" + ST.line_table(ls))
+    context = ""
+    if ci == 0 and x > 1:
+        ls, _, _ = ST.page_lines(a, 1)
+        context += ST.CTX_LINES.format(lines=ST.line_table(ls))
+    if state:
+        context += ST.STATE.format(first=x, **state)
+    return PROMPT_V2.format(images_note=(ST.IMG_CTX if x > 1 else ST.IMG_WHOLE).format(first=x), context=context,
+                            lines="\n".join(lines), first=x, last=y,
+                            metadata_spec=META_FULL_V2 if ci == 0 else ST.META_NONE)
