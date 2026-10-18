@@ -8,7 +8,9 @@ through the Gemini Batch API under a cap.
 
 **Status (2026-10-18).** Step 1 done; a 4-article Batch test ran ($0.30, section "Batch test"): the Batch
 request shape, costs and the new labels are confirmed. The feedback loop (flags → review page → marks → gold set +
-issues, version stamps) is built and tested without calls (section "Feedback loop").
+issues, version stamps) is built and tested without calls (section "Feedback loop"). The run of the 55 cost $3.18 (section "Run of the 55");
+the owner's review of it led to three code rules and view changes (section "Owner's review of the 55") and three
+prompt proposals (section "Decisions pending").
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -43,10 +45,13 @@ for byte from 41's answers (`replay43.py harness`: 55/55 identical) before apply
 |---|---|---|
 | never noise | a line with words (≥ 4 letters at a plausible width, not a sliver at the page edge) called noise or left out goes back: 1–2 lines into the touching block of running text, a longer run as its own block `other`, `from_noise`, one per column, placed in reading order; counted and logged | **26 lines** (all 0656 p4, now 2 flagged blocks); 15 other "noise with letters" are 1–3-letter specks and stay noise |
 | broken splits | a split whose parts are not Azure's text (41 then dropped the line): rebuilt from Azure's words at the same cut when the word counts match, else undone | **1** (0355 21:63, both column halves back; 41's only dropped line) |
-| other_article | masters: out of the JATS; ALTO TextBlock `role.otherArticle`; Layout view faded + "another article" | 0 (v1 answers have none); simulated on 0656: 26 lines |
+| other_article | masters: out of the JATS; ALTO TextBlock `role.otherArticle`; Layout view: one quiet mark per region, "Hide other articles" (since the owner's review; first: faded + a label per block) | 0 (v1 answers have none); simulated on 0656: 26 lines |
 | verse cut / word boxes | `cut` → splits of Azure's words; every split part drawn from its own Azure word boxes (41 cut the line box by letter count) | 170 split lines in 11 articles get word boxes |
 | ornaments | the model's list checked against Azure's text; code backstop: a lone ٥ ه * ※ = ° … at a verse half's inner edge (« » . : - only when it sits in a wide gap), not a call marker, not inside a fix; text out, ALTO `role.ornament` | 1 (0747 3:4 ٥); Argon had removed most ornaments through "fixes" already |
 | endnotes | endnote → footnote with `note_kind: endnote`, linked by id | 0 (unit-tested) |
+| exclamation (2026-10-18) | a fix writing a standalone «(!)» as «(١)» refused, a call on it dropped | 0197 p2 (also in 41's answers) |
+| text in figure (2026-10-18) | a running-text block wholly inside a figure's box becomes the figure's text (not for a background picture that also holds the title / a heading / the byline) | v2: 0493 p1 |
+| figure trim (2026-10-18) | a figure box running over a title / heading / byline line, or a caption line in its top / bottom fifth, cut back (< 30%) | v2: 4 figures (0493, 1769) |
 | fixes counted | spacing-only (12, mostly Azure gluing words: right) and hamza / ya / ta-marbuta-only (84) fixes counted, not changed | |
 
 **Replay result** (`replay43.py all` → `out/replay/compare.json`, `rules_log.json`): JATS text identical in 52/55;
@@ -209,7 +214,9 @@ Where v2 differs, judged next to the scan (`out/v2_55/shots/side_*.jpg`):
   has 2 (41: 33, mostly Azure's garbled calligraphic title, which v2 calls a figure; the title comes from the
   catalogue); 0692 50 (41: 29).
 * **Figure descriptions** are now English (41: Arabic): the article-text diff of 1769 is mostly those, not print.
-* **Small regressions**: 0197 one call no longer linked (the model wrote Azure's «(!)» as the marker of «(١)»): 1/2;
+* **Small regressions**: 0197 one call no longer linked (the model wrote Azure's «(!)» as the marker of «(١)»): 1/2
+  (*corrected after the owner's review*: the print has «(!)», the author's exclamation; both 41 and v2 wrongly "fixed"
+  it into a call; now kept as «(!)» by a code rule);
   0747 75/76 (the batch test had 76/76; one call given on a cut line as the whole line); 2382's English title and the
   received/accepted dates are now "other" (41: a heading, and part of the byline).
 
@@ -228,6 +235,81 @@ title worse). None loses text. Verdict: at least as good, with 2382's English ti
 **Verdict**: prompt v2 does what it was written for (another article, endnotes, verse cuts and ornaments) on the 55,
 for $3.18 on Batch, with no lost text and five small regressions listed above. To decide with the owner: the list vs
 references rule, the English figure descriptions, translated titles as "other".
+
+## Owner's review of the 55 (2026-10-18; no calls)
+
+The owner looked at the Layout views of the run of the 55 (scan left, ours right) and named five things. Each was
+traced, fixed in code where it could be, and looked at next to the scan. Before / after pairs (scan | ours):
+`out/v2_55/shots/before/side_*.jpg` and `out/v2_55/shots/after/side_*.jpg` (`side43.py`); masters and rules as they
+were before: `out/v2_55/before_feedback/`. Issues log: `issues.md` i1–i5.
+
+1. **Page number missing on a first page** (owner's note said 0382; it is **0197**, p1 «-٨-»: the article whose p2
+   shows «- ٩ -», the same article as item 2; 0382 p1 has its ٤٢٥). **Azure never read it**: no line or word at the foot
+   of p1 in Azure's JSON (`content` has no «٨» outside «رقم (٨)»). Every page-number line Azure did read in the 55 is
+   already placed as furniture (185 lines, none called noise or left out), so a "page numbers are always furniture" rule
+   would change nothing. Not invented in code (i1, won't fix; inferring it from the next page's number is possible but
+   would be text no OCR saw).
+2. **«(!)» on 0197 p2** («وهكذا (!)»): the print has the author's exclamation (zoomed on the scan). Where «(١)» came
+   from: a **Gemini fix**, «(!)» → «(١)», plus a call to the page's note «١ - المترجم». **41 made the same fix and
+   linked it** (2/2 calls); v2 made the fix but gave the marker as «(!)», so the call did not link: the run report's
+   "regression" was the fix half-failing, not v2 being worse. Code rule `rules43.exclamation`: a fix that writes a
+   standalone «(!)» as «(١)»/«(1)» is refused and a call on it dropped; a glued «word!» (0747's calls, which Azure reads
+   as «!») is left to the model (tested). Now «(!)», unlinked; the note «١ - المترجم» is a note without a call (flags43:
+   +1 note_no_call). Fires once in the 55 (and once in 41's answers). (i2)
+3. **Pictures with text inside** (0493 p1, the TV drawing whose screen holds a paragraph Argon called an abstract).
+   Code rule `rules43.text_in_figure`: a block of running text whose every line lies ≥ 80% inside a figure's box is the
+   figure's text (its lines become the figure's lines), except when the figure also holds a title / heading / byline
+   line (then it is a background picture under the page's own text: 0881 p1's banner photo under the title, byline and
+   abstract stays as it is). Fires once in the 55 (0493). `masters43` writes the words of any figure (these, and the
+   lines Argon itself gave inside figures: 41 kept those in the ALTO only) as `<fig>…<p content-type="text-in-figure">`
+   (JATS 1.4 allows paragraphs in fig; 55/55 DTD + XSD valid): 26 figures in 6 articles. The view draws the picture only,
+   with a small **text** button that opens the words in a box (Copy / Close; `shots/after/figure_text_box_0493_p001.png`).
+   **Overlap with the title**: Argon's box began inside the title's second line; `rules43.figure_trim` cuts a figure box
+   back to the edge of a title / heading / byline line it runs over (less than half inside) or a caption line in its
+   top or bottom fifth, when the cut is < 30% of the box: 4 figures in the 55 (0493 p1; 1769's «شكل رقم (N)» labels on
+   pp 11–12, which were drawn twice).
+4. **"Another article" marking.** Is 0493 p4 really another article? **Yes**: printed p7, a news report on the Arab
+   Council for Childhood and Development's debate («مناظرة الأطفال والقائمين على إعلام الطفل», «إعلام صديق للطفولة»),
+   with its own headline and photos; the article (a survey by د. محمد محمود عطا) ends on printed p6
+   (`side_0493_p004.jpg`). The catalogue's page range includes p7, Argon's label is right. The view now marks each
+   contiguous run of another article's blocks once: a thin rule on the region's outer side and one small label
+   "from another article" at its top; its text slightly muted (no fading of whole blocks, no dashed boxes, no repeated
+   labels); pictures and captions between or inside its blocks belong to it. A bar button **Hide other articles** hides
+   them all (remembered in the browser; storage in try/catch). Seen on 0493 p4, 1010 p2 (a framed bookshop ad inside the
+   page), 0447 p3, 0924 p1. Limit: the four photos of 0493 p4 are still `<fig>`s in 0493's JATS (Argon labelled them
+   figure, not other_article); the view assigns them to the region, the masters do not yet.
+5. **Text running under pictures** (0493 p4's round photo). The view now wraps running text round a figure that
+   intrudes into its box: floats at the start of the block's text, one per printed line beside the figure, as wide as
+   the print leaves that line short (Azure's line boxes), so the text follows the circle as the print does. Measured in
+   Chromium on the 12 articles with figures (text-node line fragments more than 30% under a figure's box):
+   **45 before → 22 after**; 0493 12 → 0. What remains: 0881 p1 (10; the banner photo with the title and abstract
+   printed on it, as in print) and 1769 (12; picture boxes that still include the «شكل رقم» label above them, drawn
+   over by our label). The round photo's crop is its square box, so the print's text at its corners shows in the crop.
+
+**Numbers after the review** (all 55 rebuilt from the saved answers; `compare.json`, `flags.json`): JATS body words
+127,049 → 127,266 (+217: figure words now in the fig, 0493's TV paragraph moved out of the body), blocks 4,638 → 4,637,
+fixes 997 → 996, calls 490 → 489; flags 3 high / 27 medium / 21 low (+1 low: 0197's note without a call). Masters
+changed in 7 articles (0041, 0197, 0408, 0493, 1147, 1769, 2382). Gold check: 2382 changed only by its chart labels
+«EGR END POV» now in the JATS fig; accepted (`gold43.py accept 2382-005-003-001 --run replay --why …`); then 5/5 the
+same. Unit tests: test_rules43 16 pass (4 new). **Layout PDFs not regenerated**: this experiment's views never wrote
+the print pages (`views43.py` skips `write_layout_print`), so the v2 run has no Layout PDFs to remake.
+
+## Decisions pending (proposals only; no prompt change made, no calls)
+
+Drafted as `prompt43.PROMPT_V3_CANDIDATE` / `META_FULL_V3_CANDIDATE` (each change a replacement of one v2 passage,
+`V3_CHANGES`; not used by `make_prompt` or `run43.py`).
+
+* **(a) References vs list.** Recommendation: *references only for a section the article presents as its sources (a
+  references / bibliography heading, or an article that is itself a bibliography); an author's list of own works in
+  the body is a list.* That keeps 0382 (a bibliography article) as references and makes 1140's publications list a
+  list, which is what v2 did; v2 chose right on both, but by accident of wording, so it should be written down. Cost:
+  ~90 tokens a chunk.
+* **(b) English translated title.** Recommendation: a title block with `"lang"` and `"translated": true` (never other,
+  never a heading), and `trans_titles` in the metadata; masters write JATS `<trans-title-group xml:lang="en">` under
+  `<title-group>`, and the view shows it under the title. Needs the masters side before it goes live (2382's English
+  title is "other" in v2, a heading in 41: both wrong).
+* **(c) Figure descriptions in the article's language** (Arabic for an Arabic article; v2 wrote English, 41 Arabic).
+  Recommendation: yes; they are alt-text for readers of the article.
 
 ## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
 
@@ -329,7 +411,7 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
-`shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
+`side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,

@@ -36,15 +36,14 @@ MIN_W = 420                                # a crop is at least this wide (0-100
 
 
 def layout_views(run: str, stems: list[str], dst: Path):
-    """Experiment 41's Layout view of each article, from the run's masters (views43's other-article fading)."""
+    """Experiment 41's Layout view of each article, from the run's masters, as views43 draws it (another article's
+    regions, figure text, text wrapped round figures)."""
     import views43
     import views as V
     import mread as MR
     arts = F.all_articles()
     MR.MAST = F.run_dirs(run)["masters"].resolve()
     V.VIEWS = dst.resolve()
-    if views43.CSS43 not in V.MIRROR_CSS:
-        V.MIRROR_CSS = V.MIRROR_CSS + views43.CSS43
     V.write_layout_print = lambda *x, **k: None
     for s in stems:
         a = arts[s]
@@ -55,23 +54,7 @@ def layout_views(run: str, stems: list[str], dst: Path):
         f = dst / "mirror" / f"{s}.html"
         if f.exists() and f.stat().st_mtime >= (MR.MAST / f"{s}.alto.xml").stat().st_mtime:
             continue
-        V.build_layout(a, load43(a, MR))
-
-
-def load43(a, MR):
-    """views43.load43 for any article dict (views43's takes experiment 41's sample only through art_of)."""
-    doc = MR.load(a)
-    other, orn = set(), set()
-    for b in doc["D"].A.iter(MR._q("TextBlock")):
-        if "role.otherArticle" in (b.get("TAGREFS") or ""):
-            other.add(b.get("ID"))
-        if "role.ornament" in (b.get("TAGREFS") or ""):
-            orn.add(b.get("ID"))
-    for rec in doc["blocks"]:
-        if rec.get("alto") in other:
-            rec["type"] = "other_article"
-    doc["blocks"] = [r for r in doc["blocks"] if r.get("alto") not in orn]
-    return doc
+        views43.build_layout43(a, views43.load43(a))
 
 
 def shots(views: Path, shots_dir: Path, need: dict, fresh: bool):
