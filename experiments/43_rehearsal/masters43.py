@@ -5,6 +5,8 @@ code that v2 needs. Experiment 41's modules are imported and extended here; noth
   * split lines (verse halves Azure read as one line, cut by word): each part's box is the union of its own Azure
     words (experiment 41 cut the line's box in proportion to characters, so the halves ran together)
   * ornaments (rules43): taken out of the text; their ink kept in the ALTO as TextBlocks role.ornament
+  * figures with words printed inside them (rules43 text_in_figure): the words go into the fig as
+    <p content-type="text-in-figure">; the Layout view draws the picture only, with a "copy text" button
   * lines put back by the never-noise rule are ordinary block lines (blocks of type "other" for runs)
 
     capture43(a, raw_dir, rules=True)  -> experiment 41's capture (structure.assemble on the answers in raw_dir)
@@ -149,6 +151,25 @@ class Master43(M.Master):
             role = "otherArticle"
             self.stats["other_article_lines"] += len(ids)
         return super().tb(p, bid, role, ids, target, lang, seq, own)
+
+    def figure(self, rec, parent, cap_rec, caption_into):
+        """experiment 41's fig, then the words printed inside the picture (rules43 text_in_figure, or Argon's
+        figure "lines") as the figure's own text: <p content-type="text-in-figure"> after the graphic (JATS allows
+        paragraphs in fig after caption / alt-text / graphic). In the ALTO they stay role.pictureText (41)."""
+        n0 = len(parent.findall("fig"))
+        super().figure(rec, parent, cap_rec, caption_into)
+        ids = [i for i in rec.get("ids") or [] if self.S.lines[i]["text"].split()]
+        figs = parent.findall("fig")
+        if not ids or len(figs) <= n0:
+            return
+        fig = figs[-1]
+        t = self.text(ids)
+        p = M.sub(fig, "p", {"content-type": "text-in-figure"})
+        lg = M.lang_of(t, rec.get("lang")) if hasattr(M, "lang_of") else None
+        if lg and lg != self.lang:
+            p.set(M.XML_LANG, lg)
+        self.fill(p, ids)
+        self.stats["figure_text_blocks"] += 1
 
     def az_words(self, L):
         ws = super().az_words(L)

@@ -24,6 +24,17 @@ The rules, in order (each counted in the log):
                 (the first reference to a part becomes the whole line, the other references go)
   empty rows    a table row with no cells (every column covered by a rowspan from above: 1148 p6 in the 55) is
                 dropped and the rowspans over it shortened by one (the JATS DTD wants th or td in every tr)
+  exclamation   a "(!)" Azure read (the author's parenthetical exclamation) is never turned into a call: a fix that
+                writes it as a digit "(١)" / "(1)" is refused and a footnote call whose marker is that "(!)" (or the
+                digit the fix wrote) on that line is dropped (0197 p2: the owner's judgement on the scan)
+  text in fig.  a block of running text (paragraph, abstract, quote, other, list item, keywords, verse) whose every
+                line lies inside a figure's box on its page (>= 80% of each line's area) is the figure's own text
+                (0493 p1: a paragraph printed on a drawn TV screen), unless the figure also holds a title, heading
+                or byline line (then it is a background picture under the page's own text: 0881 p1): its lines become the figure's "lines" (the
+                masters keep them as the figure's text, the view shows the picture only); its calls are dropped
+  figure trim   a figure box that runs over a line of a title / heading / byline (less than half of the line inside
+                the box) is cut back to that line's edge (+ the crop's 4/1000 margin), when the cut is under 30% of
+                the box's height (0493 p1: the TV drawing's box began inside the title's second line)
   fixes counted fixes that only add or remove spaces, and fixes that only change hamza / ya / ta marbuta forms,
                 are counted, not changed (mostly Azure gluing words: right to fix)
 """
@@ -497,10 +508,136 @@ def empty_rows(ans, log):
                 i += 1
 
 
+EXCL = re.compile(r"\(\s*!\s*\)")
+EXCL_DIGIT = re.compile(r"\(\s*[١1]\s*\)")
+
+
+def exclamation(ans, log):
+    """A "(!)" in Azure's text stays "(!)": a fix writing it as "(١)" is refused, calls on it dropped."""
+    keep, lines_hit = [], set()
+    for f in ans.get("fixes") or []:
+        if isinstance(f, dict) and isinstance(f.get("from"), str) and isinstance(f.get("to"), str) and \
+                EXCL.search(f["from"]) and EXCL_DIGIT.search(f["to"]) and \
+                len(EXCL.findall(f["from"])) == len(EXCL_DIGIT.findall(f["to"])):
+            orig = iter(EXCL.findall(f["from"]))
+            to_ex = EXCL_DIGIT.sub(lambda m: next(orig), f["to"])
+            from_n = f["from"]
+            lines_hit.add(str(f.get("line")))
+            log["exclamation_kept"].append(dict(line=f.get("line"), fix_from=f["from"], fix_to=f["to"]))
+            if to_ex == from_n:
+                continue                                     # the fix was only the exclamation: refused
+            f = dict(f, to=to_ex)
+        keep.append(f)
+    if "fixes" in ans:
+        ans["fixes"] = keep
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict) or not b.get("calls"):
+                continue
+            cs = []
+            for c in b["calls"]:
+                m = str(c.get("marker") or "") if isinstance(c, dict) else ""
+                if isinstance(c, dict) and (EXCL.fullmatch(m.strip()) or
+                                            (str(c.get("line")) in lines_hit and EXCL_DIGIT.fullmatch(m.strip()))):
+                    log["exclamation_calls_dropped"].append(dict(line=c.get("line"), marker=m, fn=c.get("fn")))
+                    continue
+                cs.append(c)
+            b["calls"] = cs
+
+
+FIG_TEXT = {"paragraph", "abstract", "quote", "other", "list_item", "keywords", "verse"}
+HEAD = {"title", "heading", "byline"}
+
+
+def fig_box(b):
+    bx = b.get("box") if isinstance(b, dict) else None
+    if not (isinstance(bx, list) and len(bx) == 4 and all(isinstance(v, (int, float)) for v in bx)):
+        return None
+    return [min(bx[0], bx[2]), min(bx[1], bx[3]), max(bx[0], bx[2]), max(bx[1], bx[3])]
+
+
+def inside(lb, fb) -> float:
+    """Share of the line box's area inside the figure box."""
+    w = min(lb[2], fb[2]) - max(lb[0], fb[0])
+    h = min(lb[3], fb[3]) - max(lb[1], fb[1])
+    a = max(1e-9, (lb[2] - lb[0]) * (lb[3] - lb[1]))
+    return max(0.0, w) * max(0.0, h) / a
+
+
+def text_in_figure(ans, lines, log):
+    for pg in ans.get("pages") or []:
+        blocks = pg.get("blocks") if isinstance(pg, dict) else None
+        if not isinstance(blocks, list):
+            continue
+        figs = [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]
+        # a picture that also holds the title / a heading / the byline is a background (0881 p1: a banner photo
+        # under the title, byline and abstract): its text is the page's own, not the picture's
+        heads = [base_of(i, lines) for b in blocks if isinstance(b, dict) and b.get("type") in HEAD
+                 for i in block_ids(b)]
+        figs = [f for f in figs if not any(x and inside(lines[x]["b"], fig_box(f)) >= 0.8 for x in heads)]
+        if not figs:
+            continue
+        keep = []
+        for b in blocks:
+            moved = False
+            if isinstance(b, dict) and b.get("type") in FIG_TEXT and b.get("lines"):
+                ids = [base_of(i, lines) for i in block_ids(b)]
+                if ids and all(ids):
+                    for f in figs:
+                        fb = fig_box(f)
+                        if all(inside(lines[x]["b"], fb) >= 0.8 for x in ids):
+                            f.setdefault("lines", [])
+                            f["lines"] = list(f["lines"] or []) + list(b["lines"])
+                            f.setdefault("text_from", []).append(b["type"])
+                            log["text_in_figure"].append(dict(page=pg.get("page"), type=b["type"],
+                                                              lines=list(b["lines"]), calls=len(b.get("calls") or []),
+                                                              text=" ".join(lines[x]["text"] for x in ids)[:80]))
+                            moved = True
+                            break
+            if not moved:
+                keep.append(b)
+        pg["blocks"] = keep
+
+
+def figure_trim(ans, lines, log):
+    for pg in ans.get("pages") or []:
+        blocks = pg.get("blocks") if isinstance(pg, dict) else None
+        if not isinstance(blocks, list):
+            continue
+        for f in blocks:
+            fb = fig_box(f) if isinstance(f, dict) and f.get("type") == "figure" else None
+            if not fb:
+                continue
+            for b in blocks:
+                if not isinstance(b, dict) or b.get("type") not in HEAD:
+                    continue
+                for x in (base_of(i, lines) for i in block_ids(b)):
+                    if not x:
+                        continue
+                    lb = lines[x]["b"]
+                    share = inside(lb, fb)
+                    if share <= 0 or share >= 0.5:
+                        continue
+                    h = fb[3] - fb[1]
+                    old = list(fb)
+                    if (lb[1] + lb[3]) / 2 < (fb[1] + fb[3]) / 2:
+                        y = lb[3] + 4
+                        if y - fb[1] < 0.3 * h:
+                            fb[1] = y
+                    else:
+                        y = lb[1] - 4
+                        if fb[3] - y < 0.3 * h:
+                            fb[3] = y
+                    if fb != old:
+                        f["box"] = [round(v, 1) for v in fb]
+                        log["figure_trim"].append(dict(page=pg.get("page"), line=x, old=old, new=f["box"]))
+
+
 def new_log() -> dict:
     return dict(endnotes=0, cuts=0, bad_cuts=[], ornaments_model=0, ornaments_code=0, ornaments_rejected=[],
                 never_noise=[], fixes_spacing=[], bad_splits=[], fixes_orthographic=[], other_article_blocks=0,
-                other_article_lines=0, empty_rows=0)
+                other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
+                text_in_figure=[], figure_trim=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -517,6 +654,9 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)
     never_noise(ans, lines, log)
+    exclamation(ans, log)
+    text_in_figure(ans, lines, log)
+    figure_trim(ans, lines, log)
     empty_rows(ans, log)
     fixes(ans, log)
     return ans, log
