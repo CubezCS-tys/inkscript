@@ -98,12 +98,12 @@ def crop_box(box) -> list[float]:
     if x1 - x0 < MIN_W:
         c = (x0 + x1) / 2
         x0, x1 = c - MIN_W / 2, c + MIN_W / 2
-    if y1 - y0 > 700:                           # a whole-page spot: keep it readable, top part
-        y1 = y0 + 700
+    if y1 - y0 > 450:                           # a whole-page spot: keep it readable, top part
+        y1 = y0 + 450
     return [max(0, x0), max(0, y0), min(1000, x1), min(1000, y1)]
 
 
-def crop(img, box, width=900, rect=None) -> str | None:
+def crop(img, box, width=640, rect=None) -> str | None:
     if img is None:
         return None
     h, w = img.shape[:2]
@@ -117,7 +117,7 @@ def crop(img, box, width=900, rect=None) -> str | None:
         cv2.rectangle(c, (rx0 - 4, ry0 - 4), (rx1 + 4, ry1 + 4), (40, 40, 220), max(2, c.shape[1] // 300))
     if c.shape[1] > width:
         c = cv2.resize(c, (width, int(c.shape[0] * width / c.shape[1])), interpolation=cv2.INTER_AREA)
-    return base64.b64encode(cv2.imencode(".jpg", c, [cv2.IMWRITE_JPEG_QUALITY, 70])[1].tobytes()).decode()
+    return base64.b64encode(cv2.imencode(".jpg", c, [cv2.IMWRITE_JPEG_QUALITY, 60])[1].tobytes()).decode()
 
 
 CSS = """

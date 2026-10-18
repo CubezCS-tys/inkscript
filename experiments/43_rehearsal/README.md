@@ -191,7 +191,7 @@ code rule or a prompt change, and nothing regresses on what the owner has alread
 3. *review* — `review43.py --run v2_fresh` → `out/<run>/review.html`: spots most serious first, each with the scan
    and our Layout view cropped to the same place (spot outlined), the reason, **yes, right / no, wrong** + note,
    filter by severity, "next unmarked", **Export my marks** (JSON). Self-contained, works on a phone; marks kept in
-   the browser (localStorage, try/catch). Layout screenshots by experiment 40's Playwright venv (about 1 s a page).
+   the browser (localStorage, try/catch). Layout screenshots by experiment 40's Playwright venv (under 1 s a page, cached in `out/<run>/review/shots/`; the replay's 86 spots: 8.3 MB page, rebuilt in 13 s).
 4. *import* — `gold43.py import review_v2_fresh.json`: "yes" spots join the gold set (`gold/<stem>__<run>.json`,
    snapshot of today's output, scope = those lines); "no" spots become open issues (`issues.json` → `issues.md`,
    with the note and a pattern name = the flag kind).
@@ -257,7 +257,7 @@ prompt hash is of today's text under that name; if the v2 text is edited, give i
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
-`shots43.py` (Layout-view screenshots; experiment 40's Playwright venv) · `page43.py` (owner's page) · `run43.py`
+`shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
