@@ -53,9 +53,11 @@ def sheet(a, p, figs, junk, lines, dst: Path):
     cv2.imwrite(str(dst), img, [cv2.IMWRITE_JPEG_QUALITY, 80])
 
 
-def build(run: str, raw: str, dst: Path, stems):
+def build(run: str, raw: str, dst: Path, stems, which: str = "a"):
     from inkscript.enrich.schemas import validate_alto, validate_jats
-    arts = [a for a in run43.articles("a") if not stems or a["stem"] in stems]
+    if which == "b":                              # the fresh sample's page renders (run43.py --set b)
+        ST.PAGES = OUT / "pages"
+    arts = [a for a in run43.articles(which) if not stems or a["stem"] in stems]
     src, rules = OUT / run / raw, dst / "rules"
     rules.mkdir(parents=True, exist_ok=True)
     bad = []
@@ -84,9 +86,10 @@ def main():
     ap.add_argument("--raw", default="raw", help="folder under out/<run>/ holding the answers")
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--no-sheets", action="store_true")
+    ap.add_argument("--set", default="a", choices=["a", "b"], help="--build: a = experiment 41's 55, b = sample43")
     args = ap.parse_args()
     if args.build:
-        return build(args.run, args.raw, Path(args.build).resolve(), args.stems)
+        return build(args.run, args.raw, Path(args.build).resolve(), args.stems, args.set)
     src = OUT / args.run / args.raw
     arts = [a for a in run43.articles("a") if not args.stems or a["stem"] in args.stems]
     rep, tot = {}, Counter()
