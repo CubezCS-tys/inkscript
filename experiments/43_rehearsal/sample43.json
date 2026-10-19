@@ -1,66 +1,124 @@
 {
- "made": "experiment 43 sample43.py (seed 43); proposal, not run",
+ "made": "experiment 43 sample43.py (seed 43) + fetched43.py (catalogue layouts measured, checks, swaps); final",
  "counts": {
   "articles": 300,
-  "local": 186,
-  "catalogue": 114,
-  "pages": 3482,
-  "chunks": 494,
+  "local": 180,
+  "catalogue": 120,
+  "pages": 3523,
+  "chunks": 499,
   "journals": 226,
+  "max_per_journal": 3,
   "decades": {
-   "1960s": 34,
+   "1960s": 35,
    "1970s": 34,
-   "1980s": 34,
-   "1990s": 33,
-   "2000s": 33,
-   "2010s": 43,
-   "2020s": 42,
-   "pre-1960": 34,
-   "unknown": 13
+   "1980s": 35,
+   "1990s": 36,
+   "2000s": 35,
+   "2010s": 50,
+   "2020s": 41,
+   "pre-1960": 34
   },
   "layouts": {
-   "verse": 9,
-   "tables": 42,
-   "equations": 10,
-   "two_columns": 49,
+   "verse": 22,
+   "tables": 64,
+   "equations": 8,
+   "two_columns": 69,
    "french": 23,
    "english": 30,
-   "shared": 17
+   "shared": 21
   },
-  "layouts_note": "layout flags are known for the local documents only; the catalogue documents' are measured after the fetch (features43 on their Azure JSON) and swapped from the reserve",
-  "pool": {
-   "inventory": 931,
-   "excluded": 205,
-   "too_long": 222,
-   "candidates": 504,
-   "layouts_in_pool": {
+  "layouts_by_source": {
+   "local": {
     "verse": 9,
-    "tables": 171,
-    "equations": 29,
-    "two_columns": 50,
+    "tables": 42,
+    "equations": 4,
+    "two_columns": 49,
     "french": 10,
-    "english": 28,
+    "english": 17,
     "shared": 17
    },
-   "decades_in_pool": {
-    "1960s": 16,
-    "1970s": 8,
-    "1980s": 19,
-    "1990s": 18,
-    "2000s": 51,
-    "2010s": 163,
-    "2020s": 141,
-    "pre-1960": 16,
-    "unknown": 72
+   "catalogue": {
+    "verse": 13,
+    "tables": 22,
+    "equations": 4,
+    "two_columns": 20,
+    "french": 13,
+    "english": 13,
+    "shared": 4
    }
   },
   "pages_hist": {
-   "5": 97,
-   "10": 65,
-   "15": 44,
-   "20": 38,
+   "5": 95,
+   "10": 63,
+   "15": 48,
+   "20": 37,
    "25": 32,
-   "30": 24
+   "30": 25
+  },
+  "swaps": 20,
+  "unusable_left": [],
+  "proposal_counts": {
+   "articles": 300,
+   "local": 186,
+   "catalogue": 114,
+   "pages": 3482,
+   "chunks": 494,
+   "journals": 226,
+   "decades": {
+    "1960s": 34,
+    "1970s": 34,
+    "1980s": 34,
+    "1990s": 33,
+    "2000s": 33,
+    "2010s": 43,
+    "2020s": 42,
+    "pre-1960": 34,
+    "unknown": 13
+   },
+   "layouts": {
+    "verse": 9,
+    "tables": 42,
+    "equations": 10,
+    "two_columns": 49,
+    "french": 23,
+    "english": 30,
+    "shared": 17
+   },
+   "layouts_note": "layout flags are known for the local documents only; the catalogue documents' are measured after the fetch (features43 on their Azure JSON) and swapped from the reserve",
+   "pool": {
+    "inventory": 931,
+    "excluded": 205,
+    "too_long": 222,
+    "candidates": 504,
+    "layouts_in_pool": {
+     "verse": 9,
+     "tables": 171,
+     "equations": 29,
+     "two_columns": 50,
+     "french": 10,
+     "english": 28,
+     "shared": 17
+    },
+    "decades_in_pool": {
+     "1960s": 16,
+     "1970s": 8,
+     "1980s": 19,
+     "1990s": 18,
+     "2000s": 51,
+     "2010s": 163,
+     "2020s": 141,
+     "pre-1960": 16,
+     "unknown": 72
+    }
+   },
+   "pages_hist": {
+    "5": 97,
+    "10": 65,
+    "15": 44,
+    "20": 38,
+    "25": 32,
+    "30": 24
+   }
   }
  },
  "articles": [
@@ -78,8 +136,7 @@
    "journal": "المسلم المعاصر",
    "why": "layout: verse",
    "flags": [
-    "verse",
-    "equations"
+    "verse"
    ],
    "source": "local",
    "printed_pages": null
@@ -112,15 +169,16 @@
    "n": 14,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-046-527-003/1016-046-527-003.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-046-527-003/1016-046-527-003.json",
-   "decade": null,
-   "year": null,
+   "decade": "2000s",
+   "year": "2007",
    "journal": null,
    "why": "layout: verse",
    "flags": [
     "verse"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0617-024-021,024-010",
@@ -501,15 +559,16 @@
    "n": 12,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-035-003-006/0527-035-003-006.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-035-003-006/0527-035-003-006.json",
-   "decade": null,
-   "year": null,
+   "decade": "2000s",
+   "year": "2005",
    "journal": null,
    "why": "layout: shared",
    "flags": [
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0527-046-003-024",
@@ -520,8 +579,8 @@
    "n": 20,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-046-003-024/0527-046-003-024.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-046-003-024/0527-046-003-024.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2016",
    "journal": null,
    "why": "layout: shared",
    "flags": [
@@ -529,7 +588,8 @@
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0700-000-105-003",
@@ -540,8 +600,8 @@
    "n": 24,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-105-003/0700-000-105-003.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-105-003/0700-000-105-003.json",
-   "decade": null,
-   "year": null,
+   "decade": "2020s",
+   "year": "2023",
    "journal": null,
    "why": "layout: shared",
    "flags": [
@@ -549,7 +609,8 @@
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0128-002-003-010",
@@ -579,17 +640,17 @@
    "n": 14,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-095-002/0700-000-095-002.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-095-002/0700-000-095-002.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2018",
    "journal": null,
    "why": "layout: shared",
    "flags": [
     "tables",
-    "equations",
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0863-000-059-001",
@@ -638,8 +699,8 @@
    "n": 28,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1541-006-001-030/1541-006-001-030.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1541-006-001-030/1541-006-001-030.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2019",
    "journal": null,
    "why": "layout: shared",
    "flags": [
@@ -649,7 +710,8 @@
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "2228-014-051-037",
@@ -700,8 +762,8 @@
    "n": 28,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-048-002-012/0527-048-002-012.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0527-048-002-012/0527-048-002-012.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2018",
    "journal": null,
    "why": "layout: shared",
    "flags": [
@@ -709,7 +771,8 @@
     "shared"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "2408-000-010,011-012",
@@ -745,6 +808,7 @@
    "why": "layout: english",
    "flags": [
     "tables",
+    "equations",
     "english"
    ],
    "source": "local",
@@ -759,15 +823,16 @@
    "n": 22,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/2483-000-006-015/2483-000-006-015.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/2483-000-006-015/2483-000-006-015.json",
-   "decade": null,
-   "year": null,
+   "decade": "1990s",
+   "year": "1995",
    "journal": null,
    "why": "layout: english",
    "flags": [
     "english"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0700-000-054-004",
@@ -778,17 +843,17 @@
    "n": 18,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-054-004/0700-000-054-004.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/0700-000-054-004/0700-000-054-004.json",
-   "decade": null,
-   "year": null,
+   "decade": "1990s",
+   "year": "1997",
    "journal": null,
    "why": "layout: english",
    "flags": [
     "tables",
-    "equations",
     "english"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "2342-000-005-008",
@@ -849,23 +914,23 @@
    "printed_pages": null
   },
   {
-   "stem": "1548-009-002-002",
+   "stem": "2260-010-001-010",
    "kind": "whole",
    "first": 1,
-   "last": 6,
-   "pages_total": 6,
-   "n": 6,
-   "pdf": "/home/yassine/inkscript/experiments/19_azure_map/out/docs/1548-009-002-002/1548-009-002-002.pdf",
-   "azure": "/home/yassine/inkscript/experiments/19_azure_map/out/docs/1548-009-002-002/1548-009-002-002.json",
-   "decade": null,
-   "year": null,
-   "journal": null,
-   "why": "layout: english",
+   "last": 13,
+   "pages_total": 13,
+   "n": 13,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2260-010-001-010/2260-010-001-010.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2260-010-001-010/2260-010-001-010.json",
+   "decade": "2020s",
+   "year": "2025",
+   "journal": "مجلة الرسالة للدراسات والبحوث الإنسانية",
+   "why": "replaces unusable 1548-009-002-002 (no year)",
    "flags": [
     "english"
    ],
-   "source": "local",
-   "printed_pages": null
+   "source": "catalogue",
+   "printed_pages": "109 - 121"
   },
   {
    "stem": "0310-000-091-039",
@@ -1059,7 +1124,6 @@
    "journal": "تراث الإنسانية",
    "why": "layout: equations",
    "flags": [
-    "equations",
     "two_columns"
    ],
    "source": "local",
@@ -1079,8 +1143,7 @@
    "journal": "مجلة بحوث التربية الشاملة",
    "why": "layout: equations",
    "flags": [
-    "tables",
-    "equations"
+    "tables"
    ],
    "source": "local",
    "printed_pages": null
@@ -1094,8 +1157,8 @@
    "n": 21,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/2483-000-004-013/2483-000-004-013.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/2483-000-004-013/2483-000-004-013.json",
-   "decade": null,
-   "year": null,
+   "decade": "1990s",
+   "year": "1993",
    "journal": null,
    "why": "layout: equations",
    "flags": [
@@ -1103,7 +1166,8 @@
     "equations"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0315-000-015-001",
@@ -1134,16 +1198,16 @@
    "n": 15,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-054-618-013/1016-054-618-013.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-054-618-013/1016-054-618-013.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2015",
    "journal": null,
    "why": "layout: equations",
    "flags": [
-    "equations",
     "two_columns"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0506-040-001-003",
@@ -1160,7 +1224,6 @@
    "why": "layout: equations",
    "flags": [
     "tables",
-    "equations",
     "two_columns"
    ],
    "source": "local",
@@ -1596,15 +1659,16 @@
    "n": 9,
    "pdf": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-054-623-033/1016-054-623-033.pdf",
    "azure": "/home/yassine/inkscript/experiments/39_ink_geometry/out/more/azure/1016-054-623-033/1016-054-623-033.json",
-   "decade": null,
-   "year": null,
+   "decade": "2010s",
+   "year": "2015",
    "journal": null,
    "why": "layout: two_columns",
    "flags": [
     "two_columns"
    ],
    "source": "local",
-   "printed_pages": null
+   "printed_pages": null,
+   "year_source": "catalogue"
   },
   {
    "stem": "0656-014-010-014",
@@ -3306,72 +3370,84 @@
    "printed_pages": null
   },
   {
-   "stem": "8420-000-000-005",
+   "stem": "1147-000-010-003",
    "kind": "whole",
    "first": 1,
-   "last": 19,
-   "pages_total": 19,
-   "n": 19,
-   "pdf": "/home/yassine/inkscript/experiments/33_kraken/out/docs/8420-000-000-005/8420-000-000-005.pdf",
-   "azure": "/home/yassine/inkscript/experiments/33_kraken/out/docs/8420-000-000-005/8420-000-000-005.json",
+   "last": 13,
+   "pages_total": 13,
+   "n": 13,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1147-000-010-003/1147-000-010-003.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1147-000-010-003/1147-000-010-003.json",
    "decade": "2000s",
-   "year": 2007,
-   "journal": "ندوة المعاملات القانونية الإلكترونية وعقود التجارة الدولية وورشة عمل حول التحكيم في منازعات عقود التجارة الدولية",
-   "why": "decade: 2000s",
-   "flags": [],
-   "source": "local",
-   "printed_pages": null
+   "year": "2006",
+   "journal": "المجلة العراقية للعلوم الإحصائية",
+   "why": "reserve, layout: equations",
+   "flags": [
+    "tables",
+    "equations"
+   ],
+   "source": "catalogue",
+   "printed_pages": "48 - 60"
   },
   {
-   "stem": "1955-036-996-007",
+   "stem": "0909-008-029-025",
    "kind": "whole",
    "first": 1,
-   "last": 23,
-   "pages_total": 23,
-   "n": 23,
-   "pdf": "/home/yassine/inkscript/experiments/33_kraken/out/docs/1955-036-996-007/1955-036-996-007.pdf",
-   "azure": "/home/yassine/inkscript/experiments/33_kraken/out/docs/1955-036-996-007/1955-036-996-007.json",
-   "decade": "2020s",
-   "year": 2021,
-   "journal": "مجلة العلوم القانونية",
-   "why": "decade: 2020s",
-   "flags": [],
-   "source": "local",
-   "printed_pages": null
+   "last": 17,
+   "pages_total": 17,
+   "n": 17,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0909-008-029-025/0909-008-029-025.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0909-008-029-025/0909-008-029-025.json",
+   "decade": "2010s",
+   "year": "2010",
+   "journal": "التسامح",
+   "why": "reserve, layout: verse",
+   "flags": [
+    "verse"
+   ],
+   "source": "catalogue",
+   "printed_pages": "451 - 467"
   },
   {
-   "stem": "2617-000-044-004",
+   "stem": "1967-000-008-012",
    "kind": "whole",
    "first": 1,
-   "last": 11,
-   "pages_total": 11,
-   "n": 11,
-   "pdf": "/home/yassine/inkscript/experiments/33_kraken/out/docs/2617-000-044-004/2617-000-044-004.pdf",
-   "azure": "/home/yassine/inkscript/experiments/33_kraken/out/docs/2617-000-044-004/2617-000-044-004.json",
-   "decade": "2020s",
-   "year": 2025,
-   "journal": "مجلة قراءات علمية في الأبحاث والدراسات القانونية والاقتصادية والعلوم الإنسانية والشرعية",
-   "why": "decade: 2020s",
-   "flags": [],
-   "source": "local",
-   "printed_pages": null
+   "last": 14,
+   "pages_total": 14,
+   "n": 14,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1967-000-008-012/1967-000-008-012.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1967-000-008-012/1967-000-008-012.json",
+   "decade": "2010s",
+   "year": "2018",
+   "journal": "حوليات المخبر",
+   "why": "reserve, layout: verse",
+   "flags": [
+    "verse"
+   ],
+   "source": "catalogue",
+   "printed_pages": "229 - 242"
   },
   {
-   "stem": "1309-009-002-008",
+   "stem": "0314-030-003-009",
    "kind": "whole",
    "first": 1,
-   "last": 28,
-   "pages_total": 28,
-   "n": 28,
-   "pdf": "/home/yassine/inkscript/experiments/33_kraken/out/docs/1309-009-002-008/1309-009-002-008.pdf",
-   "azure": "/home/yassine/inkscript/experiments/33_kraken/out/docs/1309-009-002-008/1309-009-002-008.json",
-   "decade": "2020s",
-   "year": 2023,
-   "journal": "مجلة الجامعة العربية الأمريكية للبحوث",
-   "why": "decade: 2020s",
-   "flags": [],
-   "source": "local",
-   "printed_pages": null
+   "last": 27,
+   "pages_total": 27,
+   "n": 27,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0314-030-003-009/0314-030-003-009.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0314-030-003-009/0314-030-003-009.json",
+   "decade": "2010s",
+   "year": "2017",
+   "journal": "مجلة جامعة الملك عبدالعزيز - الاقتصاد الإسلامي",
+   "why": "reserve, layout: equations",
+   "flags": [
+    "tables",
+    "equations",
+    "two_columns",
+    "shared"
+   ],
+   "source": "catalogue",
+   "printed_pages": "223 - 249"
   },
   {
    "stem": "2147-009-002-002",
@@ -3476,21 +3552,24 @@
    "printed_pages": null
   },
   {
-   "stem": "7979-000-000-008",
+   "stem": "1993-010-001-013",
    "kind": "whole",
    "first": 1,
-   "last": 1,
-   "pages_total": 1,
-   "n": 1,
-   "pdf": "/home/yassine/inkscript/experiments/33_kraken/out/docs/7979-000-000-008/7979-000-000-008.pdf",
-   "azure": "/home/yassine/inkscript/experiments/33_kraken/out/docs/7979-000-000-008/7979-000-000-008.json",
+   "last": 11,
+   "pages_total": 11,
+   "n": 11,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1993-010-001-013/1993-010-001-013.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1993-010-001-013/1993-010-001-013.json",
    "decade": "2020s",
-   "year": 2025,
-   "journal": "المؤتمر العربي الدولي الأول بعنوان: تطوير منظومة تقويم المتعلمين بالمرحلة الابتدائية في الوطن العربي ( الواقع والمأمول) نحو تقويم عربي موحد",
-   "why": "decade: 2020s",
-   "flags": [],
-   "source": "local",
-   "printed_pages": null
+   "year": "2025",
+   "journal": "مجلة البحوث الاقتصادية المتقدمة",
+   "why": "reserve, layout: equations",
+   "flags": [
+    "tables",
+    "equations"
+   ],
+   "source": "catalogue",
+   "printed_pages": "220 - 230"
   },
   {
    "stem": "1709-000-106-005",
@@ -3506,51 +3585,49 @@
    "journal": "مجلة إنسانيات",
    "why": "catalogue, language: fre",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "tables",
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "99-122"
+   "printed_pages": "99 - 122"
   },
   {
-   "stem": "0438-000-028-005",
+   "stem": "1708-000-005,006-017",
    "kind": "whole",
    "first": 1,
-   "last": 12,
-   "pages_total": 12,
-   "n": 12,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0438-000-028-005/0438-000-028-005.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0438-000-028-005/0438-000-028-005.json",
+   "last": 30,
+   "pages_total": 30,
+   "n": 30,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1708-000-005,006-017/1708-000-005,006-017.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1708-000-005,006-017/1708-000-005,006-017.json",
+   "decade": "2010s",
+   "year": "2015",
+   "journal": "مجلة الناصرية للدراسات الاجتماعية والتاريخية",
+   "why": "replaces unusable 0438-000-028-005 (no Azure JSON)",
+   "flags": [
+    "french"
+   ],
+   "source": "catalogue",
+   "printed_pages": "29 - 58"
+  },
+  {
+   "stem": "7263-000-000-014",
+   "kind": "whole",
+   "first": 1,
+   "last": 9,
+   "pages_total": 9,
+   "n": 9,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/7263-000-000-014/7263-000-000-014.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/7263-000-000-014/7263-000-000-014.json",
    "decade": "2010s",
    "year": "2013",
-   "journal": "مجلة العلوم العربية",
-   "why": "catalogue, language: fre",
+   "journal": "أعمال الندوة العلمية الثانية: العدالة العقارية والأمن العقاري بالمغرب",
+   "why": "replaces unusable 9815-058-006-0144-4 (no Azure JSON)",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "5-16"
-  },
-  {
-   "stem": "9815-058-006-0144-4",
-   "kind": "whole",
-   "first": 1,
-   "last": 22,
-   "pages_total": 22,
-   "n": 22,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/9815-058-006-0144-4/9815-058-006-0144-4.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/9815-058-006-0144-4/9815-058-006-0144-4.json",
-   "decade": "2010s",
-   "year": "2019",
-   "journal": null,
-   "why": "catalogue, language: fre",
-   "flags": [
-    "french",
-    "layout: measure after fetch"
-   ],
-   "source": "catalogue",
-   "printed_pages": "1-22"
+   "printed_pages": "185 - 193"
   },
   {
    "stem": "2319-000-022,023-022",
@@ -3566,39 +3643,39 @@
    "journal": "مجلة عصور",
    "why": "catalogue, language: fre",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "tables",
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "54-79"
+   "printed_pages": "54 - 79"
   },
   {
-   "stem": "7374-000-000-022",
+   "stem": "0344-002-002-002",
    "kind": "whole",
    "first": 1,
-   "last": 14,
-   "pages_total": 14,
-   "n": 14,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/7374-000-000-022/7374-000-000-022.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/7374-000-000-022/7374-000-000-022.json",
-   "decade": "2010s",
-   "year": "2010",
-   "journal": "أعمال ندوة: النخب والعنف في التاريخ",
-   "why": "catalogue, language: fre",
+   "last": 21,
+   "pages_total": 21,
+   "n": 21,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0344-002-002-002/0344-002-002-002.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0344-002-002-002/0344-002-002-002.json",
+   "decade": "1960s",
+   "year": "1965",
+   "journal": "المجلة الجزائرية للعلوم القانونية والاقتصادية والسياسية",
+   "why": "replaces unusable 7374-000-000-022 (no Azure JSON)",
    "flags": [
     "french",
-    "layout: measure after fetch"
+    "shared"
    ],
    "source": "catalogue",
-   "printed_pages": "111-124"
+   "printed_pages": "83 - 103"
   },
   {
    "stem": "1632-000-030-004",
    "kind": "whole",
    "first": 1,
-   "last": 9,
-   "pages_total": 9,
-   "n": 9,
+   "last": 10,
+   "pages_total": 10,
+   "n": 10,
    "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1632-000-030-004/1632-000-030-004.pdf",
    "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1632-000-030-004/1632-000-030-004.json",
    "decade": "2010s",
@@ -3606,19 +3683,18 @@
    "journal": "المجلة المغربية للتدقيق والتنمية",
    "why": "catalogue, language: fre",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "47-55"
+   "printed_pages": "47 - 55"
   },
   {
    "stem": "0814-026-096,097-012",
    "kind": "whole",
    "first": 1,
-   "last": 16,
-   "pages_total": 16,
-   "n": 16,
+   "last": 17,
+   "pages_total": 17,
+   "n": 17,
    "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0814-026-096,097-012/0814-026-096,097-012.pdf",
    "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0814-026-096,097-012/0814-026-096,097-012.json",
    "decade": "1980s",
@@ -3626,51 +3702,48 @@
    "journal": "المجلة التونسية للعلوم الاجتماعية",
    "why": "catalogue, language: fre",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "159-174"
+   "printed_pages": "159 - 174"
   },
   {
-   "stem": "1264-000-052,053-003",
+   "stem": "2617-000-038-035",
    "kind": "whole",
    "first": 1,
-   "last": 3,
-   "pages_total": 3,
-   "n": 3,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1264-000-052,053-003/1264-000-052,053-003.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1264-000-052,053-003/1264-000-052,053-003.json",
+   "last": 7,
+   "pages_total": 7,
+   "n": 7,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2617-000-038-035/2617-000-038-035.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2617-000-038-035/2617-000-038-035.json",
    "decade": "2020s",
-   "year": "2020",
-   "journal": "المجلة التونسية للجغرافيا",
-   "why": "catalogue, language: fre",
+   "year": "2024",
+   "journal": "مجلة قراءات علمية في الأبحاث والدراسات القانونية والاقتصادية والعلوم الإنسانية والشرعية",
+   "why": "replaces unusable 1264-000-052,053-003 (no Azure JSON)",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "13-15"
+   "printed_pages": "555 - 561"
   },
   {
-   "stem": "1818-000-083-015",
+   "stem": "0597-006-003-012",
    "kind": "whole",
    "first": 1,
-   "last": 10,
-   "pages_total": 10,
-   "n": 10,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1818-000-083-015/1818-000-083-015.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1818-000-083-015/1818-000-083-015.json",
-   "decade": "2020s",
-   "year": "2022",
-   "journal": "مجلة القانون والأعمال",
-   "why": "catalogue, language: fre",
+   "last": 4,
+   "pages_total": 4,
+   "n": 4,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0597-006-003-012/0597-006-003-012.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0597-006-003-012/0597-006-003-012.json",
+   "decade": "1980s",
+   "year": "1980",
+   "journal": "التوعية الإسلامية",
+   "why": "replaces unusable 1818-000-083-015 (no Azure JSON)",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "244-253"
+   "printed_pages": "1 - 4"
   },
   {
    "stem": "7606-000-000-010",
@@ -3686,11 +3759,10 @@
    "journal": "أعمال الندوة العلمية الدولية: المراسم والطقوس في الأوساط السياسية والدينية عبر العصور",
    "why": "catalogue, language: fre",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "67-75"
+   "printed_pages": "67 - 75"
   },
   {
    "stem": "1152-013-001-004",
@@ -3706,31 +3778,30 @@
    "journal": "مجلة مركز بابل للدراسات الإنسانية",
    "why": "catalogue, language: eng",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "45-60"
+   "printed_pages": "45 - 60"
   },
   {
-   "stem": "1941-016-002-015",
+   "stem": "0201-000-092-013",
    "kind": "whole",
    "first": 1,
-   "last": 25,
-   "pages_total": 25,
-   "n": 25,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1941-016-002-015/1941-016-002-015.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1941-016-002-015/1941-016-002-015.json",
+   "last": 14,
+   "pages_total": 14,
+   "n": 14,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0201-000-092-013/0201-000-092-013.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0201-000-092-013/0201-000-092-013.json",
    "decade": "2020s",
-   "year": "2022",
-   "journal": "المجلة الدولية للتراث والسياحة والضيافة",
-   "why": "catalogue, language: eng",
+   "year": "2025",
+   "journal": "مجلة بحوث التربية النوعية",
+   "why": "replaces unusable 1941-016-002-015 (no Azure JSON)",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "tables",
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "1-25"
+   "printed_pages": "429 - 442"
   },
   {
    "stem": "1956-017-002-013",
@@ -3746,51 +3817,49 @@
    "journal": "المجلة العراقية لبحوث السوق وحماية المستهلك",
    "why": "catalogue, language: eng",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "tables",
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "138-145"
+   "printed_pages": "138 - 145"
   },
   {
-   "stem": "0137-017-055-023",
+   "stem": "2099-000-081-006",
    "kind": "whole",
    "first": 1,
-   "last": 18,
-   "pages_total": 18,
-   "n": 18,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0137-017-055-023/0137-017-055-023.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0137-017-055-023/0137-017-055-023.json",
-   "decade": "2010s",
-   "year": "2016",
-   "journal": "عالم التربية",
-   "why": "catalogue, language: eng",
-   "flags": [
-    "english",
-    "layout: measure after fetch"
-   ],
-   "source": "catalogue",
-   "printed_pages": "1-18"
-  },
-  {
-   "stem": "9818-006-001-4963-R",
-   "kind": "whole",
-   "first": 1,
-   "last": 24,
-   "pages_total": 24,
-   "n": 24,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/9818-006-001-4963-R/9818-006-001-4963-R.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/9818-006-001-4963-R/9818-006-001-4963-R.json",
+   "last": 21,
+   "pages_total": 21,
+   "n": 21,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2099-000-081-006/2099-000-081-006.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2099-000-081-006/2099-000-081-006.json",
    "decade": "2020s",
-   "year": "2021",
-   "journal": null,
-   "why": "catalogue, language: eng",
+   "year": "2024",
+   "journal": "فيلولوجي: سلسلة في الدراسات الأدبية واللغوية",
+   "why": "replaces unusable 0137-017-055-023 (no Azure JSON)",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "1-24"
+   "printed_pages": "9 - 29"
+  },
+  {
+   "stem": "2048-015-001-019",
+   "kind": "whole",
+   "first": 1,
+   "last": 12,
+   "pages_total": 12,
+   "n": 12,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2048-015-001-019/2048-015-001-019.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2048-015-001-019/2048-015-001-019.json",
+   "decade": "2020s",
+   "year": "2025",
+   "journal": "مجلة التصميم الدولية",
+   "why": "replaces unusable 9818-006-001-4963-R (no Azure JSON)",
+   "flags": [
+    "english"
+   ],
+   "source": "catalogue",
+   "printed_pages": "269 - 280"
   },
   {
    "stem": "1677-010-002-023",
@@ -3806,39 +3875,38 @@
    "journal": "مجلة آفاق للعلوم",
    "why": "catalogue, language: eng",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "tables",
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "291-307"
+   "printed_pages": "291 - 307"
   },
   {
-   "stem": "1772-009-002-022",
+   "stem": "2280-006-001-014",
    "kind": "whole",
    "first": 1,
-   "last": 20,
-   "pages_total": 20,
-   "n": 20,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1772-009-002-022/1772-009-002-022.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1772-009-002-022/1772-009-002-022.json",
+   "last": 24,
+   "pages_total": 24,
+   "n": 24,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2280-006-001-014/2280-006-001-014.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/2280-006-001-014/2280-006-001-014.json",
    "decade": "2020s",
-   "year": "2022",
-   "journal": "مجلة الدراسات المالية والمحاسبية والإدارية",
-   "why": "catalogue, language: eng",
+   "year": "2024",
+   "journal": "مجلة تجسير لدراسات العلوم الإنسانية والاجتماعية البينية",
+   "why": "replaces unusable 1772-009-002-022 (no Azure JSON)",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "37-56"
+   "printed_pages": "281 - 303"
   },
   {
    "stem": "1010-006-011-015",
    "kind": "whole",
    "first": 1,
-   "last": 6,
-   "pages_total": 6,
-   "n": 6,
+   "last": 9,
+   "pages_total": 9,
+   "n": 9,
    "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1010-006-011-015/1010-006-011-015.pdf",
    "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/1010-006-011-015/1010-006-011-015.json",
    "decade": "pre-1960",
@@ -3846,10 +3914,10 @@
    "journal": "مجلة الآداب",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "34-39"
+   "printed_pages": "34 - 39"
   },
   {
    "stem": "0664-002-006-013",
@@ -3865,10 +3933,10 @@
    "journal": "دعوة الحق",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "60-61"
+   "printed_pages": "60 - 61"
   },
   {
    "stem": "0738-005-009-005",
@@ -3883,11 +3951,9 @@
    "year": "1950",
    "journal": "الكتاب",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "788-790"
+   "printed_pages": "788 - 790"
   },
   {
    "stem": "0873-013-003,005-003",
@@ -3902,11 +3968,9 @@
    "year": "1943",
    "journal": "مجلة القانون والاقتصاد",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "237-246"
+   "printed_pages": "237 - 246"
   },
   {
    "stem": "1010-001-003-022",
@@ -3922,10 +3986,10 @@
    "journal": "مجلة الآداب",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "46-50"
+   "printed_pages": "46 - 50"
   },
   {
    "stem": "0631-001-007-011",
@@ -3940,11 +4004,9 @@
    "year": "1957",
    "journal": "هدي الإسلام",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "39-40"
+   "printed_pages": "39 - 40"
   },
   {
    "stem": "1010-001-011-014",
@@ -3960,10 +4022,11 @@
    "journal": "مجلة الآداب",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "tables",
+    "shared"
    ],
    "source": "catalogue",
-   "printed_pages": "43-53"
+   "printed_pages": "43 - 53"
   },
   {
    "stem": "0617-025-005,008-011",
@@ -3978,11 +4041,9 @@
    "year": "1958",
    "journal": "التمدن الإسلامي",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "161-165"
+   "printed_pages": "161 - 165"
   },
   {
    "stem": "0738-002-003-016",
@@ -3998,10 +4059,11 @@
    "journal": "الكتاب",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "verse",
+    "shared"
    ],
    "source": "catalogue",
-   "printed_pages": "451-453"
+   "printed_pages": "451 - 453"
   },
   {
    "stem": "0619-002-008-010",
@@ -4016,11 +4078,9 @@
    "year": "1953",
    "journal": "المسلمون",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "49-54"
+   "printed_pages": "49 - 54"
   },
   {
    "stem": "0631-001-002-005",
@@ -4035,11 +4095,9 @@
    "year": "1956",
    "journal": "هدي الإسلام",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "16-18"
+   "printed_pages": "16 - 18"
   },
   {
    "stem": "0690-016-009,010-012",
@@ -4054,11 +4112,9 @@
    "year": "1941",
    "journal": "مجلة المجمع العلمي العربي",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "460-468"
+   "printed_pages": "460 - 468"
   },
   {
    "stem": "0018-004-003-005",
@@ -4073,11 +4129,9 @@
    "year": "1931",
    "journal": "مجلة التربية الحديثة",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "183-186"
+   "printed_pages": "183 - 186"
   },
   {
    "stem": "0749-004-001-007",
@@ -4093,11 +4147,10 @@
    "journal": "مجلة كلية الآداب",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "37-44"
+   "printed_pages": "37 - 44"
   },
   {
    "stem": "0018-031-001-006",
@@ -4112,11 +4165,9 @@
    "year": "1957",
    "journal": "مجلة التربية الحديثة",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "57-61"
+   "printed_pages": "57 - 61"
   },
   {
    "stem": "0737-002-045-003",
@@ -4131,30 +4182,28 @@
    "year": "1938",
    "journal": "الرواية",
    "why": "catalogue, decade: pre-1960",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "1152-1157"
+   "printed_pages": "1152 - 1157"
   },
   {
-   "stem": "0018-012-003-003",
+   "stem": "0718-013-003-006",
    "kind": "whole",
    "first": 1,
    "last": 2,
    "pages_total": 2,
    "n": 2,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0018-012-003-003/0018-012-003-003.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0018-012-003-003/0018-012-003-003.json",
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0718-013-003-006/0718-013-003-006.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0718-013-003-006/0718-013-003-006.json",
    "decade": "pre-1960",
-   "year": "1939",
-   "journal": "مجلة التربية الحديثة",
-   "why": "catalogue, decade: pre-1960",
+   "year": "1947",
+   "journal": "صحيفة دار العلوم - الإصدار الثاني",
+   "why": "reserve, layout: verse",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "175-176"
+   "printed_pages": "38 - 39"
   },
   {
    "stem": "0549-001-008-019",
@@ -4169,11 +4218,9 @@
    "year": "1965",
    "journal": "الوعي الإسلامي",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "70-75"
+   "printed_pages": "70 - 75"
   },
   {
    "stem": "0792-003-008-012",
@@ -4188,11 +4235,9 @@
    "year": "1963",
    "journal": "حضارة الإسلام",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "84-91"
+   "printed_pages": "84 - 91"
   },
   {
    "stem": "0955-000-023-001",
@@ -4208,10 +4253,10 @@
    "journal": "الفكر المعاصر",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "6-19"
+   "printed_pages": "6 - 19"
   },
   {
    "stem": "0691-041-001,004-046",
@@ -4227,10 +4272,10 @@
    "journal": "مجلة مجمع اللغة العربية بدمشق",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "607-630"
+   "printed_pages": "607 - 630"
   },
   {
    "stem": "1080-003-003-014",
@@ -4246,10 +4291,10 @@
    "journal": "مجلة الطليعة",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "129-137"
+   "printed_pages": "129 - 137"
   },
   {
    "stem": "0408-001-008-010",
@@ -4264,11 +4309,9 @@
    "year": "1967",
    "journal": "العرب",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "744-748"
+   "printed_pages": "744 - 748"
   },
   {
    "stem": "0955-000-055-007",
@@ -4283,11 +4326,9 @@
    "year": "1969",
    "journal": "الفكر المعاصر",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "71-75"
+   "printed_pages": "71 - 75"
   },
   {
    "stem": "0656-017-002-017",
@@ -4302,11 +4343,9 @@
    "year": "1963",
    "journal": "مجلة الحج والعمرة",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "112-114"
+   "printed_pages": "112 - 114"
   },
   {
    "stem": "0792-003-002-007",
@@ -4321,11 +4360,9 @@
    "year": "1962",
    "journal": "حضارة الإسلام",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "45-54"
+   "printed_pages": "45 - 54"
   },
   {
    "stem": "0678-011-000-015",
@@ -4340,19 +4377,17 @@
    "year": "1963",
    "journal": "المجلة التاريخية المصرية",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "255-278"
+   "printed_pages": "255 - 278"
   },
   {
    "stem": "0344-002-003,004-006",
    "kind": "whole",
    "first": 1,
-   "last": 10,
-   "pages_total": 10,
-   "n": 10,
+   "last": 8,
+   "pages_total": 8,
+   "n": 8,
    "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0344-002-003,004-006/0344-002-003,004-006.pdf",
    "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0344-002-003,004-006/0344-002-003,004-006.json",
    "decade": "1960s",
@@ -4360,11 +4395,10 @@
    "journal": "المجلة الجزائرية للعلوم القانونية والاقتصادية والسياسية",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "147-156"
+   "printed_pages": "147 - 156"
   },
   {
    "stem": "0656-014-004-008",
@@ -4380,10 +4414,10 @@
    "journal": "مجلة الحج والعمرة",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "219-222"
+   "printed_pages": "219 - 222"
   },
   {
    "stem": "0628-005-004-008",
@@ -4398,11 +4432,9 @@
    "year": "1967",
    "journal": "مجلة رابطة العالم الإسلامي",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "38-42"
+   "printed_pages": "38 - 42"
   },
   {
    "stem": "0005-012-004-007",
@@ -4417,11 +4449,9 @@
    "year": "1960",
    "journal": "صحيفة التربية",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "41-46"
+   "printed_pages": "41 - 46"
   },
   {
    "stem": "0604-007-001-003",
@@ -4437,10 +4467,10 @@
    "journal": "تراث الإنسانية",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "45-58"
+   "printed_pages": "45 - 58"
   },
   {
    "stem": "1080-002-007-003",
@@ -4456,10 +4486,10 @@
    "journal": "مجلة الطليعة",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "40-46"
+   "printed_pages": "40 - 46"
   },
   {
    "stem": "0664-010-008-004",
@@ -4475,10 +4505,10 @@
    "journal": "دعوة الحق",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "9-10"
+   "printed_pages": "9 - 10"
   },
   {
    "stem": "1080-005-004-001",
@@ -4493,11 +4523,9 @@
    "year": "1969",
    "journal": "مجلة الطليعة",
    "why": "catalogue, decade: 1960s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "5-10"
+   "printed_pages": "5 - 10"
   },
   {
    "stem": "0664-010-006,007-001",
@@ -4513,10 +4541,10 @@
    "journal": "دعوة الحق",
    "why": "catalogue, decade: 1960s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "3-5"
+   "printed_pages": "3 - 5"
   },
   {
    "stem": "0877-019-077-002",
@@ -4532,10 +4560,10 @@
    "journal": "الأمن العام",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "10-13"
+   "printed_pages": "10 - 13"
   },
   {
    "stem": "0596-003-002-014",
@@ -4550,11 +4578,9 @@
    "year": "1975",
    "journal": "التوحيد",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "41-42"
+   "printed_pages": "41 - 42"
   },
   {
    "stem": "0368-000-037-010",
@@ -4569,11 +4595,9 @@
    "year": "1974",
    "journal": "شؤون فلسطينية",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "135-141"
+   "printed_pages": "135 - 141"
   },
   {
    "stem": "0582-004-008-016",
@@ -4589,10 +4613,10 @@
    "journal": "المناهل",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "254-255"
+   "printed_pages": "254 - 255"
   },
   {
    "stem": "0946-012-020-004",
@@ -4608,10 +4632,10 @@
    "journal": "مجلة المحاسبة والإدارة والتأمين",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "73-88"
+   "printed_pages": "73 - 88"
   },
   {
    "stem": "0633-025-008-007",
@@ -4627,10 +4651,10 @@
    "journal": "التضامن الإسلامي",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "186-189"
+   "printed_pages": "186 - 189"
   },
   {
    "stem": "0692-000-034-012",
@@ -4645,11 +4669,9 @@
    "year": "1974",
    "journal": "مجلة مجمع اللغة العربية بالقاهرة",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "113-125"
+   "printed_pages": "113 - 125"
   },
   {
    "stem": "0549-013-150-014",
@@ -4664,11 +4686,9 @@
    "year": "1977",
    "journal": "الوعي الإسلامي",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "100-103"
+   "printed_pages": "100 - 103"
   },
   {
    "stem": "0618-012-002,004-011",
@@ -4683,11 +4703,9 @@
    "year": "1977",
    "journal": "الدراسات الإسلامية",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "135-139"
+   "printed_pages": "135 - 139"
   },
   {
    "stem": "0852-001-004,005-003",
@@ -4703,10 +4721,10 @@
    "journal": "الفكر العربي",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "40-66"
+   "printed_pages": "40 - 66"
   },
   {
    "stem": "0701-002-003-009",
@@ -4722,10 +4740,10 @@
    "journal": "الإدارة",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "88-101"
+   "printed_pages": "88 - 101"
   },
   {
    "stem": "0408-012-005,006-006",
@@ -4740,11 +4758,9 @@
    "year": "1977",
    "journal": "العرب",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "415-418"
+   "printed_pages": "415 - 418"
   },
   {
    "stem": "0549-006-068-013",
@@ -4759,11 +4775,9 @@
    "year": "1970",
    "journal": "الوعي الإسلامي",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "102-104"
+   "printed_pages": "102 - 104"
   },
   {
    "stem": "0368-000-013-009",
@@ -4779,10 +4793,10 @@
    "journal": "شؤون فلسطينية",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "90-116"
+   "printed_pages": "90 - 116"
   },
   {
    "stem": "0814-008-024-002",
@@ -4798,11 +4812,12 @@
    "journal": "المجلة التونسية للعلوم الاجتماعية",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "tables",
+    "equations",
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "49-74"
+   "printed_pages": "49 - 74"
   },
   {
    "stem": "0596-002-005-001",
@@ -4817,11 +4832,9 @@
    "year": "1974",
    "journal": "التوحيد",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "4-7"
+   "printed_pages": "4 - 7"
   },
   {
    "stem": "0848-002-015-008",
@@ -4837,10 +4850,10 @@
    "journal": "الثقافة",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "34-35"
+   "printed_pages": "34 - 35"
   },
   {
    "stem": "0368-000-003-003",
@@ -4855,11 +4868,9 @@
    "year": "1971",
    "journal": "شؤون فلسطينية",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "20-34"
+   "printed_pages": "20 - 34"
   },
   {
    "stem": "0412-005-001-005",
@@ -4875,10 +4886,10 @@
    "journal": "المورد",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "46-48"
+   "printed_pages": "46 - 48"
   },
   {
    "stem": "0611-005-034,035-004",
@@ -4894,10 +4905,10 @@
    "journal": "الأصالة",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "26-39"
+   "printed_pages": "26 - 39"
   },
   {
    "stem": "0080-005-002-008",
@@ -4912,11 +4923,9 @@
    "year": "1977",
    "journal": "مجلة العلوم الاجتماعية",
    "why": "catalogue, decade: 1970s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "141-145"
+   "printed_pages": "141 - 145"
   },
   {
    "stem": "0814-007-020-008",
@@ -4932,11 +4941,10 @@
    "journal": "المجلة التونسية للعلوم الاجتماعية",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "french",
-    "layout: measure after fetch"
+    "french"
    ],
    "source": "catalogue",
-   "printed_pages": "287-288"
+   "printed_pages": "287 - 288"
   },
   {
    "stem": "0864-032-000-031",
@@ -4952,11 +4960,10 @@
    "journal": "المجلة المصرية للقانون الدولي",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "179-190"
+   "printed_pages": "179 - 190"
   },
   {
    "stem": "0042-004-009-012",
@@ -4972,10 +4979,10 @@
    "journal": "تعليم الجماهير",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "101-104"
+   "printed_pages": "101 - 104"
   },
   {
    "stem": "0484-069-373-008",
@@ -4991,30 +4998,30 @@
    "journal": "مجلة مصر المعاصرة",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "tables",
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "59-77"
+   "printed_pages": "59 - 77"
   },
   {
-   "stem": "0877-019-080-001",
+   "stem": "0944-004-004-003",
    "kind": "whole",
    "first": 1,
-   "last": 2,
-   "pages_total": 2,
-   "n": 2,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0877-019-080-001/0877-019-080-001.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0877-019-080-001/0877-019-080-001.json",
+   "last": 21,
+   "pages_total": 21,
+   "n": 21,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0944-004-004-003/0944-004-004-003.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0944-004-004-003/0944-004-004-003.json",
    "decade": "1970s",
-   "year": "1978",
-   "journal": "الأمن العام",
-   "why": "catalogue, decade: 1970s",
+   "year": "1974",
+   "journal": "مجلة الجامعة المستنصرية",
+   "why": "reserve, layout: verse",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "5-6"
+   "printed_pages": "36 - 56"
   },
   {
    "stem": "0082-000-028-024",
@@ -5030,10 +5037,10 @@
    "journal": "مجلة التربية",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "70-71"
+   "printed_pages": "70 - 71"
   },
   {
    "stem": "0175-003-011-010",
@@ -5049,29 +5056,28 @@
    "journal": "علم النفس",
    "why": "catalogue, decade: 1980s",
    "flags": [
-    "layout: measure after fetch"
+    "tables",
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "103-117"
+   "printed_pages": "103 - 117"
   },
   {
    "stem": "0339-000-018,019-008",
    "kind": "whole",
    "first": 1,
-   "last": 9,
-   "pages_total": 9,
-   "n": 9,
+   "last": 10,
+   "pages_total": 10,
+   "n": 10,
    "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0339-000-018,019-008/0339-000-018,019-008.pdf",
    "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0339-000-018,019-008/0339-000-018,019-008.json",
    "decade": "1980s",
    "year": "1986",
    "journal": "المجلة الإسلامية",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "149-157"
+   "printed_pages": "149 - 157"
   },
   {
    "stem": "0049-000-999-028",
@@ -5086,11 +5092,9 @@
    "year": "1980",
    "journal": "مجلة اتحاد الجامعات العربية",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "563-581"
+   "printed_pages": "563 - 581"
   },
   {
    "stem": "0597-006-010-009",
@@ -5105,11 +5109,9 @@
    "year": "1980",
    "journal": "التوعية الإسلامية",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "41-43"
+   "printed_pages": "41 - 43"
   },
   {
    "stem": "0328-000-032-006",
@@ -5124,11 +5126,9 @@
    "year": "1982",
    "journal": "الإدارة العامة",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "152-167"
+   "printed_pages": "152 - 167"
   },
   {
    "stem": "0089-006-005-006",
@@ -5143,11 +5143,9 @@
    "year": "1985",
    "journal": "مجلة كلية التربية بالمنصورة",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "152-175"
+   "printed_pages": "152 - 175"
   },
   {
    "stem": "0703-001-001-023",
@@ -5162,11 +5160,9 @@
    "year": "1987",
    "journal": "التوباد",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "136-137"
+   "printed_pages": "136 - 137"
   },
   {
    "stem": "0596-011-008-013",
@@ -5181,11 +5177,9 @@
    "year": "1983",
    "journal": "التوحيد",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "38-42"
+   "printed_pages": "38 - 42"
   },
   {
    "stem": "0916-022-054-008",
@@ -5200,11 +5194,9 @@
    "year": "1983",
    "journal": "الدفاع",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "36-40"
+   "printed_pages": "36 - 40"
   },
   {
    "stem": "0499-004-016-005",
@@ -5219,11 +5211,9 @@
    "year": "1982",
    "journal": "التنمية الإدارية",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "22-25"
+   "printed_pages": "22 - 25"
   },
   {
    "stem": "0011-005-014-013",
@@ -5238,11 +5228,9 @@
    "year": "1985",
    "journal": "رسالة الخليج العربي",
    "why": "catalogue, decade: 1980s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "327-329"
+   "printed_pages": "327 - 329"
   },
   {
    "stem": "0295-020-002-007",
@@ -5258,10 +5246,10 @@
    "journal": "الخليج العربي",
    "why": "catalogue, decade: 1980s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "169-194"
+   "printed_pages": "169 - 194"
   },
   {
    "stem": "0354-004-008-012",
@@ -5277,11 +5265,10 @@
    "journal": "الوثيقة",
    "why": "catalogue, decade: 1980s",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "201-207"
+   "printed_pages": "201 - 207"
   },
   {
    "stem": "0744-000-072-001",
@@ -5297,10 +5284,10 @@
    "journal": "الثقافة الجديدة",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "6-11"
+   "printed_pages": "6 - 11"
   },
   {
    "stem": "0729-000-091-018",
@@ -5315,11 +5302,9 @@
    "year": "1998",
    "journal": "الشعر",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "62-63"
+   "printed_pages": "62 - 63"
   },
   {
    "stem": "0498-028-332-007",
@@ -5334,11 +5319,9 @@
    "year": "1996",
    "journal": "مجلة المال والتجارة",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "33-38"
+   "printed_pages": "33 - 38"
   },
   {
    "stem": "0084-019-001-008",
@@ -5353,11 +5336,9 @@
    "year": "1997",
    "journal": "دراسات تربوية",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "53-60"
+   "printed_pages": "53 - 60"
   },
   {
    "stem": "0720-005-018-001",
@@ -5372,11 +5353,9 @@
    "year": "1998",
    "journal": "الأدب الإسلامي",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "4-15"
+   "printed_pages": "4 - 15"
   },
   {
    "stem": "0712-020-001-006",
@@ -5391,11 +5370,9 @@
    "year": "1998",
    "journal": "مجلة البحوث التجارية",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "71-88"
+   "printed_pages": "71 - 88"
   },
   {
    "stem": "1076-007-004-012",
@@ -5410,11 +5387,9 @@
    "year": "1999",
    "journal": "مجلة الدراسات المالية والمصرفية",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "61-63"
+   "printed_pages": "61 - 63"
   },
   {
    "stem": "0407-000-045-017",
@@ -5430,11 +5405,11 @@
    "journal": "اللسان العربي",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "english",
-    "layout: measure after fetch"
+    "tables",
+    "english"
    ],
    "source": "catalogue",
-   "printed_pages": "22-29"
+   "printed_pages": "22 - 29"
   },
   {
    "stem": "0702-002-007-010",
@@ -5449,11 +5424,9 @@
    "year": "1994",
    "journal": "آفاق الثقافة والتراث",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "72-75"
+   "printed_pages": "72 - 75"
   },
   {
    "stem": "0495-000-026-010",
@@ -5469,10 +5442,10 @@
    "journal": "المجلة العلمية للتربية البدنية وعلوم الرياضة",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "165-190"
+   "printed_pages": "165 - 190"
   },
   {
    "stem": "0957-005-020-001",
@@ -5487,11 +5460,9 @@
    "year": "1996",
    "journal": "مجلة بناة الأجيال",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "6-7"
+   "printed_pages": "6 - 7"
   },
   {
    "stem": "0751-015-008-033",
@@ -5507,10 +5478,10 @@
    "journal": "افاق عربية",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "156-158"
+   "printed_pages": "156 - 158"
   },
   {
    "stem": "0936-010-001-006",
@@ -5526,10 +5497,10 @@
    "journal": "مجلة الاذاعات العربية",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "tables"
    ],
    "source": "catalogue",
-   "printed_pages": "37-46"
+   "printed_pages": "37 - 46"
   },
   {
    "stem": "1197-000-042-004",
@@ -5545,10 +5516,10 @@
    "journal": "عالم الكتاب",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "34-42"
+   "printed_pages": "34 - 42"
   },
   {
    "stem": "0744-000-059-007",
@@ -5563,11 +5534,9 @@
    "year": "1993",
    "journal": "الثقافة الجديدة",
    "why": "catalogue, decade: 1990s",
-   "flags": [
-    "layout: measure after fetch"
-   ],
+   "flags": [],
    "source": "catalogue",
-   "printed_pages": "31-34"
+   "printed_pages": "31 - 34"
   },
   {
    "stem": "0175-010-037-007",
@@ -5583,29 +5552,29 @@
    "journal": "علم النفس",
    "why": "catalogue, decade: 1990s",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "72-91"
+   "printed_pages": "72 - 91"
   },
   {
-   "stem": "0821-000-040-002",
+   "stem": "0742-000-006-004",
    "kind": "whole",
    "first": 1,
-   "last": 9,
-   "pages_total": 9,
-   "n": 9,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0821-000-040-002/0821-000-040-002.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0821-000-040-002/0821-000-040-002.json",
+   "last": 18,
+   "pages_total": 18,
+   "n": 18,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0742-000-006-004/0742-000-006-004.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0742-000-006-004/0742-000-006-004.json",
    "decade": "1990s",
-   "year": "1999",
-   "journal": "مجلة الدراسات الفلسطينية",
-   "why": "catalogue, decade: 1990s",
+   "year": "1993",
+   "journal": "مجلة كلية الآداب والعلوم الإنسانية",
+   "why": "reserve, layout: verse",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "1-9"
+   "printed_pages": "85 - 102"
   },
   {
    "stem": "0875-001-007-003",
@@ -5621,29 +5590,29 @@
    "journal": "مجلة المجلات العالمية",
    "why": "catalogue, decade: pre-1960",
    "flags": [
-    "layout: measure after fetch"
+    "two_columns"
    ],
    "source": "catalogue",
-   "printed_pages": "28-30"
+   "printed_pages": "28 - 30"
   },
   {
-   "stem": "0005-022-001-004",
+   "stem": "0595-010-005-019",
    "kind": "whole",
    "first": 1,
-   "last": 6,
-   "pages_total": 6,
-   "n": 6,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0005-022-001-004/0005-022-001-004.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0005-022-001-004/0005-022-001-004.json",
+   "last": 2,
+   "pages_total": 2,
+   "n": 2,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0595-010-005-019/0595-010-005-019.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0595-010-005-019/0595-010-005-019.json",
    "decade": "1960s",
-   "year": "1969",
-   "journal": "صحيفة التربية",
-   "why": "catalogue, decade: 1960s",
+   "year": "1966",
+   "journal": "البعث الإسلامي",
+   "why": "reserve, layout: verse",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "30-35"
+   "printed_pages": "80 - 81"
   },
   {
    "stem": "0582-002-003-021",
@@ -5659,131 +5628,277 @@
    "journal": "المناهل",
    "why": "catalogue, decade: 1970s",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "324-336"
+   "printed_pages": "324 - 336"
   },
   {
-   "stem": "0734-001-004-007",
+   "stem": "0595-026-001,002-017",
    "kind": "whole",
    "first": 1,
-   "last": 3,
-   "pages_total": 3,
-   "n": 3,
-   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0734-001-004-007/0734-001-004-007.pdf",
-   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0734-001-004-007/0734-001-004-007.json",
+   "last": 15,
+   "pages_total": 15,
+   "n": 15,
+   "pdf": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0595-026-001,002-017/0595-026-001,002-017.pdf",
+   "azure": "/home/yassine/inkscript/experiments/43_rehearsal/out/fetch/0595-026-001,002-017/0595-026-001,002-017.json",
    "decade": "1980s",
-   "year": "1984",
-   "journal": "أدب ونقد",
-   "why": "catalogue, decade: 1980s",
+   "year": "1981",
+   "journal": "البعث الإسلامي",
+   "why": "reserve, layout: verse",
    "flags": [
-    "layout: measure after fetch"
+    "verse"
    ],
    "source": "catalogue",
-   "printed_pages": "58-60"
+   "printed_pages": "123 - 137"
   }
  ],
  "reserve": [
   "1856-000-037-004",
-  "1091-001-001-005",
   "0127-000-215-004",
-  "1128-025-078-009",
   "1817-000-010-004",
   "0596-035-415-021",
-  "1580-009-016-016",
   "1191-000-013-006",
   "1643-000-007-009",
-  "0673-050-001-008",
-  "1147-000-010-003",
-  "0876-042-151-012",
   "0734-021-231-002",
-  "0055-047-002-009",
   "0792-012-003,004-014",
   "0495-000-033-010",
   "1121-012-058-009",
   "2155-000-035-001",
   "1093-000-030-003",
   "0912-014-002-004",
-  "0419-000-118-003",
   "0824-037-001-006",
-  "2246-002-010-016",
-  "0691-086-002-006",
-  "1064-000-010-001",
   "0495-100-002-003",
   "0180-008-015-015",
-  "1335-000-006-005",
   "1811-000-001-007",
   "0396-021-001-014",
   "0664-000-280-019",
   "7661-000-000-028",
   "6841-000-000-012",
   "1714-013-002-024",
-  "0828-000-035-001",
   "2586-000-012-022",
-  "1801-000-034-009",
   "2340-001-003-011",
   "2152-000-043-029",
   "0902-025-006-018",
   "0122-007-024-013",
-  "1550-011-001-007",
-  "0782-005-010-007",
   "0465-020-004-014",
   "1028-006-021-038",
   "0732-000-129,130-029",
   "1156-000-124-074",
   "0295-035-001,002-009",
   "2230-014-002-031",
-  "0922-000-001-001",
   "1554-030-121-001",
   "1865-000-033-002",
-  "0159-035-111-005",
-  "0845-000-019-003",
-  "1893-016-002-003",
-  "0087-029-001-009",
   "0549-000-347-005",
-  "2298-000-007-015",
-  "0165-006-024-007",
-  "0916-049-156-025",
   "0089-125-004-015",
-  "0419-000-096-005",
   "0532-000-092-013",
   "0708-009-099-009",
-  "0722-058-022-001",
   "1010-035-007,008,009-005",
-  "0351-039-448-002",
-  "2258-008-002-004",
   "0527-055-002-016",
   "0680-003-011,012-011",
   "2489-007-002-004",
-  "2646-000-056-005",
   "0040-007-004-002",
   "1105-017-001-005",
   "0496-017-001-015",
   "1895-000-057-016",
-  "0314-030-003-009",
   "1442-016-002-008",
-  "0239-013-003-003",
-  "2068-000-009-008",
-  "0909-008-029-025",
   "7278-000-000-002",
-  "2260-010-001-010",
   "0465-023-001-009",
-  "1697-013-003-024",
-  "0201-000-092-013",
   "0720-010-040-015",
   "1080-013-006-004",
   "0821-000-049-002",
   "2009-000-010-006",
   "1794-000-017-007",
-  "1443-029-004-026",
-  "0301-002-003-004",
   "8480-000-000-002",
-  "0818-000-032-006",
   "0599-000-353-005",
-  "2099-000-081-006",
   "0547-000-061-002",
-  "2048-015-001-019",
-  "8404-000-000-004"
+  "8404-000-000-004",
+  "0738-008-003-017",
+  "1021-005-002-001",
+  "0749-014-001-013",
+  "1010-002-010-009",
+  "0692-000-010-007",
+  "0806-003-003-006",
+  "0018-029-001-008",
+  "0756-001-000-010",
+  "0875-002-005-011",
+  "0775-014-001,002-008",
+  "1009-002-019-003",
+  "0863-002-004-005",
+  "0631-004-006-002",
+  "0924-037-010-007",
+  "0738-002-011-030",
+  "0873-009-004-001",
+  "0005-007-002-002",
+  "0300-012-004-003",
+  "0619-002-009-015",
+  "0735-002-009-009",
+  "0728-001-001-014",
+  "0664-001-011-006",
+  "0018-030-001-005",
+  "0875-001-005-002",
+  "1054-023-010-006",
+  "0690-024-001,004-019",
+  "0656-013-001-007",
+  "0690-001-003,004-003",
+  "0875-002-005-006",
+  "0664-001-011-012",
+  "0735-003-005,006-027",
+  "0690-001-005,006-007",
+  "0890-001-004-013",
+  "1010-003-005-007",
+  "0677-002-002-003",
+  "1080-002-010-015",
+  "0628-001-006-008",
+  "0549-001-004-008",
+  "1016-004-043-019",
+  "0665-002-004,005-002",
+  "1009-005-049-001",
+  "0631-006-001-013",
+  "0595-013-010-008",
+  "0877-006-023-014",
+  "0005-015-001-007",
+  "0656-017-012-008",
+  "0631-004-009-012",
+  "0631-005-008-005",
+  "0792-008-006-018",
+  "1010-012-001-016",
+  "0792-005-010-017",
+  "0300-013-004-004",
+  "0745-002-019-005",
+  "0664-007-005-018",
+  "1080-003-002-011",
+  "0656-017-003-006",
+  "0664-006-007-014",
+  "0631-009-003-026",
+  "1009-007-080-012",
+  "0849-004-002-004",
+  "1084-017-008-003",
+  "8245-000-000-008",
+  "0408-001-002-006",
+  "0907-011-002-010",
+  "0631-005-001-015",
+  "0631-013-004-008",
+  "0631-005-008-008",
+  "0082-000-031-021",
+  "0368-000-045-002",
+  "1016-000-156-010",
+  "0664-014-009-005",
+  "0326-005-001-019",
+  "0877-017-070-012",
+  "0082-000-032-020",
+  "0732-001-005,006-002",
+  "1080-012-009-010",
+  "1080-009-012-004",
+  "0466-000-028-005",
+  "0549-014-157-007",
+  "0849-012-001-002",
+  "0368-000-070-021",
+  "0625-008-007-009",
+  "0138-011-013-012",
+  "1016-000-187-006",
+  "0368-000-094-003",
+  "1080-012-007-026",
+  "1090-003-003-015",
+  "0618-013-001-003",
+  "0732-005-006-014",
+  "0692-000-035-001",
+  "1010-021-010-015",
+  "0876-004-014-019",
+  "0691-046-001-007",
+  "1010-020-002-012",
+  "0631-014-005,006-014",
+  "0631-023-001,002-005",
+  "0633-026-012-009",
+  "0848-004-041-019",
+  "0792-012-001,002-004",
+  "0701-007-002-014",
+  "0628-008-005-017",
+  "0345-010-002-010",
+  "0758-000-045-001",
+  "0346-005-009-017",
+  "1071-001-007-016",
+  "0742-000-001-001",
+  "0597-012-011-002",
+  "0189-008-003-008",
+  "0854-027-005-008",
+  "1071-001-002-007",
+  "0854-029-007-015",
+  "0353-000-007-001",
+  "1081-038-002-001",
+  "1036-013-049-004",
+  "0596-010-001-002",
+  "0336-000-018-013",
+  "0664-022-002-002",
+  "0693-001-001-011",
+  "0196-003-001-012",
+  "0734-004-028-020",
+  "0163-003-003-007",
+  "0701-017-002-004",
+  "0889-008-089-010",
+  "0295-014-001-012",
+  "1092-000-002-009",
+  "0368-000-106-009",
+  "0708-000-080-009",
+  "0729-006-022-029",
+  "0854-028-003-011",
+  "0625-014-005-007",
+  "0852-010-058-009",
+  "0631-027-008-009",
+  "1081-035-011-011",
+  "0886-009-031-001",
+  "0852-012-066-002",
+  "0744-000-063-045",
+  "0734-000-156-005",
+  "0916-034-101-009",
+  "0744-000-048-024",
+  "1090-017-001-014",
+  "0744-000-025-035",
+  "0956-010-078-004",
+  "0081-009-002-023",
+  "0816-000-060-014",
+  "6238-002-000-002",
+  "0656-053-003-008",
+  "0706-000-011-021",
+  "6885-000-000-004",
+  "0241-018-002-008",
+  "1468-000-005-002",
+  "1554-015-061-011",
+  "0993-000-005-005",
+  "0506-046-003-012",
+  "8715-000-000-036",
+  "0040-004-004-008",
+  "0530-022-015-008",
+  "0596-037-437-020",
+  "0720-007-025-028",
+  "1284-000-054,055-018",
+  "0919-000-159-002",
+  "0821-000-058-005",
+  "0549-037-417-017",
+  "1127-006-004-010",
+  "0549-055-637-018",
+  "1935-000-001-005",
+  "7393-000-000-007",
+  "7609-000-000-004",
+  "0121-000-997-004",
+  "1837-000-006-003",
+  "1865-000-020-005",
+  "0400-000-027-028",
+  "0479-016-043-027",
+  "1697-000-017-005",
+  "1385-000-027-008",
+  "0827-000-043-074",
+  "2503-045-004-015",
+  "1477-018-095-015",
+  "2421-009-002-015",
+  "2075-000-017-022",
+  "2387-008-002-005",
+  "2259-010-001-002",
+  "0419-000-137-004",
+  "2031-011-002-017",
+  "1796-010-001-014",
+  "1136-040-000-023",
+  "0964-018-003-001",
+  "2238-005-002-039"
  ]
 }

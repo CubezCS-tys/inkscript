@@ -507,7 +507,7 @@ Files: `ink43.py`, `pictures43.py` (counts, sheets, `--build`), `rules43.py` (`p
 masters, v3_now, v2_now, views, shots, run.log, v2_now_vs_before.txt, pictures.json), `out/v2_55/pictures*`,
 `out/v3_test/pictures*`.
 
-## The fresh sample (`sample43.py` → `sample43.json`; proposal, not run)
+## The fresh sample (`sample43.py` → `sample43.json`; proposal — fetched and final in the next section)
 
 300 whole articles of 1–30 pages, none in experiment 35's sample or editions, 40's sample or 41's 55; ≤ 3 per
 journal. **186 local** (on this machine with PDF + Azure JSON: experiment 41's inventory of 931, minus 205 used,
@@ -529,6 +529,67 @@ catalogue part is mostly old decades, where verse is common, so its layouts are 
 **Dry run (b)**: 494 requests (rounds 300 / 138 / 56), 12.3M input tokens, ~3.4M output: **Batch $29.5 now
 ($59 from 1 Dec), Standard $59 ($118 from 1 Dec)**; worst case Batch $79 now. Round 1 alone is ~7.5M input
 tokens: two jobs under the Tier 1 enqueue limit.
+
+## The fresh sample, fetched (2026-10-19; `fetched43.py`; no calls) — **final `sample43.json`: 300 articles, ready to run**
+
+**Fetch.** `inkscript fetch --id-file out/fetch/ids.txt --out out/fetch --workers 4` (the venv's `aws`, default
+profile): **105 of 114 fetched** (PDF + JSON, 333 MB for the 120 catalogue articles now in the sample); **9 are not in
+the bucket at all** (`aws s3 ls` empty: 0438-000-028-005, 9815-058-006-0144-4, 7374-000-000-022, 1264-000-052,053-003,
+1818-000-083-015, 1941-016-002-015, 0137-017-055-023, 9818-006-001-4963-R, 1772-009-002-022 — six French / English
+picks). The catalogue lists documents the bucket lacks: 34 of the 100 reserve stems were missing too. So a second
+reserve (`out/fetch/reserve2_ids.txt`, 200 stems of the same catalogue draw, kept only if experiment 19's corpus
+listing `19_azure_map/out/listing.txt` holds them, 35 per old decade and 15 per newer one, seed 4343; all 200 fetched)
+was added. Reserves were fetched JSON only (`out/fetch/reserve/<id>/`, 375 MB); a swapped-in article moves to
+`out/fetch/<id>/` and gets its PDF. **A future catalogue draw should be filtered by the bucket listing first.**
+
+**Layouts measured** (`fetched43.py measure` → `out/fetch/measure43.json`; sample43's `page_feats` for tables, two
+columns, verse; the catalogue's language with a Latin share > 0.3; the catalogue range test for shared pages).
+Equations: experiment 39's loose maths-line rule fired on URLs, ratios and quotations, so the fetched articles use a
+**formula rule** (a page with ≥ 2 maths lines that hold a relation `= ≤ ≥` with something on both sides, or ∑ ∫ √,
+and are no web address). **Contact sheets by eye** (`out/fetch/sheets/verse.jpg`, `equations.jpg`,
+`equations_more.jpg`, `equations_local_loose.jpg`: each flagged article's best page): **verse 13 of 14 right**
+(0412-005-001-005 is a list of libraries in two columns); **equations mostly wrong** — both rules fire on statistics
+tables, "α ≤ 0.05", a calendar, a quoted "a"="b", and 7 of the local 10 (39's flag) show no formula. The equations flag
+is now **only by eye** (`fetched43.EYE`): 9 articles with formulas or worked arithmetic were found in the 300 + 300
+reserve; 8 are in the sample (0527-055-002-016 is blocked by its journal's 3).
+
+**Checks** (`fetched43.py check` → `out/fetch/check43.json`): every article's PDF opens and its page count equals
+Azure's pages, 1–30 pages, has a year. Unusable: the 9 missing and 1548-009-002-002 (local, no year anywhere); 12 local
+articles without a year got the catalogue's. Final re-check of the 300: **all usable**, none from experiments 35/40/41,
+≤ 3 per journal. Page counts are Azure's (the catalogue's printed ranges can differ).
+
+**Swaps** (`fetched43.py swap` → `out/fetch/swaps43.json`; the proposal kept as `out/fetch/sample43_proposal.json`),
+20: the 10 unusable by a reserve article of the same language first, then decade (French → 1708, 7263, 0344, 2617,
+0597; English → 2260, 0201, 2099, 2048, 2280); verse +7 (0909, 0718, 0595-010, 0944, 0595-026, 0742, 1967) and
+equations +3 (1147, 0314, 1993), each for an article with no rare layout or language, same decade first, a catalogue
+one first. Verse stops at 22 (target 25): the 5 verse reserves left are in journals already at 3 (0664, 0549, 1010).
+
+**Final strata** (300 articles: 180 local + 120 catalogue; 226 journals; 3,523 pages, 1–30, median 10; 499 chunks):
+
+| decade | articles (local + cat.) | pages | verse | tables | equations | two columns | French | English | shared |
+|---|---|---|---|---|---|---|---|---|---|
+| pre-1960 | 34 (16 + 18) | 209 | 4 | 3 | 0 | 5 | 1 | 1 | 2 |
+| 1960s | 35 (14 + 21) | 334 | 2 | 0 | 0 | 13 | 2 | 0 | 2 |
+| 1970s | 34 (6 + 28) | 311 | 4 | 7 | 1 | 7 | 2 | 2 | 0 |
+| 1980s | 35 (19 + 16) | 379 | 2 | 3 | 1 | 3 | 2 | 1 | 0 |
+| 1990s | 36 (19 + 17) | 385 | 2 | 7 | 1 | 8 | 0 | 3 | 1 |
+| 2000s | 35 (34 + 1) | 384 | 2 | 5 | 1 | 9 | 1 | 0 | 2 |
+| 2010s | 50 (42 + 8) | 851 | 6 | 21 | 2 | 18 | 9 | 8 | 10 |
+| 2020s | 41 (30 + 11) | 670 | 0 | 18 | 2 | 6 | 6 | 15 | 4 |
+| **all** | **300** | **3,523** | **22** | **64** | **8** | **69** | **23** | **30** | **21** |
+
+Arabic only 247. Pages: ≤ 5: 95 · 6–10: 63 · 11–15: 48 · 16–20: 37 · 21–25: 32 · 26–30: 25.
+
+**Page images**: `run43.py --set b` renders lazily (`structure.page_image`, 300 dpi colour JPEG q88, into
+`out/pages/`) as each request is built, so nothing was pre-rendered. Measured: 0.54 s and 0.8 MB a page → ~32 min
+and **~2.8 GB** for the 3,523 pages, plus ~2.2 GB of Batch JSONL (images inline; v2_55's 0.6 MB a page). C: had
+57 GB free after the fetch: ~52 GB after a full run, near the 50 GB line.
+
+**Dry run** (`run43.py --set b --prompt v3.2 --dry-run`; v3.2 is accepted; the run folder still defaults to
+`v2_fresh`, so give `--run` a v3.2 name for the real run): **499 requests (rounds 300 / 142 / 57), 12.9M input
+tokens, 3.6M output expected (13.6M worst): Batch now $31.0 expected, $80.7 worst** (from 1 Dec $61.9 / $161.5;
+Standard now $61.9 / $161.5). Input per round 7.26M / 4.11M / 1.55M → at `--max-enqueued` 4.5M: **4 Batch jobs** (round
+1 in two, one after the other under the 5M enqueued limit).
 
 ## Feedback loop (2026-10-18; owner-approved; no calls)
 
@@ -717,7 +778,7 @@ pictures, `tight_picture`, `mathml43`, the D33 / refs hooks, `<stem>.metachanges
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
-`features43.json`, `catalogue_draw.json`, `fetch/ids.txt`.
+`features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets).
