@@ -323,8 +323,25 @@ FOOTNOTE AND ENDNOTE CALLS: on EVERY block"""),
 ]
 PROMPT_V32 = _apply(PROMPT_V31, V32_CHANGES)
 META_FULL_V32 = META_FULL_V3                    # the metadata spec is unchanged
+
+# ------------------------------------------------------------------------------------------------ prompt v3.3
+# 2026-10-19 (owner, after the v3.2 test's hand check of 111 works): v3.2 plus one line in the citations passage — a
+# book series is not the source (6 of 11 wrong fields were كتاب الهلال، اقرأ … as "source"), and empty fields are left
+# out (0747's answer wrote every empty field as null: tokens for nothing). W gains "series" (JATS <series>).
+V33_CHANGES = [
+    ('''"publisher": "...", "place": "...",''', '''"publisher": "...", "place": "...", "series": "...",'''),
+    ('''string («ابن خلدون») goes whole in "surname"; null (or leave out) what the entry does not print;''',
+     '''string («ابن خلدون») goes whole in "surname"; leave out what the entry does not print;'''),
+    ('''«نفسه», «op. cit.», «ibid.» cite nothing new: no W for them.
+''',
+     '''«نفسه», «op. cit.», «ibid.» cite nothing new: no W for them.
+v3.3: a book series (e.g. كتاب الهلال، سلسلة اقرأ) is not the source/journal — put it in a "series" field if present;
+leave out fields that are empty instead of writing null.
+'''),
+]
+PROMPT_V33 = _apply(PROMPT_V32, V33_CHANGES)
 PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3),
-           "v3.2": (PROMPT_V32, META_FULL_V32)}
+           "v3.2": (PROMPT_V32, META_FULL_V32), "v3.3": (PROMPT_V33, META_FULL_V32)}
 # the names the earlier README section used for the (then not live) draft of (a)-(c)
 PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
 

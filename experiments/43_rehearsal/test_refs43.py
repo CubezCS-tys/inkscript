@@ -100,3 +100,44 @@ def test_edition_prints_each_reference_once(tmp_path):
     assert [n.kind for n in refs] == ["ref", "ref"]
     note = next(n for n in notes if n.id == "fn-p5-1")
     assert len(note.paras) == 1
+
+
+# ---- tidy (2026-10-19): labels, a year out of a date, web addresses cut by line breaks, series (prompt v3.3)
+NOTE_TIDY = ("٤- هيكل، محمد حسنين. أحاديث، كتاب الهلال، القاهرة، مج ٢، ع ٣، ص ١٢٠ وما بعدها؛ Dupont, J. «Le droit», "
+             "RJ, Vol. 6, No. 2, 15 mars 1987, pp. 80-94 et s.; voir http://www.ex ample.org/a/ b.html, consulté")
+TIDY_ANSWER = {"pages": [{"page": 5, "blocks": [
+    {"type": "footnote", "lines": ["5:3"], "marker": "٤", "cites": [
+        {"type": "book", "authors": [{"surname": "هيكل", "given": "محمد حسنين"}], "title": "أحاديث",
+         "series": "كتاب الهلال", "place": "القاهرة", "volume": "مج ٢", "issue": "ع ٣", "pages": "ص ١٢٠ وما بعدها"},
+        {"type": "journal", "authors": [{"surname": "Dupont", "given": "J."}], "title": "Le droit", "source": "RJ",
+         "volume": "Vol. 6", "issue": "No. 2", "year": "15 mars 1987", "pages": "pp. 80-94 et s.", "lang": "fr"},
+        {"type": "web", "url": "http://www.example.org/a/b.html"}]}]}]}
+
+
+def test_tidy_labels_dates_urls_series(tmp_path):
+    Mo, A = article()
+    note_p = A.find(".//fn/p")
+    note_p[0].tail = NOTE_TIDY
+    st = refs43.add_parsed(Mo, A, answers=[TIDY_ANSWER])
+    assert st["refs_note_citations"] == 3
+    e1, e2, e3 = A.findall(".//fn/p[@content-type='parsed-citations']/element-citation")
+    assert (e1.findtext("volume"), e1.findtext("issue"), e1.findtext("fpage"), e1.findtext("page-range")) == \
+        ("٢", "٣", "120", "١٢٠")
+    assert e1.findtext("series") == "كتاب الهلال" and e1.find("publisher-name") is None
+    assert (e2.findtext("volume"), e2.findtext("issue"), e2.findtext("year"), e2.findtext("string-date")) == \
+        ("6", "2", "1987", "15 mars 1987")
+    assert (e2.findtext("fpage"), e2.findtext("lpage"), e2.findtext("page-range")) == ("80", "94", "80-94")
+    assert e3.find("ext-link").get("{http://www.w3.org/1999/xlink}href") == "http://www.example.org/a/b.html"
+    assert st["refs_tidy_url_joined"] == 1 and st["refs_tidy_year_from_date"] == 1
+    assert "مج ٢، ع ٣، ص ١٢٠ وما بعدها" in "".join(note_p.itertext())      # the printed form is untouched
+    f = tmp_path / "t.jats.xml"
+    f.write_bytes(etree.tostring(A, xml_declaration=True, encoding="UTF-8", doctype=DOCTYPE))
+    from inkscript.enrich.schemas import validate_jats
+    assert validate_jats(f) == []
+
+
+def test_clean_label_and_split_year():
+    assert [refs43.clean_label(v) for v in ("Vol. 6", "ع. ٣", "مج. 14", "pp. 80-94", "145 et s.", "صص ١٢-٤٥", "٢٣٤")] \
+        == ["6", "٣", "14", "80-94", "145", "١٢-٤٥", "٢٣٤"]
+    assert refs43.split_year("١٩٨٤") == ("١٩٨٤", None) and refs43.split_year("1410هـ") == ("1410هـ", None)
+    assert refs43.split_year("March 2010") == ("2010", "March 2010")
