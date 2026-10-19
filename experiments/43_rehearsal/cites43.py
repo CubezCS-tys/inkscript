@@ -101,10 +101,67 @@ def score(run: str):
     print(json.dumps(res, ensure_ascii=False, indent=1))
 
 
+HAMZA = {("ا", "أ"), ("ا", "إ"), ("ا", "آ"), ("ي", "ئ"), ("ى", "ئ"), ("و", "ؤ"), ("", "ء")}
+
+
+def orth_kind(fr: str, to: str) -> str | None:
+    """'ya dotted' (ى -> ي), 'ya undotted' (ي -> ى), 'hamza added', 'hamza removed', or None (a fix of another kind).
+    Only when every character change of the fix (spaces ignored) is of that one kind."""
+    import difflib
+    a, b = fr.replace(" ", ""), to.replace(" ", "")
+    if a == b:
+        return None
+    kinds = set()
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
+        if op == "equal":
+            continue
+        x, y = a[i1:i2], b[j1:j2]
+        if len(x) != len(y) and not (op in ("insert", "delete") and set(x + y) <= {"ء"}):
+            return None
+        for c, d in zip(x, y) if x and y else [(x, y)]:
+            if (c, d) == ("ى", "ي"):
+                kinds.add("ya dotted")
+            elif (c, d) == ("ي", "ى"):
+                kinds.add("ya undotted")
+            elif (c, d) in HAMZA:
+                kinds.add("hamza added")
+            elif (d, c) in HAMZA:
+                kinds.add("hamza removed")
+            else:
+                return None
+    return "+".join(sorted(kinds)) if kinds else None
+
+
+def orth(runs, stem):
+    """ya / hamza fixes in each run's raw answers of one article."""
+
+    res = {}
+    for run in runs:
+        fs = sorted((OUT / run / "raw").glob(f"{stem}_c*.json"))
+        if not fs:
+            continue
+        n, ks, ex = 0, Counter(), defaultdict(list)
+        for f in fs:
+            ans = json.loads(f.read_text(encoding="utf-8")).get("answer") or {}
+            for fx in ans.get("fixes") or []:
+                n += 1
+                k = orth_kind(str(fx.get("from") or ""), str(fx.get("to") or ""))
+                if k:
+                    ks[k] += 1
+                    ex[k].append(dict(fx, chunk=f.stem.split("_")[-1]))
+        res[run] = dict(fixes=n, orth=dict(ks), examples=dict(ex))
+        print(f"{run:10} fixes {n:3}  " + "  ".join(f"{k} {v}" for k, v in ks.items()))
+    return res
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["dump", "score"])
+    ap.add_argument("cmd", choices=["dump", "score", "orth"])
     ap.add_argument("--run", default="v32_test")
     ap.add_argument("--stems", nargs="*")
     a = ap.parse_args()
-    dump(a.run, a.stems) if a.cmd == "dump" else score(a.run)
+    if a.cmd == "orth":
+        R = {s: orth(["v2_55", "v3_test", "v31_test", a.run], s) for s in a.stems}
+        (OUT / a.run / "orth.json").write_text(json.dumps(R, ensure_ascii=False, indent=1), encoding="utf-8")
+    else:
+        dump(a.run, a.stems) if a.cmd == "dump" else score(a.run)

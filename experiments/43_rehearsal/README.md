@@ -16,7 +16,8 @@ v3 lost pictures; a code rule now draws every ink region without text as a figur
 out of the JATS) and prompt v3.1 asks for symbols / hieroglyphs / cartoons as figures: $0.19 test on 0493 and 1769
 (section "A picture is never lost").
 Code fixes before the 300 (D33 metadata, overlapping blocks, pictures inside a line, new flags, MathML names; prompt
-v3.2 candidate with parsed references, not live): section "Code fixes before the 300".
+v3.2 candidate with parsed references, not live): section "Code fixes before the 300". Prompt v3.2 tested on 6 articles
+($0.75 on Batch): parsed references 91% of fields right, none invented; recommended for the 300 (section "v3.2 test").
 Owner's page: `out/prompt_v2.html` (`page43.py`; images in `out/prompt_v2/`; works on a phone). Experiment 41 is
 untouched: its prompt and code are imported, never edited; this experiment's harness rebuilds 41's 55 masters byte
 for byte from 41's answers (`replay43.py harness`: 55/55 identical) before applying anything new.
@@ -761,6 +762,84 @@ pictures, `tight_picture`, `mathml43`, the D33 / refs hooks, `<stem>.metachanges
 (`long_headings`, `header_text`), `flags43.py` (4 kinds), `prompt43.py` (v3.2); outputs `out/fixes/` (`*_before`,
 `*_after`, `views*`, `shots/`, `overlaps_*.json`, `gold_check.log`, `flags_v2_55.txt`, `v2_jats_diff.txt`).
 
+## v3.2 test (2026-10-19; owner-approved, cap $1; **$0.752 billed**, log $5.045)
+
+`run43.py --set a --prompt v3.2 --run v32_test --stems 2382… 0355… 0747… 1140… 1769… 0870… --cap 5.29` (log $4.293 before):
+10 requests in 3 rounds (6 / 3 / 1), all STOP; dry run said $0.65 expected, $1.67 worst. Articles: 2382 (English
+reference list), 0355 (51 endnotes citing 1950s–70s Arabic books), 0747 (76 glossary footnotes, a few citing works with
+Hijri years), 1140 (French CV + list of own works), 1769 (Egyptology endnotes + the ى / ي question), **0870** (maritime law,
+picked from the 55 for its footnotes citing Arabic and French works, often several per note). Masters with today's code
+(`cites43.py dump` = `pictures43.build` plus a record of every work and field): **6/6 JATS DTD + ALTO XSD valid**; 111
+works → 111 `element-citation` (14 in `ref`, 97 in notes' `p[@content-type="parsed-citations"]`). `gold43.py check`: 5/5
+the same (no code change under the masters). Outputs `out/v32_test/` (raw, rules, masters, views, cites_*, orth.json,
+v32_vs_{v2,v3,v31}.txt, ink/, shots/, flags.txt, citations_check.md, progress.md).
+Views: `out/v32_test/views/index.html` (v3.2 with the v3.1 / v3 / v2 answers of the same articles, all through today's
+code), http://127.0.0.1:8899/v32_test/index.html (symlink `experiments/41_azure_structure/out/views/v32_test`).
+
+**Citations, checked by hand** (`out/v32_test/citations_check.md`, `cites_judged.json`): every one of the 111 works, field
+by field against the printed entry, doubtful ones on the scan.
+| | right | loose | wrong | dropped by code | missing | invented |
+|---|---|---|---|---|---|---|
+| 517 fields | **472 (91.3%)** | 29 (5.6%) | 11 (2.1%) | 5 (1.0%) | 0 | **0** |
+Per field right / all: authors 83/85, year 68/74, title 100/106, source 24/32, volume 33/38, issue 9/10, pages 86/99,
+publisher 30/30, place 36/37, doi 1/1, url 2/5. *Loose* = right value with printed labels («Vol. 6», «وما بعدها», «et s.»,
+a whole date as year). *Wrong*: 6 book series as `source` (كتاب الهلال، اقرأ، المكتبة الثقافية), 2 author-only
+citations with the author as title (الميدانى، ابن كثير), a series run into a title and plates as pages (1769 note 4),
+an access date as year. *Dropped*: the 5 values the substring check removed were all right values the model had
+normalised («الميدانى» for printed «للميدانى», «حيدرآباد» for «حيدرآ باد», «اتحاد» for printed «أتحاد») or a title
+Azure's line order had split; plus 3 years kept as printed per the prompt («د. ت» ×2, the misprint «٢٩٧٤») that the
+code's year check drops. Notes: **0 of 183** notes cite a work and got no `cites`; **0** `cites` on notes citing nothing;
+the 107 without parts are glosses, comments or «المرجع السابق» / op. cit. / ibid. only (by the prompt's rule; linking
+those to the earlier citation is a code job, not done). Against the plan's bar ("build it only if ≥ 90% of fields are
+right"): passed, on 111 works from 5 articles rather than 100 hand-marked entries from 20.
+
+**ى / ي and hamza** (`cites43.py orth`: fixes whose only change is ى→ي or a hamza; each checked on the scan, `ink/`):
+| | 1769 ya dotted | 1769 hamza | 0355 ya dotted | 0355 hamza |
+|---|---|---|---|---|
+| v2 | 11 | 8 removed, 1 added | 0 | 2 removed, 1 added |
+| v3 / v3.1 | 0 / 0 | 3 removed / 0 | 0 / – | 1 removed / – |
+| **v3.2** | **0** | 3 removed, 1 added (أتحاد: printed so, right) | **8 (8/8 match the ink)** | 3 removed, 1 added (right) |
+The sentence works where it fires: 0355's في، رأي ×2، أزهري، يؤذي، الذي، الحضاري، رشدي are all dotted in the print, and
+the title's «اثر» lost Azure's hamza as the banner prints it. **On 1769 it did not fire**: Azure's على / إلى where the
+print has علي / إلي (1:39, 2:13, 6:35 …, about 11 lines) stay as Azure read them, as in v3 / v3.1. (v2 over-fixed one:
+2:13 prints «على تواجد» undotted and «علي جدران» dotted; v2 dotted both.) So (i) is right but not reliable; the code
+flag on Azure's على / إلى (option (2) of the v3.1 section) remains the backstop.
+
+**Everything else vs v3.1 / v3 / v2** (`v32_vs_*.txt`, words without the citation parts; pages looked at next to the
+scan in `shots/`): calls linked unchanged in all six (0355 51/51, 0747 75/76, 1769 43/43, 0870 13/13); body words
+identical in 2382, the rest differ only by fixes. Flags (`flags.txt`): high 0, medium 5, low 4 (v2: 4 / 7 on the same six).
+| article | v3.2 against the earlier answers |
+|---|---|
+| 2382 | Same as v3 (trans_title, history, aff_parts); text identical; 14 references parsed. |
+| 0355 | Same as v3 for title / author (D33 title from the catalogue, printed «اثر» kept; the author fragments «يوسف الشـ ونى» again, so no D33 author: v2-only). Lists: p23's four dash items of 3–4 lines are paragraphs (v2 list items; defensible by the > 3 lines rule), p7 / p11 flip as between v2 and v3: variance. |
+| 0747 | **Loss**: the poem's author «القاضى عبدالمقتدر … الدهلوى» (named in the first paragraph «نظمها …», the catalogue's مؤلف) is no longer a contributor; the editor's name is cleaner («إمتياز على عرشى», honorific in the role). p8's closing «تم الشرح والحمد لله» is `other`. |
+| 1140 | Same blocks as v2: p1's ❖ bullets (Fonctions actuelles) are paragraphs, as v2; v3 had made them list items. Affiliation parts added. |
+| 1769 | Same as v3.1 (figures, quotes, picture ornaments; 26 fixes vs 20) apart from the ي fixes above. |
+| 0870 | French accents restored from the ink (Assemblée, Comité, Privés, adéquate), one wrong: «intérèt» where the print has «intérêt»; one fixes_many flag (9 fixes on p7). «١٩٧٤ → ٢٩٧٤ (ink shows ٢)» in note 9, as v2 did: the scan's first digit has a speck, doubtful. |
+No regression in structure, links or pictures; two small ones in metadata (0747's second contributor) and a list choice
+(1140 p1), both of the kind that varies run to run.
+
+**Cost** (real tokens; same chunks):
+| article | v2 out | v3 out | v3.1 out | **v3.2 out** | works |
+|---|---|---|---|---|---|
+| 2382 | 12,463 | 13,050 | – | 16,079 (+23% vs v3) | 14 |
+| 0355 | 27,018 | 23,593 | – | 32,585 (+38% vs v3) | 38 |
+| 0747 | 12,813 | – | – | 13,754 (+7% vs v2) | 11 |
+| 1140 | 11,803 | 13,604 | – | 8,725 | 0 |
+| 1769 | 18,703 | 18,189 | 18,871 | 23,104 (+22% vs v3.1) | 39 |
+| 0870 | 4,175 | – | – | 3,523 | 9 |
+| all six | 86,975 | | | 97,770 (+12%), $0.752 vs v2's $0.689 | 111 |
+About **150 output tokens per work** (twice the 80 assumed; Arabic names and titles are token-heavy, and 0747's answer wrote
+every empty field as null). **The 300** (3,523 pages, ~1.24 works a page as in the 55 → ~4,400 works): +0.65M output
+tokens ≈ **+$3.3 on Batch now** (+$6.6 from 1 Dec), plus ~0.2M input for the longer prompt (+$0.2); the dry run's $31
+expected becomes **~$34.5 (from 1 Dec ~$69)**, worst ~$84.
+
+**Recommendation**: v3.2 for the 300. The parts are right on 91% of fields (97% in content), nothing invented, no note
+missed, no structural regression; the ي sentence is right wherever it acts (12/12 checked on the scan) though it does not act on every
+article. Before the run, free in code: strip labels from volume / issue / pages, take the year out of a date, join URL
+pieces; optional one-line prompt change (a book series is not the `source`; leave empty fields out) — it would need no new
+test if limited to that line. Not done here: the code changes above, linking «المرجع السابق» notes, the على / إلى flag.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -776,7 +855,7 @@ pictures, `tight_picture`, `mathml43`, the D33 / refs hooks, `<stem>.metachanges
 
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
-`review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
+`cites43.py` (v3.2 citation audit: dump / score / orth) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
