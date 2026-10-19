@@ -17,6 +17,7 @@ clone is enough to develop and run the tests, and not enough to run the sets.
 | Built PDFs of the 227-journal runs (`experiments/09_pen_path/out/`) | 7.4 GB | optional: `rsync -avh experiments/09_pen_path/out/ user@server:~/inkscript/experiments/09_pen_path/out/` | reproducible (~5 h); needed only as the OLD side of `compare_boxes.py` |
 | The official XML schemas (JATS 1.4 DTD, ALTO 4.4 XSD) in `~/.cache/inkscript/schemas` | 2 MB | nothing: fetched on the first `--xml --verify` or test run (needs network once) | third-party files, refetchable |
 | Mandumah's MARC catalogue and its index (`~/.cache/inkscript/catalogue/`: `metadata_final.xml.gz` 1.17 GB, `catalogue.sqlite` 1.1 GB) | 2.3 GB | `python -m inkscript.enrich.catalogue build` (streams the bucket's copy if no local one; ~7–18 min, 0.5 GB of memory) or copy the `.sqlite` | derived from the bucket; size. Without it `--xml` takes the front matter from the page alone (experiment 29) |
+| The MARC catalogue as a queryable database (`~/data/marc/`: `metadata_final.xml` 7.67 GB, the same bytes as the `.gz` above; `marc.db` 10.2 GB) | 17.8 GB | `experiments/45_marc_db/build45.py` (22 min, 0.26 GB of memory) from the uncompressed XML, or copy `marc.db` | derived from the bucket; size. Only for querying the catalogue (experiment 45); the pipeline does not need it |
 | The agent's private notes (`~/.claude/projects/…/memory/`) | KB | not needed: `CLAUDE.md` and `docs/` are the source of truth | — |
 
 The Azure inputs can also be re-fetched on the server (`inkscript fetch
