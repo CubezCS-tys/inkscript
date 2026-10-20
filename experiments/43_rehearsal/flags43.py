@@ -578,8 +578,10 @@ def flags_of(B, norms) -> list[dict]:
 
 # ------------------------------------------------------------------------------------------------ the run
 
-def run_flags(run: str, stems=None) -> dict:
+def run_flags(run: str, stems=None, out: Path | None = None) -> dict:
     d = run_dirs(run)
+    if out is not None:                      # another folder (the run's own flags.json kept)
+        d["out"] = Path(out)
     norms = run_norms(run)
     arts, pending, total = {}, [], Counter()
     for a in run_articles(run, stems):
@@ -644,8 +646,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
     ap.add_argument("--stems", nargs="*")
+    ap.add_argument("--out", help="folder for flags.json / flags.txt (default out/<run>/)")
     a = ap.parse_args()
-    res = run_flags(a.run, a.stems)
+    res = run_flags(a.run, a.stems, a.out)
     print(report(res))
 
 

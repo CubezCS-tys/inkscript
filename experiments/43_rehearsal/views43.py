@@ -527,6 +527,8 @@ def build_layout43(a, doc):
         fn_first = True
         for rec in recs:
             T, g = rec["type"], GROUP.get(rec["type"], "other")
+            if T == "byline" and p != doc["pages"][0]["p"]:       # a signature at the end (0617 p3): not a heading
+                T, g = "other", "other"
             ids = [L["id"] for L in rec["lines"]]
             lg = rec.get("lang") or lang
             d = "rtl" if lg == "ar" else "ltr"

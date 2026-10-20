@@ -934,6 +934,52 @@ def advert_whole(ans, lines, log):
                                             cover=round(cover, 2)))
 
 
+# ------------------------------------------------------------------------------------------------ page numbers
+# (2026-10-20, 1010-006 p2 in the 300: print ٤٥, Azure ٣٥, kept)
+AR_DIG = "٠١٢٣٤٥٦٧٨٩"
+PAGE_NO = re.compile(r"^[\s\-–—_.]*([0-9٠-٩]{1,4})[\s\-–—_.]*$")
+
+
+def page_numbers(ans, lines, log):
+    """A page number Azure misread: the chunk's other page numbers (lone numbers in header / footer blocks, one a
+    page) agree on one offset from the page index (>= 2 pages, >= 2/3 of them), so do the pages either side of this one,
+    and this one does not, with as many
+    digits as the expected number -> a fix to the expected number in the same digits (why "code: page number in
+    sequence"). Logged."""
+    found = {}
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict) or b.get("type") not in ("header", "footer"):
+                continue
+            for i in b.get("lines") or []:
+                x = base_of(i, lines)
+                m = PAGE_NO.match(lines[x]["text"]) if x and x == str(i) else None
+                if m:
+                    found.setdefault(lines[x]["page"], []).append((x, m.group(1)))
+    vals = {}
+    for p, xs in found.items():
+        if len(xs) == 1:
+            t = xs[0][1]
+            vals[p] = (xs[0][0], t, int(t.translate(str.maketrans(AR_DIG, "0123456789"))))
+    if len(vals) < 3:
+        return
+    offs = Counter(v[2] - p for p, v in vals.items())
+    o, n = offs.most_common(1)[0]
+    if n < 2 or n < 2 / 3 * len(vals):
+        return
+    for p, (x, t, v) in sorted(vals.items()):
+        e = p + o
+        if v == e or len(str(e)) != len(t) or e <= 0:
+            continue
+        nb = [vals.get(p - 1), vals.get(p + 1)]
+        if not all(q is not None and q[2] - (p + d) == o for q, d in zip(nb, (-1, 1))):
+            continue                       # only a lone misreading between two pages in sequence (not a jump)
+        to = str(e).translate(str.maketrans("0123456789", AR_DIG)) if t[0] in AR_DIG else str(e)
+        ans.setdefault("fixes", []).append({"line": x, "from": t, "to": to,
+                                            "why": "code: page number in sequence (rules43.page_numbers)"})
+        log["page_numbers"].append(dict(line=x, page=p, printed_read=t, now=to, pages_agreeing=n))
+
+
 def block_box(b, lines):
     return union([lines[x]["b"] for x in (base_of(i, lines) for i in block_ids(b)) if x])
 
@@ -1445,7 +1491,7 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1476,6 +1522,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     table_columns(ans, lines, log)
     guillemets(ans, lines, words, log)
     vowelled_words(ans, lines, log)
+    page_numbers(ans, lines, log)
     math_parts(ans, lines, log)
     inline_math_junk(ans, lines, words, log)
     fixes(ans, log)
