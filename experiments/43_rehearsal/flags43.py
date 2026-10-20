@@ -465,14 +465,15 @@ def check_fixes(B):
     out = []
     a = B["a"]
     S = B["cap"]["S"]
-    per = Counter(f.get("page") for f in S.applied)
+    model = [f for f in S.applied if not str(f.get("why") or "").startswith("code:")]   # not rules43's own fixes
+    per = Counter(f.get("page") for f in model)
     n = a["last"] - a["first"] + 1
     med = statistics.median([per.get(p, 0) for p in range(a["first"], a["last"] + 1)]) if n else 0
     lim = max(T["fixes_min"], T["fixes_x"] * med)
     for p, k in sorted(per.items()):
         if k >= lim:
-            ids = [f.get("line") for f in S.applied if f.get("page") == p]
-            ex = "; ".join([f"{f.get('from')} → {f.get('to')}" for f in S.applied if f.get("page") == p][:3])
+            ids = [f.get("line") for f in model if f.get("page") == p]
+            ex = "; ".join([f"{f.get('from')} → {f.get('to')}" for f in model if f.get("page") == p][:3])
             out.append(flag(B, "fixes_many", "medium", p, ids,
                             f"{k} reader fixes on this page (article's median {med:g} a page): {ex}…", fixes=k))
     orth = {}

@@ -309,9 +309,10 @@ class Meta:
         """fpage / lpage consistent with the scan (2026-10-20, coordinator: 142 articles of the 300 where the
         catalogue's range fits the scan's page count and the masters' does not, e.g. 1058-005-993-021: Gemini gave
         «450-459», the range of its first chunk only; the folios read 450 ... 469 on the 20 pages). The printed
-        folios decide (lone numbers in the running heads / feet: the offset of the first pages gives fpage, of the
-        last pages lpage; a jump to a later part of the issue is kept); without two folios the catalogue's range
-        when it spans the scan's pages, else fpage + pages - 1. Logged like any D33 change."""
+        range is kept when it already spans the scan's pages; else the folios read on the first and last pages (lone
+        numbers in the running heads / feet; a jump to a later part of the issue is kept: 1010-006 34-58); else the
+        catalogue's range when it spans the scan's pages; else the folios' offset from the pages that carry one;
+        else fpage + pages - 1. Logged like any D33 change."""
         import statistics
         n = len(self.M.pages)
         p0, p1 = min(self.M.pages), max(self.M.pages)
@@ -327,23 +328,27 @@ class Meta:
         fol = {p: v[0] for p, v in fol.items() if len(v) == 1}
         fp_el, lp_el = self.am.find("fpage"), self.am.find("lpage")
         old = (fp_el.text if fp_el is not None else None, lp_el.text if lp_el is not None else None)
+        num = lambda v: int(v) if v and str(v).isdigit() else None                               # noqa: E731
+        if num(old[0]) and num(old[1]) and num(old[1]) - num(old[0]) + 1 == n:
+            return                                   # already spans the scan's pages (1289: 16-17, catalogue too)
         new, src = None, None
         ps = sorted(fol)
-        if len(ps) >= 2:
+        cat = catalogue_pages(self.M.stem)
+        seq0 = n <= 2 or fol.get(p0 + 1) == fol.get(p0, -9) + 1 or fol.get(p0 + 2) == fol.get(p0, -9) + 2
+        seq1 = n <= 2 or fol.get(p1 - 1) == fol.get(p1, -9) - 1 or fol.get(p1 - 2) == fol.get(p1, -9) - 2
+        if p0 in fol and p1 in fol and fol[p1] >= fol[p0] and seq0 and seq1:     # (a lone year is not a folio)
+            new, src = (fol[p0], fol[p1]), "printed folios (first and last page)"
+        elif cat and cat[1] - cat[0] + 1 == n:
+            new, src = cat, "catalogue (its range spans the scan's pages)"
+        elif len(ps) >= 2:
             head = [fol[p] - p for p in ps[:3]]
             tail = [fol[p] - p for p in ps[-3:]]
             o0, o1 = statistics.mode(head), statistics.mode(tail)
             if head.count(o0) >= 2 or len(ps) == 2 and head[0] == head[-1]:
                 new = (p0 + o0, p1 + (o1 if tail.count(o1) >= 2 else o0))
-                src = "printed folios"
-        if new is None:
-            cat = catalogue_pages(self.M.stem)
-            if cat and cat[1] - cat[0] + 1 == n:
-                new, src = cat, "catalogue (its range spans the scan's pages)"
-            elif old[0] and old[0].isdigit():
-                f = int(old[0])
-                if not (old[1] and old[1].isdigit() and int(old[1]) - f + 1 == n):
-                    new, src = (f, f + n - 1), "the scan's page count"
+                src = "printed folios (offset from the pages that carry one)"
+        if new is None and num(old[0]):
+            new, src = (num(old[0]), num(old[0]) + n - 1), "the scan's page count"
         if new is None or new[0] <= 0 or new[1] < new[0]:
             return
         for tag, el, v in (("fpage", fp_el, new[0]), ("lpage", lp_el, new[1])):

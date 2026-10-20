@@ -699,7 +699,7 @@ class Slots:
             t = sec.find("title")
             if t is None or sec.getparent() is None:
                 continue
-            h = re.sub(r"^[\s\d٠-٩.\-–)(]+|[\s:：.\-–]+$", "", tx(t))
+            h = re.sub(r"^[\s\d٠-٩.\-–)(«»]+|[\s:：.\-–«»)(]+$", "", tx(t))      # «» since rules43.guillemets
             if ACK_HEAD.match(h):
                 kind = "ack"
             elif APP_HEAD.match(h):
