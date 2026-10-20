@@ -695,6 +695,15 @@ def build_layout43(a, doc):
     return stats
 
 
+def art43(stem: str) -> dict:
+    """An article of experiment 41's 55 or of the fresh sample (sample43.json, set b)."""
+    try:
+        return art_of(stem)
+    except StopIteration:
+        arts = json.loads((HERE / "sample43.json").read_text(encoding="utf-8"))["articles"]
+        return dict(next(a for a in arts if a["stem"] == stem), set="b")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--masters", required=True)
@@ -707,7 +716,9 @@ def main():
     V.write_layout_print = lambda *x, **k: None              # the print page is not part of this check
     rep = {}
     for s in a.stems:
-        st = build_layout43(art_of(s), load43(art_of(s)))
+        art = art43(s)
+        ST.PAGES = HERE / "out" / "pages" if art.get("set") == "b" else ST.OUT / "pages"   # set b renders live here
+        st = build_layout43(art, load43(art))
         ov = layout_overlaps(st)
         rep[s] = dict(cut_width=st["cut_width"], cut_picture=st["cut_picture"], overlaps=ov)
         print(s, {k: v for k, v in st.items() if k not in ("boxes", "figures")}, f"overlaps {len(ov)}",

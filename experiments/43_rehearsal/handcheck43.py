@@ -24,7 +24,7 @@ sys.path.insert(0, str(HERE))
 import views43 as V4  # noqa: E402
 import mread as MR  # noqa: E402
 import structure as ST  # noqa: E402
-from structure import art_of  # noqa: E402
+from views43 import art43 as art_of  # noqa: E402  (41's 55 or the fresh sample)
 
 E41 = HERE.parent / "41_azure_structure"
 sys.path.insert(0, str(E41))
@@ -57,14 +57,13 @@ def block_html(r) -> str:
 
 
 def flags_by_page(run: str, stem: str) -> dict:
+    """flags43's flags of this article by page (out/<run>/flags.json)."""
     f = HERE / "out" / run / "flags.json"
     if not f.exists():
         return {}
-    d = json.loads(f.read_text(encoding="utf-8"))
-    rows = d.get(stem) if isinstance(d, dict) and stem in d else \
-        [x for x in (d.get("flags", d) if isinstance(d, dict) else d) if isinstance(x, dict) and x.get("stem") == stem]
+    art = json.loads(f.read_text(encoding="utf-8")).get("articles", {}).get(stem) or {}
     out = {}
-    for x in rows or []:
+    for x in art.get("flags") or []:
         out.setdefault(x.get("page"), []).append(x)
     return out
 
@@ -101,7 +100,7 @@ def build(run: str, stem: str, view_url: str, why: str = "") -> tuple[Path, int]
         img = cv2.resize(scan, (w, int(scan.shape[0] * w / scan.shape[1])), interpolation=cv2.INTER_AREA)
         b64 = base64.b64encode(cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 70])[1].tobytes()).decode()
         fx = "".join(f"<li><b>{H.escape(str(x.get('severity', '')))}</b> {H.escape(str(x.get('kind', '')))}: "
-                     f"{H.escape(str(x.get('note') or x.get('why') or x.get('text') or ''))[:300]}</li>"
+                     f"{H.escape(str(x.get('reason') or ''))[:300]}</li>"
                      for x in fl.get(p, []))
         pages_html.append(f'<section class="page"><div class="ptitle">Page {p}'
                           f'{f"<ul class=type>{fx}</ul>" if fx else ""}</div>'

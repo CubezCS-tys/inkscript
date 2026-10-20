@@ -840,6 +840,114 @@ article. Before the run, free in code: strip labels from volume / issue / pages,
 pieces; optional one-line prompt change (a book series is not the `source`; leave empty fields out) — it would need no new
 test if limited to that line. Not done here: the code changes above, linking «المرجع السابق» notes, the على / إلى flag.
 
+## The 300 (v3.3) (2026-10-19/20; owner-approved, cap $45; **$28.88 billed**, log $33.92)
+
+**Before sending (no calls).** *Prompt v3.3* (`prompt43.V33_CHANGES`) = v3.2 + one line in the citations passage: a
+book series (كتاب الهلال، سلسلة اقرأ) is not the source, it goes in `"series"`; empty fields are left out, not null
+(and "null (or leave out)" became "leave out"). *Citation tidy* in `refs43.py` (also on saved answers): volume / issue /
+pages lose printed labels («Vol.», «No.», «ع», «مج», «ج», «ص», «صص», «pp.», «وما بعدها», «et s.», «ff.»; a single
+page also gets `<fpage>`); a year given as a whole date → `<year>` + the date in `<string-date>`; a web address cut by
+Azure's line breaks is joined; `series` → JATS `<series>`; the printed form stays in the mixed-citation / note. On the
+v3.2 test's 111 works it cleaned 5 volumes, 2 issues, 6 page fields, 7 dates, 3 addresses, nothing wrong. Tests
+`test_refs43.py` (DTD-valid); gold 5/5 the same. Dry run: 499 requests, $31.0 expected / $80.8 worst on Batch.
+
+**Run** (`run43.py --set b --prompt v3.3 --run v33_300 --cap 50.045`). Disk paused it twice before anything was sent
+(C: fell under the 50 GB, then the 44 GB line, mostly from other writers; the owner moved the line to 10 GB). Six Batch
+jobs, all SUCCEEDED (UTC, create → end):
+
+| job | requests | time | failures |
+|---|---|---|---|
+| 1 (round 1, first 196 by the 4.5M enqueued-token cut) | 196 | 23:15:44 → 23:22:09 (6.4 min) | 0 |
+| 2 (round 1 rest + second chunks) | 191 | 23:35:43 → 23:41:36 (5.9) | 1 MAX_TOKENS |
+| 3 | 94 | 23:47:46 → 23:54:24 (6.6) | 0 |
+| 4 | 17 | 23:57:29 → 00:02:17 (4.8) | 0 |
+| 5 | 1 | 00:03:43 → 00:07:07 (3.4) | 0 |
+| 6 (retry of the failure) | 1 | 00:08:40 → 00:14:07 (5.5) | 1 MAX_TOKENS again |
+
+**Turnaround**: 64 min from the relaunch to the last answer (12 min of it rendering and building job 1; each later job
+waits for the one before, the chunk chain); Batch itself took 3–7 min a job. **Failures**: 1 of 499 requests —
+1764-003-005-006 pages 9–15 (two-column, tables; 531 table cells of one line each, answer pretty-printed) ran into its
+27,000-token output limit twice (retry $0.17). That article has no master (pages 1–8 answered); **299 / 300 masters,
+299 / 299 JATS DTD + ALTO XSD valid**. Masters 8.5 min (peak 1.9 GB), views 6.5 min (0.6 GB), flags 10 min (1.5 GB).
+
+**Spend** (live log): this run $28.878 (500 answers incl. the retry; the 299 complete articles $28.458), log $33.9235
+since 2026-10-18 (all of it). Batch outputs re-read (`usage_from_batch_outputs.json`): 12.11M prompt tokens (text 8.06M,
+image 4.06M), 3.35M candidates, **thoughtsTokenCount absent / 0 in all 500**, total = prompt + candidates in every
+answer; no cached or tool tokens. The owner's balance (£30.85 used with nothing in flight, ÷1.2 VAT = £25.71 ≈ $34 at
+1.33) agrees with the log within ~1%.
+
+**Summary numbers** (`summary43.py` → `out/v33_300/summary.json`/`.txt`; 299 articles, 3,508 pages):
+
+| | |
+|---|---|
+| blocks (masters) | 37,270; by type in the answers: paragraph 14,703, footnote 3,579, heading 3,066, footer 2,863, list item 2,752, verse 2,379, header 2,216, reference 2,040, figure 850, caption 667, byline 414, table 363, title 302, abstract 236, equation 185, other 177, quote 141, other_article 95, keywords 95, boxed 91, trans_title 59 |
+| another article | 95 blocks on 31 pages in 23 articles |
+| notes | 3,536 footnotes (1,566 endnotes in JATS); calls 3,567, **linked 3,512 (98.5%)** |
+| verse | 2,379 blocks; 151 cuts in 14 articles |
+| pictures | 820 figures from the model; 15 found by the ink rule (3 articles); 35 inside a line (14 from ornaments) |
+| tables / equations | 363 tables (16,845 cells, 60 articles) / 185 equation blocks (14 articles) |
+| references parsed | 2,021 reference entries → 2,033 element-citations (84 articles); 2,261 notes cite 2,742 works (127 articles); 21,482 fields written; tidy: 41 volumes, 23 issues, 28 page fields, 242 dates, 68 addresses |
+| misprints flagged (sic) | 1,634 (1,569 placed) |
+| fixes | 10,121 (2.9 a page); orthography-only 959, diacritics-only 266 |
+| metadata changes (D33) | 5 (2 titles, 3 translated titles) |
+| lines | 123 rescued from noise by code; 1,144 noise lines left out (374 with words, 553 words) |
+
+**Flags** (`flags43.py --run v33_300`; the 55 and the v3.2 test re-flagged with today's code, old files kept as
+`flags_<date>.json`; `out/v33_300/flag_rates.txt`), per 100 pages:
+
+| | v3.3 · 300 (3,523 pp) | v2 · 55 (399 pp) | v3.2 test · 6 (73 pp) |
+|---|---|---|---|
+| high | **0.48** (17) | 0.75 (3) | 0 |
+| medium | 8.06 (284) | 8.02 (32) | 6.85 (5) |
+| low | 12.21 (430) | 6.02 (24) | 5.48 (4) |
+| overlap (m) | 3.09 (109) | 0.75 | 0 |
+| fixes_many (m) / fixes_orth (l) | 2.87 / 2.87 | 1.50 / 0.50 | 5.48 / 0 |
+| call_no_note (h+m) | 1.02 (36) | 0 | 0 |
+| noise_left (l) | 5.48 (193) | 1.25 | 4.11 |
+| other_middle / other_inner / other_most | 0.17 / 0.20 / 0.03 | 0.50 / 1.25 / 0 | 0 |
+| math_failed (m) | 0.11 | 3.51 | 0 |
+| type_mix (l) | 1.05 | 0.25 | 0 |
+High: 6 other_middle (1010 ×3, 0617, …), 6 noise_rescued (0744 ×2, 1054 ×2, 0720, 0751), 3 call_no_note, 1 other_most
+(0729), 1 call_failed (1764). The fresh sample is harder than the 55 (more tables, French / English, typewritten and
+show-through pages): overlaps (tables over text, footnote rows) and noise lines with letters are the two that grew.
+
+**Looked at by eye** (22 pages across decades and layouts, `out/v33_300/shots/side_*.jpg`, notes
+`out/v33_300/look_notes.md`): 12 right apart from the systematic points below. Not caught (or only partly) by flags:
+(1) **show-through** read as text (0744 p1: the reverse side's mirrored text, ~60 lines of junk round the title);
+(2) **a table split across two columns drawn as one** whose box covers the whole page over both columns (0368 p11);
+(3) letters Azure lost in **vocalised verse** not restored (1875 p17: «الزَّاد» → «الْادُ», «الْكَرِيمِ» → «الْكَرِ»);
+(4) **guillemets read as ((…))** by Azure, kept (0658, 0875, 0617); (5) **Latin line-end hyphens** kept with a space
+(«classificat- ion», «tradition- nel»; 2483, 0310) and italics lost in French / English; (6) a free-verse page with two
+printed lines per row and a drawing over 3 lines (0729 p2); (7) inline maths in an Arabic sentence left as Azure's junk
+(0168 p5: «tostST- max»); (8) an advertisement (rightly "another article") drawn as shredded picture pieces with its
+words between (1010 p2); small: a misread page number kept, a signature drawn as a heading, author + affiliation in
+one byline, a side tab lost. One overlap flag looked false on screen (0787 p5).
+
+**Hand check** (`handcheck43.py`; scan left with numbered blocks, ours right, yes / no + note per block, Export my
+marks): 10 articles, 1,483 blocks, `out/v33_300/handcheck/` (index), http://127.0.0.1:8899/v33_300/handcheck/index.html:
+1010-006-011-015 (1958, two columns, another article mid-page), 0744-000-059-007 (1993, show-through), 0729-008-030-020
+(1983, poems, other_most), 0617-024-021,024-010 (1958, verse + advert), 0690-016-009,010-012 (1941, footnote rows),
+0787-011-001-003 (2001, overlaps), 2483-000-006-015 (1995, English typewritten, calls without notes), 1875-005-020-001
+(2019, 64 verse cuts), 1986-000-006-042 (2018, French, tables, shared page), 0168-029-002-020 (2020, English, equations).
+
+**Views**: `out/v33_300/views/index.html` (300 rows, hardest first: title, year, journal, pages, layout tags, flag
+counts and kinds), http://127.0.0.1:8899/v33_300/index.html (symlink `experiments/41_azure_structure/out/views/v33_300`);
+review of flagged spots `out/v33_300/review.html` (http://127.0.0.1:8899/v33_300/review.html).
+
+**Cost** (real tokens; Argon on Batch; $ = API price, £ = incl. 20% VAT at 1.33 $/£):
+
+| | per article | per page | out tokens / page |
+|---|---|---|---|
+| all 299 | $0.095 (median $0.080, max $0.37) | $0.0081 | 938 |
+| pre-1960 / 1960s / 1970s / 1980s | $0.049 / 0.070 / 0.075 / 0.080 | $0.0079 / 0.0074 / 0.0082 / 0.0074 | 884 / 783 / 915 / 843 |
+| 1990s / 2000s / 2010s / 2020s | $0.082 / 0.081 / 0.149 / 0.145 | $0.0077 / 0.0073 / 0.0087 / 0.0089 | 849 / 815 / 1,042 / 1,089 |
+| 1–5 / 6–10 / 11–15 / 16–20 / 21–30 pages | $0.030 / 0.065 / 0.115 / 0.137 / 0.193 | $0.0092 / 0.0081 / 0.0088 / 0.0077 / 0.0078 | |
+Input 3,420 tokens a page (2/3 text, 1/3 image), output 938. **Per million documents** at this sample's mix (11.7
+pages an article): **$96k now (≈ £87k incl. VAT), $193k from 1 Dec (≈ £174k)**; per million pages $8.2k / $16.4k
+(≈ £7.4k / £14.8k). The sample over-weights rare layouts and long articles; the corpus mean page count decides the
+real figure. Turnaround at scale is set by the 5M enqueued-token limit of Tier 1 (≈ 200 requests a job, a job ≈ 6 min):
+a million documents (~1.7M requests) would need a higher tier or many weeks.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -848,14 +956,17 @@ test if limited to that line. Not done here: the code changes above, linking «�
 3. Prompt v3.1 (v3 + pictures) is the candidate for the rehearsal (`--prompt v3.1`; section "A picture is never lost");
    decide the fix-count question there (ى/ي and hamza). Prompt v3 (owner's (a)–(c) + boxed text, quotations, history, affiliation parts): run the rehearsal with
    `--prompt v3`; watch pictures filed as other_article / noise and the fix count (section "Prompt v3 and JATS coverage").
-4. Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
-   rehearsal (`--set b`).
+4. ~~Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
+   rehearsal (`--set b`)~~ (done: "The 300 (v3.3)").
+5. Owner hand-checks the 10 articles (`out/v33_300/handcheck/`); then the fix list from "Looked at by eye": show-through
+   as noise, a table split across columns, Latin line-end hyphens, (( )) for « », restored letters in vocalised verse,
+   inline maths in Arabic sentences; 1764 pages 9–15 (raise its output limit or split the chunk).
 
 ## Files
 
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
-`cites43.py` (v3.2 citation audit: dump / score / orth) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
+`cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
