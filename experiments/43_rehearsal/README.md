@@ -1415,6 +1415,110 @@ same counts as the files.
 
 The proof pack (random pages beside the scan, error rates, citation sample, gold) is left to an independent evaluation.
 
+## Fix round 3 (proof pack) (2026-10-20; owner-approved fix list; cap $3, **$1.12 billed**, log $72.50 → $73.62)
+
+**Question.** The independent proof pack (`out/proof/proof.md`) found two serious pages (table cells dropped,
+unflagged), honorifics and non-authors in author names, Hijri years in `<year>`, a stray «)» before «»», unlinked
+roman / superscript note calls and a page set sent to Gemini without its Arabic glyphs. Fix each at its root, on a
+copy (`out/v33_300b_fix3/`, from the exam's saved answers; the frozen `v33_300b*` folders untouched), and measure
+the same numbers again. Log of every step: `out/fix3/progress.md`; numbers `out/fix3/measure.json`
+(`out/fix3/measure.py`: before = `v33_300b_final`, after = `v33_300b_fix3`).
+
+**Method.** `out/v33_300b_fix3/raw` = a copy of the exam's answers (0529's two replaced, below); every answer
+through today's rules (`pictures43.py --run v33_300b_fix3 --set c --build out/v33_300b_fix3/plain`, 6 min, 1.5 GB);
+the exam's 63 patch files + the new table retries applied (`patches43.py build --src …/plain/rules`, new option);
+flags (`--patches`), views, summary, index, review (`out/v33_300b_fix3/build3.sh`). **300/300 JATS DTD + ALTO
+XSD valid.** Gold (`gold43.py check`): 4 the same, 0747 changed by 3 items, all one fix: p3's verse «إنى … وَعِلِ»
+Azure read as «((إنى … »» is now «« إنى … »» — looked at, the print has guillemets (`out/fix3/gold_check.txt`).
+
+| fix | whole exam, before → after | proof sample, before → after |
+|---|---|---|
+| 1 table cells Azure did not read | 46 cells read by the model left outside their tables (as paragraphs after them), unflagged → 44 in their cells (28 by the code rule, 16 after retries); 12 `table_cells_lost` (high) left on 10 pages | 0201 p11 (13 of 60 cells empty) and 0295 p3 (3 lost): serious → right, looked at beside the scan |
+| 2 author names | 92 names with an honorific / title → 0; 367 contribs all "author" → 336 authors + 27 others (translator 9, supervisor 7, rapporteur 8, reviewer 3); 4 Latin spellings folded into their Arabic person | metadata 30: authors right 23 → 29 (loose 6 → 1, wrong 1 → 0) |
+| 3 Hijri years | 12 bare Hijri years in `<year>` → 0 (12 marked islamic, each with the Gregorian year beside it: 3 printed, 9 from the catalogue) | year right 27 → 29 (0266, 0596); 0764 p1 minor → right |
+| 4 stray ")" before » | 170 in 33 articles (unmatched; 202 ")»" in all) → 0 (7 ")»" left, each closing a real «(»); 222 code fixes | 0416 p8, 0511 p6 / p10 minor → right |
+| 5 letter / superscript calls | linked calls 2,823 → 2,847 (1173: 1 → 17, 1426: 46 kept but 9 moved out of words) | 1173 p3 minor → right; p8 stays minor (its notes now linked; markers still glued in the note text) |
+| 6 renders without glyphs | 15 pages (all of 0529) blank where Azure has text → re-rendered with the fonts; 0529 asked again ($0.066) | 0529 p1 / p15 right before and after (the proof judged Azure's text); now the scan shows it |
+
+Pages of the proof's 60 (re-judged where the output changed, the rest unchanged): **right 35 → 43, minor 23 → 17,
+serious 2 → 0**. Metadata 30: **all fields right 18 → 25** (0071, 0266, 0596, 0806, 1036, 2483, 8480; still not:
+0367 and 0597 titles, 0744 readers' mail, 0924 year unverifiable, 1633's affiliation «(Président …)»). Citations 80:
+no change (0 of 2,855 citations in the 52 sampled articles differ): 57/80 fully right, as before. Flags per 100 pages
+(3,404 pp) high / medium / low: **0.53 / 7.17 / 12.22 → 0.82 / 7.17 / 12.63**: the rise is the new
+`table_cells_lost` (12, high: what used to be silent) and `table_cells_added` (15, low); the old high kinds 18 → 16
+(line_twice 2 → 0 from 0913's table retry).
+
+**1. Table cells** (`rules43.table_missed_cells`, `masters43.Master43.added_cells`, `flags43.check_table_cells`).
+Both serious pages had every Azure line in a cell: the lost cells were never read by Azure (row numbers «١» «٢»
+«٤», «٧ر٥»); the model gave them as `missed` after the previous cell's line, so 41's assembly printed them as
+paragraphs after the table. Rule: a missed text after a cell's line goes into the next cell (row by row, reading
+order) when that cell is empty, its column and row are known from the other cells, its box (the column's x range ×
+the row's y range, shrunk 15%) holds ink (≥ 0.015 dark) and the text is short (≤ 30 characters, 4 words); the JATS
+cell holds it as `named-content content-type="added" specific-use="argon"` (no ALTO box: Azure has no line), the
+Layout view draws it in italics. 28 cells on 10 pages by the code. Flag `table_cells_lost` (high): an Azure line
+with letters / digits inside a table's area in no block (or noise), or a missed cell text the rule could not place;
+`table_cells_added` (low): cells filled from the model's reading. The 21 pages still flagged high went to a one-page
+Gemini retry (`retry43.py`, new `--missed`: the patch carries the page's missed texts; `out/fix3/table_retries.py`,
+Argon Standard, **$1.054**, 21 of 21 STOP): 19 passed the code check and are applied, 2 to the owner (0849 p4: 3
+calls without a note; 0946 p24: 6 split parts unknown). Left high: 12 flags on 10 pages (0040 p11, 0048 pp22–25,
+0081 pp9/13/24, 0086 pp18–19, 0108 p6, 0742 p5, 0849 p4, 0913 p16, 0946 pp19/24, 2442 p6, 2483 p20: mostly lone
+«٠» «-» «م» marks the retry left as noise or whose cell is already taken). Looked at: 0201 p11 (all 60 cells, the
+middle «رقم العبارة» column 1–10 as printed), 0295 p3 (the three cells the proof named), 6278 p17.
+
+**2. Author names** (`meta43.names_pre`, before jats43's catalogue match; `jats43.people` reads the corrected
+name). Honorifics and titles, built from the 300 exam names Gemini read: الدكتور(ة)، دكتور(ة)، الأستاذ(ة)، الشيخ،
+المحامي، السير، البروفيسور، المهندس، the abbreviations أ.د. أ.د/ أ.م.د/ أ. م.د / د. د/ د : د . د ذ. م.م., Dr / Pr /
+Prof / Mme / Mr, and a profession after the name (0806 «انور شاؤل المحامى»); «السيد» stays (often a given name in
+Egypt) unless written «السيدة /». Per D33 the printed name stays as `string-name[@specific-use="printed-on-the-page"]`
+in `name-alternatives`; each change is a `metadata-change` (source code). Roles from Gemini's printed role phrase
+(ترجمة / تعريب → translator, مراجعة → reviewer, تحرير / editorial → editor, إشراف / المشرف / supervisor →
+supervisor, مقرر / rapporteur → rapporteur; بقلم، إعداد، عرض stay authors) or, for a byline on a later page, the
+heading over it (1633 p6 «Comité de rédaction du rapport général du colloque»): `contrib-type` and `<role>`, not
+author. A Latin spelling printed beside an Arabic name (consonant skeletons ≥ 0.7: 1036 «جيوسيب كاروزو» /
+«Giuseppe Caruso» 1.00, 0775-014, 0756, 1904) is folded into that person as `string-name xml:lang="en"`, its id kept.
+Found 92 honorifics, 27 roles, 4 folds.
+
+**3. Hijri years** (`meta43.hijri_year`). A pub-date year in 1300–1500: the Gregorian year from the printed date
+(a 4-digit year ≥ 1800 beside it, 0266 «١٤٠٩هـ / ١٩٨٩م») or else the catalogue's when it agrees with the conversion
+within 2 years (0764 1428 → 2007) goes in `pub-date[@calendar="gregorian"]`, the Hijri in a second
+`pub-date[@calendar="islamic"]`; with no Gregorian known the one pub-date is marked islamic (none of the 12).
+
+**4. The stray ")"** (`rules43.guillemet_halves`). Not made by our «» rule: Azure itself reads a printed » as
+")»" (318 times in the exam's lines) and an opener as "((" or "«(" in the same pair; `guillemets` turned "((" into
+"«" and left the ")". Rule after every other fix: ")»" whose ")" closes no "(", "«(" whose "(" is not closed, "((…»"
+and "«…))" are made whole as code fixes (D30: the print has the guillemet; looked at 0367 p1).
+
+**5. Note calls** (`masters43.Master43.runs`). 41 placed a call at the first occurrence of its marker: «i» landed in
+«équ‹i›pements» and the superscript «ⁱ» the model wrote was never found. Now a letter marker takes its superscript
+form when the line has it, else an occurrence at a word's end (glued «internesi», after a number «2016v»), never
+inside a word. Looked at 1173 p3 (ⁱ ⁱⁱ ⁱⁱⁱ linked) and p8 (the 18 notes linked; their markers stay glued in the note
+text, as Azure read them).
+
+**6. Renders** (`render43.py`, installed in prompt43 and masters43, so before a page goes to Gemini, the judge or a
+crop). Ink inside Azure's word boxes: a page with ≥ 20 words without ink and under 0.8 of its words inked is blank
+where Azure has text; it is rendered again with its non-embedded fonts embedded from the system (Windows'
+Simplified Arabic, Arial, Times …; the PDF on disk untouched) into `out/pages_fixed/`, kept when its share rises;
+every check in `out/render_check.jsonl`. Exam: 19 pages flagged, 15 re-rendered and kept (0529 pp1–15: ink share
+0.04–0.68 → 0.97–1.00), 4 have every font embedded (0656 p1/p5, 0664 p1, 0700 p13: light print on dark ground, left).
+The re-render misses a few glyphs (another version of the font). 0529 asked again (2 Batch jobs, $0.066): 20 → 11
+reader fixes, looked at p1, p2, p5, p15. The views get the new scans (`out/fix3/fix_scans.py`, files of their own,
+the shared reader cache untouched).
+
+**Not done: the judge's edits made consistent across an article (0732, 0849).** 0732: the judge unmarked the
+bottom strip as "another article" on pp3/6 only; the same strip is still other_article on 25 blocks of pp1–13.
+Extending the edit would put a separate running stream into the main text on every page; reverting it would
+override a two-key judge edit; the owner decides. 0849 p4: the judge named two show-through lines, the code key
+passed one; applying the other would bypass the two-key rule.
+
+**platform.db**: `load46.py --run v33_300b_fix3` (300 articles, 702 flags, 111 patches, 614 judge findings;
+`base_run` maps `*_fix3` to the judged run) + `link46.py`. `article_authors.role` (new column, from contrib-type):
+author 336, translator 9, rapporteur 8, supervisor 7, reviewer 3; `article_dates` pub-hijri 12 (`parse46`: the
+corrected name inside name-alternatives, the Gregorian year as the article's year).
+
+**Pages**: http://127.0.0.1:8899/v33_300b_fix3/index.html (hardest first; symlink
+`experiments/41_azure_structure/out/views/v33_300b_fix3`), review of 702 flagged spots
+`v33_300b_fix3/review.html`; side-by-sides looked at in `out/fix3/look/`.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -1435,7 +1539,7 @@ The proof pack (random pages beside the scan, error rates, citation sample, gold
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `judge43.py`, `patches43.py` + `test_patches43.py`, `evidence43.py`, `retry43.py`, `judge_calib43.py`, `judge_review43.py`, `judge_truth43.json`, `judge_verdicts43.json` (the judge; out/judge/, out/v33_300_judged/) · `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `wordlist43.py` (word list: show-through, vocalised lines, Latin hyphens) · `rechunk43.py` (a MAX_TOKENS chunk asked again in smaller chunks) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`; the exam: `out/v33_300b/`, `out/v33_300b_final/`). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `wordlist43.py` (word list: show-through, vocalised lines, Latin hyphens) · `rechunk43.py` (a MAX_TOKENS chunk asked again in smaller chunks) · `render43.py` (page renders checked against Azure's word boxes, fix round 3) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`; the exam: `out/v33_300b/`, `out/v33_300b_final/`). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets), `sample2/` (the second sample: draw, fetch,

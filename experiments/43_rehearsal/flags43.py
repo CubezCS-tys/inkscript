@@ -43,6 +43,10 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   title_rubric      a section label (JURISPRUDENCE, REVUE DES LIVRES, عرض كتاب) was the title block: the
                     heading after it made the title (low) or none found, kept (medium)
   guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
+  (2026-10-20, fix round 3, the proof pack)
+  table_cells_lost  printed cells outside the table: an Azure line with letters / digits inside its area in
+                    no block, or a cell the model read (missed) that the code could not put in its cell high
+  table_cells_added cells Azure did not read, filled from the model's reading (rules43.table_missed_cells) low
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
 """
@@ -457,6 +461,61 @@ def check_tables(B):
     return out
 
 
+def check_table_cells(B):
+    """(fix round 3, the proof pack's 0201 p11 / 0295 p3: printed cells lost, unflagged.) A table whose printed cells
+    are not all in its cells: an Azure line with letters or digits inside the table's area that is in no block (or
+    left as noise), or a cell text the model saw (missed, after a cell's line) that rules43.table_missed_cells could
+    not put into its cell -> high; cells it put there from the model's reading (no Azure line) -> low, to look at."""
+    out = []
+    used = set()
+    for b in B["cap"]["blocks"]:
+        for i in b.get("ids") or []:
+            used.add(RU.base_of(i, B["lines"]) or i)
+    for b in B["cap"]["blocks"]:
+        if b["type"] != "table" or not b.get("ids"):
+            continue
+        bs = [B["lines"][RU.base_of(i, B["lines"]) or i]["b"] for i in b["ids"]
+              if (RU.base_of(i, B["lines"]) or i) in B["lines"]]
+        if not bs:
+            continue
+        x0, y0, x1, y1 = RU.union(bs)
+        lost = []
+        for i, L in B["lines"].items():
+            if L["page"] != b["page"] or i in used or not re.search(r"[^\W_]", L["text"]):
+                continue
+            lb = L["b"]
+            ia = max(0, min(x1, lb[2]) - max(x0, lb[0])) * max(0, min(y1, lb[3]) - max(y0, lb[1]))
+            if ia >= 0.6 * max(1, (lb[2] - lb[0]) * (lb[3] - lb[1])):
+                lost.append(i)
+        if lost:
+            out.append(flag(B, "table_cells_lost", "high", b["page"], lost,
+                            f"{len(lost)} Azure line(s) inside the table's area are in no cell: "
+                            f"«{B['lines'][lost[0]]['text'][:40]}»"))
+    import copy
+    words = M43.azure_words(B["a"])
+    logs = []
+    for ans in B["answers"]:                     # again on the answers as built (a retry patch may carry new cells)
+        lg = RU.new_log()
+        RU.table_missed_cells(copy.deepcopy(ans), B["lines"], words, lg)
+        logs.append(lg)
+    for log in logs:
+        by = {}
+        for e in log.get("table_cells_unplaced") or []:
+            by.setdefault(e["page"], []).append(e)
+        for p, es in sorted(by.items()):
+            out.append(flag(B, "table_cells_lost", "high", p, [e["after"] for e in es],
+                            f"{len(es)} printed cell(s) Azure did not read stay outside the table "
+                            f"(«{es[0]['text'][:20]}»: {es[0]['why']})"))
+        by = {}
+        for e in log.get("table_cells_added") or []:
+            by.setdefault(e["page"], []).append(e)
+        for p, es in sorted(by.items()):
+            out.append(flag(B, "table_cells_added", "low", p, [e["after"] for e in es],
+                            f"{len(es)} cell(s) Azure did not read filled from the model's reading "
+                            f"(«{'», «'.join(e['text'] for e in es[:4])}»)"))
+    return out
+
+
 def mml_ok(latex: str) -> bool:
     return M.mathml(etree.Element("x"), latex, "block") is not None
 
@@ -578,7 +637,7 @@ def check_fixes2(B):
 
 
 CHECKS = [check_fixes2, check_noise, check_lines, check_notes, check_verse, check_other, check_mix, check_headings, check_tables,
-          check_math, check_fixes, check_layout_rules, check_overlaps]
+          check_table_cells, check_math, check_fixes, check_layout_rules, check_overlaps]
 
 
 def flags_of(B, norms) -> list[dict]:

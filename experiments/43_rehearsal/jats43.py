@@ -591,6 +591,9 @@ class Slots:
             cc.append((keys - {""}, c))
         for c in self.am.iterfind("contrib-group/contrib"):
             sn = c.find("string-name")
+            if sn is None:                              # meta43.names_pre: the corrected name in name-alternatives
+                sn = next((s for s in c.iterfind("name-alternatives/string-name")
+                           if s.get("specific-use") != "printed-on-the-page" and not s.get(XML_LANG)), None)
             if sn is None:
                 continue
             k = norm(sn.text or "")
@@ -601,7 +604,11 @@ class Slots:
             for cid in reversed(hit.findall("contrib-id")):
                 c.insert(0, copy.deepcopy(cid))
             names = [copy.deepcopy(n) for n in hit.iter("name")]
-            if names:
+            if names and sn.getparent().tag == "name-alternatives":     # already corrected (honorific out)
+                na = sn.getparent()
+                for k_, n in enumerate(names):
+                    na.insert(k_, n)
+            elif names:
                 na = etree.Element("name-alternatives")
                 sn.addprevious(na)
                 for n in names:

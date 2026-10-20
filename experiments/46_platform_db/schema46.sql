@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS article_authors (
   stem TEXT REFERENCES articles(stem), seq INTEGER, printed_name TEXT, email TEXT,
   person_key TEXT REFERENCES people(person_key),
   catalogue_seq INTEGER, catalogue_name TEXT, authority_id TEXT, name_score REAL, match TEXT,
-  source TEXT, run TEXT REFERENCES runs(run), PRIMARY KEY (stem, seq));
+  source TEXT, run TEXT REFERENCES runs(run), role TEXT, PRIMARY KEY (stem, seq));
 CREATE TABLE IF NOT EXISTS affiliations (
   stem TEXT REFERENCES articles(stem), author_seq INTEGER, seq INTEGER, printed TEXT, orgname TEXT, dept TEXT,
   city TEXT, country TEXT,

@@ -756,11 +756,10 @@ def table_part_html(D, rec, d: str, lg: str) -> str:
     el, own = rec["table"], {L["id"] for L in rec.get("lines") or []}
     trs = list(el.iter("tr"))
     tid = lambda tr: {t.get("id") for t in tr.iter("target")}        # noqa: E731
-    if not own or all(tid(tr) <= own for tr in trs):
-        return MR.table_html(D, el, d, lg)
+    whole = not own or all(tid(tr) <= own for tr in trs)
     rows = []
     for tr in trs:
-        if not tid(tr) & own:
+        if not whole and not tid(tr) & own:
             continue
         cells = []
         for c in tr:
@@ -768,7 +767,12 @@ def table_part_html(D, rec, d: str, lg: str) -> str:
                 continue
             sp = "".join(f' {k}="{c.get(k)}"' for k in ("colspan", "rowspan") if c.get(k))
             ts = [t.get("id") for t in c.iter("target")]
-            cells.append(f"<{c.tag}{sp}>" + " ".join(D.seg.get(t, "") for t in ts) + f"</{c.tag}>")
+            inner = " ".join(D.seg.get(t, "") for t in ts)
+            ad = [n for n in c.iter("named-content") if n.get("content-type") == "added"]
+            if not ts and ad:              # a cell Azure did not read, the model's reading (fix round 3)
+                inner = (f'<span class="added" data-added="argon" style="font-style:italic" title="read by the '
+                         f'model; Azure has no line here">{E(" ".join("".join(n.itertext()) for n in ad))}</span>')
+            cells.append(f"<{c.tag}{sp}>" + inner + f"</{c.tag}>")
         rows.append("<tr>" + "".join(cells) + "</tr>")
     return f'<table dir="{d}" lang="{E(lg)}">' + "".join(rows) + "</table>"
 

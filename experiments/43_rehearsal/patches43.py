@@ -154,6 +154,9 @@ def apply_one(answers: dict, p: dict) -> str | None:
         pg["blocks"] = copy.deepcopy(pay["blocks"])
         pre = f"{p['page']}:"
         ans["noise"] = [x for x in ans.get("noise") or [] if not str(x).startswith(pre)] + list(pay.get("noise") or [])
+        if "missed" in pay:            # fix round 3: a table retry carries the page's cells Azure did not read
+            ans["missed"] = [m for m in ans.get("missed") or [] if not str((m or {}).get("after", "")).startswith(pre)] \
+                + copy.deepcopy(pay["missed"])
         return None
     tb = t.get("blocks") or []
     idx = [find_block(pg, b) for b in tb]
@@ -344,7 +347,8 @@ def mark_master(mast: Path, stem: str, log: list[dict]):
     del M43
 
 
-def build(run: str, out: Path, stems: list[str] | None = None, off: bool = False, which: str = "b") -> dict:
+def build(run: str, out: Path, stems: list[str] | None = None, off: bool = False, which: str = "b",
+          src: Path | None = None) -> dict:
     """Patched answers out/<out>/rules/ and masters out/<out>/masters/ for the run's articles that have patches
     (or `stems`). Never writes under out/<run>/."""
     import masters43 as M43
@@ -352,8 +356,9 @@ def build(run: str, out: Path, stems: list[str] | None = None, off: bool = False
     if which in ("b", "c"):
         M43.ST.PAGES = OUT / "pages"
     out = Path(out).resolve()
-    assert out != (OUT / run).resolve()
-    src, rules, mast, pdir = OUT / run / "rules", out / "rules", out / "masters", out / "patches"
+    src = Path(src).resolve() if src else OUT / run / "rules"      # --src: the plain rules output (fix round 3)
+    assert out / "rules" != src
+    rules, mast, pdir = out / "rules", out / "masters", out / "patches"
     arts = {a["stem"]: a for a in run43.articles(which)}
     stems = stems or sorted(f.stem for f in pdir.glob("*.json"))
     res = {}
@@ -385,8 +390,9 @@ def main():
     ap.add_argument("--out", default=str(OUT / "v33_300_judged"))
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--off", action="store_true", help="build without any patch (the reversibility check)")
+    ap.add_argument("--src", help="folder of the plain rules output (default out/<run>/rules)")
     a = ap.parse_args()
-    build(a.run, Path(a.out), a.stems, a.off, "c" if a.run.startswith("v33_300b") else "b")   # c: the exam
+    build(a.run, Path(a.out), a.stems, a.off, "c" if a.run.startswith("v33_300b") else "b", a.src)   # c: the exam
 
 
 if __name__ == "__main__":

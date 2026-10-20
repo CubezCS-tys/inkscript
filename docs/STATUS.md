@@ -1,6 +1,6 @@
 # Status
 
-*Last updated 2026-10-18. Update this file whenever a headline number or a
+*Last updated 2026-10-20. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
 ## Stroke study (2026-10-18)
@@ -191,6 +191,14 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   a close-up retry); prompt v3.4 candidate (not live); 1764's MAX_TOKENS chunk can be re-asked in smaller chunks
   (`rechunk43.py`, one call). The 300 re-flagged: high 0.48 → 0.26 per 100 pages. 299/299 + 55/55 valid, gold 5/5
   ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "Fixes from the 300").
+- **Experiment 43, fix round 3 on the exam (2026-10-20, $1.12)**: the proof pack's failures fixed on a copy
+  (`out/v33_300b_fix3/`): table cells Azure never read now in their cells (46 left outside tables, unflagged → 44
+  placed, 12 flagged high on 10 pages), honorifics out of 92 author names and 27 translators / supervisors /
+  rapporteurs / reviewers no longer authors, 12 Hijri years marked with the Gregorian beside, 170 stray ")" before »
+  → 0, letter / superscript note calls linked (2,823 → 2,847), 0529's glyphless renders redrawn with its fonts and
+  re-asked. Proof sample: pages right 35 → 43, serious 2 → 0 of 60; metadata all right 18 → 25 of 30; citations
+  unchanged 57/80. 300/300 valid, gold 4 same + 0747 better; http://127.0.0.1:8899/v33_300b_fix3/index.html
+  ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "Fix round 3 (proof pack)").
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

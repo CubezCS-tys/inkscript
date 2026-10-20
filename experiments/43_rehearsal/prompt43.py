@@ -22,7 +22,10 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 E41 = HERE.parent / "41_azure_structure"
 sys.path.insert(0, str(E41))
+sys.path.insert(0, str(HERE))
 import structure as ST  # noqa: E402
+import render43  # noqa: E402
+render43.install(ST)                  # a page blank where Azure has text is re-rendered with its fonts (fix round 3)
 
 PROMPT_VERSION = "v2"          # the default; run43.py --prompt v3 calls use("v3")
 

@@ -49,6 +49,7 @@ RUNS = {
                          set="a"),
     "v33_300b": dict(rules=OUT / "v33_300b" / "rules", views=OUT / "v33_300b" / "views", set="c"),     # the exam
     "v33_300b_final": dict(rules=OUT / "v33_300b_final" / "rules", views=OUT / "v33_300b_final" / "views", set="c"),
+    "v33_300b_fix3": dict(rules=OUT / "v33_300b_fix3" / "rules", views=OUT / "v33_300b_fix3" / "views", set="c"),  # round 3
     "replay": dict(rules=OUT / "replay" / "raw", views=OUT / "judge" / "views_replay", set="a"),   # views43 on out/masters
 }
 KINDS = ["title", "trans_title", "subtitle", "byline", "abstract", "keywords", "heading", "paragraph", "list_item",

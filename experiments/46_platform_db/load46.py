@@ -41,6 +41,8 @@ def now():
 
 def init(con):
     con.executescript((HERE / "schema46.sql").read_text(encoding="utf-8"))
+    if "role" not in {r[1] for r in con.execute("PRAGMA table_info(article_authors)")}:
+        con.execute("ALTER TABLE article_authors ADD COLUMN role TEXT")    # experiment 43 fix round 3: contrib-type
     con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS blocks_fts USING fts5(text_folded, content='blocks', "
                 "content_rowid='id', tokenize='unicode61 remove_diacritics 2')")
     con.execute("INSERT OR REPLACE INTO meta VALUES ('schema', 'experiment 46 v1, declared foreign keys')")
@@ -405,7 +407,7 @@ def load_patches(con, run: str, mdir: Path, pdirs: list[Path]) -> int:
 
 def base_run(run: str) -> str:
     """v33_300_judged / v33_300_fixed / v33_300_final → v33_300 (the run whose pages the judge looked at)."""
-    return re.sub(r"_(judged|fixed|patched|final)\w*$", "", run)
+    return re.sub(r"_(judged|fixed|patched|final|fix\d+)\w*$", "", run)
 
 
 def load_judge(con, run: str) -> int:

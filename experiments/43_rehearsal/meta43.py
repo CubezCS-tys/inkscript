@@ -367,6 +367,10 @@ class Meta:
                      f"{n} pages", pages_in_scan=n, folios=len(ps))
 
     def run(self):
+        for e in getattr(self.M, "name_changes", []):       # names_pre (before jats43): honorifics, roles, scripts
+            self.log(e.pop("field"), e.pop("printed"), e.pop("corrected"), e.pop("source"), e.pop("reason"), **e)
+        for e in hijri_year(self.M, self.A):
+            self.log(e.pop("field"), e.pop("printed"), e.pop("corrected"), e.pop("source"), e.pop("reason"), **e)
         self.page_range()
         self.title()
         self.authors()
@@ -433,3 +437,251 @@ def catalogue_pages(stem: str):
 
 def apply(Mo, A):
     return Meta(Mo, A).run()
+
+
+# ------------------------------------------------------------------------------------------------ fix round 3
+# (2026-10-20, the proof pack's metadata sample: honorifics kept in names (0071, 0631, 0806, 2483, 8480), a translator
+# and a Latin spelling listed as authors (1036), an editorial committee from the last page as authors (1633), the Hijri
+# year in <year> (0266, 0596, 0764). Built from the exam's 300: every honorific and role phrase Gemini read.)
+
+HON_WORD = (r"(?:الأستاذة?|الاستاذة?|أستاذة?|استاذة?|الدكتورة?|دكتورة?|الشيخ|المحامي|المحامى|السير|البروفيسور|البروفسور|"
+            r"بروفيسور|بروفسور|المهندسة?|الأديبة?|الشاعرة?|السيدة?(?=\s*/))")
+HON_ABBR = r"(?:[أمدذ]\s*[./:]\s*)+"                  # أ.د.  أ.د/  أ.م.د/  أ. م.د /  د.  د/  د :  د .  ذ.  م.م.
+HON_LAT = r"(?:Dr|Pr|Prof|Professor|Mme|Mr|Mrs|Ms)(?:\.|\b)\s*(?:[:/]\s*)?"
+HON_TAIL = re.compile(r"[\s،,]+(?:المحامي|المحامى|المحامية|المهندس|المهندسة)\s*$")
+HONORIFIC = re.compile(rf"^\s*(?:{HON_WORD}\s*[./:]?\s*|{HON_ABBR}|د\s+(?=\S\S)|{HON_LAT})")
+ROLES = [                                  # Gemini's printed role phrase (or the heading over a later byline) -> contrib-type
+    ("translator", re.compile(r"ترجم|تعريب|عربه|نقله\s+إلى|traduc|tradui|translat", re.I)),
+    ("reviewer", re.compile(r"مراجع|راجعه|review|révis", re.I)),
+    ("editor", re.compile(r"تحرير|حرره|editor|edited|éditeur|comité\s+de\s+rédaction|هيئة\s+التحرير|editorial", re.I)),
+    ("supervisor", re.compile(r"إشراف|اشراف|المشرف|supervis|directeur\s+de\s+th", re.I)),
+    ("rapporteur", re.compile(r"مقرر|rapporteur", re.I)),
+]
+LATIN = re.compile(r"[A-Za-zÀ-ɏ]")
+ARABIC = re.compile(r"[؀-ۿ]")
+
+
+def strip_honorific(name: str) -> tuple[str, str]:
+    """(name without its leading honorifics / titles, the honorifics taken off); the name itself is never emptied."""
+    n, took = " ".join((name or "").split()), []
+    for _ in range(4):
+        m = HONORIFIC.match(n)
+        if not m or not m.group(0).strip():
+            break
+        rest = n[m.end():].strip(" ./:")
+        if len(norm(rest)) < 3 or len(rest.split()) < 1:
+            break
+        took.append(m.group(0).strip())
+        n = rest
+    m = HON_TAIL.search(n)                          # a profession printed after the name (0806 «انور شاؤل المحامى»)
+    if m and len(norm(n[:m.start()])) >= 3:
+        took.append(m.group(0).strip(" ،,"))
+        n = n[:m.start()].strip(" ،,")
+    return n, " ".join(took)
+
+
+def role_kind(text: str) -> str | None:
+    for kind, rx in ROLES:
+        if rx.search(text or ""):
+            return kind
+    return None
+
+
+_AR = str.maketrans({"ب": "B", "ت": "T", "ط": "T", "ث": "T", "ج": "G", "غ": "G", "خ": "K", "ق": "K", "ك": "K",
+                     "د": "D", "ض": "D", "ذ": "D", "ر": "R", "ز": "S", "ظ": "S", "س": "S", "ص": "S", "ش": "S",
+                     "ف": "F", "ل": "L", "م": "M", "ن": "N"})
+
+
+def skeleton(name: str) -> str:
+    """Consonants of a name, Arabic or Latin, in one rough class alphabet (a transliteration check, not a spelling)."""
+    out = []
+    for w in name.split():
+        if ARABIC.search(w):
+            w = re.sub(r"^ال", "", TASHKEEL.sub("", w))
+            s = "".join(ch for ch in w.translate(_AR) if ch.isascii() and ch.isupper())
+        else:
+            w = re.sub(r"^(al|el)[-‐]", "", w.lower())
+            w = w.replace("sh", "s").replace("ch", "s").replace("kh", "k").replace("th", "t").replace("gh", "g") \
+                .replace("ph", "f").replace("ou", "u")
+            m = {"c": "K", "k": "K", "q": "K", "g": "G", "j": "G", "s": "S", "z": "S", "x": "KS", "p": "B", "b": "B",
+                 "v": "F", "f": "F", "t": "T", "d": "D", "r": "R", "l": "L", "m": "M", "n": "N"}
+            s = "".join(m.get(ch, "") for ch in w)
+        out.append(re.sub(r"(.)\1+", r"\1", s))
+    return "".join(out)
+
+
+def same_person_latin(ar: str, la: str) -> float:
+    import difflib
+    a, b = skeleton(ar), skeleton(la)
+    if len(a) < 3 or len(b) < 3:
+        return 0.0
+    return difflib.SequenceMatcher(None, a, b).ratio()
+
+
+def names_pre(Mo, A):
+    """Before jats43 matches the catalogue's people: each contrib's name without honorifics (the printed name kept as
+    string-name[@specific-use="printed-on-the-page"] in name-alternatives), its role from the printed role phrase
+    (translator, reviewer, editor, supervisor, rapporteur: contrib-type and <role>; not an author), a Latin spelling
+    printed beside an Arabic name folded into that person (string-name xml:lang, its id kept), a byline under an
+    editorial committee's heading on a later page tagged so. Every change goes to Mo.name_changes (meta43 logs it)."""
+    am = A.find("front/article-meta")
+    cg = am.find("contrib-group") if am is not None else None
+    Mo.name_changes = []
+    if cg is None:
+        return
+    aus = [au for au in (Mo.meta.get("authors") or []) if isinstance(au, dict) and au.get("name")]
+    contribs = list(cg.iterfind("contrib"))
+    if len(aus) != len(contribs):
+        return
+    later = later_byline_heading(Mo)
+    for k, (c, au) in enumerate(zip(contribs, aus), 1):
+        sn = c.find("string-name")
+        if sn is None:
+            continue
+        printed = " ".join("".join(sn.itertext()).split())
+        clean, took = strip_honorific(printed)
+        role_txt = " ".join(str(au.get("role") or "").split())
+        kind = role_kind(role_txt)
+        if kind is None:
+            h = next((v for q, v in later.items() if len(norm(printed)) >= 6 and norm(printed) in q), None)
+            if h:
+                kind = "rapporteur" if re.search(r"rapport|مقرر", h, re.I) else role_kind(h) or None
+                role_txt = h if kind else role_txt
+        if took:
+            sn.text = clean
+            for ch in list(sn):
+                sn.remove(ch)
+            na = etree.Element("name-alternatives")
+            sn.addprevious(na)
+            na.append(sn)
+            pr = etree.SubElement(na, "string-name", {"specific-use": "printed-on-the-page"})
+            pr.text = printed
+            Mo.name_changes.append(dict(field=f"author[{k}]", printed=printed, corrected=clean, source="code",
+                                        reason=f"honorific / title «{took}» taken out of the name (kept in the printed "
+                                               f"form)"))
+            Mo.stats["names_honorific_out"] += 1
+        if kind:
+            c.set("contrib-type", kind)
+            if c.find("role") is None:
+                r = etree.Element("role")
+                r.text = role_txt
+                last = [e for e in c if e.tag in ("contrib-id", "name-alternatives", "string-name", "name")][-1]
+                last.addnext(r)
+            Mo.name_changes.append(dict(field=f"author[{k}]", printed=f"author: {printed}",
+                                        corrected=f"{kind}: {clean}", source="code",
+                                        reason=f"printed role «{role_txt}»: not an author"))
+            Mo.stats[f"names_role_{kind}"] += 1
+    # a Latin spelling printed beside an Arabic name (1036 «جيوسيب كاروزو» / «Giuseppe Caruso»): one person
+    contribs = list(cg.iterfind("contrib"))
+    for c1, c2 in zip(contribs, contribs[1:]):
+        if c1.getparent() is None or c2.getparent() is None:
+            continue
+        n1, n2 = (" ".join("".join(main_name(c).itertext()).split()) for c in (c1, c2))
+        if not n1 or not n2 or c1.get("contrib-type") != c2.get("contrib-type"):
+            continue
+        ar, la = (c1, c2) if ARABIC.search(n1) and not ARABIC.search(n2) and LATIN.search(n2) else \
+            (c2, c1) if ARABIC.search(n2) and not ARABIC.search(n1) and LATIN.search(n1) else (None, None)
+        if ar is None:
+            continue
+        na_, nl = (" ".join("".join(main_name(c).itertext()).split()) for c in (ar, la))
+        sc = same_person_latin(na_, nl)
+        if sc < 0.7:
+            continue
+        sn = main_name(ar)
+        na = sn.getparent() if sn.getparent().tag == "name-alternatives" else None
+        if na is None:
+            na = etree.Element("name-alternatives")
+            sn.addprevious(na)
+            na.append(sn)
+        ls = etree.SubElement(na, "string-name", {XML_LANG: "en"})
+        if la.get("id"):
+            ls.set("id", la.get("id"))
+        ls.text = nl
+        for e in la:
+            if e.tag in ("email", "aff") and ar.find(e.tag) is None:
+                ar.append(e)
+        cg.remove(la)
+        Mo.name_changes.append(dict(field="authors", printed=f"«{na_}» and «{nl}» as two authors",
+                                    corrected=f"«{na_}» (Latin spelling «{nl}»)", source="code",
+                                    reason=f"one person printed in two scripts (consonant skeletons {sc:.2f})"))
+        Mo.stats["names_latin_folded"] += 1
+
+
+def main_name(c):
+    for s in c.iter("string-name"):
+        if s.get("specific-use") != "printed-on-the-page" and not s.get(XML_LANG):
+            return s
+    return next(c.iter("string-name"), etree.Element("string-name"))
+
+
+def later_byline_heading(Mo) -> dict:
+    """norm(byline text) -> the heading over it, for bylines on a page after the article's first two whose
+    heading names a committee (1633 p6 «Comité de rédaction du rapport général du colloque»)."""
+    out, head = {}, None
+    p0 = min(Mo.pages) if Mo.pages else 1
+    for r in Mo.recs:
+        t = " ".join(Mo.S.lines[i]["text"] for i in r.get("ids") or [] if i in Mo.S.lines)
+        if r["type"] == "heading":
+            if re.search(r"comit[ée]|rédaction|rapporteur|هيئة\s+التحرير|لجنة|مقرر|editorial", t, re.I):
+                head = (r["page"], t)
+            elif head and head[0] != r["page"]:
+                head = None
+        elif r["type"] == "byline" and head and r["page"] == head[0] and r["page"] > p0 + 1:
+            for ln in t.split("  ") + [t]:
+                out[norm(ln)] = head[1]
+            for i in r.get("ids") or []:
+                out[norm(Mo.S.lines[i]["text"])] = head[1]
+    return out
+
+
+HIJRI_MARK = re.compile(r"هـ|ه\b|ﻫ|AH\b|H\b", re.I)
+
+
+def hijri_year(Mo, A):
+    """A pub-date year that is a Hijri year (1300-1500, the printed date marked هـ or carrying no Gregorian year):
+    the Gregorian year beside it (printed: a 4-digit year >= 1800 in the printed date; else the catalogue's year of
+    the issue when it agrees with the conversion within 2 years) in pub-date[@calendar="gregorian"], the Hijri in a
+    second pub-date[@calendar="islamic"]; with no Gregorian known, the one pub-date marked islamic. Never a bare
+    Hijri number in <year> (fix round 3)."""
+    am = A.find("front/article-meta")
+    if am is None:
+        return []
+    DIGS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+    printed = str(Mo.meta.get("year") or "").translate(DIGS)
+    changes = []
+    for pd in am.findall("pub-date"):
+        y_el = pd.find("year")
+        if y_el is None or pd.get("calendar"):
+            continue
+        y = int(y_el.text) if (y_el.text or "").strip().isdigit() else None
+        if y is None or not 1300 <= y <= 1500:
+            continue
+        greg = [int(x) for x in re.findall(r"(?<!\d)(\d{4})(?!\d)", printed) if 1800 <= int(x) <= 2100]
+        conv = y * 0.970229 + 621.5643
+        g, src = None, None
+        if greg:
+            g, src = min(greg, key=lambda v: abs(v - conv)), "printed date (the Gregorian year beside the Hijri)"
+        else:
+            cy = str(Mo.a.get("year") or "")
+            if cy.isdigit() and abs(int(cy) - conv) <= 2:
+                g, src = int(cy), "catalogue (the issue's Gregorian year, agreeing with the Hijri year)"
+        if g is not None:
+            import copy
+            h = copy.deepcopy(pd)
+            h.set("calendar", "islamic")
+            for e in list(h):
+                if e.tag != "year":
+                    h.remove(e)
+            y_el.text = str(g)
+            pd.set("calendar", "gregorian")
+            if pd.get("iso-8601-date"):
+                pd.set("iso-8601-date", str(g) + pd.get("iso-8601-date")[4:])
+            pd.addnext(h)
+            changes.append(dict(field="year", printed=str(y), corrected=f"{g} (Hijri {y} kept, calendar islamic)",
+                                source=src, reason=f"the printed year {y} is Hijri ({Mo.meta.get('year')})"))
+        else:
+            pd.set("calendar", "islamic")
+            changes.append(dict(field="year", printed=str(y), corrected=f"{y} (calendar islamic)", source="code",
+                                reason=f"Hijri year with no Gregorian year known ({Mo.meta.get('year')})"))
+        Mo.stats["year_hijri"] += 1
+    return changes

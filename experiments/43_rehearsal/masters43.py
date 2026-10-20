@@ -37,6 +37,8 @@ sys.path.insert(0, str(HERE))
 import structure as ST  # noqa: E402
 import rechunk43  # noqa: E402
 rechunk43.install(ST)                 # chunks re-cut after a MAX_TOKENS failure (out/rechunk43.json)
+import render43  # noqa: E402
+render43.install(ST)                  # a page blank where Azure has text is re-rendered with its fonts (fix round 3)
 import reader as R  # noqa: E402
 import masters as M  # noqa: E402
 from lxml import etree  # noqa: E402
@@ -269,8 +271,9 @@ class Master43(M.Master):
         self.pending_inline = []
         A = super().build()
         self.put_inline(A)
-        A = J.fill_slots(self, A)
         import meta43                                  # D33: metadata corrected, printed kept, changes logged
+        meta43.names_pre(self, A)                      # honorifics, roles, a Latin spelling (before the catalogue match)
+        A = J.fill_slots(self, A)
         meta43.apply(self, A)
         return A
 
@@ -304,6 +307,51 @@ class Master43(M.Master):
         if rec.get("ids"):                         # words printed in the picture: the picture shows them
             M.Master.tb(self, p, self.bid(p), "pictureText", rec["ids"])
         self.stats["figures_other_article"] += 1
+
+    SUP = str.maketrans("0123456789ivxlcdmab", "⁰¹²³⁴⁵⁶⁷⁸⁹ⁱᵛˣˡᶜᵈᵐᵃᵇ")
+
+    def runs(self, lid: str) -> list[tuple]:
+        """experiment 41's runs, with a call whose marker is letters (roman i, ii, iv ...) placed where it is a call:
+        its superscript form when the line has it (the model's fix wrote «tunerⁱ»), else an occurrence at a word's
+        end (glued «internesi», or alone), never inside a word: 41 took the first occurrence, so 1173 p3's call «i»
+        went into «équ‹i›pements» and its note stayed unlinked (fix round 3, 2026-10-20). Digit markers as 41."""
+        L = self.S.lines[lid]
+        cs = self.calls.get(lid, []) + self.calls.get(L.get("split_of") or "\0", [])
+        alpha = {}
+        for c in cs:
+            mk = str(c.get("marker") or "")
+            if not mk:
+                continue
+            sup = mk.translate(self.SUP)
+            if mk not in L["text"] and sup != mk and sup in L["text"]:
+                c["marker"] = sup                    # the printed (superscript) form is what the line holds
+                self.stats["calls_superscript"] += 1
+            elif re.fullmatch(r"[^\W\d_]{1,5}", mk):
+                alpha[mk] = c
+        if not alpha:
+            return super().runs(lid)
+        orig = R._rep
+        stats = self.stats
+
+        def rep(t, s, ph):
+            if s not in alpha:
+                return orig(t, s, ph)
+            for t2 in (t, R._strip_fix(t)):
+                for m in re.finditer(re.escape(s), t2):
+                    k, e = m.start(), m.end()
+                    after = t2[e] if e < len(t2) else " "
+                    before = t2[k - 1] if k else " "
+                    if not after.isalpha():
+                        if before.isalnum():
+                            stats["calls_letter_glued"] += 1
+                        return t2[:k] + ph + t2[e:], True
+            stats["calls_letter_inside_word_refused"] += 1
+            return t, False
+        R._rep = rep
+        try:
+            return super().runs(lid)
+        finally:
+            R._rep = orig
 
     def fill(self, el, ids, sep_first=False, tbid=None, of=None):
         """experiment 41's fill (one space between lines); a Latin word cut at a line end with a hyphen
@@ -390,6 +438,7 @@ class Master43(M.Master):
         al = self.alto[self.lp(rec["page"])]
         n = len(al)
         super().table(rec, parent, cap_rec, caption_into)
+        self.added_cells(rec, parent)
         n = next((k for k in range(n, len(al)) if al[k].get("kind") == "table"), None)
         if n is None:
             return
@@ -409,6 +458,52 @@ class Master43(M.Master):
             al.insert(at, dict(T, id=T["id"] if k == 0 else f"{T['id']}p{k + 1}", box=box, cells=cells, part=k))
             at += 1
         self.stats["tables_in_columns"] += 1
+
+    def added_cells(self, rec, parent):
+        """rules43.table_missed_cells: a cell Azure did not read, the model's reading of it, written into the empty
+        cell of its row whose column holds its x range (named-content content-type="added", specific-use="argon";
+        no ALTO box: Azure has no line there), instead of a paragraph after the table (fix round 3, 2026-10-20)."""
+        ms = [m for m in rec.get("missed") or [] if isinstance(m, dict) and m.get("cell")]
+        tws = [e for e in parent if e.tag == "table-wrap"]
+        if not ms or not tws:
+            return
+        trs = list(tws[-1].iter("tr"))
+        rows = rec.get("rows") or []
+        if len(trs) != len(rows):
+            return
+        L = self.S.lines
+
+        def xr(c):
+            bs = [L[i]["b"] for i in c.get("ids") or [] if i in L]
+            return (min(b[0] for b in bs), max(b[2] for b in bs)) if bs else None
+        for m in ms:
+            want = set(m["cell"]["row"])
+            ri = next((k for k, r in enumerate(rows) if any(set(c.get("ids") or []) & want for c in r) or
+                       any(L.get(i, {}).get("split_of") in want for c in r for i in c.get("ids") or [])), None)
+            if ri is None:
+                continue
+            x0, x1 = m["cell"]["x"]
+            best, bo = None, 0.0
+            for j, c in enumerate(rows[ri]):
+                if c.get("ids") or c.get("_added"):
+                    continue
+                xs = [xr(r[j]) for r in rows if len(r) == len(rows[ri]) and r is not rows[ri] and xr(r[j])]
+                if not xs:
+                    continue
+                a0, a1 = sorted(v[0] for v in xs)[len(xs) // 2], sorted(v[1] for v in xs)[len(xs) // 2]
+                ov = max(0.0, min(a1, x1) - max(a0, x0)) / max(1.0, min(a1 - a0, x1 - x0))
+                if ov > bo:
+                    best, bo = j, ov
+            if best is None or bo < 0.5:
+                continue
+            tds = [e for e in trs[ri] if e.tag in ("td", "th")]
+            if best >= len(tds) or len(tds[best]) or (tds[best].text or "").strip():
+                continue
+            M.sub(tds[best], "named-content", {"content-type": "added", "specific-use": "argon"},
+                  " ".join(str(m["text"]).split()))
+            rows[ri][best]["_added"] = True
+            rec["missed"].remove(m)
+            self.stats["table_cells_added"] += 1
 
     def alto_block(self, parent, b, lp, q):
         if b.get("kind") == "table" and b.get("part"):          # a later part of a table printed in two columns

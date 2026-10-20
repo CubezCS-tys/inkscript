@@ -450,3 +450,15 @@ override one another (they are one person's edits in order). Precedence stays pe
 mark_noise over lines a person touched only in part keeps its other lines: under the whole-patch rule, marking 15 of
 the judge's ~60 show-through lines on 0744 p1 brought the other 45 back as text
 ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), "Correction tool v1").
+
+**D35 · A table cell Azure did not read takes the model's reading, inside the cell (2026-10-20, experiment 43 fix
+round 3).** Two serious pages of the exam's proof pack (0201 p11, 0295 p3) had no Azure line for the lost cells at
+all, so "rebuild from Azure's words" had nothing to rebuild from; the model had read them and listed them as
+`missed` (printed text no Azure line covers, already allowed as added paragraphs). Chosen: put that text into the
+empty cell after the line it follows, only when the cell's column and row are known and its box holds ink; marked
+`content-type="added"` (no ink box), flagged low for a look; anything else stays outside and is flagged high, and
+a one-page retry may re-give the page (a retry patch now carries its missed texts). Not chosen: leaving the cells
+empty (the table's numbers are then wrong to a reader) or OCRing the cell crop locally (a second reader for a
+handful of digits). Honorifics and roles (same round) follow D33: the printed name kept, the change logged
+([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), "Fix round 3 (proof pack)").
+

@@ -27,6 +27,7 @@ import prompt43 as P  # noqa: E402
 import replay43 as RP  # noqa: E402
 
 ST, C, OUT = JG.ST, JG.C, JG.OUT
+MISSED = False                  # --missed: the patch carries the page's "missed" texts (table cells, fix round 3)
 NOTE = """
 A REVIEWER compared your earlier answer for page {page} with the scan and found a problem:
   {evidence}
@@ -147,7 +148,9 @@ def retry(run: str, stem: str, p: int, instruction: str, evidence: str, blocks: 
     was = sorted({i for b in old_pg.get("blocks") or [] if isinstance(b, dict) for i in PA.block_lines(b)})
     patch = dict(id=f"r-{stem[:4]}-p{p}-1", run=run, article=stem, page=p, action="replace_page_blocks",
                  targets=dict(lines=was, blocks=[]),
-                 payload=dict(blocks=chk.get("page", {}).get("blocks", []), noise=chk.get("noise", []), was_lines=was),
+                 payload=dict(blocks=chk.get("page", {}).get("blocks", []), noise=chk.get("noise", []), was_lines=was,
+                              **({"missed": [m for m in new_ans.get("missed") or [] if isinstance(m, dict)
+                                             and str(m.get("after", "")).startswith(f"{p}:")]} if MISSED else {})),
                  source="gemini-retry", confidence=None, evidence=evidence, reason=f"retry: {chk['why']}",
                  created=time.strftime("%Y-%m-%d %H:%M"), apply=bool(chk["ok"]), model=model)
     out.update(check={k: chk[k] for k in ("ok", "why", "missing", "dup", "bad_split", "lost")}, patch=patch,
@@ -158,7 +161,8 @@ def retry(run: str, stem: str, p: int, instruction: str, evidence: str, blocks: 
     f.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"  check: {chk['why']} -> {'apply' if chk['ok'] else 'owner'}")
     pdir = (OUT / "v33_300_judged" / "patches" if run == "v33_300" else OUT / "v33_300b_final" / "patches"
-            if run == "v33_300b" else JG.J / f"{run}_judged" / "patches")          # v33_300b: the exam (2026-10-20)
+            if run == "v33_300b" else OUT / run / "patches" if run.startswith("v33_300b_")
+            else JG.J / f"{run}_judged" / "patches")          # v33_300b: the exam (2026-10-20); v33_300b_fix3: round 3
     ps = [q for q in PA.load_patches(pdir, stem) if q["id"] != patch["id"]]
     PA.save_patches(pdir, stem, ps + [patch])
     return out
@@ -173,7 +177,10 @@ def main():
     ap.add_argument("--blocks", nargs="*", default=[])
     ap.add_argument("--model", default="gemini-4-argon")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--missed", action="store_true", help="the patch carries the page's missed texts (table cells)")
     a = ap.parse_args()
+    global MISSED
+    MISSED = a.missed
     s, p = a.page.rsplit(":", 1)
     retry(a.run, s, int(p), a.instruction, a.evidence, a.blocks, a.model, a.dry_run)
 

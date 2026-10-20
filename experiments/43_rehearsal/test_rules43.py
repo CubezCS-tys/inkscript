@@ -371,3 +371,39 @@ def test_latin_join():
     assert RU.latin_join("to establish a classificat-", "ion scheme for") == "join"
     assert RU.latin_join("the Islamic perspective -", "and this") is None              # a dash, not a cut word
     assert RU.latin_join("القسم-", "الثاني") is None
+
+
+# ---- fix round 3 (2026-10-20, the proof pack)
+
+def _halves(text, fixes=()):
+    ans = {"fixes": list(fixes)}
+    log = RU.new_log()
+    RU.guillemet_halves(ans, {"1:1": dict(text=text, b=[0, 0, 10, 10], page=1)}, log)
+    t = text
+    for f in ans["fixes"]:
+        if f["from"] in t:
+            t = t.replace(f["from"], f["to"], 1)
+    return t
+
+
+def test_guillemet_halves():
+    assert _halves("كتاب ((الاستشراق / الشرق كما خلقه الغرب)» المترجم") == "كتاب «الاستشراق / الشرق كما خلقه الغرب» المترجم"
+    assert _halves("كلمة « قفا)» وكل") == "كلمة « قفا» وكل"
+    assert _halves("«أنه ورثه نبوته وحكمته)).(١٧).") == "«أنه ورثه نبوته وحكمته».(١٧)."
+    assert _halves("قال «كتاب (الأمالي)» هنا") == "قال «كتاب (الأمالي)» هنا"           # a real bracket inside
+    assert _halves("المهددة بالانقراض)».") == "المهددة بالانقراض»."                   # opener on an earlier line
+    # the model already fixed it: nothing more
+    assert _halves("الحنفية)» انه", [{"line": "1:1", "from": "الحنفية)»", "to": "الحنفية »"}]) == "الحنفية » انه"
+
+
+def test_honorifics_and_roles():
+    import meta43
+    for printed, name in (("أ.د. صالح الدوسي الزهراني", "صالح الدوسي الزهراني"), ("د / علي ابراهيم الفرحان", "علي ابراهيم الفرحان"),
+                          ("أ. م.د / سلامة منصور محمد", "سلامة منصور محمد"), ("الدكتور السير سيدنى سميث", "سيدنى سميث"),
+                          ("Dr.RAMDANI LAALA", "RAMDANI LAALA"), ("انور شاؤل المحامى", "انور شاؤل"),
+                          ("السيد عبد الفتاح عفيفى", "السيد عبد الفتاح عفيفى"), ("داليا سمير سالم", "داليا سمير سالم")):
+        assert meta43.strip_honorific(printed)[0] == name, printed
+    assert meta43.role_kind("ترجمة") == "translator" and meta43.role_kind("مراجعة:") == "reviewer"
+    assert meta43.role_kind("بقلم") is None and meta43.role_kind("إعداد") is None
+    assert meta43.same_person_latin("جيوسيب كاروزو", "Giuseppe Caruso") > 0.7
+    assert meta43.same_person_latin("جيوسيب كاروزو", "Elizabeth Morgan") < 0.7

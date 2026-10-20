@@ -771,6 +771,170 @@ def guillemets(ans, lines, words, log):
     log["guillemets"].append(dict(rec, decision="guillemets", fixes=n))
 
 
+# ------------------------------------------------------------------------------------------------ guillemet halves
+# (2026-10-20, fix round 3, the proof pack: a stray ")" before » 170 times in 33 articles of the exam, «« الاستشراق)» ».
+# Not made by rules43.guillemets: Azure itself reads a printed » as ")»" (318 times in the exam's lines) and an
+# opening « as "((" or "«(" in the same pair; the model fixed some, rules43.guillemets turns "((" into "«" but left
+# the ")". Looked at: 0367 p1 «الاستشراق / الشرق كما خلقه الغرب» is printed with guillemets only.)
+
+def _sim_text(ans, lid, t):
+    """Line lid's text after the fixes listed so far (structure.Store applies them in order, first occurrence)."""
+    for f in ans.get("fixes") or []:
+        if isinstance(f, dict) and str(f.get("line")) == lid and f.get("from") and f["from"] in t \
+                and f.get("from") != f.get("to"):
+            t = t.replace(f["from"], f.get("to") or "", 1)
+    return t
+
+
+def _halves_once(t: str):
+    """One edit (start, end, replacement) that makes a half-read guillemet pair whole, or None.
+    (a) ")»" whose ")" closes no "(" since the last opener (« or (( ) -> "»"; (b) "«(" whose "(" is not closed
+    before the next » -> "«"; (c) "((" closed by » (no « or )) between) -> "«"; (d) "«" closed by "))" -> "»"."""
+    for m in re.finditer(r"\)(\s?)»", t):
+        i = m.start()
+        s0 = max(t.rfind("«", 0, i), t.rfind("((", 0, i))
+        seg = t[s0 + 1 if s0 >= 0 else 0:i]
+        seg = seg[1:] if t[s0:s0 + 2] == "((" else seg
+        if seg.count("(") <= seg.count(")"):
+            return i, i + 1, ""
+    for m in re.finditer(r"«(\s?)\(", t):
+        j = m.end() - 1
+        nxt = t.find("»", j)
+        seg = t[j + 1:nxt if nxt >= 0 else len(t)]
+        if seg.count(")") <= seg.count("("):
+            return j, j + 1, ""
+    for m in re.finditer(r"\(\(", t):
+        rest = t[m.end():]
+        k = re.search(r"«|»|\)\)|\(\(", rest)
+        if k and k.group(0) == "»":
+            return m.start(), m.end(), "«"
+    for m in re.finditer(r"«", t):
+        rest = t[m.end():]
+        k = re.search(r"«|»|\)\)|\(\(", rest)
+        if k and k.group(0) == "))":
+            s = m.end() + k.start()
+            return s, s + 2, "»"
+    return None
+
+
+def _fix_span(t: str, s: int, e: int, rep: str):
+    """(from, to) for an edit at t[s:e]: the words around it, widened until `from` first occurs at that place."""
+    a, b = s, e
+    while a > 0 and not t[a - 1].isspace():
+        a -= 1
+    while b < len(t) and not t[b].isspace():
+        b += 1
+    while t.find(t[a:b]) != a:
+        a2 = t.rfind(" ", 0, max(0, a - 1))
+        a = 0 if a2 < 0 else a2 + 1
+        if a == 0 and t.find(t[a:b]) != 0:
+            return None
+    return t[a:b], t[a:s] + rep + t[e:b]
+
+
+def guillemet_halves(ans, lines, log):
+    """A guillemet pair Azure read half as brackets (")»", "«(", "((…»", "«…))") made whole by a code fix (why
+    "code: guillemet read as a bracket"). D30 holds: the print has the guillemet only."""
+    fx = ans.setdefault("fixes", [])
+    for lid, L in lines.items():
+        t0 = L["text"]
+        if "»" not in t0 and "«" not in t0 and ")»" not in t0:
+            continue
+        t = _sim_text(ans, lid, t0)
+        for _ in range(8):
+            ed = _halves_once(t)
+            if ed is None:
+                break
+            sp = _fix_span(t, *ed)
+            if sp is None:
+                break
+            frm, to = sp
+            fx.append({"line": lid, "from": frm, "to": to,
+                       "why": "code: guillemet read as a bracket (rules43.guillemet_halves)"})
+            log["guillemet_halves"].append(dict(line=lid, page=L["page"], frm=frm, to=to))
+            t = t.replace(frm, to, 1)
+
+
+# ------------------------------------------------------------------------------------------------ table cells Azure missed
+# (2026-10-20, fix round 3, the proof pack's two serious pages: 0201 p11 table 4 with 13 of 60 cells empty, 0295 p3
+# three cells lost. Azure has no line there (the row numbers «١» «٢» «٤» were not read at all); the model saw them and
+# gave them as "missed" after the previous cell's line, so they became paragraphs after the table, and the cells
+# stayed empty. Every Azure line of both pages is in a cell.)
+CELL_INK = 0.015            # the empty cell's box (its column's x range x its row's y range, shrunk 15% each way)
+CELL_TEXT_MAX = 30          # a cell's missed text: at most this many characters and 4 words
+
+
+def _cell_ids(c):
+    return [str(i) for i in (c.get("lines") or [])] if isinstance(c, dict) else []
+
+
+def table_missed_cells(ans, lines, words, log):
+    """A "missed" text the model gave after a table cell's line goes into the next cell (row by row, reading order)
+    when that cell is empty, its column and row are known from the other cells, its box holds ink and the text is
+    short. The cell is tagged on the missed entry ("cell": the row's line ids and the column's x range, 0-1000);
+    masters43.Master43.table writes it into the cell (content-type "added": no Azure line, no ink box), not after the
+    table. Anything else stays where it was and is logged (table_cells_unplaced; flags43 table_cells_lost)."""
+    missed = ans.get("missed") or []
+    if not missed:
+        return
+    where = {}
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict) or b.get("type") != "table" or not isinstance(b.get("rows"), list):
+                continue
+            rows = [r if isinstance(r, list) else [] for r in b["rows"]]
+            for ri, r in enumerate(rows):
+                for ci, c in enumerate(r):
+                    for i in _cell_ids(c):
+                        where[i] = (pg.get("page"), rows, ri, ci)
+    if not where:
+        return
+    dark = getattr(words, "dark", None)
+
+    def box_of(i):
+        j = base_of(i, lines) or i
+        return lines[j]["b"] if j in lines else None
+    taken = set()
+    for m in missed:
+        if not isinstance(m, dict) or str(m.get("after")) not in where:
+            continue
+        p, rows, ri, ci = where[str(m["after"])]
+        t = " ".join(str(m.get("text") or "").split())
+        rec = dict(page=p, after=str(m["after"]), text=t)
+        nxt = (ri, ci + 1) if ci + 1 < len(rows[ri]) else (ri + 1, 0)
+        if nxt[0] >= len(rows) or nxt[1] >= len(rows[nxt[0]]):
+            log["table_cells_unplaced"].append(dict(rec, why="no cell after it"))
+            continue
+        cell = rows[nxt[0]][nxt[1]]
+        if not isinstance(cell, dict) or _cell_ids(cell) or nxt in taken or id(cell) in taken:
+            log["table_cells_unplaced"].append(dict(rec, why="the next cell is not empty"))
+            continue
+        if not t or len(t) > CELL_TEXT_MAX or len(t.split()) > 4:
+            log["table_cells_unplaced"].append(dict(rec, why="not a short cell text"))
+            continue
+        n = len(rows[nxt[0]])
+        col = [box_of(i) for r in rows if len(r) == n and r is not rows[nxt[0]]
+               for i in _cell_ids(r[nxt[1]])[:1]]
+        col = [b for b in col if b]
+        row = [box_of(i) for c in rows[nxt[0]] for i in _cell_ids(c)]
+        row = [b for b in row if b]
+        if len(col) < 2 or not row:
+            log["table_cells_unplaced"].append(dict(rec, why="column or row unknown"))
+            continue
+        import statistics
+        x0, x1 = statistics.median(b[0] for b in col), statistics.median(b[2] for b in col)
+        y0, y1 = min(b[1] for b in row), max(b[3] for b in row)
+        bx = [x0 + 0.15 * (x1 - x0), y0 + 0.15 * (y1 - y0), x1 - 0.15 * (x1 - x0), y1 - 0.15 * (y1 - y0)]
+        ink = dark(p, bx) if dark else None
+        if ink is None or ink < CELL_INK:
+            log["table_cells_unplaced"].append(dict(rec, why=f"no ink in the cell's box ({ink})", box=bx))
+            continue
+        m["cell"] = dict(row=[i for c in rows[nxt[0]] for i in _cell_ids(c)], x=[round(x0), round(x1)],
+                         box=[round(v) for v in bx])
+        taken.add(id(cell))
+        log["table_cells_added"].append(dict(rec, ink=round(ink, 3), box=[round(v) for v in bx]))
+
+
 # ------------------------------------------------------------------------------------------------ vocalised lines
 # (2026-10-20, 1875 p17 in the 300: in densely vowelled verse Azure loses letters: «الزَّاد» -> «الْادُ», «الْكَرِيمِ»
 # -> «الْكَرِ»; the model did not restore them. Flag only: the fix route is a close-up re-read of the line.)
@@ -1565,7 +1729,8 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[], rubric_title=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[], rubric_title=[],
+                guillemet_halves=[], table_cells_added=[], table_cells_unplaced=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1600,6 +1765,8 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     page_numbers(ans, lines, log)
     math_parts(ans, lines, log)
     inline_math_junk(ans, lines, words, log)
+    guillemet_halves(ans, lines, log)
+    table_missed_cells(ans, lines, words, log)
     fixes(ans, log)
     return ans, log
 

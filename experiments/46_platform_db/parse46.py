@@ -214,10 +214,12 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
     for pd in am.findall("pub-date"):
         y = first("year", pd)
         sd = first("string-date", pd)
-        pub_year = pub_year or year_of(y)
-        pub_date = pub_date or sd or y
-        R["dates"].append(dict(stem=stem, date_type="pub", iso=pd.get("iso-8601-date"), year=year_of(y),
-                               printed=sd or y, **S))
+        hij = pd.get("calendar") == "islamic"             # experiment 43 fix round 3: the Hijri year beside
+        if not hij:                                        # (or, alone, instead of) the Gregorian one
+            pub_year = pub_year or year_of(y)
+            pub_date = pub_date or sd or y
+        R["dates"].append(dict(stem=stem, date_type="pub-hijri" if hij else "pub", iso=pd.get("iso-8601-date"),
+                               year=year_of(y), printed=sd or y, **S))
     for d in am.findall("history/date"):
         R["dates"].append(dict(stem=stem, date_type=d.get("date-type"), iso=d.get("iso-8601-date"),
                                year=year_of(first("year", d)), printed=first("string-date", d) or first("year", d), **S))
@@ -250,6 +252,9 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
     # ---- authors and affiliations
     for i, c in enumerate(am.iter("contrib")):
         nm = c.find("string-name")
+        if nm is None:                                     # the corrected name inside name-alternatives (D33)
+            nm = next((x for x in c.iterfind("name-alternatives/string-name")
+                       if x.get("specific-use") != "printed-on-the-page" and not x.get(XML_LANG)), None)
         if nm is not None:
             name = text_of(nm)
         else:
@@ -257,7 +262,7 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
             name = " ".join(x for x in (first("given-names", n), first("surname", n)) if x) if n is not None else ""
         em = c.find("email")
         R["authors"].append(dict(stem=stem, seq=i, printed_name=name, email=text_of(em) if em is not None else None,
-                                 **S))
+                                 role=c.get("contrib-type") or "author", **S))
         for j, a in enumerate(c.findall("aff")):
             orgs = [text_of(x) for x in a.findall("institution") if x.get("content-type") != "dept"]
             depts = [text_of(x) for x in a.findall("institution") if x.get("content-type") == "dept"]
