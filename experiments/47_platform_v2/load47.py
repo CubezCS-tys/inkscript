@@ -31,8 +31,8 @@ sys.path.insert(0, str(HERE))
 import biblio47  # noqa: E402
 import ink47  # noqa: E402
 import parse47  # noqa: E402
-from common47 import (DB, E43, OUT43, connect, fold, insert, jdump, marc, now, sha_file, sha_files,  # noqa: E402
-                      stemmed, AYAT, SURAS)
+from common47 import (DB, E43, OUT43, connect, country_iso, fill_pk, fold, insert, jdump, marc, now, sha_file, sha_files,  # noqa: E402
+                      spk, stemmed, AYAT, SURAS)
 
 PURPOSE = {"final": 1, "judged": 2, "base": 3, "exam": 4, "sample": 5, "replay": 6}
 VERSION_TABLES = ["line_map", "sections", "block_parts", "blocks", "page_regions", "note_call_targets", "note_calls",
@@ -84,7 +84,10 @@ def static(con):
         dict(actor_id="model:gemini-4-argon", kind="model", name="gemini-4-argon", note="the reader (masters)"),
         dict(actor_id="model:gemini-3.8-flash", kind="model", name="gemini-3.8-flash", note="judge"),
         dict(actor_id="rule:d33", kind="rule", name="docs/decisions.md D33", note="metadata corrected, printed kept"),
-        dict(actor_id="catalogue:mandumah", kind="agent", name="Mandumah catalogue (marc.db)", note=None)],
+        dict(actor_id="catalogue:mandumah", kind="agent", name="Mandumah catalogue (marc.db)", note=None),
+        dict(actor_id="model:gemini-front-page", kind="model", name="Gemini front-page reader (S3 gemini.title.json)",
+             note="the reading carried in each document's Azure JSON under gemini_front_page; the model version is "
+                  "not recorded there")],
         "INSERT OR IGNORE")
     insert(con, "role_codes", [
         dict(code=c, name_ar=a, name_en=e, counts_as_author=k) for c, a, e, k in (
@@ -142,7 +145,18 @@ def next_uid(con) -> int:
 def anchor_pks(con, anchors: dict) -> dict:
     """Insert the anchors (run-independent, never deleted) and return anchor_key -> anchor_pk."""
     rows = list(anchors.values())
-    insert(con, "ink_anchors", [{k: v for k, v in a.items()} for a in rows], "INSERT OR IGNORE")
+    # word-exact anchors (from Azure's own words) replace a line-union one a flag may have made for the same key, so
+    # the box does not depend on which run or file came first
+    rows = fill_pk("ink_anchors", [dict(a) for a in rows])
+    if rows:
+        cols = list(rows[0])
+        # the same key from another run or file: the box is Azure's (identical); the method kept is the most precise
+        con.executemany(f"""INSERT INTO ink_anchors ({','.join(cols)}) VALUES ({','.join('?' * len(cols))})
+            ON CONFLICT(anchor_key) DO UPDATE SET x = excluded.x, y = excluded.y, w = excluded.w, h = excluded.h,
+            text_azure = excluded.text_azure, wc_min = excluded.wc_min,
+            method = CASE WHEN instr('words line box page', excluded.method) < instr('words line box page',
+                     ink_anchors.method) THEN excluded.method ELSE ink_anchors.method END""",
+                        [tuple(r.get(c) for c in cols) for r in rows])
     out = {}
     keys = [a["anchor_key"] for a in rows]
     for i in range(0, len(keys), 500):
@@ -256,7 +270,7 @@ def delete_version(con, vid: int):
     con.execute("DELETE FROM link_run_versions WHERE version_id = ?", (vid,))
 
 
-def write_version(con, V: dict, vid: int) -> dict:
+def write_version(con, V: dict, vid: int, vkey: str) -> dict:
     A = anchor_pks(con, V["anchors"])
 
     def ap(k):
@@ -278,7 +292,7 @@ def write_version(con, V: dict, vid: int) -> dict:
     blocks = []
     for b in V["blocks"]:
         d = {k: v for k, v in b.items() if not k.startswith("_") and k != "anchor_key"}
-        d.update(version_id=vid, uid=next_uid(con), anchor_pk=ap(b["anchor_key"]), n_flags=0)
+        d.update(version_id=vid, uid=spk("uid", vkey, "block", b["block_id"]), anchor_pk=ap(b["anchor_key"]), n_flags=0)
         blocks.append(d)
     n["blocks"] = insert(con, "blocks", blocks)
     n["block_parts"] = insert(con, "block_parts", strip(V["block_parts"]))
@@ -296,9 +310,9 @@ def write_version(con, V: dict, vid: int) -> dict:
     for m in V["byline_mentions"]:
         d = {k: v for k, v in m.items() if not k.startswith("_") and k != "anchor_key"}
         d.update(version_id=vid, anchor_pk=ap(m["anchor_key"]))
-        cur = con.execute("INSERT INTO byline_mentions (" + ",".join(d) + ") VALUES (" + ",".join("?" * len(d)) +
-                          ")", tuple(d.values()))
-        m["_pk"] = cur.lastrowid
+        fill_pk("byline_mentions", [d])
+        insert(con, "byline_mentions", [d], "INSERT")
+        m["_pk"] = d["mention_pk"]
     pos_pk = {m["byline_pos"]: m["_pk"] for m in V["byline_mentions"]}
     import inst46
     for a in V["affiliations"]:
@@ -311,10 +325,10 @@ def write_version(con, V: dict, vid: int) -> dict:
         has_inst = bool(a["orgname"] or a["dept"] or re.search(
             r"جامع|كلي|قسم|معهد|مركز|وزار|univ|coll|facult|depart|institut|ministry|centre|center", printed, re.I))
         kind = "institution" if has_inst else ("place-only" if (a["city"] or a["country"]) else "position-only")
-        con.execute("""INSERT INTO affiliation_mentions (mention_pk, seq, printed, position_title, org_text, faculty_text,
-                       dept_text, city, country_printed, kind) VALUES (?,?,?,?,?,?,?,?,?,?)""",
-                    (mpk, a["seq"] + 1, printed, pos_title, a["orgname"], None, a["dept"], a["city"], a["country"],
-                     kind))
+        insert(con, "affiliation_mentions", [dict(mention_pk=mpk, seq=a["seq"] + 1, printed=printed,
+                                                  position_title=pos_title, org_text=a["orgname"], faculty_text=None,
+                                                  dept_text=a["dept"], city=a["city"], country_printed=a["country"],
+                                                  country_code=country_iso(a["country"]), kind=kind)], "INSERT")
     n["byline_mentions"] = len(V["byline_mentions"])
     # citation mentions (unresolved here; link47 resolves back references and builds the cited works)
     mrows = []
@@ -380,7 +394,7 @@ def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: 
             vid = old["version_id"]
             delete_version(con, vid)
         else:
-            vid = con.execute("SELECT coalesce(max(version_id), 0) + 1 FROM versions").fetchone()[0]
+            vid = spk("versions", f"V:{stem}@{run}")      # from the version key, never from load order
         con.execute("""INSERT INTO versions (version_id, version_key, stem, run, stamp_run, made, load_id, jats_sha, alto_sha,
                        pdf_sha, sidecars_sha, inputs_sha, pages_covered, pages_expected, complete, content_in_db,
                        is_current, masters_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,0,?)
@@ -393,7 +407,7 @@ def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: 
                      sha_file(files[0]), sha_file(files[1]), sha_file(mdir / f"{stem}.pdf"),
                      sha_files(files[2:4]), sha, pages_text(pages), exp, int(len(pages) >= exp),
                      f"{run}/masters/{stem}.jats.xml"))
-        n = write_version(con, V, vid)
+        n = write_version(con, V, vid, f"V:{stem}@{run}")
         counts.update(n)
         # consistency of the line crosswalk with the masters' own 'P:N' labels on fixes and misprints
         for c in V["text_corrections"]:
@@ -439,8 +453,8 @@ def choose_current(con, stems: list):
                     why = "purpose:final>judged>base>exam>sample"
                 else:
                     why = "newest"
-        con.execute("UPDATE versions SET is_current = 0, current_reason = NULL WHERE stem = ? AND version_id <> ?",
-                    (stem, best["version_id"]))
+        con.execute("UPDATE versions SET is_current = 0, current_reason = NULL, chosen_by = CASE WHEN chosen_by = "
+                    "'person' THEN chosen_by END WHERE stem = ? AND version_id <> ?", (stem, best["version_id"]))
         con.execute("UPDATE versions SET is_current = 1, current_reason = ?, chosen_by = coalesce(chosen_by, "
                     "'agent:load47') WHERE version_id = ?", (why, best["version_id"]))
         lvl = {"final": "final", "judged": "judged"}.get(best["kind"], "structured")
@@ -517,17 +531,19 @@ def anchor_from_words(con, spans: dict, method: str) -> dict:
             x1 = max(r["x"] + r["w"] for r in ls)
             y1 = max(r["y"] + r["h"] for r in ls)
             wc = [r["wc_min"] for r in ls if r["wc_min"] is not None]
-            cur = con.execute("INSERT INTO ink_anchors (anchor_key, stem, page, first_word, last_word, x, y, w, h, "
-                              "text_azure, wc_min, method) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
-                              (k, stem, page, a, b, x0, y0, x1 - x0, y1 - y0, " / ".join(r["text"] for r in ls),
-                               min(wc) if wc else None, method))
-            out[k] = cur.lastrowid
+            row = fill_pk("ink_anchors", [dict(anchor_key=k, stem=stem, page=page, first_word=a, last_word=b, x=x0, y=y0,
+                                               w=x1 - x0, h=y1 - y0, text_azure=" / ".join(r["text"] for r in ls),
+                                               wc_min=min(wc) if wc else None, method=method)])[0]
+            insert(con, "ink_anchors", [row], "INSERT")
+            out[k] = row["anchor_pk"]
     return out
 
 
 def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
     vids = {r["stem"]: r["version_id"] for r in con.execute("SELECT stem, version_id FROM versions WHERE run = ?",
                                                             (run,))}
+    vload = {r["version_id"]: r["load_id"] for r in con.execute("SELECT version_id, load_id FROM versions WHERE run = ?",
+                                                                (run,))}
     rows = []
     for pdir in pdirs:
         for f in sorted(pdir.glob("*.json")) if pdir.exists() else []:
@@ -551,7 +567,9 @@ def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
                 rows.append(dict(patch_key=key_, run=prun, stem=stem, patch_id=p["id"], domain=dom, op=act,
                                  page=p.get("page"), targets=jdump(p.get("targets")), payload=jdump(p.get("payload")),
                                  source=src, priority={"person": 1, "judge": 2, "gemini-retry": 3}.get(src, 4),
-                                 actor_id=("model:" + p["model"]) if p.get("model") and src == "judge" else None,
+                                 actor_id=("model:" + p["model"]) if p.get("model") and src in ("judge", "gemini-retry")
+                                 else ("model:gemini-4-argon" if src == "gemini-retry" else
+                                       ("person:owner" if src == "person" else None)),
                                  finding_pk=None, confidence=p.get("confidence"), evidence=jdump(p.get("evidence")),
                                  reason=p.get("reason"), apply=int(bool(p.get("apply"))), created=p.get("created"),
                                  root_id="local-43", file_key=str(f.relative_to(OUT43)), sha=sha_file(f),
@@ -563,10 +581,17 @@ def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
     seen = {}
     for r in rows:
         seen[r["patch_key"]] = {k: v for k, v in r.items() if not k.startswith("_")}
-    insert(con, "patches", list(seen.values()))     # patches never change after they are made: same key, same row
+    # patches never change after they are made: same key, same row. A patch copied into several runs' folders is
+    # kept from the first file in name order, whichever run is loaded first
+    keep = []
+    for r in seen.values():
+        old = con.execute("SELECT file_key FROM patches WHERE patch_key = ?", (r["patch_key"],)).fetchone()
+        if not old or r["file_key"] < old[0] or r["file_key"] == old[0]:
+            keep.append(r)
+    insert(con, "patches", keep)
     # what this run's build did with them (the masters' <stem>.patches.json)
-    con.execute("DELETE FROM patch_applications WHERE version_id IN (SELECT version_id FROM versions WHERE run = ?)",
-                (run,))
+    con.execute("DELETE FROM patch_applications WHERE version_id IN (SELECT version_id FROM versions WHERE run = ?) OR "
+                "(version_id IS NULL AND patch_key IN (SELECT patch_key FROM patches WHERE run = ?))", (run, run))
     apps = []
     for sc in sorted(mdir.glob("*.patches.json")):
         try:
@@ -575,6 +600,8 @@ def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
             continue
         stem = d.get("stem") or sc.name[:-len(".patches.json")]
         vid = vids.get(stem)
+        if vid is None:
+            continue                 # a sidecar of a document this run did not load (--stem): not this load's build
         st = {}
         for kind in ("applied", "skipped", "overridden"):
             for e in d.get(kind) or []:
@@ -586,11 +613,12 @@ def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
         for pid, (s, why) in st.items():
             pk = next((k for k in seen if k.endswith(f"|{stem}|{pid}")), None)
             if pk:
-                apps.append(dict(patch_key=pk, version_id=vid, load_id=load_id, status=s, why=jdump(why)))
+                apps.append(dict(patch_key=pk, version_id=vid, load_id=vload.get(vid) or load_id, status=s,
+                                 why=jdump(why)))
     for pk, r in seen.items():
         if r["stem"] in vids and not any(a["patch_key"] == pk for a in apps) and \
                 (mdir / f"{r['stem']}.patches.json").exists():
-            apps.append(dict(patch_key=pk, version_id=vids[r["stem"]], load_id=load_id,
+            apps.append(dict(patch_key=pk, version_id=vids[r["stem"]], load_id=vload.get(vids[r["stem"]]) or load_id,
                              status="proposed" if not r["apply"] else "not-built", why=None))
     insert(con, "patch_applications", apps)
     # blocks rewritten by an applied patch carry it as their text source
@@ -812,16 +840,18 @@ def refresh_search(con, stems: list):
             for kind, col, lang in (("alt-text", "alt_ar", "ar"), ("alt-text", "alt_en", "en"),
                                     ("figure-text", "text_in_figure", None), ("equation", "tex", None)):
                 if f[col]:
-                    rows.append(dict(uid=next_uid(con), version_id=vid, unit_kind=kind,
+                    rows.append(dict(uid=spk("uid", vid, kind, f"{f['figure_id']}:{col}"), version_id=vid, unit_kind=kind,
                                      unit_id=f"{f['figure_id']}:{col}", lang=lang, text=f[col],
                                      anchor_pk=f["anchor_pk"]))
         for v in con.execute("SELECT verse_id, text, anchor_pk FROM verse_lines WHERE version_id = ?", (vid,)):
-            rows.append(dict(uid=next_uid(con), version_id=vid, unit_kind="verse", unit_id=v["verse_id"], lang="ar",
+            rows.append(dict(uid=spk("uid", vid, "verse", v["verse_id"]), version_id=vid, unit_kind="verse",
+                             unit_id=v["verse_id"], lang="ar",
                              text=v["text"], anchor_pk=v["anchor_pk"]))
         for m in con.execute("SELECT mention_id, printed, anchor_pk FROM citation_mentions WHERE version_id = ? AND "
                              "kind IN ('full', 'short')", (vid,)):
             if m["printed"]:
-                rows.append(dict(uid=next_uid(con), version_id=vid, unit_kind="citation", unit_id=m["mention_id"],
+                rows.append(dict(uid=spk("uid", vid, "citation", m["mention_id"]), version_id=vid, unit_kind="citation",
+                                 unit_id=m["mention_id"],
                                  lang=None, text=m["printed"], anchor_pk=m["anchor_pk"]))
         for r in rows:
             r["folded"] = fold(r["text"])
@@ -882,7 +912,8 @@ def main(argv=None):
                    root_rel, note) VALUES (?,?,?,?,?,?,?,?, 'local-43', ?, ?) ON CONFLICT(run) DO UPDATE SET
                    kind = excluded.kind, parent_run = excluded.parent_run, model = excluded.model,
                    prompt_hash = excluded.prompt_hash, rules_hash = excluded.rules_hash, started = excluded.started,
-                   finished = excluded.finished, note = coalesce(excluded.note, runs.note)""",
+                   finished = excluded.finished, note = CASE WHEN runs.note LIKE 'parent of a loaded run%'
+                   THEN excluded.note ELSE coalesce(excluded.note, runs.note) END""",
                 (run, kind, parent_of(run) if kind != "exam" or run.endswith("_final") else None, st.get("model"),
                  st.get("prompt_hash"), st.get("rules_hash"), min((s.get("made") or "") for s in stamps) if stamps
                  else None, max((s.get("made") or "") for s in stamps) if stamps else None, run, a.note))
@@ -921,7 +952,6 @@ def main(argv=None):
     rows = {r[0]: con.execute(f"SELECT count(*) FROM [{r[0]}]").fetchone()[0] for r in con.execute(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'search_fts%' AND name NOT LIKE "
         "'sqlite_%'")}
-    rows["_uid_hwm"] = _uid[0]
     con.execute("UPDATE load_events SET finished = ?, n_loaded = ?, n_unchanged = ?, rows_by_table = ? WHERE load_id = ?",
                 (now(), done, skipped, json.dumps(rows), load_id))
     con.commit()

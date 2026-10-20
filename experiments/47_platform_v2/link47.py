@@ -34,8 +34,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import biblio47  # noqa: E402
-from common47 import (DATA, DB, E46, V46, calendar_of, connect, fold, greg_to_hijri, hijri_to_greg, insert, jdump,  # noqa: E402
-                      key, marc, name_parts, now, ratio, sha_files, script, tokset, year_of)
+from common47 import (DATA, DB, E46, V46, akey, split_life, calendar_of, connect, fill_pk, fold, greg_to_hijri,  # noqa: E402
+                      hijri_to_greg, insert, jdump, key, marc, name_key, name_parts, now, ratio, sha_files, script,
+                      to_int, tokset, year_of)
 
 sys.path.insert(0, str(E46))
 import link46  # noqa: E402
@@ -50,28 +51,52 @@ CACHE = DATA / "link_cache47.json"
 
 # ------------------------------------------------------------------ keys
 def title_of(p: dict) -> str | None:
+    """The cited work's own title: a journal article's or a chapter's title, else the book's (fix round 1: a chapter
+    «La preuve» in a book is the chapter, not the book; the book is its container)."""
     if not p:
         return None
-    if p.get("article_title"):
-        return p["article_title"]
-    return p.get("source_title") or p.get("chapter_title")
+    return p.get("article_title") or p.get("chapter_title") or p.get("source_title")
+
+
+def container_of(p: dict) -> str | None:
+    """The book a chapter sits in (journal names vary too much in print to tell articles apart by them)."""
+    if not p or not p.get("chapter_title") or p.get("article_title"):
+        return None
+    return p.get("source_title")
 
 
 def tnorm(t: str | None) -> str:
     k = link46.tkey(t or "")
+    k = akey(k) if re.search("[A-Za-zÀ-ɏ]", k) else k
     ws = [re.sub(r"^(ال|و?بال|لل)(?=\S{2,})", "", w) for w in k.split()]
     ws = ["بن" if w in ("ابن", "بن") else w for w in ws]
     return " ".join(w for w in ws if w)
 
 
+def _join_abd(s: str) -> str:
+    """«عبد الحكيم» and «عبدالحكيم» are one name word"""
+    return re.sub(r"(?:^|(?<=\s))(ابو|عبد)\s+(?=\S)", r"\1", s)
+
+
+def _atoks(sn, gn) -> set:
+    out = set()
+    for w in _join_abd(akey(f"{gn or ''} {sn or ''}")).split():
+        w2 = re.sub(r"^ال", "", w)
+        if len(w2) >= 3 and w2 not in COMMON and w not in COMMON:
+            out.add(w2)
+    return out
+
+
 def author_tokens(p: dict) -> set:
     out = set()
     for sn, gn in (p or {}).get("authors") or []:
-        for w in key(f"{gn or ''} {sn or ''}").split():
-            w2 = re.sub(r"^ال", "", w)
-            if len(w2) >= 3 and w2 not in COMMON and w not in COMMON:
-                out.add(w2)
+        out |= _atoks(sn, gn)
     return out
+
+
+def first_author_tokens(p: dict) -> set:
+    a = (p or {}).get("authors") or []
+    return _atoks(*a[0]) if a else set()
 
 
 def compatible(a: set, b: set) -> bool:
@@ -87,6 +112,32 @@ def same_title(t1: str, t2: str) -> bool:
     if min(len(a), len(b)) >= 6 and (a in b or b in a) and tokset(t1, t2) >= THRESHOLDS["in_article_title_tokset"]:
         return True
     return tokset(t1, t2) >= 0.8 and ratio(t1, t2) >= THRESHOLDS["in_article_title_ratio"]
+
+
+def same_container(a: dict, b: dict) -> bool:
+    return not a["ck"] or not b["ck"] or same_title(a["ck"], b["ck"])
+
+
+def contains_title(text_norm: str, title_norm: str) -> bool:
+    """The title's words, in order, inside a printed citation («Rafi-ud-Din, The Qur'ān and Modern Knowledge, p. 259»)."""
+    if not title_norm or len(title_norm.split()) < 2 or len(title_norm) < 8:
+        return False
+    return f" {title_norm} " in f" {text_norm} "
+
+
+def title_in_text(m: dict, cands: list) -> dict | None:
+    """The full (else any) citation whose title is printed in m's text, by an author m shares (when m names one);
+    when several titles are printed, the first one is m's own («Rafi-ud-Din, The Qur'ān …, pp. 148-150; The Ideology
+    of the Future …»)."""
+    best = None
+    for w in cands:
+        if not w["tk"] or (m["au"] and not (m["au"] & w["au"])) or not contains_title(m["pn"], w["tk"]):
+            continue
+        pos = f" {m['pn']} ".find(f" {w['tk']} ")
+        k = (pos, w["kind"] != "full", w["reading_ord"])
+        if best is None or k < best[0]:
+            best = (k, w)
+    return best[1] if best else None
 
 
 class UF:
@@ -108,60 +159,141 @@ class UF:
 
 # ------------------------------------------------------------------ 1. resolution inside one version
 HINT_STOP = re.compile(r"\b(ص|ج|جـ|مج|ط|p|pp|vol|no|voir|voy|see|cf|انظر|ينظر|يراجع|راجع|السابق|et|al|in|وانظر|"
-                       r"المرجع|المصدر|مرجع|مصدر|سابق|نفسه|ذاته)\b")
+                       r"المرجع|المصدر|مرجع|مصدر|سابق|نفسه|ذاته|op|cit|loc|ibid|id|aussi|also|cite|par|dans)\b")
+YEAR_RE = re.compile(r"(?<![0-9])(1[0-9]{3}|20[0-9]{2})(?![0-9])")
+# a note in between that breaks «المرجع نفسه» only when it looks like a citation (a page, a back reference, a
+# publisher); an explanatory note («* لم تتوفر احصاءات …») does not
+CITE_LIKE = re.compile(r"(?:^|\s)(?:ص|ص\.|صفحة|ج|p|pp|s|vol)\s*\.?\s*[0-9٠-٩]|المرجع|المصدر|مرجع|مصدر|op\.?\s*cit|"
+                       r"ibid|ibíd|loc\.?\s*cit|(?:^|\s)دار\s|مطبعة|مكتبة|منشورات|(?:^|\s)ط\s*[0-9٠-٩]|§|"
+                       r"(?:^|\s)n[°º]\s*\S|affaire|arr[êe]t|jugement|judgment|(?:^|\s)case\s|décision", re.I)
+OWN_WORK = re.compile(r"(?:مؤلف|كتاب|بحث|دراست|مقال|مرجع)نا|notre (?:ouvrage|article|étude)|our (?:book|study|article)",
+                      re.I)
+PAGE_NEAR = 30           # pages: a back reference continues the work last cited within this many pages
 
 
 def hint_words(h: str) -> list:
-    k = HINT_STOP.sub(" ", key(h or ""))
+    k = HINT_STOP.sub(" ", akey(h or ""))
     return [w for w in k.split() if len(w) >= 3 and w not in link46.STOP and not w.isdigit()]
 
 
+def page_of(x) -> int | None:
+    v = to_int(str(x)) if x not in (None, "") else None
+    return v if v and v < 20000 else None
+
+
 def resolve(con, vid: int) -> dict:
-    ms = [dict(r) for r in con.execute("SELECT * FROM citation_mentions WHERE version_id = ? ORDER BY reading_ord",
-                                       (vid,))]
+    ms = [dict(r) for r in con.execute("SELECT * FROM citation_mentions WHERE version_id = ? ORDER BY reading_ord, "
+                                       "mention_id", (vid,))]
     for m in ms:
         m["p"] = json.loads(m["parsed"]) if m["parsed"] else None
         m["tk"] = tnorm(title_of(m["p"])) if m["p"] else ""
+        m["ck"] = tnorm(container_of(m["p"])) if m["p"] else ""
         m["au"] = author_tokens(m["p"])
+        m["au1"] = first_author_tokens(m["p"])
+        m["pn"] = tnorm(m["printed"])
+        m["yr"] = year_of((m["p"] or {}).get("year")) if m["p"] else None
+        m["borrowed"] = None
+    # a citation whose parsed form lost its title (the reader's element-citation has none) takes the title of the
+    # full citation of the same author whose title is printed in it, or, failing that, the only one by that author
+    # with the same year
+    titled = [m for m in ms if m["kind"] in ("full", "short") and m["tk"]]
+    for m in ms:
+        if m["kind"] not in ("full", "short") or m["tk"] or not m["p"]:
+            continue
+        src = title_in_text(m, titled)
+        if not src and m["au"] and m["yr"]:
+            ys = [w for w in titled if w["kind"] == "full" and w["au"] & m["au"] and w["yr"] == m["yr"]]
+            if len({w["tk"] for w in ys}) == 1:
+                src = ys[0]
+        if src:
+            m["tk"], m["ck"], m["borrowed"] = src["tk"], src["ck"], src["mention_id"]
+            if not m["au"]:
+                m["au"], m["au1"] = set(src["au"]), set(src["au1"])
     works = [m for m in ms if m["kind"] in ("full", "short") and m["tk"]]
     uf = UF()
     for i, a in enumerate(works):
         uf.find(a["mention_pk"])
         for b in works[:i]:
+            if not same_container(a, b):
+                continue
             if compatible(a["au"], b["au"]) and same_title(a["tk"], b["tk"]):
                 uf.union(a["mention_pk"], b["mention_pk"])
             elif "short" in (a["kind"], b["kind"]) and a["au"] & b["au"] and tokset(a["tk"], b["tk"]) >= 0.6 and \
                     min(len(a["tk"].split()), len(b["tk"].split())) >= 2:
                 uf.union(a["mention_pk"], b["mention_pk"])       # same author, most title words (a misprinted title)
+            elif a["au"] & b["au"] and min(len(a["tk"].split()), len(b["tk"].split())) >= 3 and \
+                    ratio(a["tk"], b["tk"]) >= 0.85:
+                uf.union(a["mention_pk"], b["mention_pk"])       # same author, misprinted letters («Trautè … drait»)
+    # a short form left alone whose printed text carries the title of a full citation by a compatible author
+    root_kinds = defaultdict(set)
+    for m in works:
+        root_kinds[uf.find(m["mention_pk"])].add(m["kind"])
+    fulls = [w for w in works if w["kind"] == "full"]
+    for m in works:
+        if m["kind"] == "short" and "full" not in root_kinds[uf.find(m["mention_pk"])]:
+            w = title_in_text(m, [w for w in fulls if w["mention_pk"] != m["mention_pk"]])
+            if w:
+                uf.union(m["mention_pk"], w["mention_pk"])
+                m["borrowed"] = m["borrowed"] or w["mention_id"]
     clusters = defaultdict(list)
     for m in works:
         clusters[uf.find(m["mention_pk"])].append(m)
     canon = {}
     for root, mm in clusters.items():
-        fulls = [m for m in mm if m["kind"] == "full"]
-        c = min(fulls or mm, key=lambda m: m["reading_ord"])
+        fl = [m for m in mm if m["kind"] == "full"]
+        c = min(fl or mm, key=lambda m: (m["reading_ord"], m["mention_id"]))
         for m in mm:
             canon[m["mention_pk"]] = c["mention_pk"]
     by_pk = {m["mention_pk"]: m for m in ms}
+    # what each in-article work is known by: author tokens, first author, title (+ container) words, year
+    wk_au, wk_au1, wk_tw, wk_cw, wk_yr = defaultdict(set), defaultdict(set), defaultdict(set), defaultdict(set), {}
+    for m in works:
+        c = canon[m["mention_pk"]]
+        wk_au[c] |= m["au"]
+        wk_au1[c] |= m["au1"]
+        wk_tw[c] |= {w for w in m["tk"].split() if len(w) >= 3}
+        wk_cw[c] |= {w for w in m["ck"].split() if len(w) >= 3}
+        if m["yr"] and c not in wk_yr:
+            wk_yr[c] = m["yr"]
+    pages = defaultdict(list)     # canonical -> pages cited so far (reading order)
     notes = {r["note_id"]: dict(r) for r in con.execute("SELECT note_id, ord, text FROM notes WHERE version_id = ?", (vid,))}
+    byline_toks = set()
+    for (n,) in con.execute("SELECT name_text FROM byline_mentions WHERE version_id = ?", (vid,)):
+        byline_toks |= _atoks(n, "")
     note_has = {m["container_id"] for m in ms if m["container_kind"] == "note"}
     upd = []
     stats = Counter()
     target = {}      # mention_pk -> canonical pk it counts for
     prev = None
     refs = [m for m in ms if m["container_kind"] == "ref-list" and m["kind"] in ("full", "short")]
-    for m in ms:
+
+    def by_page(cands, pg):
+        """the candidate whose cited pages run on to this one («op. cit., p. 954» after p. 945, 946 …)"""
+        if not pg:
+            return None
+        d = sorted((min(abs(pg - q) for q in pages[c]), k, c) for k, c in enumerate(cands) if pages.get(c))
+        if d and d[0][0] <= PAGE_NEAR and (len(d) == 1 or d[1][0] > 2 * d[0][0] + 5):
+            return d[0][2]
+        return None
+
+    for idx, m in enumerate(ms):
         pk = m["mention_pk"]
         u = dict(full_mention_pk=None, resolve_method=None, resolve_score=None, resolved_by=None, unresolved_why=None,
                  resolve_evidence=m["resolve_evidence"])
         k = m["kind"]
+        pg = page_of(m["cited_pages"])
         if k == "full":
             u.update(full_mention_pk=pk, resolve_method="self", resolve_score=1.0, resolved_by="link47")
             target[pk] = canon.get(pk, pk)
         elif k == "short":
             c = canon.get(pk)
             if c and c != pk and by_pk[c]["kind"] == "full":
-                u.update(full_mention_pk=c, resolve_method="short-form", resolve_score=0.9, resolved_by="link47")
+                how = "short-form+title-in-text" if m["borrowed"] else "short-form"
+                u.update(full_mention_pk=c, resolve_method=how, resolve_score=0.9 if not m["borrowed"] else 0.85,
+                         resolved_by="link47")
+                if m["borrowed"]:
+                    ev = json.loads(m["resolve_evidence"]) if m["resolve_evidence"] else {}
+                    u["resolve_evidence"] = jdump(dict(ev, title_from=m["borrowed"]))
             else:
                 u.update(unresolved_why="no-full-citation" if m["tk"] else "no-title")
             target[pk] = canon.get(pk, pk)
@@ -169,7 +301,16 @@ def resolve(con, vid: int) -> dict:
             target[pk] = pk
         elif k in ("ibid", "op_cit", "loc_cit"):
             ev = json.loads(m["resolve_evidence"]) if m["resolve_evidence"] else {}
-            hw = hint_words(ev.get("hint") or "") if k != "ibid" else []
+            hint = ev.get("hint") or ""
+            hw = hint_words(hint) if k != "ibid" else []
+            if not hw and k != "ibid" and m["marker"] and m["printed"] and m["marker"] in m["printed"]:
+                tail = m["printed"].split(m["marker"], 1)[1]       # «Op. cit Ziauddin Sardar.»: the name after it
+                if not tail.strip(" .،,") and m["container_kind"] == "note":
+                    nt = (notes.get(m["container_id"]) or {}).get("text") or ""
+                    tail = nt.split(m["marker"], 1)[1] if m["marker"] in nt else ""
+                if 0 < len(tail.split()) <= 6 and not re.search(r"[0-9٠-٩]", tail):
+                    hw, hint = hint_words(tail), tail
+            years = {int(y) for y in YEAR_RE.findall(fold(hint))} if k != "ibid" else set()
             tgt, how, sc, why = None, None, None, None
             if prev is not None and prev["container_kind"] == m["container_kind"] == "note" and \
                     prev["container_id"] == m["container_id"] and prev["kind"] in ("full", "short") and not hw:
@@ -182,43 +323,82 @@ def resolve(con, vid: int) -> dict:
                 upd.append((None, u["resolve_method"], None, u["resolved_by"], None, u["resolve_evidence"], pk))
                 prev = m
                 continue
-            earlier = [x for x in ms[:ms.index(m)] if x["kind"] in ("full", "short") and x["tk"]]
-            if hw:
+            earlier = [x for x in ms[:idx] if x["kind"] in ("full", "short") and x["tk"]]
+            if OWN_WORK.search(f"{m['marker'] or ''} {hint} {m['printed'] or ''}") and byline_toks:
+                # «مؤلفنا السابق» («our earlier work»): the latest earlier work by the article's own author
+                pool = list(reversed(earlier)) + [x for x in refs if x not in earlier]
+                own = [canon.get(x["mention_pk"], x["mention_pk"]) for x in pool
+                       if len(wk_au[canon.get(x["mention_pk"], x["mention_pk"])] & byline_toks) >= 2 or
+                       (wk_au[canon.get(x["mention_pk"], x["mention_pk"])] and
+                        wk_au[canon.get(x["mention_pk"], x["mention_pk"])] <= byline_toks)]
+                if own:
+                    tgt, how, sc = own[0], "own-earlier-work", 0.8
+                    hw = []
+            if tgt:
+                pass
+            elif hw:
                 hs = set(hw) | {re.sub(r"^ال", "", h) for h in hw}
                 pool = list(reversed(earlier)) + [x for x in refs if x not in earlier]
-                by_a = [x for x in pool if x["au"] & hs]
-                if by_a:
-                    cl = []
-                    for x in by_a:
-                        c = canon.get(x["mention_pk"], x["mention_pk"])
-                        if c not in cl:
-                            cl.append(c)
-                    left = [h for h in hw if re.sub(r"^ال", "", h) not in set().union(*(x["au"] for x in by_a))]
-                    titled = []
-                    for c in cl:
-                        tw = {w for w in by_pk[c]["tk"].split() if len(w) >= 3}
-                        n = len(tw & {re.sub(r"^ال", "", h) for h in left} | tw & set(left))
-                        if n:
-                            titled.append((n, c))
-                    if titled:
-                        tgt, how, sc = max(titled)[1], "same-author+title-words", 0.95
-                    elif len(cl) == 1:
-                        tgt, how, sc = cl[0], "same-author-earliest", 0.9
-                    elif len(left) < 3:
-                        tgt, how, sc = cl[0], "same-author-latest", 0.6
-                        why = f"author has {len(cl)} works cited earlier; the most recent taken"
-                    else:
-                        why = "ambiguous-author"
+                cands = []                 # in-article works, most recently cited first
+                for x in pool:
+                    c = canon.get(x["mention_pk"], x["mention_pk"])
+                    if c not in cands:
+                        cands.append(c)
+                A = [c for c in cands if wk_au[c] & hs]
+                if A:
+                    if years and [c for c in A if wk_yr.get(c) in years]:
+                        A = [c for c in A if wk_yr.get(c) in years]       # «ROLDAN et al., 2006, op. cit.»
+                    if len(A) > 1 and [c for c in A if wk_au1[c] & hs]:
+                        A = [c for c in A if wk_au1[c] & hs]              # the name printed is the first author
+                    left = {h for h in hs if h not in set().union(*(wk_au[c] for c in A))}
+                    # words of the work's own title, then of the book it sits in («La preuve», in Commentaire …)
+                    hits = [(len(wk_tw[c] & left) + len(wk_cw[c] & left),
+                             round(len(wk_tw[c] & left) / max(1, len(wk_tw[c])), 3), c) for c in A]
+                    top = max((h[:2] for h in hits), default=(0, 0))
+                    T = [c for n, cv, c in hits if (n, cv) == top] if top[1] else A   # the book's words alone never pick
+                    base = "same-author+title-words" if top[1] else ("same-author+year" if years and len(A) == 1 and
+                                                                    wk_yr.get(A[0]) in years else "same-author-earliest")
+                    unexplained = len(left) >= 3 and not top[1]
+                    if len(T) > 1 and unexplained:
+                        why = ("no-earlier-full: the title printed matches none of the author's earlier works "
+                               f"({len(T)} by that author)")
+                        T = []
+                    if len(T) == 1:
+                        tgt, how, sc = T[0], base, 0.95 if top[1] else (0.7 if unexplained else 0.9)
+                        if unexplained:
+                            why = "the author's only earlier work; words printed beside the name do not match it"
+                    elif T:
+                        bp = by_page(T, pg)
+                        if bp:
+                            tgt, how, sc = bp, ("same-author+title-words+page" if top[0] else
+                                                "same-author+page-continuity"), 0.75
+                        else:
+                            tgt, how, sc = T[0], "same-author-latest", 0.5
+                            why = (f"ambiguous: {len(T)} works by the author fit the words printed; the one cited "
+                                   f"most recently is taken (citation-style rule)")
                 if not tgt and not why and len(hw) <= THRESHOLDS["short_note_words"]:
-                    for x in list(reversed(earlier)) + refs:
-                        tw = [w for w in x["tk"].split() if len(w) >= 3]
-                        if tw and len(set(tw) & {re.sub(r"^ال", "", h) for h in hw} | set(tw) & set(hw)) >= min(2, len(tw)):
-                            tgt, how, sc = canon.get(x["mention_pk"], x["mention_pk"]), "title-words", 0.8
-                            break
+                    hs2 = set(hw) | {re.sub(r"^ال", "", h) for h in hw}
+                    hits = []
+                    for c in cands:
+                        tw = wk_tw[c]
+                        n = len(tw & hs2)
+                        if tw and n >= min(2, len(tw)):
+                            hits.append((n / len(tw), n, -cands.index(c), c))
+                    if hits:
+                        hits.sort(reverse=True)
+                        T = [h[3] for h in hits if h[:2] == hits[0][:2]]
+                        if len(T) == 1:
+                            tgt, how, sc = T[0], "title-words", 0.8
+                        else:
+                            bp = by_page(T, pg)
+                            tgt, how, sc = (bp, "title-words+page", 0.7) if bp else (T[0], "title-words-latest", 0.5)
+                            if not bp:
+                                why = f"ambiguous: {len(T)} works share the title words; the most recent taken"
                 if not tgt and not why and (k != "ibid" and len(hw) >= 1):
                     why = "no-earlier-full: names a work not parsed earlier in the article"
             if not tgt and not why:
-                # ibid (or a bare op. cit.): the mention just before; a short unparsed note in between breaks it
+                # ibid (or a bare op. cit.): the mention just before; a citation-like note with no parsed citation
+                # in between breaks it
                 p = prev
                 if p is None:
                     why = "no-earlier-mention"
@@ -228,11 +408,12 @@ def resolve(con, vid: int) -> dict:
                         lo, hi = notes.get(p["container_id"], {}).get("ord"), notes.get(m["container_id"], {}).get("ord")
                         if lo is not None and hi is not None:
                             for nid, n in notes.items():
-                                if lo < n["ord"] < hi and nid not in note_has and len((n["text"] or "").split()) <= 12 \
-                                        and re.search(r"[0-9٠-٩]", n["text"] or ""):
+                                t = (n["text"] or "").strip()
+                                if lo < n["ord"] < hi and nid not in note_has and len(t.split()) <= 30 \
+                                        and not t.startswith("*") and CITE_LIKE.search(t):
                                     gap = True
                     if gap:
-                        why = "previous-not-parsed: a short note without a parsed citation lies in between"
+                        why = "previous-not-parsed: a citation-like note without a parsed citation lies in between"
                     elif p["kind"] in ("ibid", "op_cit", "loc_cit"):
                         if target.get(p["mention_pk"]):
                             tgt, how, sc = target[p["mention_pk"]], "previous-mention (chain collapsed)", 0.85
@@ -250,23 +431,37 @@ def resolve(con, vid: int) -> dict:
             else:
                 u["unresolved_why"] = why
                 stats[f"unresolved:{(why or '').split(':')[0]}"] += 1
+        if target.get(pk) and pg:
+            pages[target[pk]].append(pg)
         upd.append((u["full_mention_pk"], u["resolve_method"], u["resolve_score"], u["resolved_by"],
                     u["unresolved_why"], u["resolve_evidence"], pk))
         if k != "see_also":
             prev = m
     con.executemany("UPDATE citation_mentions SET full_mention_pk = ?, resolve_method = ?, resolve_score = ?, "
                     "resolved_by = ?, unresolved_why = ?, resolve_evidence = ? WHERE mention_pk = ?", upd)
-    return dict(stats=stats, clusters={c: [m["mention_pk"] for m in mm] for c, mm in
-                                       ((canon[mm[0]["mention_pk"]], mm) for mm in clusters.values())},
+    return dict(stats=stats, clusters={canon[mm[0]["mention_pk"]]: [m["mention_pk"] for m in mm]
+                                       for mm in clusters.values()},
                 mentions={m["mention_pk"]: m for m in works})
 
 
 # ------------------------------------------------------------------ 2. cited works across articles
 def build_cited_works(con, res: dict, load_id: int) -> dict:
-    groups = []          # (canonical pk, mention dict, member pks, citing stem)
-    for vid, r in res.items():
-        for c, pks in r["clusters"].items():
-            groups.append((c, r["mentions"][c], pks))
+    """One card per work across the shown versions (title key + container + a shared author word). The card's id
+    comes from its content key; a card whose key moved (a new member changed its representative) keeps the id its
+    members had, and an id no card keeps any more is retired into merged_ids — never re-minted silently."""
+    vkey = {r[0]: r[1] for r in con.execute("SELECT version_id, version_key FROM versions")}
+    old_of = {}          # (version_key, mention_id) -> old active cited_work_id
+    for r in con.execute("""SELECT v.version_key, c.mention_id, w.cited_work_id FROM cited_work_members m
+                            JOIN citation_mentions c ON c.mention_pk = m.full_mention_pk
+                            JOIN versions v ON v.version_id = c.version_id
+                            JOIN cited_works w ON w.cited_work_pk = m.cited_work_pk WHERE w.status = 'active'"""):
+        old_of[(r[0], r[1])] = r[2]
+    old_active = {r[0] for r in con.execute("SELECT cited_work_id FROM cited_works WHERE status = 'active'")}
+    groups = []          # (canonical pk, mention dict, member pks, version id)
+    for vid in sorted(res, key=lambda v: vkey[v]):
+        r = res[vid]
+        for c in sorted(r["clusters"], key=lambda c: r["mentions"][c]["mention_id"]):
+            groups.append((c, r["mentions"][c], r["clusters"][c], vid))
     by_t = defaultdict(list)
     for i, g in enumerate(groups):
         by_t[g[1]["tk"]].append(i)
@@ -275,69 +470,187 @@ def build_cited_works(con, res: dict, load_id: int) -> dict:
         for a in ix:
             uf.find(a)
             for b in ix:
-                if b < a and compatible(groups[a][1]["au"], groups[b][1]["au"]):
+                if b < a and compatible(groups[a][1]["au"], groups[b][1]["au"]) and \
+                        same_container(groups[a][1], groups[b][1]):
                     uf.union(a, b)
     cw = defaultdict(list)
     for i in range(len(groups)):
         cw[uf.find(i)].append(i)
-    con.execute("DELETE FROM cited_work_members")
-    con.execute("DELETE FROM cited_work_authors")
-    keep = set()
-    out = {}
+    cards = []
     for root, ix in cw.items():
         reps = [groups[i] for i in ix]
-        rep = max(reps, key=lambda g: (g[1]["kind"] == "full", len(json.dumps(g[1]["p"] or {}))))[1]
-        au = Counter(w for g in reps for w in g[1]["au"])
-        akey = au.most_common(1)[0][0] if au else ""
-        nat = f"cw:{rep['tk']}|{akey}"
-        cid = biblio47.public_id(con, "cited_work", nat, load_id)
+        allm = [res[g[3]]["mentions"][pk] for g in reps for pk in g[2] if pk in res[g[3]]["mentions"]]
+        rep = max(reps, key=lambda g: (g[1]["kind"] == "full", bool((g[1]["p"] or {}).get("authors")),
+                                       len(json.dumps(g[1]["p"] or {}, sort_keys=True)),
+                                       [-ord(ch) for ch in f"{vkey[g[3]]}|{g[1]['mention_id']}"]))[1]
+        au = Counter(w for g in reps for w in sorted(g[1]["au"]))
+        akey_ = sorted(au.items(), key=lambda x: (-x[1], x[0]))[0][0] if au else ""
+        nat = f"cw:{rep['tk']}|{rep['ck']}|{akey_}" if rep["ck"] else f"cw:{rep['tk']}|{akey_}"
+        members = [(vkey[g[3]], res[g[3]]["mentions"][pk]["mention_id"]) for g in reps for pk in g[2]
+                   if pk in res[g[3]]["mentions"] and (res[g[3]]["mentions"][pk]["kind"] == "full" or pk == g[0])]
+        # the authors: the representative's, else the most common author list among all the members
+        alist = (rep["p"] or {}).get("authors") or []
+        if not alist:
+            cnt = Counter(json.dumps(m["p"]["authors"], ensure_ascii=False) for m in allm
+                          if m["p"] and m["p"].get("authors"))
+            if cnt:
+                alist = json.loads(sorted(cnt.items(), key=lambda x: (-x[1], x[0]))[0][0])
+        cards.append(dict(nat=nat, rep=rep, reps=reps, members=members, akey=akey_, authors=alist))
+    # ids: a known content key keeps its id; otherwise the old id most of the members had; otherwise a new one
+    claimed = {}
+    for cd in cards:
+        r = con.execute("SELECT public_id FROM id_registry WHERE kind = 'cited_work' AND natural_key = ?",
+                        (cd["nat"],)).fetchone()
+        if r and r[0] not in claimed.values():
+            cd["id"] = r[0]
+            claimed[cd["nat"]] = r[0]
+    rest = [cd for cd in cards if "id" not in cd]
+    prefs = []
+    for cd in rest:
+        votes = Counter(old_of[m] for m in cd["members"] if m in old_of)
+        for oid, n in votes.items():
+            prefs.append((-n, cd["nat"], oid))
+    for _, nat, oid in sorted(prefs):
+        cd = next(c for c in rest if c["nat"] == nat)
+        if "id" not in cd and oid not in claimed.values():
+            cd["id"] = oid
+            claimed[nat] = oid
+    for cd in sorted(rest, key=lambda c: c["nat"]):
+        if "id" not in cd:
+            nat, n = cd["nat"], 1
+            while True:
+                pid = biblio47.public_id(con, "cited_work", nat, load_id)
+                if pid not in claimed.values():
+                    break
+                n += 1
+                nat = f"{cd['nat']}#{n}"         # two cards with one content key (authors told them apart)
+            cd["id"] = pid
+            claimed[nat] = pid
+    con.execute("DELETE FROM cited_work_members")
+    con.execute("DELETE FROM cited_work_authors")
+    keep, out = set(), {}
+    for cd in cards:
+        rep, cid = cd["rep"], cd["id"]
         p = rep["p"] or {}
         yp = p.get("year")
         y = year_of(yp)
         cal = calendar_of(f"{yp or ''} {rep['printed'] or ''}" if y and re.search(r"%s\s*هـ" % y, fold(rep["printed"] or ""))
                           else yp, y) if y else None
         pt = p.get("pub_type") or ("article" if p.get("article_title") else "book")
-        con.execute("""INSERT INTO cited_works (cited_work_id, pub_type, title, title_key, first_author_key, year_printed,
-                       year_calendar, year_hijri, year_greg, edition_note, place, publisher, lang, status, method,
-                       built_load) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?, 'active', ?, ?)
+        if p.get("chapter_title") and not p.get("article_title") and pt == "book":
+            pt = "chapter"
+        row = fill_pk("cited_works", [dict(cited_work_id=cid)])[0]
+        cpk = row["cited_work_pk"]
+        con.execute("""INSERT INTO cited_works (cited_work_pk, cited_work_id, pub_type, title, title_key, first_author_key,
+                       year_printed, year_calendar, year_hijri, year_greg, edition_note, place, publisher, lang, status,
+                       method, built_load) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?, 'active', ?, ?)
                        ON CONFLICT(cited_work_id) DO UPDATE SET pub_type = excluded.pub_type, title = excluded.title,
                        title_key = excluded.title_key, first_author_key = excluded.first_author_key,
                        year_printed = excluded.year_printed, year_calendar = excluded.year_calendar,
                        year_hijri = excluded.year_hijri, year_greg = excluded.year_greg, place = excluded.place,
                        publisher = excluded.publisher, lang = excluded.lang, status = 'active',
                        built_load = excluded.built_load""",
-                    (cid, pt, title_of(p), rep["tk"], akey or None, yp, cal,
+                    (cpk, cid, pt, title_of(p), rep["tk"], cd["akey"] or None, yp, cal,
                      y if cal == "hijri" else (greg_to_hijri(y) if y else None),
                      hijri_to_greg(y) if cal == "hijri" else y, (p.get("extra") or {}).get("edition") if isinstance(
                          p.get("extra"), dict) else None, p.get("place"), p.get("publisher"),
                      "ara" if script(title_of(p)) == "Arab" else ("lat" if title_of(p) else None),
-                     "title-key + shared author word", load_id))
+                     "title-key + container + shared author word", load_id))
         cpk = con.execute("SELECT cited_work_pk FROM cited_works WHERE cited_work_id = ?", (cid,)).fetchone()[0]
-        keep.add(cpk)
-        for c, m, pks in reps:
+        keep.add(cid)
+        for c, m, pks, vid in cd["reps"]:
             for pk in pks:
-                mm = next((x for r in res.values() for x in [r["mentions"].get(pk)] if x), None)
+                mm = res[vid]["mentions"].get(pk)
                 if mm and (mm["kind"] == "full" or pk == c):
                     con.execute("INSERT OR REPLACE INTO cited_work_members VALUES (?,?,?,?,?, 'link47', NULL)",
                                 (pk, cpk, "in-article-first" if pk == c else "in-article-repeat",
                                  1.0 if pk == c else 0.9,
-                                 jdump(dict(title_key=m["tk"], authors=sorted(m["au"])))))
-        for k, (sn, gn) in enumerate(p.get("authors") or []):
+                                 jdump(dict(title_key=m["tk"], container_key=m["ck"] or None, authors=sorted(m["au"])))))
+        for k, (sn, gn) in enumerate(cd["authors"]):
             printed = " ".join(x for x in (gn, sn) if x)
             pp = name_parts(printed)
             con.execute("INSERT OR REPLACE INTO cited_work_authors (cited_work_pk, seq, printed, honorific, kunya, ism, "
                         "nasab, nisba, laqab, shuhra, latin, name_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                         (cpk, k + 1, printed, pp["titles"], pp["kunya"], pp["ism"], pp["nasab"], pp["nisba"],
                          pp["laqab"], pp["shuhra"], printed if script(printed) == "Latn" else None,
-                         key(printed).replace(" ", "")))
-        out[cpk] = dict(rep=rep, citing=set())
-    con.execute(f"UPDATE cited_works SET status = 'merged' WHERE cited_work_pk NOT IN ({','.join(map(str, keep)) or 0})")
+                         name_key(printed)))
+        out[cpk] = dict(rep=rep, citing=set(), authors=cd["authors"])
+    # retired ids: written to merged_ids (old -> the card that holds most of its members now)
+    new_of = {m: cd["id"] for cd in cards for m in cd["members"]}
+    for oid in sorted(old_active - keep):
+        votes = Counter(new_of[m] for m, o in old_of.items() if o == oid and m in new_of)
+        con.execute("UPDATE cited_works SET status = 'merged' WHERE cited_work_id = ?", (oid,))
+        if votes:
+            nid = sorted(votes.items(), key=lambda x: (-x[1], x[0]))[0][0]
+            con.execute("INSERT OR REPLACE INTO merged_ids VALUES (?,?, 'cited_work', 'merged-into', ?, ?, 'link47', "
+                        "NULL)", (oid, nid, now(), f"{sum(votes.values())} of its members are now on {nid}"))
     return out
 
 
 # ------------------------------------------------------------------ 3. real links
-def link_cards(con, mcon, cards: dict, link_run_id: int) -> Counter:
+def name_tokens(name: str | None) -> set:
+    out = set()
+    for w in _join_abd(akey(split_life(name or "")[0])).split():
+        w2 = re.sub(r"^ال", "", w)
+        if len(w2) >= 3 and w2 not in COMMON and w not in COMMON:
+            out.add(w2)
+    return out
+
+
+def near_token(a: str, b: str) -> bool:
+    """the same name word, allowing one misread letter in a word of 4+ («العبلي» for «العيلي»)"""
+    if a == b:
+        return True
+    if min(len(a), len(b)) < 4 or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        return sum(x != y for x, y in zip(a, b)) == 1
+    lo, hi = (a, b) if len(a) < len(b) else (b, a)
+    return any(hi[:i] + hi[i + 1:] == lo for i in range(len(hi)))
+
+
+def judge_link(confident: bool, authors: list, target_names: list, where: str):
+    """(status, best, method, author evidence). A link is best only when the authors agree (a shared name word in
+    either script, the record's Latin heading included); a match the record's own authors contradict is rejected;
+    one with no author to compare stays a candidate, however good the title."""
+    cited = set()
+    for sn, gn in authors or []:
+        cited |= _atoks(sn, gn)
+        whole = akey(f"{gn or ''} {sn or ''}").replace(" ", "").replace("-", "")
+        if script(whole) == "Latn" and len(whole) >= 6:
+            cited.add(whole)                       # «Abdul Razzaq» = abdulrazzaq
+    tgt = set()
+    for n, lat in target_names:
+        tgt |= name_tokens(n) | name_tokens(lat)
+    for t in [t for t in tgt if script(t) == "Arab"]:
+        # the catalogue's own Arabic→Latin name pairs (translit_pairs): «عبدالرزاق» -> abdulrazzaq, abdul razzaq …
+        for lat in TRANSLIT.get(t, set()) | TRANSLIT.get("ال" + t, set()):
+            tgt.add(lat.replace(" ", "").replace("-", ""))
+            tgt |= {w for w in lat.split() if len(w) >= 3 and w not in COMMON}
+    shared = sorted({a for a in cited for b in tgt if near_token(a, b)})
+    if not cited or not tgt:
+        agree = "unknown"
+    else:
+        agree = "agree" if shared else "contradict"
+    ev = dict(agreement=agree, cited=sorted(cited), target=sorted(tgt), shared=shared)
+    base = "catalogue-fts" if where == "catalogue" else "article-fts"
+    if agree == "contradict":
+        return "rejected", 0, f"{base} (authors contradict)", ev
+    if confident and agree == "agree":
+        return "accepted", 1, f"{base}+validate", ev
+    if confident:
+        return "candidate", 0, f"{base}+validate (no author to compare)", ev
+    return "candidate", 0, f"{base} (title only)" + (", authors agree" if agree == "agree" else ""), ev
+
+
+TRANSLIT = {}
+
+
+def link_cards(con, mcon, cards: dict, link_run_id: int, load_id=None) -> Counter:
     cache = json.loads(CACHE.read_text(encoding="utf-8")) if CACHE.exists() else {}
+    TRANSLIT.clear()
+    for ar, lat in con.execute("SELECT arabic, latin FROM translit_pairs WHERE share >= 0.05 AND n >= 5"):
+        TRANSLIT.setdefault(ar, set()).add(lat)
     chash = sha_files([HERE / "link47.py", E46 / "link46.py"])
     con.execute("DELETE FROM citation_links WHERE asserted_by = 'link47'")
     con.execute("DELETE FROM work_relations WHERE asserted_by = 'link47'")
@@ -369,7 +682,7 @@ def link_cards(con, mcon, cards: dict, link_run_id: int) -> Counter:
         rep = c["rep"]
         p = rep["p"] or {}
         w = dict(article_title=p.get("article_title"), pub_type=p.get("pub_type"), source_title=p.get("source_title"),
-                 chapter_title=p.get("chapter_title"), authors=json.dumps(p.get("authors") or [], ensure_ascii=False),
+                 chapter_title=p.get("chapter_title"), authors=json.dumps(c["authors"] or [], ensure_ascii=False),
                  year_int=year_of(p.get("year")), stem=None)
         ck = hashlib.sha1(json.dumps([chash, w], ensure_ascii=False, sort_keys=True).encode()).hexdigest()
         if ck not in cache:
@@ -380,74 +693,55 @@ def link_cards(con, mcon, cards: dict, link_run_id: int) -> Counter:
             ev = json.loads(f["evidence"])
             c999 = ev.get("c999")
             rel = ev.get("relation")
-            tp = biblio47.ensure_catalogued_pub(con, mcon, c999) if c999 else None
+            tp = biblio47.ensure_catalogued_pub(con, mcon, c999, load_id) if c999 else None
             if tp and tp in c["citing"]:
                 S["dropped: catalogue match is a citing article itself"] += 1
             elif tp and rel in REL:
-                con.execute("INSERT INTO work_relations (subject_cited_work_pk, relation, inverse, object_pub_id, score, "
-                            "method, evidence, asserted_by, link_run_id) VALUES (?,?,?,?,?,?,?, 'link47', ?)",
-                            (cpk, REL[rel][0], REL[rel][1], tp, f["score"], f["method"], f["evidence"], link_run_id))
+                insert(con, "work_relations", [dict(subject_cited_work_pk=cpk, relation=REL[rel][0], inverse=REL[rel][1],
+                                                    object_pub_id=tp, score=f["score"], method=f["method"],
+                                                    evidence=f["evidence"], asserted_by="link47",
+                                                    link_run_id=link_run_id)], "INSERT")
                 S[f"relation:{REL[rel][0]}"] += 1
             elif tp:
-                ok = bool(f["best"])
-                con.execute("""INSERT OR IGNORE INTO citation_links (cited_work_pk, via_mention_pk, target_kind, target_pub_id,
-                               status, best, score, method, matched_on, evidence, asserted_by, link_run_id, created)
-                               VALUES (?,?, 'publication', ?, ?, ?, ?, ?, 'printed', ?, 'link47', ?, ?)""",
-                            (cpk, rep["mention_pk"], tp, "accepted" if ok else "candidate", int(ok), f["score"],
-                             "catalogue-fts+validate" if ok else "catalogue-fts (title only)", f["evidence"],
-                             link_run_id, now()))
-                S["link:catalogue:" + ("accepted" if ok else "candidate")] += 1
+                names = [(r["name"], r["latin"]) for r in con.execute(
+                    "SELECT name, latin FROM catalogue_contributors WHERE c999 = ? ORDER BY seq", (c999,))]
+                st, best, method, ag = judge_link(bool(f["best"]), c["authors"], names, "catalogue")
+                f_ev = jdump(dict(json.loads(f["evidence"]), authors=ag))
+                insert(con, "citation_links", [dict(
+                    cited_work_pk=cpk, via_mention_pk=rep["mention_pk"], target_kind="publication", target_pub_id=tp,
+                    status=st, best=best, score=f["score"], method=method, matched_on="printed", evidence=f_ev,
+                    asserted_by="link47", link_run_id=link_run_id, created=now())], "INSERT OR IGNORE")
+                S[f"link:catalogue:{st}"] += 1
         x = [a for a in arts if a["pub_id"] not in c["citing"]]
         fa = link46.link_articles(x, dict(w, stem="")) if len(link46.tkey(title_of(p)).split()) >= 2 else None
         if fa:
-            tp = next(a["pub_id"] for a in x if a["stem"] == fa["target_id"])
-            ok = bool(fa["best"])
-            con.execute("""INSERT OR IGNORE INTO citation_links (cited_work_pk, via_mention_pk, target_kind, target_pub_id,
-                           status, best, score, method, matched_on, evidence, asserted_by, link_run_id, created)
-                           VALUES (?,?, 'publication', ?, ?, ?, ?, ?, 'printed', ?, 'link47', ?, ?)""",
-                        (cpk, rep["mention_pk"], tp, "accepted" if ok else "candidate", int(ok), fa["score"],
-                         "article-fts+validate" if ok else "article-title (title only)", fa["evidence"], link_run_id,
-                         now()))
-            S["link:article:" + ("accepted" if ok else "candidate")] += 1
+            tgt = next(a for a in x if a["stem"] == fa["target_id"])
+            st, best, method, ag = judge_link(bool(fa["best"]), c["authors"], [(n, None) for n in tgt["_authors"]],
+                                              "article")
+            insert(con, "citation_links", [dict(
+                cited_work_pk=cpk, via_mention_pk=rep["mention_pk"], target_kind="publication",
+                target_pub_id=tgt["pub_id"], status=st, best=best, score=fa["score"], method=method,
+                matched_on="printed", evidence=jdump(dict(json.loads(fa["evidence"]), authors=ag)),
+                asserted_by="link47", link_run_id=link_run_id, created=now())], "INSERT OR IGNORE")
+            S[f"link:article:{st}"] += 1
         if (i + 1) % 500 == 0:
             print(f"  linked {i + 1}/{len(cards)} cards ({time.time() - t0:.0f} s)", flush=True)
             CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
     CACHE.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
-    # best: one accepted link per card and target kind
-    con.execute("""UPDATE citation_links SET best = 0 WHERE status = 'accepted' AND link_pk NOT IN (SELECT link_pk FROM
-                   (SELECT link_pk, row_number() OVER (PARTITION BY cited_work_pk ORDER BY score DESC) rn FROM
-                   citation_links WHERE status = 'accepted') WHERE rn = 1)""")
+    # best: one accepted link per card (the highest score; ties by target id)
+    con.execute("""UPDATE citation_links SET best = 0 WHERE best = 1 AND link_pk NOT IN (SELECT link_pk FROM
+                   (SELECT link_pk, row_number() OVER (PARTITION BY cited_work_pk ORDER BY score DESC, target_pub_id)
+                   rn FROM citation_links WHERE best = 1) WHERE rn = 1)""")
     return S
-
-
-def cited_authors_to_persons(con) -> int:
-    """A cited author is a person when the card's accepted link is a catalogue record whose contributor with an
-    authority id carries the cited surname (as a whole word)."""
-    n = 0
-    for r in con.execute("""SELECT a.cited_work_pk, a.seq, a.printed, p.c999 FROM cited_work_authors a
-                            JOIN citation_links l ON l.cited_work_pk = a.cited_work_pk AND l.status = 'accepted'
-                            AND l.best = 1 JOIN publications p ON p.pub_id = l.target_pub_id WHERE p.c999 IS NOT NULL""").fetchall():
-        sn = [w for w in key(r["printed"]).split() if len(re.sub(r"^ال", "", w)) >= 3 and w not in COMMON]
-        for c in con.execute("SELECT name, latin, authority_id FROM catalogue_contributors WHERE c999 = ? AND "
-                             "authority_id IS NOT NULL AND is_org = 0", (r["c999"],)).fetchall():
-            ws = set(key(c["name"]).split()) | {re.sub(r"^ال", "", w) for w in key(c["name"]).split()} | \
-                set(key(c["latin"] or "").split())
-            if sn and any(s in ws or re.sub(r"^ال", "", s) in ws for s in sn[-1:]):
-                pid = biblio47.public_id(con, "person", f"auth:{c['authority_id']}", None)
-                con.execute("UPDATE cited_work_authors SET person_id = ?, authority_id = ?, match_method = "
-                            "'surname-in-linked-record', match_score = 0.9 WHERE cited_work_pk = ? AND seq = ?",
-                            (pid, c["authority_id"], r["cited_work_pk"], r["seq"]))
-                n += 1
-                break
-    return n
 
 
 # ------------------------------------------------------------------ 4. experiment 46's hand checks
 def carry_checks(con, mcon) -> Counter:
     S = Counter()
     con.execute("DELETE FROM reviews WHERE source_file = 'link_checks'")
+    rv = []
     v46 = connect(V46, ro=True)
-    for c in v46.execute("SELECT * FROM link_checks").fetchall():
+    for c in v46.execute("SELECT * FROM link_checks ORDER BY rowid").fetchall():
         fk, fid = c["from_kind"], c["from_id"]
         stem = fid.split("|")[0]
         vid = con.execute("SELECT version_id FROM versions WHERE stem = ? AND is_current = 1", (stem,)).fetchone()
@@ -507,14 +801,15 @@ def carry_checks(con, mcon) -> Counter:
                     else:
                         attach = "v46 target not found in v2"
         S[attach.split(" (")[0]] += 1
-        insert(con, "reviews", [dict(subject_kind=kind or ("link" if fk == "work" else "resolution"),
+        rv.append((dict(subject_kind=kind or ("link" if fk == "work" else "resolution"),
                                      subject_key=subj or f"v46:{fk}:{fid}->{c['target_kind']}:{c['target_id']}",
                                      subject_fingerprint=fp,
                                      verdict={"near": "partly", "withheld-ok": "right"}.get(c["verdict"], c["verdict"]),
                                      note=f"{c['note']} | v46 {fk} {fid} -> {c['target_kind']} {c['target_id']} | "
                                           f"attached: {attach}",
                                      actor_id="agent:agent-46", checked=c["checked"], is_gold=0,
-                                     source_file="link_checks")], "INSERT")
+                                     source_file="link_checks")))
+    insert(con, "reviews", rv, "INSERT")
     return S
 
 
@@ -569,7 +864,12 @@ def main(argv=None):
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--report", action="store_true")
     ap.add_argument("--db", default=str(DB))
+    ap.add_argument("--work", help="folder for the link cache and metrics47.json (default: the data folder)")
     a = ap.parse_args(argv)
+    global CACHE
+    work = Path(a.work) if a.work else DATA
+    work.mkdir(parents=True, exist_ok=True)
+    CACHE = work / "link_cache47.json"
     con = connect(Path(a.db))
     t0 = time.time()
     if not a.report:
@@ -598,9 +898,9 @@ def main(argv=None):
         cards = build_cited_works(con, res, load_id)
         con.commit()
         print(f"cited works: {len(cards)} ({time.time() - t0:.0f} s)", flush=True)
-        S = link_cards(con, mcon, cards, lrid)
-        np_ = cited_authors_to_persons(con)
-        biblio47.refresh_persons(con, mcon, load_id)
+        S = link_cards(con, mcon, cards, lrid, load_id)
+        G = biblio47.refresh_global(con, mcon, load_id)      # persons (cited authors included), institutions, ...
+        np_ = con.execute("SELECT count(*) FROM cited_work_authors WHERE person_id IS NOT NULL").fetchone()[0]
         con.commit()
         C = carry_checks(con, mcon)
         n_links = con.execute("SELECT count(*) FROM citation_links WHERE link_run_id = ?", (lrid,)).fetchone()[0]
@@ -610,10 +910,10 @@ def main(argv=None):
                     (now(), len(vids), json.dumps(dict(links=dict(S), cited_authors_as_persons=np_, checks=dict(C)),
                                                   ensure_ascii=False), load_id))
         con.commit()
-        print(f"links {dict(S)}; cited authors -> persons {np_}; hand checks carried {dict(C)} "
+        print(f"links {dict(S)}; global {G}; cited authors -> persons {np_}; hand checks carried {dict(C)} "
               f"({time.time() - t0:.0f} s)")
     M = metrics(con)
-    (DATA / "metrics47.json").write_text(json.dumps(M, ensure_ascii=False, indent=1, default=list), encoding="utf-8")
+    (work / "metrics47.json").write_text(json.dumps(M, ensure_ascii=False, indent=1, default=list), encoding="utf-8")
     print(json.dumps({k: v for k, v in M.items() if not isinstance(v, list)}, ensure_ascii=False, indent=1))
     print("orphans:", len(con.execute("PRAGMA foreign_key_check").fetchall()))
 

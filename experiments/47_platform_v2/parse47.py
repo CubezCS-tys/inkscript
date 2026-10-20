@@ -299,6 +299,15 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
 
     # ---- blocks with positions
     blocks, bobj, line_block = [], {}, {}
+    # the ALTO TextBlocks that carry a JATS block's text by id or by xlink:href (#p2b7): a block whose own line list
+    # is empty (kwd-group, contrib) takes their lines, so flags and fixes on them land on the block (fix round 1)
+    jats_ids = {b["block_id"] for b in R["blocks"]}
+    tb_lines = defaultdict(list)
+    for p_, P_ in alto.items():
+        for tb in P_["blocks"]:
+            tgt = tb["id"] if tb["id"] in jats_ids else ((tb.get("href") or "").rsplit("#", 1)[-1] or None)
+            if tgt in jats_ids:
+                tb_lines[tgt] += [L["id"] for L in tb["lines"]]
     els = {}
     for e in root.iter():
         if isinstance(e.tag, str) and e.get("id") and BLOCK_ID.match(e.get("id")) and e.get("id") not in els:
@@ -331,7 +340,7 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
                 V.setdefault("text_mismatch", []).append(b["block_id"])
         bo = Block(b["block_id"], t, ev, ink)
         bobj[b["block_id"]] = bo
-        lids = json.loads(b["alto_lines"])
+        lids = json.loads(b["alto_lines"]) or tb_lines.get(b["block_id"], [])
         for lid in lids:
             line_block.setdefault(lid, b["block_id"])
         # stats from the ALTO words of the block's lines (Azure confidences)
@@ -387,6 +396,9 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
             for L in tb["lines"]:
                 m = ink.lmap.get(L["id"], {})
                 blk = line_block.get(L["id"])
+                if not blk and ink47.role_of(tb["tags"]) not in REGION_ROLES:
+                    ref = tb["id"] if tb["id"] in bmap else (tb.get("href") or "").rsplit("#", 1)[-1]
+                    blk = ref if ref in bmap else None
                 lmap.append(dict(alto_line_id=L["id"], page=p, azure_line_no=m.get("azure_line_no"),
                                  block_id=blk, region_id=None if blk else tb["id"],
                                  x=L["box"][0] if L["box"] else None, y=L["box"][1] if L["box"] else None,
@@ -683,6 +695,11 @@ def mention_kind(w: dict, printed: str | None = None) -> str:
             if w.get(k):
                 rest = rest.replace(w[k], " ")
         rich = bool(RICH_RE.search(rest))
+    if not has_title and w.get("first_author") and w.get("year") and (w.get("place") or w.get("publisher")) and \
+            re.search(r"[«»“”]", printed or w.get("printed") or ""):
+        # the reader's element-citation lost the title, but the print quotes one beside author, place and year
+        # (0328 fn-p4-1 «Les principes généraux …», Chaudet, باريس ١٩٦٧): a reader can find the work (fix round 1)
+        return "full"
     return "full" if has_title and rich else "short"
 
 

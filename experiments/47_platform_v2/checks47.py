@@ -64,10 +64,12 @@ REC = [
      f"SELECT count(*) FROM citation_mentions WHERE resolve_method = 'part-of-citation' AND {CUR}",
      "«Pincus: Economic Aid, op. cit.»: the marker belongs to the citation parsed just before it"),
     ("citation_links", "citation_links", "SELECT count(*) FROM citation_links",
-     "real links only (accepted + title-only candidates); v46's 306 back-reference rows are resolutions in "
-     "citation_mentions, its 301 review/about/part rows are work_relations; linked per card, not per citing place"),
-    ("citation_links", "  accepted", "SELECT count(*) FROM citation_links WHERE status = 'accepted'",
-     "v46: 109 confident work rows (89 records); v2 counts cards"),
+     "real links only (accepted, candidates, and rejected ones kept as decisions); v46's 306 back-reference rows are "
+     "resolutions in citation_mentions, its 301 review/about/part rows are work_relations; linked per card"),
+    ("citation_links", "  accepted (best, authors agree)", "SELECT count(*) FROM citation_links WHERE status = 'accepted'",
+     "v46: 109 confident work rows (89 records); v2 counts cards and needs the authors to agree (fix round 1)"),
+    ("citation_links", "  rejected (the record's authors contradict)",
+     "SELECT count(*) FROM citation_links WHERE status = 'rejected'", "new in fix round 1"),
     ("citation_links", "work_relations", "SELECT count(*) FROM work_relations",
      "is_reviewed_in / is_studied_in / is_part_of, by card"),
     ("link_checks", "reviews from link_checks", "SELECT count(*) FROM reviews WHERE source_file = 'link_checks'", ""),
@@ -119,13 +121,30 @@ def main(argv=None):
     ap.add_argument("--db", default=str(DB))
     a = ap.parse_args(argv)
     con = connect(Path(a.db))
-    con.execute(f"ATTACH 'file:{V46}?mode=ro' AS o")
+    con.execute(f"ATTACH 'file:{V46}?mode=ro' AS o46")
+    # platform.db now also holds the exam (v33_300b, v33_300b_final: 300 more articles, loaded there on 2026-10-20).
+    # v2 is reconciled with v46 on the documents v2 holds; the rest is reported (it loads with the documented commands)
     out = {}
+    for (t,) in con.execute("SELECT name FROM o46.sqlite_master WHERE type IN ('table', 'view') AND name NOT LIKE "
+                            "'sqlite_%' AND name NOT LIKE '%fts%'").fetchall():
+        cols = [r[1] for r in con.execute(f"PRAGMA o46.table_info([{t}])")]
+        if "stem" in cols:
+            w = "WHERE stem IN (SELECT stem FROM main.documents)"
+        elif t == "runs":
+            w = "WHERE run IN (SELECT run FROM main.runs)"
+        elif t == "citation_links" and "from_id" in cols:
+            w = "WHERE substr(from_id, 1, instr(from_id, '|') - 1) IN (SELECT stem FROM main.documents)"
+        else:
+            w = ""
+        con.execute(f"CREATE TEMP VIEW [o_{t}] AS SELECT * FROM o46.[{t}] {w}")
+    out["v46_not_in_v2"] = dict(articles=con.execute(
+        "SELECT count(*) FROM o46.articles WHERE stem NOT IN (SELECT stem FROM main.documents)").fetchone()[0],
+        runs=[r[0] for r in con.execute("SELECT run FROM o46.runs WHERE run NOT IN (SELECT run FROM main.runs)")])
     rows = []
     for t46, t2, q, why in REC:
         base = t46.split(" ")[0]
-        n46 = con.execute(f"SELECT count(*) FROM o.[{base}]").fetchone()[0] if base != "blocks_fts" else \
-            con.execute("SELECT count(*) FROM o.blocks").fetchone()[0]
+        n46 = con.execute(f"SELECT count(*) FROM [o_{base}]").fetchone()[0] if base != "blocks_fts" else \
+            con.execute("SELECT count(*) FROM o_blocks").fetchone()[0]
         n2 = con.execute(q).fetchone()[0]
         rows.append(dict(v46_table=t46, v46_rows=n46, v2_table=t2, v2_rows=n2, v2_query=q, same=int(n46 == n2),
                          why=why or ("equal" if n46 == n2 else "MUST BE EQUAL — not explained")))
@@ -139,19 +158,19 @@ def main(argv=None):
     ex = {}
     for name, q2, q46 in (
             ("blocks (stem, block_id, text)", f"SELECT v.stem, x.block_id, x.text FROM blocks x {sv}",
-             "SELECT stem, block_id, text FROM o.blocks"),
+             "SELECT stem, block_id, text FROM o_blocks"),
             ("notes (stem, note_id, text)", f"SELECT v.stem, x.note_id, x.text FROM notes x {sv}",
-             "SELECT stem, note_id, text FROM o.notes"),
+             "SELECT stem, note_id, text FROM o_notes"),
             ("fixes (stem, id, azure, print)", f"SELECT v.stem, x.xml_id, x.azure_reading, x.printed FROM "
              f"text_corrections x {sv} WHERE x.layer = 'azure-misread'",
-             "SELECT stem, fix_id, azure_reading, print FROM o.fixes"),
+             "SELECT stem, fix_id, azure_reading, print FROM o_fixes"),
             ("misprints (stem, id, printed, proposed)", f"SELECT v.stem, x.xml_id, x.printed, x.proposed FROM "
              f"text_corrections x {sv} WHERE x.layer = 'misprint'",
-             "SELECT stem, sic_id, printed, proposed FROM o.misprints"),
+             "SELECT stem, sic_id, printed, proposed FROM o_misprints"),
             ("figures (stem, id, kind)", f"SELECT v.stem, x.figure_id, x.kind FROM figures x {sv} WHERE x.kind NOT LIKE "
-             "'inline%'", "SELECT stem, xml_id, kind FROM o.figures WHERE kind NOT LIKE 'inline%'"),
+             "'inline%'", "SELECT stem, xml_id, kind FROM o_figures WHERE kind NOT LIKE 'inline%'"),
             ("versions (stem, run) shown", "SELECT stem, run FROM versions WHERE is_current = 1",
-             "SELECT stem, run FROM o.article_runs WHERE current = 1")):
+             "SELECT stem, run FROM o_article_runs WHERE current = 1")):
         a_ = con.execute(f"SELECT count(*) FROM ({q2} EXCEPT {q46})").fetchone()[0]
         b_ = con.execute(f"SELECT count(*) FROM ({q46} EXCEPT {q2})").fetchone()[0]
         ex[name] = dict(only_v2=a_, only_v46=b_)
@@ -197,10 +216,90 @@ def main(argv=None):
            WHERE v.stem = '0069-000-026-005' AND m.container_id IN ('fn-p15-13', 'fn-p16-1', 'fn-p15-5', 'fn-p15-1',
                  'fn-p14-13', 'fn-p14-5') AND m.kind NOT IN ('full', 'quran') ORDER BY m.reading_ord""").fetchall()
     out["ibid_examples"] = [dict(r) for r in ex_rows]
-    old = con.execute("""SELECT from_id, target_id, method FROM o.citation_links WHERE from_id IN
+    old = con.execute("""SELECT from_id, target_id, method FROM o_citation_links WHERE from_id IN
                          ('0069-000-026-005|fn-p15-13', '0069-000-026-005|fn-p16-1', '0069-000-026-005|fn-p15-5',
                           '0069-000-026-005|fn-p15-1', '0069-000-026-005|fn-p14-5')""").fetchall()
     out["ibid_examples_v46"] = [dict(r) for r in old]
+    # ---- fix round 1: the verifier's failures, measured
+    q1 = lambda sql: con.execute(sql).fetchone()[0]  # noqa: E731
+    F = {}
+    F["line_map rows pointing at nothing"] = q1(
+        """SELECT count(*) FROM line_map l WHERE (l.block_id IS NULL AND (l.region_id IS NULL OR NOT EXISTS (SELECT 1
+           FROM page_regions r WHERE r.version_id = l.version_id AND r.region_id = l.region_id))) OR (l.block_id IS NOT
+           NULL AND NOT EXISTS (SELECT 1 FROM blocks b WHERE b.version_id = l.version_id AND b.block_id = l.block_id))""")
+    F["best links whose authors do not agree"] = q1(
+        "SELECT count(*) FROM citation_links WHERE best = 1 AND coalesce(json_extract(evidence, '$.authors.agreement'), "
+        "'') <> 'agree'")
+    F["candidate links the catalogue's authors contradict"] = q1(
+        "SELECT count(*) FROM citation_links WHERE status = 'candidate' AND json_extract(evidence, "
+        "'$.authors.agreement') = 'contradict'")
+    F["citation_links by status / author agreement"] = dict(con.execute(
+        "SELECT status || ' / ' || coalesce(json_extract(evidence, '$.authors.agreement'), '?'), count(*) FROM "
+        "citation_links GROUP BY 1").fetchall())
+    F["authorships whose catalogue authority id is in hand but not their person"] = q1(
+        """SELECT count(*) FROM authorships a JOIN catalogue_contributors c ON c.c999 = a.c999 AND c.seq = a.catalogue_seq
+           LEFT JOIN id_registry r ON r.public_id = a.person_id WHERE c.authority_id IS NOT NULL AND c.is_org = 0
+           AND a.method NOT IN ('weak-name-rejected', 'editorial-role', 'corporate-byline')
+           AND coalesce(r.natural_key, '') <> 'auth:' || c.authority_id""")
+    F["authority ids carried by more than one person"] = q1(
+        """SELECT count(*) FROM (SELECT c.authority_id FROM authorships a JOIN catalogue_contributors c ON c.c999 = a.c999
+           AND c.seq = a.catalogue_seq WHERE c.authority_id IS NOT NULL AND a.person_id IS NOT NULL AND a.method <>
+           'weak-name-rejected' GROUP BY 1 HAVING count(DISTINCT a.person_id) > 1)""")
+    F["weak name matches: given name agrees (authority taken) / rejected"] = dict(con.execute(
+        "SELECT method, count(*) FROM authorships WHERE method IN ('weak-name+given-name', 'weak-name-rejected') "
+        "GROUP BY 1").fetchall())
+    F["persons with no name"] = q1("SELECT count(*) FROM persons WHERE preferred_name_ar IS NULL AND "
+                                   "preferred_name_lat IS NULL")
+    F["persons with a life note inside the name"] = q1(
+        "SELECT count(*) FROM persons WHERE preferred_name_ar GLOB '*ت. [0-9]*' OR preferred_name_ar GLOB '*ت.[0-9]*' "
+        "OR preferred_name_ar GLOB '*[0-9][0-9][0-9] هـ*'")
+    F["persons with a death year"] = q1("SELECT count(*) FROM persons WHERE death_year_h IS NOT NULL OR "
+                                        "death_year_g IS NOT NULL")
+    F["editorial roles / corporate bylines as persons"] = q1(
+        "SELECT count(*) FROM persons WHERE preferred_name_ar IN ('رئيس التحرير', 'أسرة التحرير', 'هيئة التحرير', "
+        "'اسرة التحرير')")
+    F["bylines that are an editorial role or body"] = dict(con.execute(
+        "SELECT method, count(*) FROM authorships WHERE method IN ('editorial-role', 'corporate-byline') GROUP BY 1"
+    ).fetchall())
+    F["institution country codes that are not ISO"] = q1(
+        "SELECT count(*) FROM institutions WHERE country_code IS NOT NULL AND (length(country_code) <> 2 OR "
+        "upper(country_code) <> country_code)")
+    F["affiliation mentions with a country printed / with an ISO code"] = [
+        q1("SELECT count(*) FROM affiliation_mentions WHERE country_printed IS NOT NULL AND country_printed <> ''"),
+        q1("SELECT count(*) FROM affiliation_mentions WHERE country_code IS NOT NULL")]
+    F["cards with no authors although a member has parsed authors"] = q1(
+        """SELECT count(*) FROM cited_works w WHERE w.status = 'active' AND NOT EXISTS (SELECT 1 FROM cited_work_authors
+           a WHERE a.cited_work_pk = w.cited_work_pk) AND EXISTS (SELECT 1 FROM cited_work_members m JOIN
+           citation_mentions c ON c.mention_pk = m.full_mention_pk WHERE m.cited_work_pk = w.cited_work_pk AND
+           json_array_length(json_extract(c.parsed, '$.authors')) > 0)""")
+    F["back references resolved to a later mention (a reference-list entry after the notes)"] = q1(
+        """SELECT count(*) FROM citation_mentions m JOIN citation_mentions t ON t.mention_pk = m.full_mention_pk
+           JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1
+           WHERE m.kind IN ('ibid', 'op_cit', 'loc_cit') AND t.reading_ord > m.reading_ord""")
+    F["back references by score (shown)"] = dict(con.execute(
+        f"SELECT coalesce(resolve_score, -1), count(*) FROM citation_mentions WHERE kind IN ('ibid', 'op_cit', "
+        f"'loc_cit') AND {CUR} GROUP BY 1 ORDER BY 1").fetchall())
+    F["short forms: resolved / unresolved (shown)"] = [
+        q1(f"SELECT count(*) FROM citation_mentions WHERE kind = 'short' AND full_mention_pk IS NOT NULL AND {CUR}"),
+        q1(f"SELECT count(*) FROM citation_mentions WHERE kind = 'short' AND full_mention_pk IS NULL AND {CUR}")]
+    F["true self-citations"] = q1("SELECT count(*) FROM v_author_self_citations")
+    F["self-citations by how the cited author was tied"] = dict(con.execute(
+        """SELECT ca.match_method, count(DISTINCT s.citing_pub_id || s.cited_work_pk) FROM v_author_self_citations s
+           JOIN cited_work_authors ca ON ca.cited_work_pk = s.cited_work_pk AND ca.person_id = s.person_id
+           GROUP BY 1""").fetchall())
+    F["provenance: catalogue assertions without load_id"] = q1(
+        "SELECT count(*) FROM metadata_assertions WHERE form = 'catalogue' AND load_id IS NULL")
+    F["provenance: gemini-title assertions without actor"] = q1(
+        "SELECT count(*) FROM metadata_assertions WHERE form = 'gemini-title' AND actor_id IS NULL")
+    F["provenance: patch applications without version"] = q1(
+        "SELECT count(*) FROM patch_applications WHERE version_id IS NULL")
+    F["provenance: judge / retry patches without actor"] = q1(
+        "SELECT count(*) FROM patches WHERE source IN ('judge', 'gemini-retry') AND actor_id IS NULL")
+    F["provenance: registry ids without a load"] = q1("SELECT count(*) FROM id_registry WHERE created_load IS NULL")
+    F["merged_ids by kind"] = dict(con.execute("SELECT kind, count(*) FROM merged_ids GROUP BY 1").fetchall())
+    F["public ids not of the hashed form"] = q1(
+        "SELECT count(*) FROM id_registry WHERE length(public_id) < 10")
+    out["fix_round_1"] = F
     out["hand_checks"] = dict(con.execute("SELECT verdict, count(*) FROM reviews WHERE source_file = 'link_checks' "
                                           "GROUP BY 1").fetchall())
     out["hand_checks_attached"] = dict(con.execute(

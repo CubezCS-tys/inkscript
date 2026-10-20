@@ -9,6 +9,8 @@ import re
 import sqlite3
 import sys
 import time
+import unicodedata
+from collections import Counter
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -102,10 +104,65 @@ def jdump(x) -> str | None:
     return x if isinstance(x, str) else json.dumps(x, ensure_ascii=False)
 
 
+# ------------------------------------------------------------------ stable keys (fix round 1)
+# Every surrogate integer key and every public id is derived from the row's own content key (a hash), never from the
+# order rows were loaded in: two clean rebuilds, in any step order and any PYTHONHASHSEED, give the same ids.
+def spk(*parts) -> int:
+    """A stable integer key in [1, 2**53) (safe in JavaScript) from the parts of a natural key."""
+    h = hashlib.sha1("\x1f".join("" if p is None else str(p) for p in parts).encode("utf-8")).digest()
+    return int.from_bytes(h[:7], "big") % (2 ** 53 - 1) + 1
+
+
+# table -> (pk column, natural-key columns). insert() fills the pk from these when the row has none; rows with the
+# same natural key inside one call get an ordinal (their order in the call, which is deterministic).
+STABLE_PK = {
+    "versions": ("version_id", ("version_key",)),
+    "ink_anchors": ("anchor_pk", ("anchor_key",)),
+    "text_corrections": ("corr_pk", ("version_id", "xml_id")),
+    "metadata_assertions": ("assert_pk", ("pub_id", "field", "form", "source", "version_id", "export_id", "lang",
+                                          "value")),
+    "publication_dates": ("date_pk", ("pub_id", "date_type", "calendar", "derivation", "year", "month", "printed")),
+    "abstracts": ("abstract_pk", ("pub_id", "form", "version_id", "lang", "seq", "block_id")),
+    "keyword_terms": ("term_id", ("term_key",)),
+    "subject_terms": ("subject_id", ("scheme", "term_key")),
+    "person_names": ("name_pk", ("person_id", "full_form", "form_type")),
+    "byline_mentions": ("mention_pk", ("version_id", "block_id", "byline_pos", "script")),
+    "affiliation_mentions": ("aff_pk", ("mention_pk", "seq")),
+    "authorships": ("authorship_pk", ("pub_id", "position", "role_code")),
+    "citation_mentions": ("mention_pk", ("version_id", "mention_id")),
+    "cited_works": ("cited_work_pk", ("cited_work_id",)),
+    "citation_links": ("link_pk", ("cited_work_pk", "target_kind", "target_pub_id", "target_value")),
+    "work_relations": ("relation_pk", ("subject_cited_work_pk", "relation", "object_pub_id", "object_cited_work_pk")),
+    "quran_citations": ("qc_pk", ("version_id", "source_kind", "block_id", "printed_ref", "quoted_text", "sura",
+                                  "aya_from")),
+    "judge_findings": ("finding_pk", ("call_id", "k")),
+    "reviews": ("review_pk", ("source_file", "subject_kind", "subject_key", "actor_id", "checked")),
+    "catalogue_reports": ("report_pk", ("kind", "field", "c999", "pub_id", "stem", "version_id", "catalogue_value",
+                                        "our_value", "evidence")),
+    "model_calls": ("call_pk", ("job", "run", "stem", "page", "chunk", "model", "file_key")),
+}
+
+
+def fill_pk(table: str, rows: list, seen: Counter | None = None) -> list:
+    st = STABLE_PK.get(table)
+    if not st:
+        return rows
+    pkc, nat = st
+    seen = Counter() if seen is None else seen
+    for r in rows:
+        if r.get(pkc) is None:
+            k = tuple(r.get(c) for c in nat)
+            n = seen[k]
+            seen[k] += 1
+            r[pkc] = spk(table, *k, *((n,) if n else ()))
+    return rows
+
+
 def insert(con, table, rows, mode="INSERT OR REPLACE"):
     rows = list(rows)
     if not rows:
         return 0
+    rows = fill_pk(table, [dict(r) for r in rows])
     cols = list(rows[0])
     con.executemany(f"{mode} INTO {table} ({','.join(cols)}) VALUES ({','.join('?' * len(cols))})",
                     [tuple(r.get(c) for c in cols) for r in rows])
@@ -203,6 +260,7 @@ def name_parts(name: str) -> dict:
                shuhra=None)
     if not s:
         return out
+    s, _life = split_life(s)
     if re.search("[،,]", s):
         a, b = re.split(r"\s*[،,]\s*", s, maxsplit=1)
         if b and not re.search(r"\d", b):
@@ -283,3 +341,107 @@ for _i, _s in enumerate(SURAS, 1):
 SURA_KEYS.update({key("الاسراء"): 17, key("بني إسرائيل"): 17, key("المؤمن"): 40, key("حم السجدة"): 41,
                   key("الدهر"): 76, key("الإنشراح"): 94, key("الانشراح"): 94, key("اقرأ"): 96, key("تبارك"): 67,
                   key("براءة"): 9, key("عم"): 78, key("الأحقاف"): 46, key("لم يكن"): 98, key("التطفيف"): 83})
+
+
+# ------------------------------------------------------------------ public ids (fix round 1)
+_B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"      # Crockford base 32 (no I, L, O, U)
+
+
+def hashed_id(prefix: str, kind: str, natural: str, n: int = 9) -> str:
+    """'A' / 'I' / 'C' + 9 base-32 characters (45 bits) of sha1(kind|natural key): the same natural key gives the
+    same public id in every build, whatever was loaded before it."""
+    v = int.from_bytes(hashlib.sha1(f"{kind}|{natural}".encode("utf-8")).digest()[:10], "big")
+    out = []
+    for _ in range(n):
+        out.append(_B32[v % 32])
+        v //= 32
+    return prefix + "".join(out)
+
+
+# ------------------------------------------------------------------ names: accents, life notes, countries
+def akey(s: str | None) -> str:
+    """key() with Latin accents folded too (ROLDÁN = ROLDAN); Arabic is folded as before."""
+    return latin_key(s)
+
+
+LIFE_RE = re.compile(r"\s*[،,]?\s*(?:\(?\s*(?:ت\s*\.?|توفي|المتوفى|d\.|died|m\.)\s*[0-9٠-٩]{3,4}\s*(?:هـ|ه|م|AH|CE)?"
+                     r"(?:\s*[/-]\s*[0-9٠-٩]{3,4}\s*(?:هـ|ه|م)?)?\s*\)?|\(?\s*[0-9٠-٩]{3,4}\s*[-–]\s*[0-9٠-٩]{3,4}\s*(?:هـ|م)?\s*\)?)"
+                     r"\s*$")
+
+
+def split_life(name: str | None) -> tuple[str, dict]:
+    """«محمود، زكي نجيب، ت. 1414 هـ» -> («محمود، زكي نجيب», {death_year_h: 1414, death_year_g: 1994}). The catalogue
+    puts life dates at the end of a heading; they are a fact about the person, not part of the name."""
+    s = name or ""
+    life = {}
+    m = LIFE_RE.search(s)
+    if not m or m.start() == 0:
+        return s.strip(), life
+    note = m.group(0)
+    s = s[:m.start()].strip(" ،,")
+    ys = [int(fold(y)) for y in re.findall(r"[0-9٠-٩]{3,4}", note)]
+    hij = bool(re.search(r"هـ|ه\b|AH", note)) or (ys and ys[-1] < 1500 and not re.search(r"م\s*\)?\s*$", note))
+    death = ys[-1]
+    birth = ys[0] if len(ys) > 1 and re.search(r"[-–]", note) else None
+    if hij:
+        life.update(death_year_h=death, death_year_g=hijri_to_greg(death))
+        if birth:
+            life.update(birth_year_h=birth, birth_year_g=hijri_to_greg(birth))
+    else:
+        life.update(death_year_g=death, death_year_h=greg_to_hijri(death))
+        if birth:
+            life.update(birth_year_g=birth, birth_year_h=greg_to_hijri(birth))
+    life["life_note"] = note.strip(" ،,")
+    return s, life
+
+
+def heading_display(name: str | None) -> str | None:
+    """A catalogue heading «surname، given، ت. 1427 هـ» as a display name «given surname» (life note dropped)."""
+    if not name:
+        return None
+    s, _ = split_life(name)
+    if re.search("[،,]", s):
+        a, b = re.split(r"\s*[،,]\s*", s, maxsplit=1)
+        s = f"{b} {a}".strip()
+    return " ".join(s.split())
+
+
+def _country_table():
+    import inst46
+    t = dict(inst46.COUNTRY_OF)
+    extra = {"DZ": ["algérie", "algerie", "الجمهورية الجزائرية الديمقراطية الشعبية", "الجزائر العاصمة"],
+             "IQ": ["irak"], "LY": ["la libye", "libye"], "PK": ["pakistan", "باكستان"],
+             "BH": ["kingdom of bahrain", "royaume de bahreïn"], "SY": ["الجمهورية العربية السورية", "سوري", "syrie"],
+             "CA": ["canada", "كندا"], "MA": ["maroc", "le maroc"], "TN": ["tunisie", "la tunisie"],
+             "EG": ["égypte", "egypte", "جمهورية مصر العربية"], "LB": ["liban", "le liban"], "JO": ["jordanie"],
+             "SA": ["arabie saoudite", "المملكة العربية السعودية"], "IN": ["india", "الهند", "inde"],
+             "IR": ["iran", "إيران", "ايران"], "NG": ["nigeria", "نيجيريا"], "ID": ["indonesia", "إندونيسيا"],
+             "DE": ["germany", "allemagne", "ألمانيا"], "ES": ["spain", "espagne", "إسبانيا", "اسبانيا", "españa"],
+             "IT": ["italy", "italie", "إيطاليا"], "BE": ["belgium", "belgique", "بلجيكا"], "CN": ["china", "الصين"],
+             "MY": ["malaisie"], "OM": ["سلطنة عمان"], "US": ["usa", "u.s.a."], "TR": ["türkiye", "turquie"],
+             "SN": ["senegal", "sénégal", "السنغال"], "ML": ["mali", "مالي"], "NE": ["niger", "النيجر"],
+             "SO": ["somalia", "الصومال"], "DJ": ["djibouti", "جيبوتي"], "KM": ["comoros", "جزر القمر"]}
+    for c, ns in extra.items():
+        for n in ns:
+            t[akey(n)] = c
+            t[key(n)] = c
+    return t
+
+
+_COUNTRY = []
+
+
+def country_iso(raw: str | None) -> str | None:
+    """A printed country («Algérie», «الجمهورية العربية السورية», «DZ») -> ISO 3166-1 alpha-2, else None."""
+    if not raw:
+        return None
+    s = raw.strip()
+    if re.fullmatch(r"[A-Z]{2}", s):
+        return s
+    if not _COUNTRY:
+        _COUNTRY.append(_country_table())
+    t = _COUNTRY[0]
+    for k in (key(s), akey(s), re.sub(r"^(la|le|l|the)\s+", "", akey(s))):
+        if k in t:
+            return t[k]
+    return None

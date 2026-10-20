@@ -1,0 +1,8 @@
+- 09:31 fix round 1 started: read VERIFY.md, README
+- 09:46 code changes in (stable keys, hashed public ids, global persons pass, resolve rules, author agreement, front-matter lines); testing on a small build
+- 09:53 small stable-id test (8 docs, two orders, two hash seeds, load-after-link, relink): identical in 80 tables; full test started
+- 09:56 code settled; previous db kept as /home/yassine/data/platform_v2/platform_v2.db.bak-20261020-fix0; clean rebuild started
+- 10:08 second clean rebuild after hand-check review (trailing-name hints, legal notes break ibid, عبد-joined names, catalogue transliteration pairs, numbered universities)
+- 10:10 README fix-round-1 section written; waiting for the full two-build test
+- 10:24 third clean rebuild (anchor method by precision, patch copies by file order, unused keyword terms dropped, numbered university names moved)
+- 10:36 full stable-id test: identical (81 tables, all four runs, reverse order + load-after-link + relink, two hash seeds); Datasette :8003 restarted, 17 canned queries 200 (search_arabic with q), ink page checked by screenshot
