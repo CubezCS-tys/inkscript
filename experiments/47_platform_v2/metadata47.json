@@ -1,0 +1,752 @@
+{
+ "title": "Mandumah platform v2 (experiment 47)",
+ "description_html": "The scan is the bottom layer: every value points at Azure's words on the page (<code>ink_anchors</code>; open <code>ink</code> links to see the crop). Each run's reading of a document is its own <code>version</code>, side by side; one is shown. Printed values are never overwritten: corrections, misprints and D33 changes are readings beside the print. «المرجع السابق» resolves to the first full citation; <code>citation_links</code> holds real links only. Schema diagram: <a href='/diagram/schema47.html'>/diagram/schema47.html</a>. Built by experiments/47_platform_v2 (load47.py, link47.py) from the same sources as platform.db; read only.",
+ "databases": {
+  "platform_v2": {
+   "tables": {
+    "storage_roots": {
+     "description": "A place files live (local disk, an S3 bucket), so the database stores keys relative to it, never absolute paths. [Provenance and identity]",
+     "label_column": "root_id",
+     "columns": {
+      "root_id": "e.g. 'local-43', 's3-source-docs', 's3-legacy'",
+      "kind": "local | s3",
+      "base": "path or s3://bucket/prefix in this environment"
+     }
+    },
+    "runs": {
+     "description": "One processing run (a Gemini/Argon reading, a judge pass, a final rebuild, an exam): what it ran with and what it cost. [Provenance and identity]",
+     "label_column": "run",
+     "columns": {
+      "run": "v2_55, v33_300, v33_300_judged, v33_300_final, v33_300b",
+      "kind": "sample | base | judged | final | exam | replay",
+      "parent_run": "the run whose readings this one builds on",
+      "root_rel": "the run folder"
+     }
+    },
+    "load_events": {
+     "description": "One execution of the loader or linker, so every row can be traced to the load that wrote it. [Provenance and identity]",
+     "label_column": "tool",
+     "columns": {
+      "tool": "load47 | link47 | people47 | report47 | rebuild47",
+      "rows_by_table": "JSON"
+     }
+    },
+    "model_calls": {
+     "description": "Every paid model call ever made for a run (from gemini_spend.jsonl, raw chunk files, judge answers), so the cost of any page, article or verdict adds up. [Provenance and identity]",
+     "columns": {
+      "job": "job: read | retry | judge | title | numbers ..."
+     }
+    },
+    "actors": {
+     "description": "Who (which person, agent, model or code rule) made an assertion, a patch or a review. [Provenance and identity]",
+     "label_column": "name",
+     "columns": {
+      "actor_id": "'person:owner', 'agent:link47', 'model:gemini-3.8-flash', 'rule:d33-pages'",
+      "kind": "person | agent | model | rule"
+     }
+    },
+    "id_registry": {
+     "description": "The append-only register of public ids (A persons, I institutions, C cited works), so a rebuild gives every entity the same id again. [Provenance and identity]",
+     "columns": {
+      "public_id": "'A000123', 'I000045', 'C0001234'",
+      "kind": "person | institution | cited_work",
+      "natural_key": "'auth:111978' | 'mention:<mention_id>' | 'founder:<mention_id>' | 'cat-corp:2631'"
+     }
+    },
+    "merged_ids": {
+     "description": "When two ids turn out to be one thing (or one splits), the retired id points to the survivor so no link or bookmark breaks. [Provenance and identity]",
+     "columns": {
+      "kind": "publication | person | institution | cited_work | journal",
+      "relation": "merged-into | split-from",
+      "asserted_by": "person | judge | link47 | catalogue"
+     }
+    },
+    "documents": {
+     "description": "One file in the archive (an article PDF or one part of a thesis): where it is and how far it has been processed. [The ink layer]",
+     "label_column": "stem",
+     "columns": {
+      "stem": "S3 id, e.g. 0005-012-004-007 or 9802-001-009-0299-R",
+      "part_label": "thesis part suffix: T A C F 1..n O R",
+      "part_kind": "article | title-page | abstract | contents | chapter | conclusion | references",
+      "level": "legacy-pdf | azure | structured | judged | final | person-checked",
+      "scan_pdf_key": "scan_pdf = inkscript ink PDF",
+      "qdrant_doc_id": "= stem in mandumah_v2 payloads"
+     }
+    },
+    "pages": {
+     "description": "One scanned page: its size, image, printed folio and running head, and Azure's own confidence on it. [The ink layer]",
+     "columns": {
+      "page": "scan page, 1-based",
+      "height_px": "ALTO page size (the box convention)",
+      "printed_folio_int": "from the role.pageNumber region (evidence for page ranges)",
+      "running_head": "from role.pageHeader (evidence for journal / issue)",
+      "n_low_wc": "Azure word confidences, run-independent"
+     }
+    },
+    "azure_lines": {
+     "description": "One line as Azure read it (its \"P:N\" label), with its box and the span of Azure word numbers on it; kept only for structured documents. [The ink layer]",
+     "columns": {
+      "line_no": "N in the 'P:N' labels of flags, patches, judge targets and fixes",
+      "last_word": "Azure word ordinals on the page",
+      "text": "Azure's reading of the line"
+     }
+    },
+    "ink_anchors": {
+     "description": "An exact place on the scan (a page and a span of Azure words, or a box) that any value can cite as its evidence: \"show me the ink\". [The ink layer]",
+     "label_column": "anchor_key",
+     "columns": {
+      "anchor_key": "'<stem>|p<page>|w<first>-<last>' (stable across runs) or '<stem>|p<page>|b<x>,<y>,<w>,<h>'",
+      "method": "words | line | box | page  (how precisely the value was placed)"
+     }
+    },
+    "anchor_links": {
+     "description": "Extra evidence places for a value that needs more than one (a citation running across two pages, a name printed twice). [The ink layer]",
+     "columns": {
+      "owner_kind": "citation_mention | byline_mention | assertion | correction | flag | finding | patch | quran | figure ..."
+     }
+    },
+    "versions": {
+     "description": "One reading of one document by one run; every content and quality row belongs to one of these, and one per document is shown. [The reading layer]",
+     "label_column": "version_key",
+     "columns": {
+      "version_key": "'V:<stem>@<run>'",
+      "stamp_run": "what the stamp file says (it can disagree with the folder)",
+      "complete": "v2_55: 24 of 54 are partial",
+      "content_in_db": "0 = retired to files; the row and its hashes stay",
+      "current_reason": "person | complete | purpose:final>judged>base>exam>sample | newest",
+      "masters_key": "under the run's root"
+     }
+    },
+    "line_map": {
+     "description": "Translation between a run's ALTO line ids and Azure's lines, so a flag, patch or fix given as \"4:2\" lands on the right block. [The reading layer]",
+     "columns": {
+      "alto_line_id": "p3b6l1",
+      "azure_line_no": "NULL when the ALTO line has no Azure source (rare)",
+      "region_id": "exactly one of them is set",
+      "map_method": "tag | box-overlap"
+     }
+    },
+    "sections": {
+     "description": "The article's headings as a tree, so a search hit or a citation can say which section it sits in. [The reading layer]"
+    },
+    "blocks": {
+     "description": "The text in reading order exactly as printed (D30), one row per paragraph, heading, cell, note paragraph or verse group, with its quality roll-up. [The reading layer]",
+     "columns": {
+      "block_id": "the run's JATS/ALTO id, e.g. p1b9",
+      "uid": "never reused; the search rowid",
+      "role": "closed list: title | title-translated | byline | affiliation | abstract | keywords | heading | paragraph | list-item | footnote | endnote | ref | caption | table-cell | verse-group | quote | front-matter | back-matter",
+      "text_source": "reader | rule | patch:<source>:<patch_key> (source = person | judge | gemini-retry)",
+      "trust": "derived (see v_block_trust); stored per release"
+     }
+    },
+    "block_parts": {
+     "description": "Where each piece of a block sits on each page it spans (1,733 blocks cross a page). [The reading layer]"
+    },
+    "page_regions": {
+     "description": "Ink on the page that is not article text (running heads, page numbers, noise, show-through, the next article, picture text), kept so every leave-out can be checked. [The reading layer]",
+     "columns": {
+      "region_id": "the ALTO TextBlock id",
+      "role": "pageHeader | pageNumber | pageFooter | noise | pictureText | pictureJunk | formulaInk | ornament | showThrough | otherArticle",
+      "decided_by": "reader | rule | judge | person"
+     }
+    },
+    "notes": {
+     "description": "One footnote or endnote, with its printed label and its place on the page. [The reading layer]",
+     "label_column": "label",
+     "columns": {
+      "kind": "footnote | endnote"
+     }
+    },
+    "note_calls": {
+     "description": "Each call mark in the running text, where it is, and whether it found its note. [The reading layer]",
+     "label_column": "call_text",
+     "columns": {
+      "status": "ok | no-target | multi"
+     }
+    },
+    "note_call_targets": {
+     "description": "The note or notes one call opens (\"(٤، ٩)\" opens two). [The reading layer]"
+    },
+    "figures": {
+     "description": "Each picture, table and equation as an object: its box, crop, caption, Arabic and English descriptions, text inside it, LaTeX and MathML. [The reading layer]",
+     "columns": {
+      "figure_id": "JATS id; inline formulas get an anchor-based id",
+      "kind": "figure | table | equation | inline-equation | inline-picture"
+     }
+    },
+    "table_cells": {
+     "description": "Tables as data: every cell with its row, column and spans, so a table can be rebuilt, exported or queried. [The reading layer]"
+    },
+    "verse_lines": {
+     "description": "Each printed verse line, or hemistich where the print separates them, as printed with its vowels, so poetry can be searched and cited line by line. [The reading layer]",
+     "columns": {
+      "part": "line | sadr | ajuz",
+      "text": "vowelled, call marks removed",
+      "text_bare": "vowels stripped, for search",
+      "poet_hint": "as printed near the verse («قال المتنبي»), not resolved"
+     }
+    },
+    "text_corrections": {
+     "description": "The text-correction ledger: every word where Azure's reading, the print and a proposed correction differ (Azure misreadings fixed in the text; suspected misprints kept as printed, D30), with who said so and why. [The reading layer]",
+     "columns": {
+      "xml_id": "fixN | sicN in the masters",
+      "layer": "azure-misread | misprint",
+      "azure_wc": "what Azure read, and how sure it was",
+      "printed": "what the paper says (the text shown)",
+      "proposed": "misprint only: the suggested correction, never applied to the text",
+      "applied_to_text": "1 for azure-misread, 0 for misprint",
+      "asserted_by": "reader | rule | judge | person",
+      "status": "open | confirmed | rejected (by a review)",
+      "anchor_method": "word | contains | line-only | none"
+     }
+    },
+    "search_units": {
+     "description": "One searchable piece of text (block, figure description, picture text, equation, verse line, printed citation), so one search covers everything and every hit opens its ink. [The reading layer]",
+     "columns": {
+      "uid": "= blocks.uid for blocks; its own range for the rest",
+      "unit_kind": "block | alt-text | figure-text | equation | verse | citation",
+      "text": "as printed (snippets come from here)",
+      "folded": "hamza/alef/ya/ta-marbuta/tatweel/diacritics folded",
+      "stemmed": "folded, with clitics و ب ل ف ك ال stripped"
+     }
+    },
+    "search_fts": {
+     "description": "FTS5 index over search_units (columns folded, stemmed); query it with MATCH 'stemmed : ' || stem47(:q) (plugin fold47)",
+     "hidden": false
+    },
+    "catalogue_exports": {
+     "description": "Each MARC export marc.db was built from, so every catalogue value can be traced to its export and rechecked on the next one. [Bibliographic layer]",
+     "label_column": "export_id",
+     "columns": {
+      "export_id": "e.g. 'marc-2026-09'"
+     }
+    },
+    "catalogue_records": {
+     "description": "Mandumah's catalogue entry, keyed by the stable 999$c, as it stands in one export. [Bibliographic layer]",
+     "label_column": "title",
+     "columns": {
+      "rec": "position in that export only (trace back to the XML)",
+      "record_id_001": "not unique (16,428 duplicates)",
+      "type": "336 / Mandumah type: بحوث ومقالات | رسائل جامعية | بحوث المؤتمرات | عروض كتب",
+      "databases": "HumanIndex, EduSearch, ...",
+      "thesis_json": "502: degree, university, year"
+     }
+    },
+    "catalogue_record_documents": {
+     "description": "Which files the catalogue says belong to a record (a thesis has about ten parts); files may be absent from the bucket. [Bibliographic layer]",
+     "columns": {
+      "stem": "not a key into documents: 87,396 catalogued files are missing"
+     }
+    },
+    "publications": {
+     "description": "One scholarly item (article, thesis, conference paper, book review, editorial), whether we hold its scan or only its catalogue entry; the target of every real citation link. [Bibliographic layer]",
+     "label_column": "title_shown",
+     "columns": {
+      "pub_id": "'W'+c999, or 'WS'+stem for an uncatalogued file (merged later via merged_ids)",
+      "type": "article | thesis | conference-paper | book-review | editorial | interview | report",
+      "status": "catalogued-only | pdf-only | azure | structured | judged | final | person-checked",
+      "year_shown": "denormalised from the chosen assertions, refreshed per release"
+     }
+    },
+    "metadata_assertions": {
+     "description": "Every value anyone gave for a bibliographic field (as printed, as corrected under D33, catalogue, Gemini title file, Qdrant payload, a person), with its place on the page; exactly one per field is chosen to show. [Bibliographic layer]",
+     "label_column": "value",
+     "columns": {
+      "field": "title | title_translated | subtitle | pages | volume | issue | year | doi | journal_title | language ...",
+      "form": "printed | corrected | catalogue | gemini-title | qdrant-payload | html-view | azure | person",
+      "source": "masters | catalogue | s3-gemini-title | qdrant | judge | person | rule",
+      "reason": "D33: why the corrected form differs from the printed one",
+      "supersedes": "a correction points at the printed form it corrects",
+      "chosen_rule": "person > judge > D33-corrected > printed > catalogue > gemini-title > qdrant"
+     }
+    },
+    "publication_dates": {
+     "description": "Every date of a publication in the calendar it was printed in, paired with its converted twin, and where it was read. [Bibliographic layer]",
+     "columns": {
+      "date_type": "published | received | accepted | defended | issue",
+      "calendar": "gregorian | hijri",
+      "precision": "year | month | day | season",
+      "month_name_printed": "'آب 1977', 'رمضان وشوال'",
+      "pair_pk": "its twin in the other calendar",
+      "derivation": "read | converted | catalogue"
+     }
+    },
+    "languages": {
+     "description": "The language code list (ISO 639-2/B as key, with 639-1 and names in Arabic and English). [Bibliographic layer]",
+     "label_column": "name_en",
+     "columns": {
+      "code": "ara | fre | eng | ..."
+     }
+    },
+    "publication_languages": {
+     "description": "Which languages a publication is in, by role (text, abstract, title), and how we know. [Bibliographic layer]",
+     "columns": {
+      "role": "text | abstract | title | summary",
+      "method": "catalogue-041 | script-share | detector:<name>"
+     }
+    },
+    "abstracts": {
+     "description": "An abstract as printed or as catalogued, with its detected language and its place on the page. [Bibliographic layer]",
+     "columns": {
+      "form": "printed | catalogue"
+     }
+    },
+    "keyword_terms": {
+     "description": "An author keyword as a term that can be counted across the archive. [Bibliographic layer]",
+     "label_column": "display",
+     "columns": {
+      "term_key": "folded"
+     }
+    },
+    "publication_keywords": {
+     "description": "Which publication carries which keyword, as printed and from which source. [Bibliographic layer]",
+     "columns": {
+      "source": "masters | catalogue"
+     }
+    },
+    "subject_terms": {
+     "description": "A catalogue subject heading or field of study, its Arabic and English forms as one term. [Bibliographic layer]",
+     "label_column": "term_key",
+     "columns": {
+      "scheme": "653 | field-of-study | database"
+     }
+    },
+    "record_subjects": {
+     "description": "Which subjects the catalogue gives a record. [Bibliographic layer]"
+    },
+    "journals": {
+     "description": "One journal (Mandumah's journal code) with its country and the databases it is indexed in. [Bibliographic layer]",
+     "label_column": "code",
+     "columns": {
+      "journal_id": "'J'+code",
+      "country_code": "ISO 3166-1"
+     }
+    },
+    "journal_titles": {
+     "description": "Every name a journal has had or been printed under, in which years, from which source. [Bibliographic layer]",
+     "columns": {
+      "form": "printed | running-head | catalogue | catalogue-en | romanised | person"
+     }
+    },
+    "journal_issns": {
+     "description": "Every ISSN string seen for a journal, cleaned and check-digit tested, with its ISSN-L. [Bibliographic layer]",
+     "columns": {
+      "kind": "print | online | unknown"
+     }
+    },
+    "publishers": {
+     "description": "A publisher (a university, society, ministry or press) as an entity. [Bibliographic layer]",
+     "label_column": "name",
+     "columns": {
+      "publisher_id": "'P...'"
+     }
+    },
+    "journal_publishers": {
+     "description": "Which publisher published a journal, in which years. [Bibliographic layer]"
+    },
+    "issues": {
+     "description": "One physical issue of a journal, with its printed label, numbers, special/joint marks and both calendars. [Bibliographic layer]",
+     "label_column": "issue_id",
+     "columns": {
+      "issue_id": "'J<code>/<volume_raw>/<issue_raw>'"
+     }
+    },
+    "issue_numbers": {
+     "description": "The issue numbers one physical issue covers (a joint issue \"3,4\" has two rows). [Bibliographic layer]"
+    },
+    "external_ids": {
+     "description": "Every outside identifier of a publication, journal, person, institution or cited work, and who assigned it. [Bibliographic layer]",
+     "columns": {
+      "entity_kind": "W | J | A | I | C",
+      "scheme": "doi | c999 | 001 | issn-l | isbn | orcid | viaf | wikidata | ror | qdrant-doc | s3-key",
+      "assigned_by": "mandumah | publisher | crossref | person | link47",
+      "anchor_pk": "a DOI printed on the page"
+     }
+    },
+    "role_codes": {
+     "description": "The controlled list of contributor roles (author, co-author, translator, reviewer of a book, editor, supervisor...). [People and institutions]",
+     "label_column": "name_en",
+     "columns": {
+      "code": "author | coauthor | translator | reviewer | editor | supervisor | interviewer | compiler | original-author | editor-of-text (محقق)"
+     }
+    },
+    "persons": {
+     "description": "One real person, with an id that never changes across rebuilds. [People and institutions]",
+     "label_column": "preferred_name_ar",
+     "columns": {
+      "person_id": "'A...' from id_registry",
+      "status": "active | provisional | merged",
+      "source": "catalogue-authority | cluster | person"
+     }
+    },
+    "person_authorities": {
+     "description": "Which Mandumah authority ids belong to a person (a cataloguer's decision, our highest-trust identity signal); two when the catalogue has a duplicate. [People and institutions]",
+     "columns": {
+      "authority_id": "never ''",
+      "relation": "same | duplicate-in-catalogue"
+     }
+    },
+    "person_names": {
+     "description": "Every way a person's name is written (printed, catalogue heading, Latin form, cited form, initials), split into its Arabic name parts. [People and institutions]",
+     "columns": {
+      "form_type": "printed | catalogue-heading | catalogue-latin | cited | transliteration | initials | pseudonym",
+      "name_key": "folded, for matching (never an identity)"
+     }
+    },
+    "translit_pairs": {
+     "description": "Arabic↔Latin name-token pairs learned from the catalogue's own Latin headings (232k authority ids), used to match Latin bylines and citations and to search across scripts. [People and institutions]"
+    },
+    "byline_mentions": {
+     "description": "A name exactly as printed in one version's byline, with its titles («د.», «الشيخ») kept and its box on the scan; never changed by matching. [People and institutions]",
+     "label_column": "printed",
+     "columns": {
+      "printed": "whole printed string",
+      "titles": "د. | أ.د. | الشيخ | الدكتور ... (kept, not thrown away)"
+     }
+    },
+    "catalogue_contributors": {
+     "description": "Every contributor heading on a catalogue record (100/110/700), with its normalised role and authority id. [People and institutions]",
+     "columns": {
+      "authority_id": "NULL, never ''",
+      "life_note": "«ت. 1973 م»"
+     }
+    },
+    "authorships": {
+     "description": "One person's (or body's) part in one publication: role, position, and how we know who they are. [People and institutions]",
+     "label_column": "pub_id",
+     "columns": {
+      "inst_id": "corporate byline (اللجنة الوطنية ...)",
+      "method": "exact | token-subset | transliteration | script-twin | corporate | initials | catalogue-only | person",
+      "score": "NULL when nothing was compared",
+      "asserted_by": "link47 | judge | person | catalogue",
+      "evidence": "JSON"
+     }
+    },
+    "authorship_mentions": {
+     "description": "Joins the printed forms of a name (an Arabic and a Latin byline of the same author) to the one authorship they belong to. [People and institutions]"
+    },
+    "affiliation_mentions": {
+     "description": "An affiliation exactly as printed, split into position, department, faculty, organisation and place, with its box. [People and institutions]",
+     "label_column": "printed",
+     "columns": {
+      "position_title": "«مدرس القانون الدولي العام» (kept)",
+      "kind": "institution | position-only | place-only"
+     }
+    },
+    "affiliation_links": {
+     "description": "Which institution(s) a printed affiliation was matched to, with method, score and who said so. [People and institutions]",
+     "columns": {
+      "level": "org | faculty | dept"
+     }
+    },
+    "institutions": {
+     "description": "One university, faculty, department, ministry or centre, with a stable id and its parent. [People and institutions]",
+     "label_column": "inst_id",
+     "columns": {
+      "inst_id": "'I...' from id_registry (never a path)",
+      "kind": "university | faculty | department | ministry | centre | society | press | committee",
+      "status": "active | renamed | merged | closed | provisional",
+      "catalogue_authority_id": "corporate authority «مصر. جامعة القاهرة. كلية الحقوق»"
+     }
+    },
+    "institution_names": {
+     "description": "All names of an institution in Arabic, Latin and French, each typed; no single \"primary\" name (ROR style). [People and institutions]",
+     "columns": {
+      "type": "label | alias | acronym | printed | catalogue-heading | dissertation-502c"
+     }
+    },
+    "institution_relations": {
+     "description": "How institutions relate over time: part of, renamed to, successor of. [People and institutions]",
+     "columns": {
+      "relation": "parent | successor | predecessor | related"
+     }
+    },
+    "supervisions": {
+     "description": "Who supervised whose thesis, where and when: the Arab world's academic family tree, from the catalogue. [People and institutions]"
+    },
+    "citation_mentions": {
+     "description": "Each place on a page where an article cites something (full citation, short form, «المرجع السابق»/«نفسه»/ibid./op. cit., Quran, hadith), with its ink and the first full citation it counts for. [Citations]",
+     "label_column": "printed",
+     "columns": {
+      "mention_id": "'<stem>|p<page>|w<first>-<last>|<n>': built on Azure word numbers, so it survives a new run",
+      "container_kind": "note | ref-list | body",
+      "container_id": "note_id / ref id / block_id",
+      "reading_ord": "order of the citation in the article's reading (note stream order)",
+      "kind": "full | short | ibid | op_cit | loc_cit | see_also | quran | hadith",
+      "marker": "the back-reference words as printed",
+      "printed": "the citation's own span, as printed",
+      "printed_fixed": "the same span with Azure misreadings fixed (what the linker also tries)",
+      "parsed": "JSON: authors, title, source, place, publisher, year, edition ...",
+      "cited_pages": "the locator: the page cited, not the work's pages",
+      "resolve_method": "self | previous-mention | same-author-earliest | title-words | person",
+      "resolved_by": "link47 | judge | person",
+      "unresolved_why": "no-earlier-full | ambiguous-author | no-parse | ..."
+     }
+    },
+    "cited_works": {
+     "description": "One book, article, thesis, diwan or manuscript cited anywhere in the archive, the same whichever articles cite it, with its own times-cited even when it is not in Mandumah (most cited books are not). [Citations]",
+     "label_column": "title",
+     "columns": {
+      "cited_work_id": "'C...' from id_registry",
+      "pub_type": "book | article | thesis | chapter | conference-paper | manuscript | diwan | web | quran | hadith-collection",
+      "status": "active | merged"
+     }
+    },
+    "cited_work_members": {
+     "description": "Which full citations were grouped into each cited work, why, and by whom; a person can move one with a patch. [Citations]"
+    },
+    "cited_work_authors": {
+     "description": "The authors of a cited work split into the parts of an Arabic name, tied to a person where the catalogue identifies them. [Citations]",
+     "columns": {
+      "shuhra": "«ابن جني» is shuhra"
+     }
+    },
+    "link_runs": {
+     "description": "One pass of the linker: its code, thresholds and catalogue export, so any link can be reproduced. [Citations]",
+     "label_column": "linker"
+    },
+    "link_run_versions": {
+     "description": "Which versions one linker pass covered. [Citations]"
+    },
+    "citation_links": {
+     "description": "A REAL link only: a cited work found as a publication of the archive or catalogue (or an outside id), with status, score, method, evidence and who said so. No back-reference, no relation, no self-link. [Citations]",
+     "columns": {
+      "via_mention_pk": "the full mention whose text matched",
+      "target_kind": "publication | external",
+      "target_pub_id": "scanned or catalogued-only: both are publications",
+      "target_value": "doi / isbn / wikidata when external",
+      "status": "accepted | candidate | rejected",
+      "method": "catalogue-fts+validate | article-fts+validate | doi | person",
+      "matched_on": "printed | printed_fixed",
+      "asserted_by": "link47 | judge | person"
+     }
+    },
+    "work_relations": {
+     "description": "A typed relation between a cited work and another item (reviewed in, studied in, part of, edition or translation of), stored with its reverse, separate from citations. [Citations]",
+     "columns": {
+      "relation": "is_reviewed_in | is_studied_in | is_part_of | is_edition_of | is_translation_of",
+      "inverse": "reviews | studies | has_part | has_edition | has_translation"
+     }
+    },
+    "quran_ayat": {
+     "description": "A reference text of the Quran (sura, aya, text) to match quotations against; source and licence recorded. [Citations]",
+     "label_column": "sura_name_ar"
+    },
+    "quran_citations": {
+     "description": "Every place an article quotes or cites the Quran, by sura and aya: a Quran citation index no other index has. [Citations]",
+     "columns": {
+      "source_kind": "inline-quote (﴿…﴾) | note-ref («سورة البقرة، الآية ٢٥٥») | both",
+      "method": "bracket+match | ref-only | match-only | person"
+     }
+    },
+    "flag_detectors": {
+     "description": "Each automatic check that raises flags, with its code version and thresholds, so \"resolved\" can be told from \"new detector\". [Quality]",
+     "label_column": "kind",
+     "columns": {
+      "detector_id": "'<kind>@<code_hash8>'"
+     }
+    },
+    "flags": {
+     "description": "One warning raised by a code check on one version's page, tied to the detector that raised it and to its ink. [Quality]",
+     "columns": {
+      "flag_id": "natural id, stable across runs",
+      "box_raw": "as in the flag file ('2:1', 0-1000 box)"
+     }
+    },
+    "judge_calls": {
+     "description": "One look by one judge model and prompt at one page, kept even when it found nothing, with its cost. [Quality]",
+     "label_column": "call_id",
+     "columns": {
+      "call_id": "'<run>|<stem>|p<page>|<model>|<prompt_version>'",
+      "version_id": "the version that was judged",
+      "verdict": "clean | problems | failed"
+     }
+    },
+    "judge_findings": {
+     "description": "One problem a judge named on a page, with its route (auto, retry, human) and its ink. [Quality]",
+     "label_column": "type",
+     "columns": {
+      "route": "auto | retry | human"
+     }
+    },
+    "patches": {
+     "description": "One proposed correction (structure, text, metadata, who-is-who, citation grouping) from a person, the judge or a retry; never changed after it is made. [Quality]",
+     "label_column": "patch_id",
+     "columns": {
+      "patch_key": "'<run>|<stem>|<patch_id>' (upstream ids collide across a journal's articles)",
+      "domain": "content | metadata | entity | citation | catalogue",
+      "op": "split_block | set_kind | replace_page_blocks | merge | split | assign-mention | set-parent | move-member | not-a-person ...",
+      "source": "person | judge | gemini-retry | rule",
+      "priority": "person 1 > judge 2 > gemini-retry 3 > rule 4",
+      "payload_copy": "only for person patches (they cannot be regenerated)"
+     }
+    },
+    "patch_applications": {
+     "description": "What happened to a patch in each build or rebuild that saw it (applied, skipped, overridden). [Quality]",
+     "columns": {
+      "version_id": "content patches: the version built; NULL for entity/citation patches",
+      "status": "applied | skipped | overridden | proposed"
+     }
+    },
+    "reviews": {
+     "description": "Every human or agent verdict on anything (a link, a resolution, a grouping, a finding, a flag, a correction, a page, a gold item): the ground truth trust scores are calibrated on. [Quality]",
+     "columns": {
+      "subject_kind": "link | relation | resolution | membership | authorship | finding | flag | correction | assertion | page | article",
+      "subject_key": "stable id (mention_id, link fingerprint, flag_id ...)",
+      "subject_fingerprint": "hash of what was seen, so a verdict re-attaches after rebuilds or is marked stale",
+      "verdict": "right | wrong | partly | unsure",
+      "source_file": "judge_verdicts43.json, judge_truth43.json, gold/, handcheck/, link_checks"
+     }
+    },
+    "catalogue_reports": {
+     "description": "A problem found in Mandumah's catalogue (or a print-vs-catalogue disagreement), with who is right, its evidence on the page, and whether Mandumah was told and fixed it in a later export. [Quality]",
+     "columns": {
+      "kind": "invalid-issn | stem-on-several-records | duplicate-001 | duplicate-authority | missing-author | name-differs | role-wrong | corporate-as-person | page-range | year | hijri-as-gregorian | title | language | author-count | missing-file | missing-record",
+      "who_is_right": "print | catalogue | both-wrong | unknown",
+      "assert_pk": "the D33 correction it rests on",
+      "status": "open | sent | accepted | rejected | fixed"
+     }
+    },
+    "vector_points": {
+     "description": "A link from each existing Qdrant point (mandumah_v2) to its document and, where offsets allow, its blocks, so a semantic hit opens the page and its payload counts as one more metadata reading. [Ties to what Mandumah already runs]",
+     "columns": {
+      "collection": "mandumah_v2",
+      "stem": "payload doc_id; not a key: points exist for documents we have not loaded",
+      "map_method": "doc-only | section | text-overlap"
+     }
+    },
+    "search_feedback": {
+     "description": "Users' feedback on Mandumah's AI search (from the ai_search_feedback MySQL dumps), as query/document judgements without user identities. [Ties to what Mandumah already runs]",
+     "columns": {
+      "dump": "the nightly dump it came from",
+      "source_row": "its id in the dump",
+      "verdict": "as the dump records it (columns fixed once the dump is inspected)",
+      "user_hash": "salted hash only; never names or emails"
+     }
+    },
+    "v_articles": {
+     "description": "Back-compat: the v46 `articles` row, shown for the current version of each document."
+    },
+    "v_fixes": {
+     "description": "Back-compat: fixes and misprints of v46 are two slices of the ledger."
+    },
+    "v_metadata_changes": {
+     "description": "D33 log: each corrected value beside the printed one it corrects."
+    },
+    "v_catalogue_disagreements": {
+     "description": "Print vs catalogue, recomputed from the assertions (no stale snapshot)."
+    },
+    "v_mention_work": {
+     "description": "Each citation counted where it belongs: every mention (full or back-reference) of a work in one article."
+    },
+    "v_times_cited": {
+     "description": "Times cited per cited work: citing publications (WoS headline) and all mentions incl. «المرجع السابق»."
+    },
+    "v_pub_times_cited": {
+     "description": "Times cited per archive/catalogue publication, through accepted best links only."
+    },
+    "v_author_self_citations": {
+     "description": "True self-citation: an author of the citing publication is an author of the cited work (shared person id)."
+    },
+    "v_journal_citation_pairs": {
+     "description": "Journal self-citation and journal pairs (citation stacking), through accepted links."
+    },
+    "v_block_trust": {
+     "description": "Trust of a block, from evidence (starting formula; calibrated on `reviews` per release): start at 1, x0.6 if any Azure word < 0.5, x0.9 per fix (max 3), x0.8 if a flag, x0.7 if patched by retry, floor 0.05."
+    },
+    "v_judge_precision": {
+     "description": "Judge precision per model / prompt / finding type, against reviews: tells how far to trust an auto route."
+    },
+    "v_flag_lifecycle": {
+     "description": "Flag lifecycle between two versions of one document, comparing only detectors present in both."
+    },
+    "v_issue_coverage": {
+     "description": "Holdings per issue: catalogued vs in the bucket vs read — the map of what exists on paper but not in the index."
+    },
+    "v_quran_index": {
+     "description": "Quran citation index: how often each aya is quoted or cited, by how many publications."
+    },
+    "reconciliation_v46": {
+     "description": "Builder report: each table of platform.db (experiment 46), its v2 counterpart's count, and why they differ."
+    }
+   },
+   "queries": {
+    "show_me_the_ink": {
+     "title": "Show me the ink: any citation of an article, with its crop of the scan",
+     "description": "Every citation mention of the shown version of one document, in reading order, with a link that draws the page and the box of Azure's words it was read from.",
+     "sql": "SELECT m.reading_ord, m.container_id AS note, m.kind, m.marker, m.printed, m.cited_volume, m.cited_pages,\n       t.printed AS counts_for_first_full_citation, m.resolve_method, m.unresolved_why, m.trust,\n       a.anchor_key, 'http://127.0.0.1:8003/diagram/ink.html?a=' || m.anchor_pk AS ink\nFROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1\nLEFT JOIN citation_mentions t ON t.mention_pk = m.full_mention_pk\nLEFT JOIN ink_anchors a ON a.anchor_pk = m.anchor_pk\nWHERE v.stem = :stem ORDER BY m.reading_ord"
+    },
+    "back_references_resolved": {
+     "title": "«المرجع السابق» / «نفسه» / ibid. / op. cit. → the first full citation",
+     "description": "Each back reference of an article and the first full citation of the work it counts for (chains collapsed); unresolved ones say why.",
+     "sql": "SELECT m.container_id AS note, m.kind, m.marker, m.printed AS back_reference, m.resolve_method,\n       m.resolve_score, m.unresolved_why, t.container_kind || ':' || t.container_id AS first_full_in,\n       t.printed AS first_full_citation, w.cited_work_id, 'http://127.0.0.1:8003/diagram/ink.html?a=' || m.anchor_pk AS ink\nFROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1\nLEFT JOIN citation_mentions t ON t.mention_pk = m.full_mention_pk\nLEFT JOIN cited_work_members cm ON cm.full_mention_pk = m.full_mention_pk\nLEFT JOIN cited_works w ON w.cited_work_pk = cm.cited_work_pk\nWHERE v.stem = :stem AND m.kind IN ('ibid', 'op_cit', 'loc_cit', 'short') ORDER BY m.reading_ord"
+    },
+    "most_cited_works": {
+     "title": "Cited-reference index: most cited works, books included",
+     "description": "Times cited per cited work: citing articles (the Web-of-Science headline) and every mention, back references included; with the archive/catalogue record when one is linked.",
+     "sql": "SELECT w.cited_work_id, w.pub_type, w.title, w.first_author_key, w.year_printed, w.year_calendar,\n       t.n_citing_pubs, t.n_mentions, t.n_full, t.n_backrefs, l.target_pub_id AS in_mandumah,\n       (SELECT group_concat(relation || ' ' || object_pub_id, '; ') FROM work_relations r\n        WHERE r.subject_cited_work_pk = w.cited_work_pk) AS relations\nFROM v_times_cited t JOIN cited_works w USING (cited_work_pk)\nLEFT JOIN citation_links l ON l.cited_work_pk = w.cited_work_pk AND l.status = 'accepted' AND l.best = 1\nORDER BY t.n_citing_pubs DESC, t.n_mentions DESC LIMIT 200"
+    },
+    "corrections_ledger": {
+     "title": "The corrections ledger: what Azure read, what the page says, what is proposed",
+     "description": "Azure misreadings fixed in the text (Azure's reading and confidence kept) and suspected misprints kept as printed with a proposed correction (D30), each on its ink.",
+     "sql": "SELECT v.stem, c.layer, c.xml_id, c.azure_reading, c.azure_wc, c.printed, c.proposed, c.why, c.block_id,\n       c.anchor_method, 'http://127.0.0.1:8003/diagram/ink.html?a=' || c.anchor_pk AS ink\nFROM text_corrections c JOIN versions v ON v.version_id = c.version_id AND v.is_current = 1\nWHERE (:stem = '' OR v.stem = :stem) AND (:layer = '' OR c.layer = :layer)\nORDER BY v.stem, c.corr_pk LIMIT 1000"
+    },
+    "metadata_as_printed_and_corrected": {
+     "title": "Metadata as printed, as corrected (D33) and as catalogued",
+     "description": "Every reading of every field of one publication; the chosen one is marked with the rule that chose it.",
+     "sql": "SELECT a.field, a.form, a.value, a.is_chosen, a.chosen_rule, a.reason, a.rule, v.run,\n       'http://127.0.0.1:8003/diagram/ink.html?a=' || a.anchor_pk AS ink\nFROM metadata_assertions a LEFT JOIN versions v ON v.version_id = a.version_id\nWHERE a.pub_id = (SELECT pub_id FROM documents WHERE stem = :stem)\nORDER BY a.field, a.is_chosen DESC, a.form"
+    },
+    "catalogue_reports_for_mandumah": {
+     "title": "Catalogue reports for Mandumah (print vs catalogue, record problems)",
+     "description": "Who is right, the evidence on the page, and the status of each report.",
+     "sql": "SELECT kind, field, stem, c999, catalogue_value, our_value, who_is_right, severity, evidence, note,\n       status, 'http://127.0.0.1:8003/diagram/ink.html?a=' || anchor_pk AS ink\nFROM catalogue_reports WHERE (:kind = '' OR kind = :kind) ORDER BY kind, stem LIMIT 1000"
+    },
+    "catalogue_reports_summary": {
+     "title": "Catalogue reports by kind and who is right",
+     "sql": "SELECT kind, who_is_right, count(*) AS n FROM catalogue_reports GROUP BY 1, 2 ORDER BY 3 DESC"
+    },
+    "quran_index": {
+     "title": "Quran citation index: each aya, how often and by how many documents",
+     "sql": "SELECT q.sura, a.sura_name_ar, q.aya_from, q.aya_to, q.n_places, q.n_documents\nFROM v_quran_index q JOIN quran_ayat a ON a.sura = q.sura AND a.aya = q.aya_from\nORDER BY q.n_places DESC, q.sura, q.aya_from"
+    },
+    "quran_places": {
+     "title": "Every place the Quran is quoted or cited (with the ink)",
+     "sql": "SELECT v.stem, q.source_kind, q.method, q.sura, a.sura_name_ar, q.aya_from, q.aya_to, q.printed_ref,\n       q.quoted_text, 'http://127.0.0.1:8003/diagram/ink.html?a=' || q.anchor_pk AS ink\nFROM quran_citations q JOIN versions v ON v.version_id = q.version_id AND v.is_current = 1\nLEFT JOIN quran_ayat a ON a.sura = q.sura AND a.aya = q.aya_from\nWHERE (:sura = '' OR q.sura = cast(:sura AS INTEGER)) ORDER BY q.sura, q.aya_from LIMIT 1000"
+    },
+    "search_arabic": {
+     "title": "Search (folded, clitics stripped): blocks, figure texts, equations, verses, citations",
+     "description": "Type the words as printed (hamza, ta marbuta, vowels and و/ب/ال are handled); each hit opens its ink.",
+     "sql": "SELECT v.stem, u.unit_kind, u.unit_id, u.text, 'http://127.0.0.1:8003/diagram/ink.html?a=' || u.anchor_pk AS ink\nFROM search_fts f JOIN search_units u ON u.uid = f.rowid JOIN versions v ON v.version_id = u.version_id\nWHERE search_fts MATCH 'stemmed : ' || stem47(:q) ORDER BY rank LIMIT 200"
+    },
+    "verse_search": {
+     "title": "Verse index: vowelled verse lines, searched without vowels",
+     "sql": "SELECT v.stem, l.verse_id, l.text, l.poet_hint, 'http://127.0.0.1:8003/diagram/ink.html?a=' || l.anchor_pk AS ink\nFROM verse_lines l JOIN versions v ON v.version_id = l.version_id AND v.is_current = 1\nWHERE l.text_bare LIKE '%' || fold(:q) || '%' LIMIT 300"
+    },
+    "least_trusted_blocks": {
+     "title": "Least trusted text (trust from Azure confidence, fixes, flags, retries)",
+     "sql": "SELECT v.stem, b.block_id, b.role, b.trust, b.wc_min, b.n_fixes, b.n_flags, b.text_source,\n       substr(b.text, 1, 160) AS text, 'http://127.0.0.1:8003/diagram/ink.html?a=' || b.anchor_pk AS ink\nFROM blocks b JOIN versions v ON v.version_id = b.version_id AND v.is_current = 1\nWHERE b.trust IS NOT NULL ORDER BY b.trust, b.wc_min LIMIT 300"
+    },
+    "author_self_citations": {
+     "title": "True self-citation (the same person id cites their own work)",
+     "sql": "SELECT s.citing_pub_id, p.title_shown, s.person_id, pe.preferred_name_ar, w.title AS cited_work\nFROM v_author_self_citations s JOIN publications p ON p.pub_id = s.citing_pub_id\nJOIN persons pe ON pe.person_id = s.person_id JOIN cited_works w USING (cited_work_pk)"
+    },
+    "person_by_name": {
+     "title": "A person by any form of the name (Arabic or Latin), with authorships",
+     "sql": "SELECT pe.person_id, pe.status, pe.preferred_name_ar, pe.preferred_name_lat,\n       (SELECT group_concat(authority_id) FROM person_authorities pa WHERE pa.person_id = pe.person_id) AS authority,\n       a.pub_id, p.title_shown, a.role_code, a.method, a.score\nFROM persons pe JOIN authorships a USING (person_id) JOIN publications p ON p.pub_id = a.pub_id\nWHERE pe.person_id IN (SELECT person_id FROM person_names WHERE name_key LIKE '%' || replace(fold(:name), ' ', '') || '%')\nORDER BY pe.person_id"
+    },
+    "versions_side_by_side": {
+     "title": "One document read by every run: versions, why one is shown, cost, flags",
+     "sql": "SELECT v.version_id, v.run, r.kind, v.is_current, v.current_reason, v.complete, v.pages_covered, v.usd,\n       (SELECT count(*) FROM blocks b WHERE b.version_id = v.version_id) AS blocks,\n       (SELECT count(*) FROM text_corrections c WHERE c.version_id = v.version_id) AS corrections,\n       (SELECT count(*) FROM flags f WHERE f.version_id = v.version_id) AS flags,\n       (SELECT count(*) FROM citation_mentions m WHERE m.version_id = v.version_id) AS citation_mentions\nFROM versions v JOIN runs r USING (run) WHERE v.stem = :stem ORDER BY v.version_id"
+    },
+    "flags_on_the_ink": {
+     "title": "Flags and judge findings of a document, each on its ink",
+     "sql": "SELECT 'flag' AS what, v.run, f.page, f.kind AS type, f.severity AS level, f.reason AS text, f.block_id,\n       'http://127.0.0.1:8003/diagram/ink.html?a=' || f.anchor_pk AS ink\nFROM flags f JOIN versions v USING (version_id) WHERE v.stem = :stem\nUNION ALL\nSELECT 'judge', c.run, c.page, j.type, j.route, j.evidence, NULL, 'http://127.0.0.1:8003/diagram/ink.html?a=' || j.anchor_pk\nFROM judge_findings j JOIN judge_calls c USING (call_id) WHERE c.stem = :stem ORDER BY 3"
+    },
+    "reconciliation_with_v46": {
+     "title": "Reconciliation with platform.db (experiment 46)",
+     "sql": "SELECT * FROM reconciliation_v46"
+    }
+   }
+  }
+ }
+}
