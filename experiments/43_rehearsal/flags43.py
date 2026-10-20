@@ -95,12 +95,16 @@ def all_articles() -> dict:
     if f.exists():
         for a in ST.jl(f)["articles"]:
             arts.setdefault(a["stem"], dict(a, set="b"))
+    f = HERE / "sample43b.json"                       # the second 300 (set c, 2026-10-20)
+    if f.exists():
+        for a in ST.jl(f)["articles"]:
+            arts.setdefault(a["stem"], dict(a, set="c"))
     return arts
 
 
 def use_pages_of(a: dict):
     """Page renders of the fresh sample live in this experiment (as in run43.py)."""
-    ST.PAGES = OUT / "pages" if a.get("set") == "b" else M43.E41 / "out" / "pages"
+    ST.PAGES = OUT / "pages" if a.get("set") in ("b", "c") else M43.E41 / "out" / "pages"
 
 
 def chunk_files(a: dict, raw: Path) -> list[dict]:

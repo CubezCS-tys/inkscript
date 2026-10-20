@@ -51,7 +51,7 @@ def main():
     rules, mast, raw = OUT / run / "rules", OUT / run / "masters", OUT / run / "raw"
     tot, types, per, by_dec, by_len = Counter(), Counter(), {}, defaultdict(Counter), defaultdict(Counter)
     oa_regions = 0
-    for a in run43.articles("b"):
+    for a in run43.articles("c" if run.startswith("v33_300b") else "b"):   # c: the exam
         s = a["stem"]
         one = CMP.one(s, rules, mast)
         if one is None:

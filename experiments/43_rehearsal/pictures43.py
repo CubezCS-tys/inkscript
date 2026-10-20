@@ -55,7 +55,7 @@ def sheet(a, p, figs, junk, lines, dst: Path):
 
 def build(run: str, raw: str, dst: Path, stems, which: str = "a"):
     from inkscript.enrich.schemas import validate_alto, validate_jats
-    if which == "b":                              # the fresh sample's page renders (run43.py --set b)
+    if which in ("b", "c"):                       # the fresh samples' page renders (run43.py --set b / c)
         ST.PAGES = OUT / "pages"
     arts = [a for a in run43.articles(which) if not stems or a["stem"] in stems]
     src, rules = OUT / run / raw, dst / "rules"
@@ -86,7 +86,7 @@ def main():
     ap.add_argument("--raw", default="raw", help="folder under out/<run>/ holding the answers")
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--no-sheets", action="store_true")
-    ap.add_argument("--set", default="a", choices=["a", "b"], help="--build: a = experiment 41's 55, b = sample43")
+    ap.add_argument("--set", default="a", choices=["a", "b", "c"], help="--build: a = experiment 41's 55, b = sample43, c = sample43b")
     args = ap.parse_args()
     if args.build:
         return build(args.run, args.raw, Path(args.build).resolve(), args.stems, args.set)

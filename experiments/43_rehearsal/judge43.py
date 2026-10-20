@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import subprocess
 import sys
 import time
@@ -34,7 +35,8 @@ ST, C = M43.ST, run43.C
 OUT = HERE / "out"
 J = OUT / "judge"
 PW = HERE.parent / "40_gemini4_vlm" / "out" / "venv" / "bin" / "python"
-CAP_TOTAL = 33.9235 + 5.0          # the live log's total when this work began + the owner's $5 cap for the judge
+CAP_TOTAL = float(os.environ.get("JUDGE43_CAP") or 33.9235 + 5.0)   # the live log's total when this work began + the
+#                  owner's $5 cap for the judge; JUDGE43_CAP = the exam's judge cap (2026-10-20, step G)
 PRICE = {"gemini-3.8-flash": (0.75, 3.75), "gemini-4-argon": (2.0, 10.0)}   # Standard, per M tokens; Batch = half
 THRESHOLD = 0.85                   # judge confidence needed for an automatic edit (and the evidence check)
 BATCH_MAX_OUT = 2500              # calibration answers: at most 436 output tokens (Flash); keeps the worst case under the cap
@@ -45,6 +47,8 @@ RUNS = {
     "v2_55": dict(rules=OUT / "v2_55" / "rules", views=OUT / "v2_55" / "views", set="a"),
     "v2_55_judged": dict(rules=OUT / "judge" / "v2_55_judged" / "rules", views=OUT / "judge" / "v2_55_judged" / "views",
                          set="a"),
+    "v33_300b": dict(rules=OUT / "v33_300b" / "rules", views=OUT / "v33_300b" / "views", set="c"),     # the exam
+    "v33_300b_final": dict(rules=OUT / "v33_300b_final" / "rules", views=OUT / "v33_300b_final" / "views", set="c"),
     "replay": dict(rules=OUT / "replay" / "raw", views=OUT / "judge" / "views_replay", set="a"),   # views43 on out/masters
 }
 KINDS = ["title", "trans_title", "subtitle", "byline", "abstract", "keywords", "heading", "paragraph", "list_item",
@@ -65,7 +69,7 @@ def art(run: str, stem: str) -> dict:
     w = RUNS[run]["set"]
     if w not in _arts:
         _arts[w] = {a["stem"]: a for a in run43.articles(w)}
-    ST.PAGES = OUT / "pages" if w == "b" else M43.E41 / "out" / "pages"
+    ST.PAGES = OUT / "pages" if w in ("b", "c") else M43.E41 / "out" / "pages"
     return _arts[w][stem]
 
 

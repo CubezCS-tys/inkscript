@@ -349,7 +349,7 @@ def build(run: str, out: Path, stems: list[str] | None = None, off: bool = False
     (or `stems`). Never writes under out/<run>/."""
     import masters43 as M43
     import run43
-    if which == "b":
+    if which in ("b", "c"):
         M43.ST.PAGES = OUT / "pages"
     out = Path(out).resolve()
     assert out != (OUT / run).resolve()
@@ -386,7 +386,7 @@ def main():
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--off", action="store_true", help="build without any patch (the reversibility check)")
     a = ap.parse_args()
-    build(a.run, Path(a.out), a.stems, a.off)
+    build(a.run, Path(a.out), a.stems, a.off, "c" if a.run.startswith("v33_300b") else "b")   # c: the exam
 
 
 if __name__ == "__main__":

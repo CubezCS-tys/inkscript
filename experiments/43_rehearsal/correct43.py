@@ -189,7 +189,7 @@ this browser; <b>Export corrections</b> saves them all as one file for <code>cor
 
 def build(run: str, stems: list[str] | None, views: bool = True) -> dict:
     import run43
-    arts = {a["stem"]: a for a in run43.articles("b")}
+    arts = {a["stem"]: a for a in run43.articles("c" if run.startswith("v33_300b") else "b")}   # c: the exam
     masters = OUT / run / "masters"
     stems = stems or sorted(s for s in arts if (masters / f"{s}.alto.xml").exists())
     vdir = OUT / "correct" / run / "views"

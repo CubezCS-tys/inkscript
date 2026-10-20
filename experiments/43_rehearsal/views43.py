@@ -742,8 +742,12 @@ def art43(stem: str) -> dict:
     try:
         return art_of(stem)
     except StopIteration:
-        arts = json.loads((HERE / "sample43.json").read_text(encoding="utf-8"))["articles"]
-        return dict(next(a for a in arts if a["stem"] == stem), set="b")
+        for f, w in (("sample43.json", "b"), ("sample43b.json", "c")):      # set c: the second 300
+            arts = json.loads((HERE / f).read_text(encoding="utf-8"))["articles"]
+            hit = [a for a in arts if a["stem"] == stem]
+            if hit:
+                return dict(hit[0], set=w)
+        raise KeyError(stem)
 
 
 def table_part_html(D, rec, d: str, lg: str) -> str:
@@ -782,7 +786,7 @@ def main():
     rep = {}
     for s in a.stems:
         art = art43(s)
-        ST.PAGES = HERE / "out" / "pages" if art.get("set") == "b" else ST.OUT / "pages"   # set b renders live here
+        ST.PAGES = HERE / "out" / "pages" if art.get("set") in ("b", "c") else ST.OUT / "pages"   # set b renders live here
         st = build_layout43(art, load43(art))
         ov = layout_overlaps(st)
         rep[s] = dict(cut_width=st["cut_width"], cut_picture=st["cut_picture"], overlaps=ov)

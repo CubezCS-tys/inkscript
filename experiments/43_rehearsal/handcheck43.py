@@ -71,7 +71,7 @@ def flags_by_page(run: str, stem: str) -> dict:
 def build(run: str, stem: str, view_url: str, why: str = "") -> tuple[Path, int]:
     MR.MAST = (HERE / "out" / run / "masters").resolve()
     a = art_of(stem)
-    ST.PAGES = HERE / "out" / "pages" if a.get("set") == "b" else E41 / "out" / "pages"
+    ST.PAGES = HERE / "out" / "pages" if a.get("set") in ("b", "c") else E41 / "out" / "pages"
     doc = V4.load43(a)
     fl = flags_by_page(run, stem)
     pages_html, nb = [], 0

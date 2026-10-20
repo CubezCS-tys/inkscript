@@ -22,6 +22,7 @@ import judge43 as JG  # noqa: E402
 
 J = JG.J
 E = html.escape
+JUDGED = "v33_300_judged"           # --judged (the exam: v33_300b_final)
 
 
 def card(rec: dict, findings: list[dict], kind: str, truth: dict | None = None, others: dict | None = None,
@@ -43,7 +44,7 @@ def card(rec: dict, findings: list[dict], kind: str, truth: dict | None = None, 
     if after:
         a = after.relative_to(J)
         h.append(f'<figure class="after"><a href="{a}"><img loading="lazy" src="{a}" alt="after"></a>'
-                 '<figcaption>after the applied edit(s): out/v33_300_judged</figcaption></figure>')
+                 f'<figcaption>after the applied edit(s): out/{JUDGED}</figcaption></figure>')
     if not findings:
         h.append(f'<p class="none">{E(rec.get("model", ""))}: <b>nothing wrong</b> on this page.</p>')
     for f in findings:
@@ -112,15 +113,22 @@ def main():
     ap.add_argument("--dir", default="gemini-3.8-flash", help="the judge's answers (model dir) used for routes")
     ap.add_argument("--calib-dirs", nargs="*", default=["gemini-3.8-flash", "gemini-4-argon"])
     ap.add_argument("--summary", default=str(J / "summary.json"))
+    ap.add_argument("--run", default="v33_300", help="the judged run (the exam: v33_300b)")
+    ap.add_argument("--judged", default="v33_300_judged", help="the patched run folder (the exam: v33_300b_final)")
+    ap.add_argument("--out", default=str(J / "judge_review.html"))
+    ap.add_argument("--no-calib", action="store_true", help="leave out the calibration pages and table")
+    ap.add_argument("--none-shown", type=int, default=12)
     a = ap.parse_args()
+    global JUDGED
+    JUDGED, RUN = a.judged, a.run
     truth = json.loads((HERE / "judge_truth43.json").read_text(encoding="utf-8"))
     vf = HERE / "judge_verdicts43.json"
     verdicts = json.loads(vf.read_text(encoding="utf-8"))["verdicts"] if vf.exists() else {}
-    calib = json.loads((J / "calib.json").read_text()) if (J / "calib.json").exists() else []
+    calib = json.loads((J / "calib.json").read_text()) if (J / "calib.json").exists() and not a.no_calib else []
     summ = json.loads(Path(a.summary).read_text()) if Path(a.summary).exists() else {}
     cards = []
     seen = set()
-    for t in truth["pages"]:
+    for t in ([] if a.no_calib else truth["pages"]):
         s, p = t["page"].rsplit(":", 1)
         f = JG.answer_path(a.dir, t["run"], s, int(p))
         if not f.exists():
@@ -141,17 +149,17 @@ def main():
         rt = J / "retry" / t["run"] / f"{s}_p{int(p):03d}.json"
         retry = json.loads(rt.read_text()) if rt.exists() else None
         after = None
-        if t["run"] == "v33_300" and (JG.OUT / "v33_300_judged" / "views" / "mirror" / f"{s}.html").exists():
-            pf = JG.OUT / "v33_300_judged" / "masters" / f"{s}.patches.json"
+        if t["run"] == "v33_300" and (JG.OUT / JUDGED / "views" / "mirror" / f"{s}.html").exists():
+            pf = JG.OUT / JUDGED / "masters" / f"{s}.patches.json"
             if pf.exists() and any(e.get("page") == int(p) for e in json.loads(pf.read_text())["applied"]):
-                after = JG.side("v33_300_judged", s, int(p))
+                after = JG.side(JUDGED, s, int(p))
         cards.append(card(rec, fs, "calibration", t, others, after, retry))
         seen.add((t["run"], s, int(p)))
     # the 300's flagged pages: auto / retry / human first, then a sample of "none"
     rest = {"auto": [], "retry": [], "human": [], "none": []}
-    for f in sorted((J / "answers" / a.dir / "v33_300").glob("*_p[0-9][0-9][0-9].json")):
+    for f in sorted((J / "answers" / a.dir / RUN).glob("*_p[0-9][0-9][0-9].json")):
         rec = json.loads(f.read_text())
-        if ("v33_300", rec["stem"], rec["page"]) in seen:
+        if (RUN, rec["stem"], rec["page"]) in seen:
             continue
         fs = JG.decide(rec)
         rs = {x["route"] for x in fs}
@@ -160,13 +168,13 @@ def main():
     for key in ("auto", "retry", "human"):
         for rec, fs in rest[key]:
             after = None
-            pf = JG.OUT / "v33_300_judged" / "masters" / f"{rec['stem']}.patches.json"
-            if pf.exists() and (JG.OUT / "v33_300_judged" / "views" / "mirror" / f"{rec['stem']}.html").exists():
+            pf = JG.OUT / JUDGED / "masters" / f"{rec['stem']}.patches.json"
+            if pf.exists() and (JG.OUT / JUDGED / "views" / "mirror" / f"{rec['stem']}.html").exists():
                 if any(e.get("page") == rec["page"] for e in json.loads(pf.read_text())["applied"]):
-                    after = JG.side("v33_300_judged", rec["stem"], rec["page"])
-            rt = J / "retry" / "v33_300" / f"{rec['stem']}_p{rec['page']:03d}.json"
+                    after = JG.side(JUDGED, rec["stem"], rec["page"])
+            rt = J / "retry" / RUN / f"{rec['stem']}_p{rec['page']:03d}.json"
             cards.append(card(rec, fs, "the 300", None, None, after, json.loads(rt.read_text()) if rt.exists() else None))
-    for rec, fs in rest["none"][:12]:
+    for rec, fs in rest["none"][:a.none_shown]:
         cards.append(card(rec, fs, "the 300"))
     # calibration table
     tab = ""
@@ -187,11 +195,11 @@ def main():
             "<b>automatically</b> only with two keys: the judge is sure (confidence ≥ "
             f"{JG.THRESHOLD}) <b>and</b> a code check of the scan agrees (pale ink + non-words / unsure Azure for "
             "show-through; geometry for structure). Otherwise a <b>retry</b> of that page with the judge's note and "
-            "close-ups, or the <b>owner</b>. Applied edits go to out/v33_300_judged only; the run's masters are "
+            f"close-ups, or the <b>owner</b>. Applied edits go to out/{E(JUDGED)} only; the run's masters are "
             "untouched.</p>"
             + (f"<p class=lead>{E(summ.get('line', ''))}</p>" if summ else "")
-            + f"<p class=lead>Flagged pages of the 300 judged: {sum(n300.values())} — auto {n300['auto']}, "
-              f"retry {n300['retry']}, owner {n300['human']}, nothing wrong {n300['none']} (12 of those shown).</p>"
+            + f"<p class=lead>Pages of {E(RUN)} judged: {sum(n300.values())} — auto {n300['auto']}, "
+              f"retry {n300['retry']}, owner {n300['human']}, nothing wrong {n300['none']} ({min(a.none_shown, n300['none'])} of those shown).</p>"
             + "<h2>Calibration</h2>" + tab)
     bar = ('<div class=bar>show: <button data-k=all>all</button><button data-k=calibration>calibration pages</button>'
            '<button data-k="the 300">the 300</button> · route: <button data-r=all>any</button>'
@@ -200,7 +208,7 @@ def main():
     page = (f'<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,'
             f'initial-scale=1"><title>The judge</title><style>{CSS}</style></head><body><main>{head}{bar}'
             + "\n".join(cards) + f"</main><script>{JS}</script></body></html>")
-    out = J / "judge_review.html"
+    out = Path(a.out)
     out.write_text(page, encoding="utf-8")
     print(out, len(cards), "cards")
 
