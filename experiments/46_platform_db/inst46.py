@@ -13,13 +13,13 @@ from collections import Counter, defaultdict
 
 from common46 import fold, key, latin_key, ratio
 
-ORG = re.compile(r"(جامع|university|univ\b|وزار|ministry|مركز|center|centre|معهد|institut|اكاديمي|academy|هيئ|"
-                 r"مدرس|school|مستشفي|hospital|شرك|company|بنك|bank|مجلس|council|مكتب|library|منظم|organi[sz]ation|"
+ORG = re.compile(r"(جامع|university|univ\b|وزار|ministry|مركز|center|centre|معهد|institut|اكاديميه|academy|هيئ|"
+                 r"مدرسه|school|مستشفي|hospital|شرك|company|بنك|bank|مجلس|council|مكتب|library|منظم|organi[sz]ation|"
                  r"مجمع|المجمع|ديوان|دار\s|جمعي|society|association|نقاب|اتحاد|union|مؤسس|foundation|corporation|"
-                 r"المحكم|محكم|court|القضاء|الامانه|امانه|secretariat|بلدي|municipal|مديري|directorate|الادار|ادار)",
+                 r"المحكم|محكم|court|القضاء|الامانه|امانه|secretariat|بلدي|municipal|مديري|directorate|ازهر|^(ب|ال)?اداره)",
                  re.I)
-FAC = re.compile(r"^(كلي|college|faculty|school of|عماد|deanship)", re.I)
-DEP = re.compile(r"^(قسم|شعب|department|dept|division|وحد|unit|برنامج|program)", re.I)
+FAC = re.compile(r"^(كلي|college|faculty|facult[ée]|school of|عماد|deanship)", re.I)
+DEP = re.compile(r"^(قسم|شعب|دايره|department|dept|d[ée]partement|division|وحد|unit|برنامج|program)", re.I)
 COUNTRIES = {
     "SA": ["السعوديه", "المملكه العربيه السعوديه", "saudi arabia", "ksa", "kingdom of saudi arabia"],
     "EG": ["مصر", "جمهوريه مصر العربيه", "egypt", "arab republic of egypt"],
@@ -52,8 +52,15 @@ def norm_key(s: str) -> str:
 
 
 def pieces(text: str) -> list[str]:
-    parts = re.split(r"\s+[-–—]\s*|\s*[-–—]\s+|[،,/|;؛]|\s-(?=\S)|(?<=\S)-\s", text or "")
-    return [p.strip(" .:()[]") for p in parts if p and p.strip(" .:()[]")]
+    parts = re.split(r"\s+[-–—]\s*|\s*[-–—]\s+|[،,/|;؛_.]|\s-(?=\S)|(?<=\S)-\s", text or "")
+    out = []
+    for p in parts:
+        # «قسم … كلية … جامعة …» written without separators: cut before each level word
+        for q in re.split(r"\s+(?=(?:ب|و)?(?:كلية|جامعة|الجامعة|(?:College|Faculty)\s+of|(?:University|Université)\s+(?:of|de|d')))", p):
+            q = re.sub(r"^\s*ب(?=(ال)?(قسم|كلي|جامع|معهد|مركز|اكاديمي|أكاديمي))", "", q.strip(" .:()[]"))
+            if q:
+                out.append(q)
+    return out
 
 
 def classify(p: str) -> str:
@@ -72,13 +79,20 @@ def classify(p: str) -> str:
     return "other"
 
 
+ROLE = re.compile(r"^\s*(الاستاذ|الأستاذ|استاذ|أستاذ|مدرس|المدرس|محاضر|باحث|الباحث|معيد|عضو\s+هيئة\s+التدريس|عضو|"
+                  r"معلم|معلمة|عميد|وكيل|رئيس|امين|أمين|مدير|المراقب\s+المساعد|المراقب|مستشار|خبير|maître\s+de\s+conférences|dean|head|"
+                  r"lecturer|professor|assistant\s+professor|associate\s+professor|researcher|teacher)\S*"
+                  r"(\s+(مساعد|مشارك|دكتور|بال|في|ب|at|in|of))*\s*", re.I)
+
+
 def strip_role(p: str) -> str:
-    """'مدرس المناهج…' / 'الاستاذ بقسم…' → the institution part."""
-    f = p
-    m = re.search(r"(قسم|كلي|جامع|شعب|department|college|faculty|university)", f, re.I)
-    if m and m.start() > 0 and len(f[:m.start()].split()) <= 4:
-        return f[m.start():]
-    return f
+    """'مدرس المناهج…' / 'الاستاذ بقسم…' / 'Lecturer at …' → the institution part (only a leading role is cut)."""
+    m = ROLE.match(p)
+    if not m:
+        return p
+    rest = p[m.end():]
+    rest = re.sub(r"^ب(?=(قسم|كلي|جامع))", "", rest)
+    return rest if rest.strip() else p
 
 
 def rebuild(con) -> dict:
@@ -93,20 +107,23 @@ def rebuild(con) -> dict:
         for col in ("dept", "orgname"):
             for t in (a[col] or "").split(" | "):
                 if t:
-                    texts.append(t)
+                    texts.append((col, t))
         if a["country"]:
             country = COUNTRY_OF.get(key(a["country"])) or a["country"]
-        if not texts and a["printed"]:
-            texts = [a["printed"]]
-        for t in texts:
+        if a["printed"]:
+            texts.append(("printed", a["printed"]))      # untagged parts (lowest priority: tagged levels come first)
+        for col, t in texts:
             for p in pieces(t):
                 p = strip_role(p)
                 c = classify(p)
+                if c == "other" and col == "dept":
+                    c = "department"          # the masters tagged it as a department
                 if c == "country":
                     country = country or COUNTRY_OF[key(p)]
                 elif c in ("organisation", "faculty", "department") and c not in lv:
                     lv[c] = p
-        if "organisation" not in lv and a["orgname"]:
+        if "organisation" not in lv and a["orgname"] and classify(strip_role(a["orgname"].split(" | ")[0])) not in (
+                "faculty", "department", "country"):
             lv["organisation"] = a["orgname"].split(" | ")[0]
         if not country and a["printed"]:
             for p in pieces(a["printed"]):
@@ -133,6 +150,28 @@ def rebuild(con) -> dict:
                 tgt = c
                 break
         canon[k] = tgt or k
+    # the same person printed in both scripts in one article (Arabic and Latin affiliations): one institution
+    person = {(r["stem"], r["seq"]): r["person_key"] for r in con.execute("SELECT stem, seq, person_key FROM "
+                                                                          "article_authors")}
+    seen_pair = defaultdict(set)
+    for (stem, aseq, _), lv, _c in parsed:
+        if "organisation" in lv and (stem, aseq) in person:
+            seen_pair[(stem, person[(stem, aseq)])].add(canon.get(norm_key(lv["organisation"])))
+    parent = {}
+
+    def find(x):
+        while parent.get(x, x) != x:
+            x = parent[x]
+        return x
+    merged_pairs = []
+    for ks in seen_pair.values():
+        ks = [k for k in ks if k]
+        ar = [k for k in ks if script(k) == "ar"]
+        la = [k for k in ks if script(k) != "ar"]
+        if len(ar) == 1 and len(la) == 1 and find(la[0]) != find(ar[0]):
+            parent[find(la[0])] = find(ar[0])
+            merged_pairs.append((la[0], ar[0]))
+    canon = {k: find(c) for k, c in canon.items()}
     org_key = {}
     rows = {}
     for k, c in canon.items():
@@ -166,11 +205,12 @@ def rebuild(con) -> dict:
                     "author_seq = ? AND seq = ?", out)
     ins, var = [], []
     for ik, r in rows.items():
-        name = r["variants"].most_common(1)[0][0] if r["variants"] else ik
+        ar = [v for v, _ in r["variants"].most_common() if script(v) == "ar"]
+        name = (ar[0] if ar else r["variants"].most_common(1)[0][0]) if r["variants"] else ik
         ins.append((ik, r["level"], name, r["parent_key"],
                     r["countries"].most_common(1)[0][0] if r["countries"] else None, script(name),
                     sum(r["variants"].values()), len(r["variants"]), "masters"))
         var += [(ik, v, n) for v, n in r["variants"].items()]
     con.executemany("INSERT OR REPLACE INTO institutions VALUES (?,?,?,?,?,?,?,?,?)", ins)
     con.executemany("INSERT OR REPLACE INTO institution_variants VALUES (?,?,?)", var)
-    return dict(institutions=len(ins), affiliations=len(affs))
+    return dict(institutions=len(ins), affiliations=len(affs), cross_script=merged_pairs)

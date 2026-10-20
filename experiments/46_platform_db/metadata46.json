@@ -1,0 +1,61 @@
+{
+  "title": "Platform database (experiment 46)",
+  "description": "Mandumah articles read by the inkscript pipeline (experiment 43 masters: JATS + ALTO) beside the MARC catalogue (experiment 45). Every row carries its source (masters | catalogue | judge | person | link46) and, for masters values, the run. Read only.",
+  "databases": {
+    "platform": {
+      "tables": {
+        "blocks": {"fts_table": "blocks_fts", "fts_pk": "id", "description": "Every block of every article in reading order, with its ALTO line ids and box (pixels at 300 dpi). Search: type folded Arabic (no diacritics, ا for أإآ, ه for ة, ي for ى)."},
+        "citation_links": {"description": "Links made by link46.py; best = 1 is a confident link (title and author or year agree); best = 0 keeps a candidate (a review of the book, a study about it, a part of it, a title-only match)."},
+        "catalogue_disagreements": {"description": "Masters vs catalogue, field by field. kind catalogue-fits-scan = the masters' page range is the one that is off; missing-in-catalogue = the print has it, the catalogue does not."},
+        "judge_findings": {"description": "Every problem the judge named (experiment 43 judge43.py), with the patch made of it when there is one; route auto = two keys, applied."},
+        "patches": {"description": "The patch layer (experiment 43 patches43.py): judge, person and retry edits keyed to Azure line ids; status from the masters' sidecar."}
+      },
+      "queries": {
+        "articles_by_author": {
+          "title": "Articles by an author",
+          "description": "Any spelling: printed, catalogue (surname، given) or Latin. Folded match on the name without spaces.",
+          "sql": "SELECT DISTINCT p.display_name, p.authority_id, aa.printed_name, a.stem, a.title, a.pub_year, j.title_catalogue AS journal, a.run FROM person_names n JOIN people p ON p.person_key = n.person_key JOIN article_authors aa ON aa.person_key = p.person_key JOIN articles a ON a.stem = aa.stem LEFT JOIN journals j ON j.journal_id = a.journal_id WHERE n.name_key LIKE '%' || replace(replace(replace(replace(replace(replace(:name, ' ', ''), 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه'), 'ى', 'ي') || '%' OR lower(n.name) LIKE '%' || lower(:name) || '%' ORDER BY p.display_name, a.pub_year"
+        },
+        "who_cites_whom": {
+          "title": "Who cites whom (confident links)",
+          "description": "Each citing article, the work as printed, and what it was linked to: a catalogue record (with its authors and authority ids), an article in this database, or (for «المرجع السابق» / ibid.) the earlier work it points back to.",
+          "sql": "SELECT a.stem AS citing, a.title AS citing_title, l.target_kind, l.method, l.score, coalesce(w.printed, b.printed) AS printed, CASE l.target_kind WHEN 'catalogue' THEN json_extract(l.evidence, '$.catalogue_title') WHEN 'article' THEN (SELECT title FROM articles WHERE stem = l.target_id) ELSE (SELECT coalesce(article_title, source_title) FROM works WHERE work_id = l.target_id) END AS cited_title, json_extract(l.evidence, '$.catalogue_authors') AS cited_authors, json_extract(l.evidence, '$.authority_ids') AS authority_ids, json_extract(l.evidence, '$.catalogue_year') AS cited_year, l.target_id FROM citation_links l LEFT JOIN works w ON l.from_kind = 'work' AND w.work_id = l.from_id LEFT JOIN back_references b ON l.from_kind = 'backref' AND b.backref_id = l.from_id JOIN articles a ON a.stem = coalesce(w.stem, b.stem) WHERE l.best = 1 AND (:kind = '' OR l.target_kind = :kind) ORDER BY a.stem, l.from_id LIMIT 2000"
+        },
+        "most_cited_catalogue_records": {
+          "title": "Most cited catalogue records",
+          "sql": "SELECT l.target_id AS rec, json_extract(l.evidence, '$.catalogue_title') AS title, json_extract(l.evidence, '$.catalogue_authors') AS authors, json_extract(l.evidence, '$.catalogue_year') AS year, count(DISTINCT w.stem) AS citing_articles, count(*) AS citations FROM citation_links l JOIN works w ON w.work_id = l.from_id WHERE l.target_kind = 'catalogue' AND l.best = 1 GROUP BY l.target_id ORDER BY citing_articles DESC, citations DESC LIMIT 200"
+        },
+        "catalogue_disagreements_list": {
+          "title": "Catalogue disagreements (the list for Mandumah)",
+          "description": "Leave field empty for all. Severity: high, medium, low, info.",
+          "sql": "SELECT d.severity, d.field, d.kind, d.stem, d.c999, d.masters_value, d.catalogue_value, d.note, a.title FROM catalogue_disagreements d JOIN articles a ON a.stem = d.stem WHERE (:field = '' OR d.field = :field) ORDER BY CASE d.severity WHEN 'high' THEN 0 WHEN 'medium' THEN 1 WHEN 'low' THEN 2 ELSE 3 END, d.field, d.stem"
+        },
+        "catalogue_disagreements_summary": {
+          "title": "Catalogue disagreements: counts",
+          "sql": "SELECT field, kind, severity, count(*) AS n, count(DISTINCT stem) AS articles FROM catalogue_disagreements GROUP BY 1, 2, 3 ORDER BY n DESC"
+        },
+        "judge_findings_by_type": {
+          "title": "Judge findings by type",
+          "sql": "SELECT run, model, type, route, status, count(*) AS n, count(DISTINCT stem || page) AS pages, round(avg(confidence), 2) AS mean_confidence FROM judge_findings GROUP BY 1, 2, 3, 4, 5 ORDER BY n DESC"
+        },
+        "flags_per_article": {
+          "title": "Flags per article",
+          "sql": "SELECT f.run, f.stem, a.title, sum(f.severity = 'high') AS high, sum(f.severity = 'medium') AS medium, sum(f.severity = 'low') AS low, group_concat(DISTINCT f.kind) AS kinds FROM flags f LEFT JOIN articles a ON a.stem = f.stem GROUP BY f.run, f.stem ORDER BY high DESC, medium DESC, low DESC"
+        },
+        "article_overview": {
+          "title": "One article: masters beside the catalogue",
+          "sql": "SELECT a.stem, a.run, a.title, a.title_printed, cr.title AS catalogue_title, a.title_en, cr.title_en AS catalogue_title_en, a.pub_year, cr.year AS catalogue_year, a.fpage || '-' || a.lpage AS pages, cr.pages AS catalogue_pages, a.scan_pages, a.n_blocks, a.n_notes, a.n_works, a.n_fixes, a.n_misprints, a.flags_high, a.flags_medium, a.flags_low, a.prompt, a.rules_hash, a.patches_applied, cr.c999, a.jats_path FROM articles a LEFT JOIN catalogue_records cr ON cr.stem = a.stem AND cr.is_primary = 1 WHERE a.stem = :stem"
+        },
+        "institution_clusters": {
+          "title": "Institutions and their printed variants",
+          "sql": "SELECT i.level, i.name, i.country, i.n_affiliations, i.n_variants, (SELECT group_concat(variant, ' ‖ ') FROM institution_variants v WHERE v.inst_key = i.inst_key) AS variants, (SELECT name FROM institutions p WHERE p.inst_key = i.parent_key) AS parent FROM institutions i ORDER BY i.level = 'organisation' DESC, i.n_affiliations DESC"
+        },
+        "search_text": {
+          "title": "Search the text of all articles",
+          "description": "Folded Arabic or Latin words (no diacritics; ا for أإآ, ه for ة, ي for ى); FTS5 syntax.",
+          "sql": "SELECT b.stem, b.page, b.kind, b.block_id, snippet(blocks_fts, 0, '[', ']', '…', 12) AS hit, a.title FROM blocks_fts JOIN blocks b ON b.id = blocks_fts.rowid JOIN articles a ON a.stem = b.stem WHERE blocks_fts MATCH :q LIMIT 200"
+        }
+      }
+    }
+  }
+}

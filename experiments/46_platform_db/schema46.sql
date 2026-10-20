@@ -144,3 +144,18 @@ CREATE TABLE IF NOT EXISTS metadata_changes (   -- D33 corrections of metadata
 CREATE TABLE IF NOT EXISTS catalogue_disagreements (    -- masters vs catalogue: the list for Mandumah
   stem TEXT, rec INTEGER, c999 TEXT, field TEXT, masters_value TEXT, catalogue_value TEXT, kind TEXT,
   severity TEXT, note TEXT, run TEXT, PRIMARY KEY (stem, field, kind));
+
+-- ------------------------------------------------------------------ indexes
+CREATE INDEX IF NOT EXISTS links_target ON citation_links(target_kind, target_id);
+CREATE INDEX IF NOT EXISTS flags_stem ON flags(stem);
+CREATE INDEX IF NOT EXISTS findings_stem ON judge_findings(stem);
+CREATE INDEX IF NOT EXISTS patches_stem ON patches(stem);
+CREATE INDEX IF NOT EXISTS backrefs_stem ON back_references(stem);
+CREATE INDEX IF NOT EXISTS authors_person ON article_authors(person_key);
+CREATE INDEX IF NOT EXISTS names_key ON person_names(name_key);
+CREATE INDEX IF NOT EXISTS affs_org ON affiliations(org_key);
+CREATE INDEX IF NOT EXISTS keywords_stem ON keywords(stem);
+CREATE INDEX IF NOT EXISTS dates_stem ON article_dates(stem);
+CREATE INDEX IF NOT EXISTS abstracts_stem ON abstracts(stem);
+CREATE INDEX IF NOT EXISTS subjects_stem ON subjects(stem);
+CREATE INDEX IF NOT EXISTS calls_stem ON note_calls(stem);

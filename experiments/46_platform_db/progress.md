@@ -7,3 +7,7 @@
 - 02:34 link46: first sample checked (book reviews/edition-parts found, op.cit author after marker); rules tightened, rerun
 - 02:36 link46 rules after 2 checked samples: book->article = about (not the work), reviews/parts kept as non-best, op.cit unresolved when author unknown; final sample drawn (seed 2026)
 - 02:37 hand check of 54 links done (checks46.py → link_checks, sample46_checked.json)
+- 02:40 institutions: role/level parsing fixed after a 25-affiliation look, Arabic<->Latin twins merged (7 pairs); 30-affiliation check: 24 right, 4 partial, 2 wrong
+- 02:42 datasette on 8002 (metadata46.json, 10 canned queries, all 200); judge answers + v33_300_judged patches loaded; writing README
+- 02:45 README + experiments/README line; idempotence re-checked; committing
+- 02:45 loader: an unchanged run never takes an article back (re-runs are no-ops); committed

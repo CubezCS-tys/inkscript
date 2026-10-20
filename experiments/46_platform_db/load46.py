@@ -11,7 +11,8 @@ findings of the run are re-read every time (they are small) and replaced for tha
 the masters are read, marc.db is opened read-only.
 
 Which run fills an article's content (blocks, notes, works…) when several runs hold it: `--current always` (default:
-the run loaded last wins, e.g. a judged copy loaded after its run) or `if-new` (only articles not yet in the database).
+the run that last loaded a new or changed version wins, e.g. a judged copy loaded after its run; re-running an
+unchanged run takes nothing back) or `if-new` (only articles not yet in the database).
 Every (article, run) loaded is in `article_runs`; flags/patches/findings are kept for every run.
 """
 from __future__ import annotations
@@ -251,7 +252,7 @@ def disagreements(art: dict, crow: list, cauth: list, authors: list, kws: list, 
     for fld, mv_, cv_ in (("fpage", mf, cf), ("lpage", ml, cl)):
         if mv_ and cv_ and mv_ != cv_:
             mfit = fits(mf, ml)
-            cfit = fits(cf if fld == "fpage" else mf, cl if fld == "lpage" else ml)
+            cfit = fits(cf or mf, cl or ml)
             kind = "catalogue-fits-scan" if cfit and not mfit else "masters-fits-scan" if mfit and not cfit else "differs"
             add(fld, art[fld], cv_, kind, "info" if kind == "catalogue-fits-scan" else "medium",
                 f"scan has {n} pages: masters {mf}-{ml}, catalogue {cf}-{cl}")
@@ -402,45 +403,47 @@ def load_patches(con, run: str, mdir: Path, pdirs: list[Path]) -> int:
     return len(rows)
 
 
-def judge_files(run: str) -> list[Path]:
-    pats = [OUT43 / run / "judge" / "**" / "*.json", OUT43 / "judge" / run / "**" / "*.json",
-            OUT43 / "judge" / "**" / f"findings*{run}*.json", OUT43 / "judge" / "**" / "findings*.json"]
-    seen = []
-    for p in pats:
-        for f in glob.glob(str(p), recursive=True):
-            if f not in seen:
-                seen.append(f)
-    return [Path(f) for f in seen]
+def base_run(run: str) -> str:
+    """v33_300_judged / v33_300_fixed → v33_300 (the run whose pages the judge looked at)."""
+    return re.sub(r"_(judged|fixed|patched)\w*$", "", run)
 
 
 def load_judge(con, run: str) -> int:
-    con.execute("DELETE FROM judge_findings WHERE run = ?", (run,))
+    """The judge's answers (experiment 43, judge43.py): out/judge/answers/<model>/<run>/<stem>_pNNN.json, one row per
+    problem it named. Route and status come from the patch the judge's decide step made of it (patch id
+    j-<stem4>-p<page>-<n>): applied with two keys = auto; otherwise the judge's own route (retry | human | patch)."""
+    br = base_run(run)
+    con.execute("DELETE FROM judge_findings WHERE run = ?", (br,))
+    pt = {r["patch_id"]: r for r in con.execute("SELECT patch_id, apply, status FROM patches WHERE source = 'judge'")}
     rows = []
-    for f in judge_files(run):
+    for f in sorted((OUT43 / "judge" / "answers").glob(f"*/{br}/*_p[0-9][0-9][0-9].json")):
         try:
-            d = json.loads(f.read_text(encoding="utf-8"))
+            rec = json.loads(f.read_text(encoding="utf-8"))
         except Exception:
             continue
-        lst = d if isinstance(d, list) else (d.get("findings") if isinstance(d, dict) else None)
-        if not isinstance(lst, list):
-            continue
-        frun = d.get("run") if isinstance(d, dict) else None
-        for k, x in enumerate(lst):
-            if not isinstance(x, dict) or not (x.get("type") or x.get("kind") or x.get("question")):
-                continue
-            r = x.get("run") or frun or run
-            if r != run and not (OUT43 / run / "judge") in f.parents:
-                continue
-            stem = x.get("stem") or x.get("article") or (d.get("stem") if isinstance(d, dict) else None)
-            fid = x.get("id") or f"{stem}|p{x.get('page')}|{f.stem}|{k}"
-            rows.append(dict(finding_id=fid, run=run, stem=stem, page=x.get("page"), type=x.get("type") or x.get("kind"),
-                             question=_j(x.get("question")), answer=_j(x.get("answer")), targets=_j(x.get("targets")),
-                             confidence=_j(x.get("confidence")), evidence=_j(x.get("evidence")),
-                             code_check=_j(x.get("code_check") or x.get("check")), action=_j(x.get("action")),
-                             route=x.get("route"), patch_id=x.get("patch_id") or x.get("patch"),
-                             status=x.get("status"), model=x.get("model") or (d.get("model") if isinstance(d, dict)
-                                                                               else None),
-                             created=x.get("created"), raw=_j(x), source=x.get("source") or "judge", file=str(f)))
+        model = rec.get("model") or f.parent.parent.name
+        stem, page = rec.get("stem"), rec.get("page")
+        ans = rec.get("answer") or {}
+        probs = ans.get("problems") or []
+        if not probs:
+            rows.append(dict(finding_id=f"{f.parent.parent.name}|{stem}|p{page}|0", run=br, stem=stem, page=page,
+                             type="none", question=None, answer=ans.get("verdict"), targets=None, confidence=None,
+                             evidence=None, code_check=None, action=None, route="none", patch_id=None,
+                             status="no problem named", model=model, created=None, raw=_j(ans), source="judge",
+                             file=str(f)))
+        for k, pr in enumerate(probs, 1):
+            pid = f"j-{stem[:4]}-p{page}-{k}"
+            p = pt.get(pid)
+            route = ("auto" if p["apply"] else "proposed") if p else pr.get("route")
+            rows.append(dict(
+                finding_id=f"{f.parent.parent.name}|{stem}|p{page}|{k}", run=br, stem=stem, page=page,
+                type=pr.get("type") + (f"/{pr['subtype']}" if pr.get("subtype") else ""),
+                question=None, answer=pr.get("instruction"),
+                targets=_j(dict(blocks=pr.get("blocks") or [], lines=pr.get("lines") or [], box=pr.get("box"))),
+                confidence=pr.get("confidence"), evidence=pr.get("evidence"), code_check=None,
+                action=pr.get("action"), route=route, patch_id=pid if p else None,
+                status=(p["status"] if p else None), model=model, created=None, raw=_j(pr), source="judge",
+                file=str(f)))
     insert(con, "judge_findings", rows)
     return len(rows)
 
@@ -548,7 +551,8 @@ def main(argv=None):
                         (stem, run, sha, stamp.get("made"), now()))
             kept += 1
             continue
-        if not a.force and cur and cur["run"] == run:
+        if not a.force and cur:
+            # unchanged since this run last loaded it: nothing to do (even if a later run now holds the article)
             from parse46 import sha_of
             sha = sha_of([mdir / f"{stem}.jats.xml", mdir / f"{stem}.metachanges.json", mdir / f"{stem}.patches.json"])
             old = con.execute("SELECT sha FROM article_runs WHERE stem = ? AND run = ?", (stem, run)).fetchone()
