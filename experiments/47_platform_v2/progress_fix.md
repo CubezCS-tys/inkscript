@@ -6,3 +6,6 @@
 - 10:10 README fix-round-1 section written; waiting for the full two-build test
 - 10:24 third clean rebuild (anchor method by precision, patch copies by file order, unused keyword terms dropped, numbered university names moved)
 - 10:36 full stable-id test: identical (81 tables, all four runs, reverse order + load-after-link + relink, two hash seeds); Datasette :8003 restarted, 17 canned queries 200 (search_arabic with q), ink page checked by screenshot
+- 10:37 re-verify round 1 (independent verifier) started: read VERIFY.md, README fix round 1; scratch at /tmp/claude-1000/-home-yassine-inkscript/ed816869-9be5-4008-b630-480b426fc462/scratchpad/rv
+- 10:44 checks 1-4 rerun (schema, orphans incl. line_map, v46 counts, 8 articles seeds 9131/9132): pass; 15 back refs seed 2610: 13 right / 0 wrong / 2 missed; two clean scratch builds (seeds 7, 13, different order) + loads x2 + relink on a copy: identical except 5 subject_terms display labels; exam-load test running
+- 10:52 re-verify round 1 done: VERIFY.md 'Re-verify round 1' appended; 10/11 pass, check 8 fails narrowly (عبد الحليم محمود given authority 123266; Constantine 2 faculty under Constantine)
