@@ -632,3 +632,312 @@ The scripts are in the session scratchpad, `rv/`:
 | `c1_schema.py`, `c2_orph.py`, `c3_counts.py`, `c4.py` / `c4b.py`, `c5.py <seed>`, `c6.py` | checks 1–6 |
 
 Checks 7–11 are SQL in this section's numbers.
+
+---
+
+## Re-verify round 2 (2026-10-20)
+
+Checked by a verifier who built nothing, against the rebuilt `/home/yassine/data/platform_v2/platform_v2.db`
+(build of `95012e2`, sha256 `0e6d57da1003…`, unchanged by this check). Every source was opened read-only. Every build
+ran on copies in the session scratchpad (`…/scratchpad/rv2/`), with `link47 --work` pointed there. No paid call was
+made. `platform.db`, `marc.db`, the served db and the derived `marc_heading_keys47_*.sqlite` have the same sha256
+after the check as before. Datasette was not restarted, because the served db was not rebuilt.
+
+### Verdict
+
+**Pass, with minor gaps.** All eleven checks pass. Both round-1 failures are fixed at their root:
+
+- «عبد الحليم محمود» no longer goes to 123266, and an independent scan of marc.db finds 0 clashes in the 33
+  name-to-authority matches.
+- Constantine 2's faculty and department hang under IXTRD7CFDX, and 0 faculty or department in the archive has
+  another university as parent.
+
+Two clean builds under new seeds and a new step order are identical to each other except for **2 publisher country
+codes**, a new instance of the order-dependence class that round 1 found in subject labels. The 2449 hint fix
+changed more back references than the README says: 28 notes in 8 articles. Nearly all of these changes are
+corrections, but 2 became unresolved although their work is cited earlier.
+
+| # | check | result |
+|---|---|---|
+| 1 | Schema against `schema47.sql` | **PASS** |
+| 2 | Orphans, declared and undeclared | **PASS** |
+| 3 | Counts against `platform.db` on the 354 documents | **PASS** |
+| 4 | 5 random articles (seed 20261) + 3 citation-heavy ones (seed 20262) against JATS and MARC | **PASS** |
+| 5 | 15 new random back references (seed 4471), plus every change since round 1 | **PASS: 13 right, 0 wrong, 2 missed (upstream)**; gap below |
+| 6 | `citation_links`: rules, author agreement, samples (seeds 7171/7172) | **PASS** |
+| 7 | Provenance | **PASS** (all 0) |
+| 8 | People and institutions: sample (seeds 4040/51) + systematic checks | **PASS** (round-1 failures fixed) |
+| 9 | Idempotency: 2 clean builds, reload ×2 + relink, exam load, all on copies | **PASS, one minor gap** (2 publisher countries depend on load order) |
+| 10 | 25 random ink anchors (seed 8383), plus all 2,951 word anchors | **PASS 25/25 text and box**; gap below |
+| 11 | Views, self-citations, Datasette :8003 | **PASS** |
+
+### 1–3. Schema, orphans, counts: PASS
+
+I re-ran round 1's scripts on the served db.
+
+- **Schema.** There are 87 design tables plus the declared `reconciliation_v46`, and all 15 views. Columns and FKs
+  are identical, with 169 FK pairs. `foreign_key_check` returns 0 and `integrity_check` returns ok. The only index
+  difference is the declared one.
+- **Orphans.** All 19 undeclared intra-version references have 0 orphans.
+  - `line_map.region_id` pointing at nothing: 0.
+  - Mention containers: 0 orphans.
+  - Cross-version resolutions: 0.
+  - `merged_ids` is empty, as expected after a clean build.
+- **Counts.**
+  - Shown run differs in 0 of 354.
+  - blocks, notes, fixes, misprints, abstracts (printed 241, catalogue 138) and article_runs: 0 / 0 rows both ways.
+  - Figures: 1,910 = 1,910. Note calls: 4,024 = 4,024. Bylines: 413 = 413. Affiliations: 247 = 247.
+  - Journals and issues: 261 / 353, with 0 unused.
+  - Parsed mentions: 4,789 = v1 `works`. Keywords: 1,179 → 1,173 distinct, as in round 1.
+
+### 4. Articles against JATS and MARC: PASS
+
+The samples were:
+
+- seed 20261: `0955-000-025-001`, `2051-000-002-017`, `0619-001-004-010`, `0295-020-002-007`, `0290-000-005-003`;
+- seed 20262, articles with at least 20 mentions: `1580-005-010-029`, `2228-014-051-037`, `0527-046-003-024`.
+
+The results, field by field:
+
+- **Authors and affiliations.** 8/8 equal, with titles stripped.
+- **Keywords.** Equal.
+- **Notes.** Count and text equal, with 0 mismatches over 188 notes.
+- **Element-citations against parsed mentions.** 0, 13, 5, 50, 71, 18, 22 and 25: equal in all 8.
+- **Abstracts.** Stored per paragraph. Once the JATS heading («الملخص», «Abstract») is dropped, the paragraphs
+  concatenate to the JATS abstract.
+- **Authorships against marc.db.** All 9 have the right c999, catalogue seq and authority id. This includes the
+  merged «زكي نجيب محمود» (ANH46TF8C2, 311655) and the supervisor of 0527 (catalogue-only, 402814).
+
+### 5. Back references: PASS, one gap
+
+**Fresh sample, seed 4471.** I read each note with the notes before it.
+
+| # | article, note | printed | v2 → | verdict |
+|---|---|---|---|---|
+| 1 | 0368-003 fn-p13-18 | Barrington Moore, Jr. op. cit. | fn-p13-6 Moore, *Political Power and Social Theory* | right |
+| 2 | 0368-003 fn-p13-21 | المصدر ذاته (after two ibid and the Moore op. cit.) | fn-p13-6 | right |
+| 3 | 0368-003 fn-p14-6 | شرابي، المصدر السابق ص ٢١٥ | fn-p14-4, the Arabic book, p. 215 | right |
+| 4 | 0419 fn-p10-1 | La Rosa « La preuve », op.cit., p.959 | fn-p2-5 (*Droit international pénal*), by page continuity | right |
+| 5 | 0419 fn-p10-9 | … in Commentaire …, op.cit., p. 1594 | fn-p3-1 | right |
+| 6 | 0590 fn-p10-21 | الماوردي: نفس المرجع ص٢٤٢ | r14 الأحكام السلطانية | right |
+| 7 | 0877 fn-p3-6 | نقض ١٢ يونيو ١٩٣٩ - المرجع السابق | unresolved | **missed upstream**: the work, «مجموعة القواعد القانونية…» in fn-p3-1, is printed, but these v2_55 masters have 0 element-citations |
+| 8 | 1110 fn-p21-21 | الدالي … الخطاطة، المرجع السابق | r18 الدالي (the reference list precedes the endnotes) | right |
+| 9 | 1421 fn-p11-14 | وزارة الإعلام والثقافة: المصدر السابق | fn-p11-1 | right |
+| 10 | 1769 fn-p15-7 | ليز مانكة، المرجع السابق | unresolved | **missed upstream**: fn-p15-5 «ليز مانكة، التداوي بالأعشاب…» is printed, but the masters parsed no citation in it (same class as round 1's Refai) |
+| 11 | 1967 fn-p14-4 | المصدر نفسه، ج2، ص254 (after the short form «العمدة، ج2، ص255») | fn-p13-11 ابن رشيق، العمدة | right |
+| 12 | 2449 fn-p26-31 | روبرت سارجنت. (المرجع السابق) | fn-p25-5 سارجنت، شعر ونثر من حضرموت | right (was wrong in round 1's db: fn-p26-19) |
+| 13 | 6643 fn-p12-3 | نفسه: 160/10 | fn-p11-8 المعسول | right |
+| 14 | 6643 fn-p12-17 | نفسه: 428 | fn-p12-8 شعر داود الرسموكي | right |
+| 15 | 7606 fn-p2-1 | … Loïc PASCO, L'évolution des cérémonies…, op.cit. | fn-p1-1 PASCO | right |
+
+**Every change since round 1.** I diffed every back reference of the shown versions against
+`platform_v2.db.bak-20261020-fix1`.
+
+- **Spans.** The printed span of 175 back-reference mentions changed. It now starts at the note number or the
+  author («12. السابق 1/34», «Barrington Moore, Jr. op. cit.»). Op. cit. mentions went from 403 to 401 (0344).
+- **Targets: 28 notes in 8 articles.** The builder reports "14 back references in 3 articles". Mention by mention:
+  - **2449: 11 notes, now right.** The ناجي, سارجنت and العمري ones go to their own works. The السقاف ones go to r1
+    or fn-p26-14 (two forms of one 1974 article; 0.5 where both are earlier).
+  - **0344: 3 notes.** fn-p25-3 and fn-p26-1 each hold one ibid now. fn-p22-3 «Annuaire CDI. op. cit.» → fn-p18-1
+    «Annuaire CDI».
+  - **Wrong before, right now (11).**
+    - 0368 fn-p13-18…23 (6): previously sent to Arendt's *Between Past and Future*.
+    - 0461 fn-p6-12: the OECD *Performance Measurement*.
+    - 6508 fn-p10-2: *Jeux et activités ludiques*.
+    - 7606 fn-p5-1, fn-p6-3 and fn-p6-4: PASCO, Reydellet and Köhler.
+  - **Wrong before, wrong now (1).** 0310 fn-p12-2 «CHEN, Chen. «Le roman policier de Fred Vargas…». Op.Cit.»
+    goes to fn-p9-1, Vargas's novel *L'Homme à l'envers*, at 0.7 ("the author's only earlier work").
+    - The name in the title was taken for the author.
+    - The thesis is cited nowhere earlier, so this should be unresolved. Before, it went to fn-p12-1.
+  - **Wrong before, missed now (2), both in 0702.**
+    - fn-p10-17 «أحمد إبراهيم محمود. المصدر السابق، ص٤٦» is unresolved, although fn-p9-8 is his full citation of
+      «الإرهاب الجديد» (p. 45 → 46). It is the same all-common-given-names blind spot that fix 5 cured in
+      `link47.judge_link` but not in the back-reference resolver.
+    - fn-p10-21 «أدونيس العكرة. المصدر السابق» is unresolved, although fn-p9-4 is his «الإرهاب السياسي». That full
+      citation is typed `short`.
+- **Archive-wide.** Of the 97 unresolved back references with an author hint, 9 have an earlier full or short mention
+  whose printed text contains that hint (7 in round 1's db). These 9 are the two 0702 notes plus pre-existing ones,
+  such as 0590 «الدكتور عبد الحكيم حسن» (r15).
+- **Gap: minor.** The fix is a clear net gain: 11 + 11 corrected, 2 now missed instead of wrong. The README
+  undercounts its reach, though. The resolver's author match still fails on all-common names and on full citations
+  typed `short`.
+
+### 6. citation_links: PASS
+
+- **Rows.** There are 138: 92 accepted, 25 candidates and 21 rejected.
+- **The owner's rules.** All hold at 0: rows from a back reference, via-mentions outside their card, same-article
+  links or relations, work→work relations, links to a non-publication, rows missing provenance, best links not
+  accepted, and links on merged cards. There is at most 1 best link per card.
+- **My token matcher against the catalogue authors.**
+  - Accepted: 91 agree. The 92nd is round 1's «لايف عورة البنيوي» = «البنوي، نايف عودة», which is right.
+  - Candidates: 4 agree and 18 have no author to compare. The 3 "contradict" are round 1's transliterations
+    (Khidir = خضر, Abdul Razzaq = عبدالرزاق, هيتكوت = هيثكوت).
+  - Rejected: 21, all contradicting.
+- **«الإرهاب الجديد»** → W307323 is accepted and best, with `whole_name` evidence. It is the **only** link that
+  agrees on the whole name alone, with no shared tokens.
+  - The `checks47.json` measure "best links agreeing on the whole name only = 50" is mislabelled. It counts every
+    evidence that carries a `whole_name` key.
+- **10 random accepted links (seed 7171) against MARC title, author and year: 10/10 right.**
+  - The differences are OCR or edition only: «العبلي» for the catalogue's «عبدالله، عبدالحكيم حسن», 1974; «ليلى /
+    نيلي المسعودي»; 1994 against 1995.
+- **8 random rejected links (seed 7172): 8/8 rightly rejected.** Examples: «البداية والنهاية» by ابن كثير → a 1994
+  record by ونوس; Lewis's *Unlimited Supplies of Labor* → *…of Capital* (1967).
+
+### 7. Provenance: PASS
+
+Every round-1 measure is 0:
+
+- catalogue assertions without load_id;
+- gemini-title assertions without an actor (0 of 146);
+- applied content patches without a version (126 applications in all);
+- patches without an actor;
+- id_registry or persons rows without created_load;
+- authorships, members, affiliation links or relations without method, asserted_by or evidence;
+- resolved mentions without a method;
+- unresolved back references without a reason.
+
+### 8. People and institutions: PASS
+
+**The round-1 failures.**
+
+- **«عبد الحليم محمود».** The three cited «عبد الحليم محمود» now have no authority. The four printed forms in v2
+  are:
+  - «علم النفس الاجتماعى والإعلام» (1979), printed «عبد الحليم محمود السيد» → 123266, the psychologist. This is
+    right: his heading turned round is exactly that name.
+  - «علم النفس العام», «أبو مدين الغوث» and «التفكير الفلسفى فى الاسلام»: unmatched. This is a miss, not a wrong
+    identity.
+- **Independent homonym scan.** I did not use the builder's index. I read every heading in marc.db (Arabic and
+  Latin), turned it round, dropped the life note and folded it with my own rules. Of the **33** `name-key-to-authority`
+  cited-author matches, **0** carry a name that another authority id also carries, and all 33 equal their own
+  authority's heading. There are 0 name-only authorship matches.
+- **Constantine 2.** IXTRD7CFDX «جامعة قسنطينة 2» → INEH6E8Q4G faculty → I586QN4MX5 department (one affiliation).
+  Across the archive, 0 faculties have a parent other than their affiliation's university, and 0
+  departments a parent other than their faculty (or their university when there is no faculty). 0 institutions are
+  pointed at by nothing.
+
+**Samples.**
+
+- **Persons: 12/12 right** (seed 4040, from 494 with more than one name key): A2EHVHCH29, ABBX1EX6BV, AMVBK9V75R,
+  AR7K9RGSC3, AW82QKA96E, AJ1F75BWEJ, AJ2ES029G3, AMZW0BTWXT, ASQD5XTSJN, AMJQSTMJVH, ABWJSZFRFA and ATZ8M3GZAE. In
+  each, the Arabic and Latin headings and the printed forms belong to one authority.
+- **Institutions: 8/8 right** (seed 51; only 8 have more than one name). They are Salahaddin, Babylon, UMT, Cairo
+  (with «Cairo Unverssity»), Ehya, Tikrit, Baghdad and Constantine 2.
+
+**Systematic checks.**
+
+- 0 authorities on two persons, 0 nameless persons, 0 life notes in names, 0 roles as persons.
+- 0 non-ISO country codes in institutions or affiliations.
+
+**Small notes, not failures.**
+
+- Both «جامعة قسنطينة» institutions have no country code (DZ).
+- The department «التجارية وعلوم التسيير» is the tail of the faculty name «كلية العلوم الاقتصادية، التجارية وعلوم
+  التسيير», split at its comma by inst46's parse.
+
+### 9. Idempotency: PASS, one minor gap
+
+Four builds ran on copies, in parallel, in 3:26 with a peak of 156 MB each. Each started from an empty link cache
+in its own work folder.
+
+| build | what | result |
+|---|---|---|
+| A | clean, the `build47.sh` order, `PYTHONHASHSEED=31` | **identical to the served db in 79 tables, every column**. `citation_links` and `metadata_assertions` differ only in `created`; the event tables and `reconciliation_v46` differ because `checks47` was not run |
+| B | clean, `PYTHONHASHSEED=57`, a new order: v2_55 → **link** → final → v33_300 → **link** → judged → **link** | identical to A in 80 tables once the load and clock columns are excluded. **Differs in 2 `publishers.country_code`** (below) and in the event tables |
+| C | the served db + all four loads twice + link | identical to the served db in all 81 compared tables once the load and clock columns are excluded. The loads alone change only `load_id`s and event rows |
+| D | the served db + `v33_300b` + `v33_300b_final` + link (the exam workflow) | see below |
+
+**D, the exam workflow.**
+
+- Documents go from 354 to 654, and the shown version of 0 old documents changes.
+- All 580 old person ids are still present with the same status, and all 315 old institution ids are still present.
+- 3 old cited-work ids are retired, and all 3 are in `merged_ids`.
+- 0 old authorships change or vanish. 0 old resolutions change, and 0 old affiliation links change. FK check: 0.
+- **One old link changes, rightly.** «كشف الظنون» (C098G0W6PP) gains two exam members that name حاجي خليفة, so its
+  candidate → W232413 becomes `rejected (authors contradict)`.
+
+**Minor gap: publisher country by load order.**
+
+- `biblio47` keys a publisher on its name alone (`P` + sha1 of the name key). The publisher is inserted with
+  `INSERT OR IGNORE`, so its country is that of whichever journal loads first.
+- Two names belong to different bodies in different countries:
+  - «المجلس الإسلامي الأعلى»: TN under A, DZ under B;
+  - «مجمع اللغة العربية»: SY under A, EG under B.
+- So each is also two publishers merged into one.
+- The builder's `test_ids47.py --full` did not catch it because its three orders load these journals in the same
+  order. Its quick test, `pytest test_ids47.py`, passes (57 s).
+
+### 10. Ink anchors: PASS, one gap
+
+**Sample of 25** (seed 8383, from 2,951 word anchors of shown mentions). I read the words straight from the Azure
+JSON, numbered from 1 per page.
+
+- `text_azure` equals the Azure words in **25/25**.
+- The box is within 15 px of the words' union in **25/25**.
+- At least 70% of the printed citation's tokens are in the ink in **24/25**. The exception is 0909 fn-p16-9: the
+  anchor `w208-214` «(الأصل الألماني: 1987 بعنوان: Theologie in Aufbruch» starts 4 words early and stops before
+  «، منشورات Piper Verlag).» (w215–219).
+
+**All 2,951 word anchors.**
+
+- Text and box are right in **2,951/2,951**.
+- The token cover is ≥ 70% in **2,860 (96.9%)** and < 50% in 20. Round 1's db gives 2,881/2,977 and 24, so this is
+  not a regression, only a gap the 25-sample hid.
+- The < 50% cases include:
+  - four 0870 «المرجع السابق» anchors placed on neighbouring words;
+  - 0694 «7. Ibid, p.4» on the single word «to»;
+  - long citations cut at a line end (1453, 2319);
+  - Azure misreadings («الفكت» for «النكت»).
+- `anchor_key` is unique. 4 shown mentions have no anchor.
+
+**Documentation gap.** The README's demo link `ink.html?a=6479508497353429` returns 200, but that anchor no longer
+exists.
+
+- The back-reference span now includes the note number, and the «السابق نفسه» of 0069 fn-p15-13 is now anchor
+  4584737663546638, `0069-000-026-005|p15|w215-217`.
+- The page will show nothing for the old id.
+
+### 11. Views, self-citations, Datasette: PASS
+
+- **Views.** All 15 views run: `v_articles` 354, `v_times_cited` 3,080, `v_pub_times_cited` 92 and so on.
+- **Self-citations.** `v_author_self_citations` has the same 24 rows as round 1's db, which round 1 read one by one.
+  Listing them again with the byline and cited forms shows every one is the citing author's own work.
+- **Datasette :8003.** It runs on the 11:11 db.
+  - All 17 canned queries return 200.
+  - `ink.html` and `schema47.html` return 200.
+  - :8001, :8002 and :8899 were not touched.
+
+### What is left (minor; none blocks)
+
+1. **Back-reference resolver.**
+   - It does not use an earlier full citation whose author is all common given names (0702 fn-p10-17), or one typed
+     `short` (0702 fn-p10-21).
+   - It takes a name inside a quoted title for the author (0310 fn-p12-2 → Vargas's novel).
+   - The README should say that the hint fix moved 28 notes in 8 articles, not 14 in 3.
+2. **Publishers keyed on name alone.** Two homonymous publishers in different countries are merged, and their country
+   depends on load order (`publishers.country_code`, 2 rows).
+3. **Ink.**
+   - 91 of 2,951 word anchors (3.1%) cover less than 70% of their printed citation.
+   - The README's demo anchor id is stale.
+4. **checks47's "best links agreeing on the whole name only = 50"** counts the evidence key, not the case. The true
+   number is 1.
+5. **Upstream text.** 0877 (v2_55 masters with no parsed citations) and 1769 fn-p15-5 (a full citation not parsed).
+
+**Not from this check:** `experiments/43_rehearsal/out/fix3/count_paren.py` appeared at 11:22, during this check. It
+was written by another session. Experiment 47's code does not write there, and nothing tracked in 43 or 46 changed.
+
+### How to reproduce
+
+The scripts are in the session scratchpad, `rv2/`:
+
+| script | what it does |
+|---|---|
+| `builds.sh` | builds A–D |
+| `cmp.py A B <ignored columns>` | compares two dbs table by table, as in round 1 |
+| `c1_schema.py`, `c2_orph.py`, `c3_counts.py` | checks 1–3 |
+| `c4.py`, `c4b.py`, `c4abs.py` | check 4 |
+| `c5.py 4471` | the back-reference sample |
+| `c5chg.py` / `c5diff.py` | back-reference targets and spans against the fix1 backup |
+| `c5miss.py` | unresolved back references whose author is printed earlier |
+| `c6.py`, `c6s.py` | check 6 |
+| `c8a.py` | the independent marc.db homonym scan |
+| `c10.py`, `c10all.py` | ink: the sample and all anchors |
