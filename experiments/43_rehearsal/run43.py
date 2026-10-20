@@ -50,7 +50,8 @@ import common as C  # noqa: E402  (experiment 41's client: paths re-pointed belo
 
 OUT = HERE / "out"
 MODEL, THINKING = "gemini-4-argon", "low"
-SETS = {"a": ("v2_55", P.E41 / "out" / "sample.json"), "b": ("v2_fresh", HERE / "sample43.json")}
+SETS = {"a": ("v2_55", P.E41 / "out" / "sample.json"), "b": ("v2_fresh", HERE / "sample43.json"),
+        "c": ("v33_300b", HERE / "sample43b.json")}       # c: the second 300 (sample43b.py)
 LOCK = threading.Lock()
 DONE_STATES = {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}
 
@@ -372,7 +373,8 @@ def run_batch(arts, run, cap, upload, poll, max_enqueued):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--set", choices=["a", "b"], required=True, help="a: experiment 41's 55; b: sample43.json")
+    ap.add_argument("--set", choices=["a", "b", "c"], required=True,
+                    help="a: experiment 41's 55; b: sample43.json; c: sample43b.json (the second 300)")
     ap.add_argument("--mode", choices=["batch", "standard"], default="batch")
     ap.add_argument("--cap", type=float, help="USD: stop before the logged spend could pass this")
     ap.add_argument("--dry-run", action="store_true")
@@ -388,7 +390,7 @@ def main():
     args = ap.parse_args()
     P.use(args.prompt)
     run = args.run or SETS[args.set][0]
-    if args.set == "b":                       # page renders of the fresh sample stay in this experiment
+    if args.set in ("b", "c"):                # page renders of the fresh samples stay in this experiment
         ST.PAGES = OUT / "pages"
     arts = [a for a in articles(args.set) if not args.stems or a["stem"] in args.stems]
     if args.dry_run:
