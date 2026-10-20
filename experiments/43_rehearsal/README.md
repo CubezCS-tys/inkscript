@@ -1247,6 +1247,80 @@ Files: `correct43.py`, `correct43.js`, `correct43.css`, `correct_test43.py`, `co
 v33_300/views/{mirror,edit,scans,crops}, linked on the 8899 server as `correct/`; test/).
 Version 2 (logins, a shared server, review of others' corrections, a queue of flagged pages) is not built.
 
+## Final first 300 and the exam config (2026-10-20; owner-approved overnight plan steps E, F, G0; **$4.54 billed**, log $40.56)
+
+Evidence and logs: `out/stepEF/` (progress.md, the run logs, `g0/` numbers / gold / pictures), plan
+`out/overnight_plan.md` (chosen config + frozen stamp).
+
+**E — 1764 completed ($0.106).** `rechunk43.py --run v33_300 --stems 1764-003-005-006` then `run43.py --set b --prompt
+v3.3 --run v33_300 --stems 1764-003-005-006`: pages 9–15 asked as 9–11, 12–14, 15 (32,768-token limit), all STOP with
+5.2k / 5.3k / 0.9k output tokens (the failed 9–15 had run into 27,000 twice). The last chunk was first cut by the cap
+because the G0 runs shared the spend log; relaunched. Master JATS DTD + ALTO XSD valid; pp 9–15 beside the scan
+(`out/stepEF/e_look/side_1764_p0*.jpg`): tables, two columns and the English abstract right; small: the bracketed
+reference numbers [1]–[14] were taken as note calls (call_no_note), a heading fragment folded into a list line on p13.
+
+**F — the first 300, final** (`out/v33_300_final/`; no calls). The run's answers through every current rule
+(`pictures43.py --run v33_300 --set b --build out/v33_300_final`, 8.6 min, 2.0 GB), then the judge's certain patches
+(`out/v33_300_judged/patches`, copied to `out/v33_300_final/patches`; `patches43.py build` on the new answers): **10
+applied** (2 page retries 0368 p11 and 1080 p9, picture boxes 0590 p2, 1412 p2, 1634 p2, splits 0736 p1, 2048 p1, 0961
+p14, kinds 0484 p1 and 0728 p2), **20 skipped because the code already did them** (every judge show-through / junk
+removal: its lines are in no block after `rules43.show_through`), the two footnote→paragraph proposals stay off.
+Patched masters replace the plain ones (`masters_before_patches/` keeps those 77 masters, `rules_patched/` the patched
+answers; `rules/` is the plain rules output). **300/300 JATS DTD + ALTO XSD valid.** `flags43.py --patches DIR` (new)
+flags a patched run. Views (index hardest first), review page (876 spots), hand-check pages of the 10 articles,
+http://127.0.0.1:8899/v33_300_final/index.html (symlink `experiments/41_azure_structure/out/views/v33_300_final`).
+Gold 5/5 the same. Loaded into platform.db (`load46.py --run v33_300_final`: 300 articles, 876 flags, 125 patches, 628
+judge findings; `load46.base_run` now maps `*_final` to its judged run) and `link46.py` (484 works linked, 306 back
+references resolved).
+
+| flags per 100 pages (3,523 pp) | high | medium | low |
+|---|---|---|---|
+| v33_300 (the run, 2026-10-20 00:30) | 0.48 (17) | 8.06 (284) | 12.21 (430) |
+| fixes2 (all code fixes) | 0.26 (9) | 7.27 (256) | 17.17 (605) |
+| **final** (+ 1764 + judge patches) | **0.26 (9)** | **7.44 (262)** | **17.17 (605)** |
+Fixes2 → final: 1764 now built (its call_failed gone; 5 flags of its own: the bracketed references as calls, one
+overlap), 0961 p14 +1 overlap (false: the judge's split leaves both halves with the quote's old box; the page looks
+right), 1541 −1 cost_high. The patches change structure, not the flag kinds (show-through was already out).
+**Text changed** (JATS body words): run → final 87 articles, 4,918 words (+1764's 5,560 new); fixes2 → final 2 articles,
+14 words (1080 p9's retry, 0728's running head out of the body). Looked at after: 1080 p9, 0368 p11 (one table cell
+«٥» lost in the left part), 0961 p14 right.
+
+**G0 — the exam configuration** (`ab43.py`; cap $5, **$4.44**). Arms, all Argon on Batch through the same rules
+(`pictures43.py --build`) and flags: (1) **v3.3 low** = the run's answers; (2) **v3.4 low** (`prompt43.PROMPT_V34`:
+inline formulas in Arabic sentences, lost letters in fully vowelled lines, compact JSON); (3) **v3.4 high**
+(`run43.py --thinking high`, new). Articles: the 16 hardest (most serious flags + look_notes + vowelled verse + 0751 +
+2048 + 0368: 185 pp), the 5 gold articles (45 pp; arm 1 asked anew, the gold answers being experiment 41's), and a
+replicate of each arm where they disagreed (run-to-run noise).
+
+| 16 hard, 185 pp | v3.3 low | v3.4 low | v3.4 high (6 of them, 69 pp) |
+|---|---|---|---|
+| flags per 100 pp high / medium / low | 2.16 / 32.4 / 50.3 | 3.24 / 30.8 / 47.6 | 8.7 / 30.4 / 34.8 (v3.3 on the 6: 2.9 / 43.5 / 44.9) |
+| the model's fixes / in vowelled lines / sic | 680 / 103 / 53 | 656 / **125** / 48 | 210 / 69 / 11 (v3.3: 242 / 67) |
+| $ a page / output tokens a page | $0.0090 / 1,083 | **$0.0073 / 726** | $0.0179 / 2,914 (2,224 thinking) |
+| MAX_TOKENS | 0 | 0 | 0 (but 0747's 8-page chunk: 25k thinking → MAX_TOKENS) |
+
+Pages changed between v3.3 and v3.4: 108 of 185 (`out/stepEF/g0/changed_v33low_v34low.json`); 13 looked at beside the
+scan (`out/stepEF/g0/look/three_*.jpg`: scan | v3.3 | v3.4): **v3.4 better 6** (1875 p17: «الزَّاد», «الْكَرِيمِ», «الْهَادِي»
+restored — the exact losses of "Looked at by eye"; 0168 p10 and p13: inline formulas as maths instead of «T^* \ge 0»
+text; 0617 p3 verse lines as printed; 0751 p3 the banner's word; 0729 p3), **v3.3 better 4** (1010-006 pp2 and 4: the
+advertisement drawn whole vs shredded into text pieces; 0787 p9 paragraphs; 1986 p1 the history line), **same 3**.
+**Replicates** (both prompts again on 1010-006, 0787, 1986; `rep_*.jpg`): the advert shredded by v3.4 in 2 of 2 runs
+and whole with v3.3 in 2 of 2; 0787 p9's paragraphs merged by v3.4 in 2 of 2; 1986's history line merged in one run of
+each (noise); high flags on those 3 articles: v3.3 1 and 4, v3.4 3 and 2 (noise). **Gold** (differences from the
+owner-checked snapshots, `out/stepEF/g0/gold.json`): v3.3 230 and 193 (two runs), v3.4 206; JATS words off 5,792 /
+5,726 vs 5,561; the two v3.3 runs differ from each other by 115 differences, v3.3 vs v3.4 by 139–156: v3.4 is within
+run-to-run noise on gold (one systematic difference: 2382's equation blocks anchored one line later).
+
+**Recommendation: the exam runs prompt v3.3, thinking low (unchanged).** v3.4 is cheaper and does what its two lines
+were written for, but two losses repeat (adverts as text, paragraph breaks merged), so it is not clearly better; thinking
+high costs 2.6× with no visible gain and runs out of output on long chunks. For after the exam: a v3.5 = v3.3 + the two
+content lines without the "compact JSON" line, to learn which line brought the losses. Frozen stamp in
+`out/overnight_plan.md` (prompt v3.3 d6b2156150; rules 950aa361c0; judge v2 35fd897dea, 0.85 + code key).
+
+Files: `ab43.py` (new: A/B numbers, gold, changed pages); `flags43.py --patches`; `run43.py --thinking` (stamped in
+each answer as `thinking`); `experiments/46_platform_db/load46.py` (`*_final` runs). Outputs: `out/v33_300_final/`,
+`out/g0_v34_low/`, `out/g0_v34_high/`, `out/g0a_*`, `out/g0_v3*_low_rep/`, `out/stepEF/`.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
