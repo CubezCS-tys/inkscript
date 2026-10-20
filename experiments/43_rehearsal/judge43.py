@@ -37,11 +37,14 @@ PW = HERE.parent / "40_gemini4_vlm" / "out" / "venv" / "bin" / "python"
 CAP_TOTAL = 33.9235 + 5.0          # the live log's total when this work began + the owner's $5 cap for the judge
 PRICE = {"gemini-3.8-flash": (0.75, 3.75), "gemini-4-argon": (2.0, 10.0)}   # Standard, per M tokens; Batch = half
 THRESHOLD = 0.85                   # judge confidence needed for an automatic edit (and the evidence check)
+BATCH_MAX_OUT = 2500              # calibration answers: at most 436 output tokens (Flash); keeps the worst case under the cap
 
 RUNS = {
     "v33_300": dict(rules=OUT / "v33_300" / "rules", views=OUT / "v33_300" / "views", set="b"),
     "v33_300_judged": dict(rules=OUT / "v33_300_judged" / "rules", views=OUT / "v33_300_judged" / "views", set="b"),
     "v2_55": dict(rules=OUT / "v2_55" / "rules", views=OUT / "v2_55" / "views", set="a"),
+    "v2_55_judged": dict(rules=OUT / "judge" / "v2_55_judged" / "rules", views=OUT / "judge" / "v2_55_judged" / "views",
+                         set="a"),
     "replay": dict(rules=OUT / "replay" / "raw", views=OUT / "judge" / "views_replay", set="a"),   # views43 on out/masters
 }
 KINDS = ["title", "trans_title", "subtitle", "byline", "abstract", "keywords", "heading", "paragraph", "list_item",
@@ -354,7 +357,7 @@ SCHEMA_V2 = {"type": "object", "properties": dict(checks={"type": "array", "item
 def rest_schema(s):
     """The schema in the REST shape the Batch JSONL takes (types upper-case)."""
     if isinstance(s, dict):
-        return {k: (v.upper() if k == "type" else rest_schema(v)) for k, v in s.items()}
+        return {k: (v.upper() if k == "type" and isinstance(v, str) else rest_schema(v)) for k, v in s.items()}
     if isinstance(s, list):
         return [rest_schema(x) for x in s]
     return s
@@ -438,10 +441,10 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
             parts.append({"text": prompt})
             key = f"judge_{mdir(model)}_{run}_{s}_p{p:03d}"
             req = {"contents": [{"role": "user", "parts": parts}],
-                   "generationConfig": {"maxOutputTokens": 6000, "responseMimeType": "application/json",
+                   "generationConfig": {"maxOutputTokens": BATCH_MAX_OUT, "responseMimeType": "application/json",
                                         "responseSchema": rest_schema(schema()),
                                         "thinkingConfig": {"thinkingLevel": "LOW"}}}
-            w = (len(prompt) / 2.5 + 1200 * len(imgs)) / 1e6 * pin + 6000 / 1e6 * pout
+            w = (len(prompt) / 2.5 + 1200 * len(imgs)) / 1e6 * pin + BATCH_MAX_OUT / 1e6 * pout
             if C.spent() + worst + w > cap_total:
                 print(f"  cap: job cut at {len(lines)} of {len(todo)} pages (worst ${worst:.3f})", flush=True)
                 break
@@ -567,12 +570,16 @@ def decide(rec: dict, threshold: float = THRESHOLD) -> list[dict]:
                        "relink_call": dict(line=pr.get("line"), marker=pr.get("marker"), fn=pr.get("fn")),
                        "unmark_other_article": dict(kind=pr.get("kind")),
                        "fix_picture_box": dict(box=pr.get("new_box") or pr.get("box"))}.get(act, {})
-            pv = dict(v, blocks=v["blocks"])
+            pv = dict(v, blocks=v["blocks"], page=p)
             chk = EV.check(act, dict(payload, blocks=bl), pv)
         f["check"] = dict(ok=chk["ok"], why=chk["why"], **{k: chk[k] for k in ("pale", "nonword", "conf") if k in chk})
         auto = conf >= threshold and chk["ok"]
         f["route"] = "auto" if auto else ("human" if act == "mark_noise" and not chk["ok"] else "retry"
-                                          if pr.get("route") == "retry" else "human")
+                                          if pr.get("route") == "retry" or chk.get("retry") else "human")
+        if chk.get("retry") and not f.get("instruction"):
+            f["instruction"] = ("This block is running text that was taken for a picture: give its lines as the page's "
+                                "own blocks (headings, paragraphs in column order, notes); keep a real picture as a "
+                                "figure with its own box only.")
         f["patch"] = dict(id=f"j-{stem[:4]}-p{p}-{k}", run=run, article=stem, page=p, action=act, targets=targets,
                           payload=payload, source="judge", confidence=conf, evidence=pr.get("evidence"),
                           reason=f"{pr.get('type')}: {chk['why']}", created=time.strftime("%Y-%m-%d %H:%M"),

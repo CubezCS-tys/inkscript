@@ -179,6 +179,9 @@ def overlap(a, b) -> float:
     return w * h / max(1e-9, (a[2] - a[0]) * (a[3] - a[1]))
 
 
+KINDS = {"title", "trans_title", "subtitle", "byline", "abstract", "keywords", "heading", "paragraph", "list_item",
+         "quote", "verse", "boxed", "footnote", "reference", "caption", "figure", "table", "equation", "header",
+         "footer", "other_article", "other"}
 RUNNING = {"paragraph", "footnote", "list_item", "verse", "quote", "reference", "abstract", "boxed", "other"}
 
 
@@ -195,6 +198,26 @@ def check(action: str, payload: dict, page: dict) -> dict:
         k, b = payload.get("kind"), bs[0]
         if b["type"] == "other_article":
             return dict(ok=False, why="the block is marked another article: unmark it first (owner's call)")
+        if b["type"] in ("figure", "table") and len(b["lines"]) > 3:
+            return dict(ok=False, retry=True, why=f"a {b['type']} holding {len(b['lines'])} lines of text: the text needs its own "
+                                                  "blocks (paragraphs, columns) — a retry, not a relabel")
+        if k not in KINDS:
+            return dict(ok=False, why=f"«{k}» is not a block kind")
+        # kind changes are trusted one kind at a time (calibrated on the 300, 2026-10-20: two footnote → paragraph
+        # changes were wrong — note continuations and endnotes look like body text to the judge)
+        L = page["line_box"]
+        hs = lambda ids: [L[i][3] - L[i][1] for i in ids if L.get(i)]
+        body = [h for bb in page["blocks"] if bb["type"] == "paragraph" for h in hs(bb["lines"])] or \
+            [h for bb in page["blocks"] for h in hs(bb["lines"])]
+        mine = hs(b["lines"])
+        ratio = (float(np.median(mine)) / float(np.median(body))) if mine and body else None
+        if k == "title" and not (page.get("page") == 1 and (b["box"] or [0, 1000])[1] < 500 and len(b["lines"]) <= 4
+                                 and ratio and ratio >= 1.15):
+            return dict(ok=False, why=f"a title must be large print in the top half of page 1 (height {ratio and round(ratio, 2)}× the body)")
+        if k == "heading" and not (ratio and ratio >= 1.1 and len(b["lines"]) <= 3):
+            return dict(ok=False, why=f"a heading must be larger print (height {ratio and round(ratio, 2)}× the body), ≤ 3 lines")
+        if k not in ("header", "footer", "title", "heading"):
+            return dict(ok=False, why=f"{b['type']} → {k}: this kind change is not yet trusted alone (owner)")
         bx, n = b["box"] or [0, 0, 0, 0], len(b["lines"])
         if k in ("header",) and bx[1] > 150:
             return dict(ok=False, why=f"a running head below the top of the page (y {bx[1]})")

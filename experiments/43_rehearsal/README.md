@@ -1002,6 +1002,111 @@ Batch JSONL. **Run** (`--cap` is the whole log's total: the log at launch + the 
 The downstream scripts (`pictures43 --set`, `views43`, `flags43`, `handcheck43`) know sets a / b only: they need
 `sample43b.json` for set c.
 
+## The judge (2026-10-20; owner-approved design, docs/ideas.md "A judge with authority, through patches"; cap $5, **$2.10 billed**, log $36.02)
+
+A model looks at one page — the scan, the scan with our blocks outlined and numbered, our Layout page (headless
+Chromium) — with our block list (ids `p<P>b<K>`, kinds, Azure line ids, boxes, short text, lines left as noise), and
+answers as data (schema-forced JSON): problems of a fixed set of types (missing_text, text_not_on_scan, wrong_kind,
+wrong_order, picture_box, table_box, note_link, other_article, verse_layout, other), each with target ids, confidence,
+an evidence sentence and a proposed edit, or "retry" with an instruction, or "human". The prompt forbids any word
+change and says when to answer "none". It edits **only through the patch layer**, and only with **two keys**.
+
+**Built** (no file of the parallel fix list touched; nothing under `src/`):
+* `patches43.py` — patches keyed to Azure line ids and blocks (a block is found again by its lines, or type + box,
+  never by position): `{id, run, article, page, action, targets, payload, source, confidence, evidence, reason,
+  created, apply}`. Actions: mark_noise (kind show-through / bleed / scanner-junk), set_kind, reorder, split_block,
+  merge_blocks, relink_call, mark/unmark_other_article, fix_picture_box, and replace_page_blocks (a retry's or a
+  person's page structure, line ids only). No action changes a word. Precedence person > judge > gemini-retry (a
+  lower patch touching the same lines is skipped, logged "overridden"). Applied on a copy of the run's rule-applied
+  answers, then `masters43.build43` — so no hook in masters43 / pictures43 was needed. Every master built with the
+  layer gets `<stem>.patches.json` (applied, skipped with why) and JATS custom-meta `pipeline-patches`; with no patch
+  applied the master is exactly build43's (`test_patches43.py`, 8 pass: actions, precedence, stale targets, **patch
+  off = identical master** on 0744, patched master DTD-valid).
+* `judge43.py` — page view, outlined scan, screenshots, prompt v1 and **v2** (v1 + a nine-question checklist the judge
+  answers first), Standard and Batch calls (REST schema), `decide()` = the two keys and the route of each finding:
+  **auto** (confidence ≥ 0.85 AND the code check passes), **retry**, **human** (owner), or **dismissed** (the code
+  shows the claim is a normal layout).
+* `evidence43.py` — the second key, from the scan and Azure only. Show-through / bleed / junk: *pale* (share of
+  pixels darker than 100 in the line boxes ≤ 0.45 of the page's text lines) AND (*garbled*: ≥ 20% non-words against
+  283,638 Arabic words of the MARC catalogue's titles + 300k abstracts, folded, with prefixes / suffixes; or *unsure*:
+  Azure's word confidence ≤ the page's 75th percentile − 0.2); lines that fail alone are dropped from the edit (on
+  0744 p1 the show-through lines measure ink 0.00–0.16 of the text, confidence 0.2–0.6 against 0.9+). Structure:
+  a picture box must overlap the old one and cover no line of text; a reorder must read fewer blocks upward in a
+  column; a split needs a gap, another column, or (byline) an affiliation word in the second part; unmarking another
+  article only between this article's blocks; mark only at the start or end of the page. Kind changes are trusted
+  one kind at a time: → header / footer by position, → title / heading by print size (line height ≥ 1.15 / 1.1 ×
+  the body) and place; every other change goes to the owner. A figure or table holding > 3 lines → retry. "Columns
+  mixed" claims on a running-text block that runs from the foot of one column to the top of the next → dismissed.
+* `retry43.py` — the bespoke retry: the run's own request for that ONE page (its lines, image, the context of the
+  pages before it, prompt v3.3) + the judge's evidence and instruction + up to three close-ups of the region from
+  the 300 dpi render; Argon; rules43 on the answer; one replace_page_blocks patch, applied when every Azure line of
+  the page is used once (or noise), every split part is known and every call's note exists (across all chunks).
+* `judge_calib43.py` + `judge_truth43.json` + `judge_verdicts43.json` — scoring; `judge_review43.py` — the owner's page.
+
+**Calibration** (30 pages: the 300 agent's 22 looked-at pages, 0478 p4 and 0355 p1 from the 55, six pages of the
+owner's checked articles 0747 / 2382 / 0877 / 0924 / 1140; 11 known structural problems; word-level points —
+guillemets, hyphens, lost vowelled letters, inline maths — are not the judge's business and count neither way; every
+finding outside the known list looked at on the scan by me, `judge_verdicts43.json`). Standard calls:
+
+| problem type (known) | Flash v1 | Flash v2 (checklist) | Argon v1 |
+|---|---|---|---|
+| show-through (1: 0744 p1) | 1 | 1 | 1 |
+| table across columns (1: 0368 p11) | 1 (as wrong_order) | 1 | 1 |
+| columns merged (2: 0478 p4; 0690 p3 notes side by side) | 1 | 1 | 2 |
+| verse layout (1: 0729 p2) | 0 | 1 | 1 |
+| picture box (2: 0729 p2 drawing over verse; 1010 p2 shredded advert) | 0 | 0 | 1 |
+| wrong kind (2: 0617 signature as heading; 2048 author + affiliation) | 0 | 1 | 1 |
+| missing text (1: 0037 p9 side tab) | 0 | 0 | 0 |
+| **caught / 11** | **4** | **7** | **9** |
+| false alarms (before the code keys) | 5 (4 "columns mixed", 1 ornament as a call) | 4 ("columns mixed") | 1 (title printed low) |
+| new real problems found | 1 (0617's missing ornament) | 3 (0617 ornament, 1140 running head, 0736 byline) | 1 (0315 table cell lost) |
+| clean pages answered "none" | 18/21 | 17/21 | 19/21 |
+| cost a page (Standard) | $0.0043 | $0.0050 | $0.0132 |
+
+Confidence does not separate right from wrong: almost everything comes at 0.95 (≥ 0.9: Flash v2 8 of 15 right, Argon
+8 of 13). The code key does the separating: the column run-on check dismisses 3 of Flash v2's 4 false "columns mixed"
+(and 2 of v1's) and keeps the real ones (0478; 0368's table is not running text). The gold pages of the owner: no
+finding from Argon or Flash v2 except 0877's title position (Argon, Flash v1; reorder refused by the code) and 1140's
+small running head (real). Argon is the better judge (9 of 11, 1 false alarm) at 2.7× the price; the brief said Flash
+for the run, so **Flash v2 judged the 300**.
+
+**On the 300** (Flash v2, one Batch job, 535 requests, 3 min queued + 7 min building, all STOP, **$1.30 = $0.0024 a
+page**, 5,762 tokens in / 140 out): the 498 flagged pages and 50 random unflagged ones.
+
+| pages | none | dismissed by code | auto (two keys) | retry | owner |
+|---|---|---|---|---|---|
+| 498 flagged | 345 | 41 | 24 | 22 | 66 |
+| 50 random | 33 | 6 | 1 | 1 | 9 |
+
+Findings by type: wrong_order 90 (50 dismissed), text_not_on_scan 33 (20 auto), wrong_kind 32 (2 auto), picture_box
+23 (3 auto), table_box 4 (retry), missing_text 4, note_link 3, other_article 2, other 2. **Applied** into
+`out/v33_300_judged/` (the run's masters untouched): 28 judge edits + 2 retries in 21 articles — 20 show-through /
+scanner-junk removals (0744 p1 38 lines and p4 32; 0720 pp1, 2, 6, 8; 0527 pp2, 7, 9, 11; 1054 pp1, 4; 0751 p3; 0461,
+0471, 0919, 0419's watermark, 2483's margin speck), 3 picture boxes (1412 p2's header strip to full width, 0590 p2,
+1634 p2), 3 splits (bylines 0736 p1, 2048 p1; 0961 p14 a quote holding two columns), 2 kind changes (0728 p2 running
+head, 0484 p1 title). 77 judged masters, all JATS DTD + ALTO XSD valid. Looked at after the edit: 0744 p1, 0527 p9,
+1412 p2, 0590 p2, 0961 p14 right. **Two automatic edits were wrong in the first pass** (1453 p13 and 1016 p15:
+footnote → paragraph; a note continued from the page before and endnotes 3–5 looked like body text to the judge):
+that kind change no longer goes alone (rule above) and both pages now go to the owner.
+
+**Retries** (Argon, one page each, Standard): 0368 p11 ($0.056) — the table now two parts, each in its column;
+1080 p9 ($0.035) — a whole page drawn as one picture (the text-in-figure rule had swallowed 67 lines) now headings
+and paragraphs with the drawing alone as the figure; 0478 p4 (the 55, $0.037) — the two columns no longer drawn over
+each other, but the formula lines became an equation block drawn small: a retry can bring a new small fault, so
+retried pages belong in the owner's sample. 22 more pages of the 300 are routed to a retry, not sent.
+
+**Cost** (Batch, today's price): Flash v2 $0.0024 a judged page; judging the flagged pages only (14% of pages, 1.7 an
+article) ≈ **$4k per million documents**, every page ≈ $28k (Flash doubles from 1 Jan 2027). Argon as judge $0.0066 a
+page on Batch: ≈ $11k / $77k. Retries ≈ 4% of flagged pages × ~$0.02 on Batch ≈ $1.5k per million.
+
+**Owner's page**: `out/judge/judge_review.html` (http://127.0.0.1:8899/judge/judge_review.html; symlink
+`experiments/41_azure_structure/out/views/judge`): per page the scan with our blocks numbered | our page, after the
+edit when one was applied, each finding with confidence, evidence, the code check and its route, the other models'
+answers on calibration pages, filters by route. **Honest limits**: 11 known problems is a small yardstick (the owner's
+marks on the review page would grow it); the judge missed 1010 p2's shredded advert and 0037's side tab with every
+model, and 1412 p2's interleaved columns; confidence is uninformative; 548 judged pages were picked by flags, so the
+auto rate on unflagged pages (1 in 50) is a small sample.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -1021,7 +1126,7 @@ The downstream scripts (`pictures43 --set`, `views43`, `flags43`, `handcheck43`)
 `prompt43.py` (prompt v2) · `rules43.py` (code rules) · `test_rules43.py` · `masters43.py` (41's masters + v2 code) ·
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
-`side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
+`judge43.py`, `patches43.py` + `test_patches43.py`, `evidence43.py`, `retry43.py`, `judge_calib43.py`, `judge_review43.py`, `judge_truth43.json`, `judge_verdicts43.json` (the judge; out/judge/, out/v33_300_judged/) · `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
 (Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,

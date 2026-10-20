@@ -169,6 +169,14 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   overlaps over the 55 11 → 3, pictures inside a printed line as JATS `inline-graphic` (1769), 4 new flags, MathML
   names; prompt v3.2 candidate with parsed references (masters ready, not live; ~$1.7 more on the 300). 55/55 valid,
   gold 5/5 ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "Code fixes before the 300").
+- **Experiment 43, the judge (2026-10-20, $2.10)**: a model looks at the scan beside our page and edits only through
+  a patch layer (line ids, logged, reversible) when two keys agree (its confidence + a code check of the scan).
+  Calibration on 30 pages with 11 known structural problems: Flash 4 caught (v1) / 7 (checklist prompt v2), Argon 9;
+  Flash v2 on the 300's 498 flagged pages + 50 random ($0.0024 a page on Batch): 25 pages edited automatically
+  (show-through, picture boxes, bylines, running heads), 23 to a one-page retry, 75 to the owner; two one-page
+  Argon retries fixed a table split across columns and a page drawn as one picture. Masters in
+  `out/v33_300_judged/` only; page http://127.0.0.1:8899/judge/judge_review.html
+  ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "The judge").
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

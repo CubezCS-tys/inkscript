@@ -157,7 +157,7 @@ def retry(run: str, stem: str, p: int, instruction: str, evidence: str, blocks: 
                            if isinstance(b, dict)])
     f.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"  check: {chk['why']} -> {'apply' if chk['ok'] else 'owner'}")
-    pdir = OUT / "v33_300_judged" / "patches" if run == "v33_300" else JG.J / "patches_other" / run
+    pdir = OUT / "v33_300_judged" / "patches" if run == "v33_300" else JG.J / f"{run}_judged" / "patches"
     ps = [q for q in PA.load_patches(pdir, stem) if q["id"] != patch["id"]]
     PA.save_patches(pdir, stem, ps + [patch])
     return out

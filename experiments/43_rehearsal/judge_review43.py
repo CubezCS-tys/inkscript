@@ -161,7 +161,7 @@ def main():
         for rec, fs in rest[key]:
             after = None
             pf = JG.OUT / "v33_300_judged" / "masters" / f"{rec['stem']}.patches.json"
-            if key == "auto" and pf.exists() and (JG.OUT / "v33_300_judged" / "views" / "mirror" / f"{rec['stem']}.html").exists():
+            if pf.exists() and (JG.OUT / "v33_300_judged" / "views" / "mirror" / f"{rec['stem']}.html").exists():
                 if any(e.get("page") == rec["page"] for e in json.loads(pf.read_text())["applied"]):
                     after = JG.side("v33_300_judged", rec["stem"], rec["page"])
             rt = J / "retry" / "v33_300" / f"{rec['stem']}_p{rec['page']:03d}.json"

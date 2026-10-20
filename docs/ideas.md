@@ -463,7 +463,9 @@ reason is recorded), **open** (voiced, not yet judged).
   feedback loop's gold set and issues log. Build it after the 300-article sample shows which corrections are
   common. Version 2 (logins, shared server, review of others' corrections, a queue of flagged pages) saved for
   later; where it lives is the owner's call ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
-- **A judge with authority, through patches** (owner, 2026-10-20): *planned, after the 300 report*. A model looks at
+- **A judge with authority, through patches** (owner, 2026-10-20): *built and calibrated 2026-10-20* (judge43.py,
+  patches43.py, evidence43.py, retry43.py; README "The judge": Flash with a checklist prompt for the run, Argon better
+  but 2.7× the price; kind changes trusted one kind at a time — footnote → paragraph failed twice and goes to the owner). A model looks at
   the scan beside our rendered page (+ our block list with line ids) on flagged pages and a small random sample, and
   answers fixed questions as data (missing text, text not on the scan such as show-through, block kinds, order,
   pictures/tables). It edits only through a patch layer keyed to Azure line ids (logged, reversible; person > judge >
