@@ -1,0 +1,9 @@
+- 02:19 started; reading context
+- 02:22 context read (masters JATS/ALTO, flags.json, patches43 format, marc.db); writing schema46.sql + load46.py
+- 02:28 wrote schema46.sql, common46/parse46/load46/inst46; first test load of v33_300
+- 02:29 loaded v33_300 (299) + v2_55 (55; 1 overlap 0732-019-222,224-040 kept on v33_300): 353 articles; idempotent re-run skips all
+- 02:30 disagreements refined (pages: which side fits the scan; hijri years; Arabic+Latin twin authors); writing link46.py
+- 02:32 link46 first full run
+- 02:34 link46: first sample checked (book reviews/edition-parts found, op.cit author after marker); rules tightened, rerun
+- 02:36 link46 rules after 2 checked samples: book->article = about (not the work), reviews/parts kept as non-best, op.cit unresolved when author unknown; final sample drawn (seed 2026)
+- 02:37 hand check of 54 links done (checks46.py → link_checks, sample46_checked.json)

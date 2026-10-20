@@ -1,0 +1,1293 @@
+[
+ {
+  "from_kind": "work",
+  "from_id": "0314-030-003-009|note:fn-p13-1|0",
+  "target_kind": "catalogue",
+  "target_id": "69812",
+  "method": "catalogue-fts",
+  "score": 0.995,
+  "cited": {
+   "authors": "[[\"أحمد\", \"التجاني عبدالقادر\"]]",
+   "title": "السلم بديل شرعي للتمويل المصرفي المعاصر: نظرية مالية ومحاسبية",
+   "source": "مجلة جامعة الملك عبد العزيز: الاقتصاد الإسلامي",
+   "year": "٢٠٠٠ م",
+   "type": "journal",
+   "printed": "(٧) ليس هنا مجال سرد تفصيلات تلك العقود وأركانها وشرعيتها ولكن للاطلاع على ذلك راجع التجاني عبدالقادر أحمد \"السلم بديل شرعي للتمويل المصرفي المعاصر: نظرية مالية ومحاسبية\"، مجلة جامعة الملك عبد العزيز: الاقتصاد الإسلامي، م١٢، ٢٠٠٠ م."
+  },
+  "target": {
+   "title": "السلم بديل شرعي للتمويل المصرفي المعاصر",
+   "subtitle": "نظرة مالية ومحاسبية",
+   "year": 2000,
+   "journal": "مجلة جامعة الملك عبدالعزيز - الاقتصاد الإسلامي",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "أحمد، التجاني عبدالقادر"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0732-003-010-007|note:fn-p4-1|0",
+  "target_kind": "catalogue",
+  "target_id": "435132",
+  "method": "catalogue-fts",
+  "score": 0.75,
+  "cited": {
+   "authors": null,
+   "title": "(طواحين بيروت ) اضافة بارزة الى الرواية العربية المعاصرة",
+   "source": "الآداب",
+   "year": "١٩٧٣",
+   "type": "journal",
+   "printed": "(١): (طواحين بيروت ) اضافة بارزة الى الرواية العربية المعاصرة / الآداب / ص٣٩ / العدد الثالث / آذار ١٩٧٣ ."
+  },
+  "target": {
+   "title": "طواحين بيروت : إضافة بارزة إلى الرواية العربية المعاصرة",
+   "subtitle": "",
+   "year": 1973,
+   "journal": "مجلة الآداب",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "عباس، عبدالجبار"
+   ]
+  },
+  "verdict": "right (no author parsed; title, year, journal agree)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1423-004-002-006|note:fn-p15-10|0",
+  "target_kind": "catalogue",
+  "target_id": "789738",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"العظامات\", \"عبد الله مطر نجم\"]]",
+   "title": null,
+   "source": "أثر تكنولوجيا المعلومات على الأداء التسويقي لوكالات السياحة والسفر الأردنية",
+   "year": "2010",
+   "type": "thesis",
+   "printed": "14: عبد الله مطر نجم العظامات، أثر تكنولوجيا المعلومات على الأداء التسويقي لوكالات السياحة والسفر الأردنية، رسالة ماجستير، كلية إدارة المال والأعمال، قسم إدارة الأعمال، جامعة إل البيت، الأردن 2010/2009، ص ص 44-45."
+  },
+  "target": {
+   "title": "أثر تكنولوجيا المعلومات على الأداء التسويقى لوكالات السياحة والسفر الأردنية",
+   "subtitle": "دراسة ميدانية",
+   "year": 2010,
+   "journal": "",
+   "type": "رسائل جامعية",
+   "authors": [
+    "العظامات، عبدالله مطر نجم",
+    "الجوازنة، بهجت عيد"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1423-004-002-006|note:fn-p15-11|0",
+  "target_kind": "catalogue",
+  "target_id": "669836",
+  "method": "catalogue-fts",
+  "score": 0.96,
+  "cited": {
+   "authors": "[[\"الدوسري\", \"ناصر شافي\"]]",
+   "title": null,
+   "source": "أثر إستراتيجية النمو على الأداء التسويقي لدى شركات التامين الكويتية ودور التوجه السوقي كمتغير وسيط",
+   "year": "2010",
+   "type": "thesis",
+   "printed": "15: ناصر شافي الدوسري، أثر إستراتيجية النمو على الأداء التسويقي لدى شركات التامين الكويتية ودور التوجه السوقي كمتغير وسيط، رسالة ضمن متطلبات الحصول على الماجستير في إدارة الأعمال، جامعة الشرق الأوسط، الكويت، 2010."
+  },
+  "target": {
+   "title": "أثر استراتيجية النمو على الأداء التسويقي لدى شركات التأمين الكويتية ودور التوجه السوقي كمتغير وسيط: دراسة ميدانية",
+   "subtitle": "",
+   "year": 2010,
+   "journal": "",
+   "type": "رسائل جامعية",
+   "authors": [
+    "الدوسري، ناصر شافي",
+    "مقدادي، يونس عبدالعزيز"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1677-010-002-023|note:fn-p5-2|0",
+  "target_kind": "catalogue",
+  "target_id": "153902",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"قيراط\", \"محمد\"]]",
+   "title": "حرية الصحافة في ظل التعددية السياسية في الجزائر",
+   "source": "مجلة جامعة دمشق",
+   "year": "2003",
+   "type": "journal",
+   "printed": "8 محمد قيراط ،\" حرية الصحافة في ظل التعددية السياسية في الجزائر\" 2003 ، مجلة جامعة دمشق المجلد 19 العدد 3و4 سوریا ."
+  },
+  "target": {
+   "title": "حرية الصحافة في ظل التعددية السياسية في الجزائر",
+   "subtitle": "",
+   "year": 2003,
+   "journal": "مجلة جامعة دمشق للآداب والعلوم الإنسانية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "قيراط، محمد"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0239-010-002-023|ref:r5|0",
+  "target_kind": "catalogue",
+  "target_id": "46914",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"الغامدي\", \"سعيد\"]]",
+   "title": null,
+   "source": "تقويم أداء معلمي العلوم الطبيعية بالمرحلة المتوسطة في ضوء المعايير العالمية للتربية العلمية",
+   "year": "٢٠١٠م",
+   "type": "thesis",
+   "printed": "الغامدي، سعيد (٢٠١٠م). تقويم أداء معلمي العلوم الطبيعية بالمرحلة المتوسطة في ضوء المعايير العالمية للتربية العلمية . رسالة دكتوراه، جامعة أم القرى، مكة المكرمة، السعودية."
+  },
+  "target": {
+   "title": "تقويم أداء معلمي العلوم الطبيعية بالمرحلة المتوسطة في ضوء المعايير العالمية للتربية العلمية",
+   "subtitle": "",
+   "year": 2010,
+   "journal": "مجلة القراءة والمعرفة",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "الغامدي، سعيد عبدالله جار الله"
+   ]
+  },
+  "verdict": "near: cited as a 2010 thesis, linked to the 2010 journal article of the same title and author"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0523-011-003-011|ref:r12|0",
+  "target_kind": "catalogue",
+  "target_id": "5192",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"القرني\", \"محمد\"]]",
+   "title": "المهارات الصوتية ومهارات الوعي الصوتي اللازمة لمعلمي اللغة العربية لتعليم القراءة الجهرية بالصفوف الثلاثة الأولى من المرحلة الإبتدائية",
+   "source": "مجلة القراءة والمعرفة، جامعة عين شمس",
+   "year": "٢٠٠٨",
+   "type": "journal",
+   "printed": "القرني، محمد، (٢٠٠٨). المهارات الصوتية ومهارات الوعي الصوتي اللازمة لمعلمي اللغة العربية لتعليم القراءة الجهرية بالصفوف الثلاثة الأولى من المرحلة الإبتدائية، مجلة القراءة والمعرفة، جامعة عين شمس، ٨٠ (٢)، ٩٢-١٤١."
+  },
+  "target": {
+   "title": "المهارات الصوتية ومهارات الوعي الصوتي اللازمة لمعلمي اللغة العربية لتعليم القراءة الجهرية بالصفوف الثلاثة الأولى من المرحلة الابتدائية",
+   "subtitle": "",
+   "year": 2008,
+   "journal": "مجلة القراءة والمعرفة",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "محمد، محمد عويس القرني إبراهيم"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1577-003-005-009|ref:r3|0",
+  "target_kind": "catalogue",
+  "target_id": "712457",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"عاشور\", \"مصباح محمد\"]]",
+   "title": null,
+   "source": "استخدام تقنيات نظم المعلومات الجغرافية والاستشعار عن بعد في تحديد محاور التوسع العمراني في مدينة مصراتة",
+   "year": "2005م",
+   "type": "thesis",
+   "printed": "3- مصباح محمد عاشور، استخدام تقنيات نظم المعلومات الجغرافية والاستشعار عن بعد في تحديد محاور التوسع العمراني في مدينة مصراتة، رسالة ماجستير غير منشورة، جامعة 7 أكتوبر، كلية الآداب، قسم الجغرافيا، 2005م."
+  },
+  "target": {
+   "title": "استخدام تقنيات نظم المعلومات الجغرافية والاستشعار عن بعد فى تحديد محاور التوسع العمرانى فى مدينة مصراتة",
+   "subtitle": "",
+   "year": 2005,
+   "journal": "",
+   "type": "رسائل جامعية",
+   "authors": [
+    "عاشور، مصباح محمد مصطفى",
+    "الزيدي، نجيب عبدالرحمن محمود"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1616-000-003,004-010|note:fn-p8-10|1",
+  "target_kind": "catalogue",
+  "target_id": "100426",
+  "method": "catalogue-fts",
+  "score": 0.993,
+  "cited": {
+   "authors": "[[\"عباس\", \"فضل حسن\"]]",
+   "title": "الكلمة القرآنية وأثرها في الدراسات اللغوية",
+   "source": "مجلة مركز بحوث السنة والسيرة",
+   "year": "1409هـ",
+   "type": "journal",
+   "printed": "10- مقدمة دفاع عن البلاغة أحمد حسن الزيات ص: نقلا عن بحث الكلمة القرآنية وأثرها في الدراسات اللغوية فضل حسن عباس مجلة مركز بحوث السنة والسيرة ع 4 1409هـ ص: 502"
+  },
+  "target": {
+   "title": "الكلمة القرآنية و أثرها في الدراسات اللغوية",
+   "subtitle": "",
+   "year": 1989,
+   "journal": "مجلة مركز بحوث السنة والسيرة",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "عباس، فضل حسن"
+   ]
+  },
+  "verdict": "right (1409 H = 1989)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1453-025-001-008|note:fn-p4-1|0",
+  "target_kind": "catalogue",
+  "target_id": "55104",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"عبد الحميد عبد الفتاح المغربي\", \"\"]]",
+   "title": null,
+   "source": "الادخار في التشريع الإسلامي",
+   "year": null,
+   "type": "other",
+   "printed": "(6) عبد الحميد عبد الفتاح المغربي، الادخار في التشريع الإسلامي، بحث منشور في جامعة المنصورة 37."
+  },
+  "target": {
+   "title": "الادخار في التشريع الاسلامي",
+   "subtitle": "",
+   "year": 1981,
+   "journal": "البنوك الإسلامية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "المغربي، عبدالحميد عبدالفتاح"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1058-005-993-021|ref:r21|0",
+  "target_kind": "catalogue",
+  "target_id": "99693",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"عبيد\", \"عبد اللطيف\"]]",
+   "title": "المرصد المصطلحي أداة لتطوير المصطلح العربيّ وإشاعته",
+   "source": "وقائع مؤتمر التعريب الحادي عشر",
+   "year": "٢٠٠٨م",
+   "type": "web",
+   "printed": "- عبيد، عبد اللطيف، (٢٠٠٨م)، المرصد المصطلحي أداة لتطوير المصطلح العربيّ وإشاعته، ورقة ضمن وقائع مؤتمر التعريب الحادي عشر، أكتوبر ٢٠٠٨، منشورة في الأنترنيت على الموقع: www.majma.org"
+  },
+  "target": {
+   "title": "المرصد المصطلحي أداة لتطوير المصطلح العربي وإشاعته",
+   "subtitle": "",
+   "year": 2009,
+   "journal": "مجلة الجامعة المغاربية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "عبيد، عبداللطيف"
+   ]
+  },
+  "verdict": "near: conference paper 2008, journal 2009"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1453-025-001-008|ref:r73|0",
+  "target_kind": "catalogue",
+  "target_id": "55104",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"المغربي\", \"عبد الحميد\"]]",
+   "title": null,
+   "source": "الادخار في التشريع الإسلامي",
+   "year": null,
+   "type": "other",
+   "printed": "المغربي، عبد الحميد(د.ت) الادخار في التشريع الإسلامي، بحث منشور في جامعة المنصورة."
+  },
+  "target": {
+   "title": "الادخار في التشريع الاسلامي",
+   "subtitle": "",
+   "year": 1981,
+   "journal": "البنوك الإسلامية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "المغربي، عبدالحميد عبدالفتاح"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1453-025-001-008|note:fn-p16-1|0",
+  "target_kind": "catalogue",
+  "target_id": "603093",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"د. عبد السلام اللوح\", \"\"], [\"د. محمود عنبر\", \"\"]]",
+   "title": "علاج مشكلة الفقر دراسة قرآنية موضوعية",
+   "source": "مجلة الجامعة الإسلامية للدراسات الإسلامية",
+   "year": null,
+   "type": "journal",
+   "printed": "(92) د. عبد السلام اللوح، د. محمود عنبر، علاج مشكلة الفقر دراسة قرآنية موضوعية، مجلة الجامعة الإسلامية للدراسات الإسلامية، غزة، مجلد17، عدد1، ص351."
+  },
+  "target": {
+   "title": "علاج مشكلة الفقر",
+   "subtitle": "دراسة قرآنية موضوعية",
+   "year": 2009,
+   "journal": "مجلة الجامعة الإسلامية للدراسات الإسلامية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "اللوح، عبدالسلام حمدان عودة",
+    "عنبر، محمود هاشم محمود"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1993-010-001-013|ref:r12|0",
+  "target_kind": "catalogue",
+  "target_id": "1122495",
+  "method": "catalogue-fts",
+  "score": 0.997,
+  "cited": {
+   "authors": "[[\"السيدية\", \"موفق أحمد علي\"], [\"الهاشمي\", \"ليلى عبد الكريم محمد\"]]",
+   "title": "قياس مخاطر التعثر المصرفي باستخدام نموذج sherrod - دراسة تطبيقية على عينة من المصارف العراقية -",
+   "source": "مجلة تكريت للعلوم الادارية والاقتصادية",
+   "year": "2016",
+   "type": "journal",
+   "printed": "12. موفق أحمد علي السيدية، وليلى عبد الكريم محمد الهاشمي. (2016). قياس مخاطر التعثر المصرفي باستخدام نموذج sherrod - دراسة تطبيقية على عينة من المصارف العراقية -. مجلة تكريت للعلوم الادارية والاقتصادية، 12(36)."
+  },
+  "target": {
+   "title": "قياس مخاطر التعثر المصرفي باستخدام نموذج Serrod",
+   "subtitle": "دراسة تطبيقية على عينة من المصارف العراقية",
+   "year": 2016,
+   "journal": "مجلة تكريت للعلوم الإدارية والاقتصادية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "السيدية، موفق أحمد علي",
+    "الهاشمي، ليلى عبدالكريم محمد"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1421-000-008-007|note:fn-p11-3|0",
+  "target_kind": "catalogue",
+  "target_id": "763659",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"الغول\", \"الطاهر\"]]",
+   "title": "القيم الإنسانية والمبادئ السلمية في الثورة التحريرية بين الكتابة التاريخية والخطاب الشعري",
+   "source": "مجلة الباحث في العلوم الإنسانية والإجتماعية",
+   "year": "2016",
+   "type": "journal",
+   "printed": "(3)- الطاهر الغول: القيم الإنسانية والمبادئ السلمية في الثورة التحريرية بين الكتابة التاريخية والخطاب الشعري، مجلة الباحث في العلوم الإنسانية والإجتماعية، السنة 05، العدد 07، جامعة الشهيد حمة لخضر الوادي، الجزائر، جوان 2016، ص125."
+  },
+  "target": {
+   "title": "القيم الإنسانية والمبادئ السلمية في الثورة التحريرية بين الكتابة التاريخية والخطاب الشعري",
+   "subtitle": "",
+   "year": 2016,
+   "journal": "مجلة الباحث في العلوم الإنسانية والاجتماعية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "الغول، الطاهر"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1577-003-005-009|note:fn-p21-8|0",
+  "target_kind": "catalogue",
+  "target_id": "1263681",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"عبده\", \"أشرف على\"]]",
+   "title": null,
+   "source": "التباين المكاني لمحطات الوقود في المدينة المنورة، باستخدام نظم المعلومات الجغرافية",
+   "year": null,
+   "type": "other",
+   "printed": "8) أشرف على عبده، التباين المكاني لمحطات الوقود في المدينة المنورة، باستخدام نظم المعلومات الجغرافية، جامعة طيبة، قسم الجغرافيا، المدينة المنورة، (د.ت)، ص2."
+  },
+  "target": {
+   "title": "التباين المكاني لمحطات الوقود في المدينة المنورة باستخدام نظم المعلومات الجغرافية",
+   "subtitle": "",
+   "year": 2014,
+   "journal": "سلسلة بحوث جغرافية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "عبده، أشرف علي"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1058-005-993-021|ref:r9|0",
+  "target_kind": "catalogue",
+  "target_id": "349992",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"خضر\", \"\"]]",
+   "title": "خطّة مرجعيّة لمشروع مرصد اللغة العربيّة",
+   "source": "اللسان العربي",
+   "year": "٢٠١١م",
+   "type": "journal",
+   "printed": "- خضر، محمد زكي، (٢٠١١م)، \"خطّة مرجعيّة لمشروع مرصد اللغة العربيّة\"، اللسان العربي، (ع ٦٦)."
+  },
+  "target": {
+   "title": "خطة مرجعية لمشروع مرصد اللغة العربية",
+   "subtitle": "",
+   "year": 2010,
+   "journal": "اللسان العربي",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "خضر، محمد زكي محمد"
+   ]
+  },
+  "verdict": "right (2011 vs 2010, same journal)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0523-011-003-011|ref:r4|0",
+  "target_kind": "catalogue",
+  "target_id": "534720",
+  "method": "catalogue-fts",
+  "score": 0.997,
+  "cited": {
+   "authors": "[[\"حجازين\", \"حيدر مبارك\"]]",
+   "title": null,
+   "source": "مظاهر الاضطرابات الفونولوجية النمائية وعلاقتها بصعوبات التعلم في مرحلة التعليم الأساسي كما يدركها أولياء الأمور",
+   "year": "٢٠٠٦",
+   "type": "thesis",
+   "printed": "حجازين، حيدر مبارك (٢٠٠٦). مظاهر الاضطرابات الفونولوجية النمائية وعلاقتها بصعوبات التعلم في مرحلة التعليم الأساسي كما يدركها أولياء الأمور. رسالة ماجيستير غير منشورة، جامعة عمان العربية للدراسات العليا، عمان، الأوردن"
+  },
+  "target": {
+   "title": "مظاهر الاضطرابات الفونولوجية النمائية و علاقتها بصعوبات التعلم في مرحلة التعليم الأساسي كما يدركها أولياء الأمور",
+   "subtitle": "",
+   "year": 2006,
+   "journal": "",
+   "type": "رسائل جامعية",
+   "authors": [
+    "حجازين، حيدر مبارك",
+    "الظاهر، قحطان أحمد"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0013-002-001-005|ref:r21|0",
+  "target_kind": "catalogue",
+  "target_id": "160208",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"سويف\", \"مصطفى\"]]",
+   "title": "اسهامات العلوم الاجتماعية فى بحوث تعاطى المسكرات والمخدرات",
+   "source": "مجلة علم النفس",
+   "year": "١٩٨٧",
+   "type": "journal",
+   "printed": "(٢١) سويف، مصطفى. اسهامات العلوم الاجتماعية فى بحوث تعاطى المسكرات والمخدرات . مجلة علم النفس، القاهرة: الهيئة العامة للكتابة. ع ١ . يناير (١٩٨٧)."
+  },
+  "target": {
+   "title": "اسهامات العلوم الاجتماعية في بحوث تعاطي المسكرات والمخدرات",
+   "subtitle": "",
+   "year": 1987,
+   "journal": "علم النفس",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "سويف، مصطفى إسماعيل"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1596-000-041-011|ref:r13|0",
+  "target_kind": "catalogue",
+  "target_id": "11962",
+  "method": "catalogue-fts",
+  "score": 0.85,
+  "cited": {
+   "authors": "[[\"جبر\", \"يحيى\"]]",
+   "title": "الترجمة الآلية همّ جديد",
+   "source": "مجلة التعريب",
+   "year": "2009",
+   "type": "journal",
+   "printed": "يحيى جبر. (2009). الترجمة الآلية همّ جديد. مجلة التعريب، دمشق."
+  },
+  "target": {
+   "title": "الترجمة الآلية هم جديد",
+   "subtitle": "",
+   "year": 2000,
+   "journal": "التعريب",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "جبر، يحيى"
+   ]
+  },
+  "verdict": "right (2009 vs 2000, same journal; a year typo on one side)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0179-000-033-002|ref:r1|0",
+  "target_kind": "catalogue",
+  "target_id": "577778",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"حربوش\", \"العمري\"]]",
+   "title": "التكامل المعرفي ودوره في التكوين الجامعي \"التكوين الطبي والبيولوجي نموذجا.\"",
+   "source": "مجلة العلوم الإنسانية",
+   "year": "2012",
+   "type": "journal",
+   "printed": "حربوش، العمري. (2012). التكامل المعرفي ودوره في التكوين الجامعي \"التكوين الطبي والبيولوجي نموذجا.\"مجلة العلوم الإنسانية، العدد 37، ص ص.39-23"
+  },
+  "target": {
+   "title": "التكامل المعرفى ودوره فى التكوين الجامعى",
+   "subtitle": "التكوين الطبى والبيولوجى نموذجاً",
+   "year": 2012,
+   "journal": "مجلة العلوم الإنسانية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "حربوش، العمري"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0295-020-002-007|note:fn-p4-4|0",
+  "target_kind": "catalogue",
+  "target_id": "9165",
+  "method": "catalogue-fts",
+  "score": 0.75,
+  "cited": {
+   "authors": "[[\"وزارة التربية السورية، اليونسكو\", \"\"]]",
+   "title": "دراسة ظاهرة تسرب الفتيات والفتيان في مراحل التعليم ما قبل الجامعي",
+   "source": "المجلة العربية للبحوث التربوية",
+   "year": "١٩٨٢",
+   "type": "journal",
+   "printed": "١٦. وزارة التربية السورية، اليونسكو. دراسة ظاهرة تسرب الفتيات والفتيان في مراحل التعليم ما قبل الجامعي. المجلة العربية للبحوث التربوية، السنة الثانية، العدد الأول، تونس ١٩٨٢، ص ١٨٥."
+  },
+  "target": {
+   "title": "دراسة ظاهرة تسرب الفتيات والفتيان في مراحل التعليم ما قبل الجامعي",
+   "subtitle": "",
+   "year": 1982,
+   "journal": "المجلة العربية للبحوث التربوية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "سوريا. وزارة التربية والتعليم"
+   ]
+  },
+  "verdict": "right (corporate author)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0590-004-003-008|ref:r17|0",
+  "target_kind": "catalogue",
+  "target_id": "255765",
+  "method": "catalogue-fts",
+  "score": 0.98,
+  "cited": {
+   "authors": "[[\"غوشة\", \"عبد الله\"]]",
+   "title": "رعاية الإسلام للتعميم والمعاني الإنسانية في الدولة الإسلامية",
+   "source": "المؤتمر السادس بمجمع البحوث الإسلامية في الأزهر",
+   "year": "١٩٧١",
+   "type": "other",
+   "printed": "- الشيخ عبد الله غوشة: رعاية الإسلام للتعميم والمعاني الإنسانية في الدولة الإسلامية بحث قدم إلى المؤتمر السادس بمجمع البحوث الإسلامية في الأزهر عام ١٩٧١ ."
+  },
+  "target": {
+   "title": "رعاية الإسلام للقيم والمعاني الإنسانية في الدولة الإسلامية",
+   "subtitle": "",
+   "year": 1971,
+   "journal": "المؤتمر السادس لمجمع البحوث الاسلامية",
+   "type": "بحوث المؤتمرات",
+   "authors": [
+    "غوشة، عبدالله"
+   ]
+  },
+  "verdict": "right (OCR: للتعميم = للقيم)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0239-010-002-023|ref:r2|0",
+  "target_kind": "catalogue",
+  "target_id": "451018",
+  "method": "catalogue-fts",
+  "score": 1.0,
+  "cited": {
+   "authors": "[[\"أمبوسعيدي\", \"عبدالله\"]]",
+   "title": "تقدير طلبة الصف الثاني عشر بسلطنة عمان لدرجة امتلاك معلمي العلوم لخصائص المعلم الفعال وعلاقته ببعض المتغيرات",
+   "source": "مؤتة للبحوث والدراسات العلوم الإنسانية والاجتماعية",
+   "year": "٢٠١٣",
+   "type": "journal",
+   "printed": "أمبوسعيدي، عبدالله (٢٠١٣). تقدير طلبة الصف الثاني عشر بسلطنة عمان لدرجة امتلاك معلمي العلوم لخصائص المعلم الفعال وعلاقته ببعض المتغيرات. مؤتة للبحوث والدراسات العلوم الإنسانية والاجتماعية، ٢٨(٢)، ٣١٣ -٣٤٢."
+  },
+  "target": {
+   "title": "تقدير طلبة الصف الثاني عشر بسلطنة عمان لدرجة امتلاك معلمي العلوم لخصائص المعلم الفعال وعلاقته ببعض المتغيرات",
+   "subtitle": "",
+   "year": 2013,
+   "journal": "مؤتة للبحوث والدراسات - سلسلة العلوم الإنسانية والاجتماعية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "أمبوسعيدي، عبدالله بن خميس"
+   ]
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1105-019-002-003|ref:r22|0",
+  "target_kind": "catalogue",
+  "target_id": "805411",
+  "method": "catalogue-fts",
+  "score": 0.75,
+  "cited": {
+   "authors": "[[\"العبلي\", \"عبد الحكيم حسن\"]]",
+   "title": null,
+   "source": "الحريات العامة في الفكر والنظام السياسي في الإسلام",
+   "year": "1974",
+   "type": "book",
+   "printed": "22. العبلي، عبد الحكيم حسن، الحريات العامة في الفكر والنظام السياسي في الإسلام، مصر، دار الفكر العربي، 1974."
+  },
+  "target": {
+   "title": "الحريات العامة في الفكر والنظام السياسي في الإسلام",
+   "subtitle": "دراسة مقارنة",
+   "year": 1974,
+   "journal": "",
+   "type": "رسائل جامعية",
+   "authors": [
+    "عبدالله، عبدالحكيم حسن محمد",
+    "الطماوي، سليمان محمد سليمان"
+   ]
+  },
+  "verdict": "near: the 1974 thesis behind the cited 1974 book (author misread العبلي for العيلي)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "0013-002-001-005|ref:r66|0",
+  "target_kind": "catalogue",
+  "target_id": "611160",
+  "method": "catalogue-about",
+  "score": 0.511,
+  "cited": {
+   "authors": "[[\"Shaheen\", \"Omar\"]]",
+   "title": "Anxiety and Addiction Health Services (incl) Public Health",
+   "source": "The Second International Conference on Islamic Med- icine",
+   "year": "1982",
+   "type": "book",
+   "printed": "(66) Shaheen, Omar. Anxiety and Addiction Health Services (incl) Public Health. The Second International Conference on Islamic Med- icine. Kuwait 29 March - 2 April (1982) ."
+  },
+  "target": {
+   "title": "Second International Conference on Islamic Economics",
+   "subtitle": "",
+   "year": 1984,
+   "journal": "مجلة أبحاث الإقتصاد الإسلامي",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "Editorial Board"
+   ]
+  },
+  "verdict": "withheld-ok"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "6643-000-000-011|note:fn-p12-8|1",
+  "target_kind": "catalogue",
+  "target_id": "1434192",
+  "method": "catalogue-about",
+  "score": 0.523,
+  "cited": {
+   "authors": null,
+   "title": null,
+   "source": "شعر داود الرسموكي",
+   "year": null,
+   "type": "book",
+   "printed": "18- المعسول: 247/7 وشعر داود الرسموكي، ت ذ اليزيد الراضي: 37."
+  },
+  "target": {
+   "title": "كتاب \"شعر داود الرسموكي\"",
+   "subtitle": "جمع وتحقيق ودراسة",
+   "year": 2024,
+   "journal": "مجلة أنساق لغوية وثقافية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "الراضي، اليزيد",
+    "أزوكاي، صالح"
+   ]
+  },
+  "verdict": "withheld-ok (a study of the book)"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "1453-025-001-008|ref:r61|0",
+  "target_kind": "catalogue",
+  "target_id": "1108224",
+  "method": "catalogue-about",
+  "score": 0.54,
+  "cited": {
+   "authors": "[[\"عبد الحميد\", \"د. أحمد مختار\"]]",
+   "title": null,
+   "source": "معجم اللغة العربية المعاصرة",
+   "year": "1429ه",
+   "type": "book",
+   "printed": "عبد الحميد، د. أحمد مختار (1429ه) معجم اللغة العربية المعاصرة، ط1، القاهرة ، عالم الكتب."
+  },
+  "target": {
+   "title": "معجم تكراري للغة العربية المعاصرة",
+   "subtitle": "معالجة لغوية حاسوبية",
+   "year": 2021,
+   "journal": "مجلة جامعة مصر للدراسات الإنسانية",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "حامد، محمد مجدي لبيب"
+   ]
+  },
+  "verdict": "withheld-ok"
+ },
+ {
+  "from_kind": "work",
+  "from_id": "2280-006-001-014|ref:r9|0",
+  "target_kind": "catalogue",
+  "target_id": "957065",
+  "method": "catalogue-about",
+  "score": 0.6,
+  "cited": {
+   "authors": "[[\"Lillie\", \"William\"]]",
+   "title": null,
+   "source": "Introduction to Ethics",
+   "year": "1948",
+   "type": "book",
+   "printed": "Lillie, William. Introduction to Ethics. London: Metheun, 1948."
+  },
+  "target": {
+   "title": "مقدمة في علم الأخلاق",
+   "subtitle": "",
+   "year": 2017,
+   "journal": "حولية كلية أصول الدين والدعوة الإسلامية بطنطا",
+   "type": "بحوث ومقالات",
+   "authors": [
+    "أبو عوف، أسماء حسن"
+   ]
+  },
+  "verdict": "withheld-ok"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0814-008-024-002|fn-p22-2",
+  "target_kind": "work",
+  "target_id": "0814-008-024-002|note:fn-p13-1|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "(2) Voir Pincus : économic Aid. p. 362 op. cit."
+  },
+  "target": {
+   "authors": "[[\"Pincus\", \"\"]]",
+   "title": null,
+   "source": "C.N.U.C.E.D.",
+   "year": null,
+   "note": "fn-p13-1",
+   "printed": "(1) Voir communication de Pincus à la C.N.U.C.E.D. : p. 35/op. Cit p. 1."
+  },
+  "verdict": "wrong: Pincus's «Economic Aid» resolved to his C.N.U.C.E.D. communication"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0419-000-044-007|fn-p9-7",
+  "target_kind": "work",
+  "target_id": "0419-000-044-007|note:fn-p3-1|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "7 . A-M La Rosa, « La preuve », op.cit., p.959."
+  },
+  "target": {
+   "authors": "[[\"La Rosa\", \"A-M\"]]",
+   "title": "La preuve",
+   "source": "Commentaire du Statut de Rome de la Cour pénale internationale",
+   "year": "2012",
+   "note": "fn-p3-1",
+   "printed": "1 . A-M La Rosa, « La preuve », in Commentaire du Statut de Rome de la Cour pénale internationale, (dir), Julian Fernandez et Xavier Pacreau, Paris, Pedone, 2012, p.1588."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1110-020-001-047|fn-p21-20",
+  "target_kind": "work",
+  "target_id": "1110-020-001-047|note:fn-p21-17|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "20. معزوز (عبد الحق) : المرجع السابق ، ص 72 ."
+  },
+  "target": {
+   "authors": "[[\"معزوز\", \"عبد الحق\"]]",
+   "title": "قراءات في الكتابات الکوفیة في الجزائر",
+   "source": "مجلة الآثار",
+   "year": "2007",
+   "note": "fn-p21-17",
+   "printed": "17. معزوز (عبد الحق): قراءات في الكتابات الکوفیة في الجزائر ، مجلة الآثار ، العدد 2007.6 ، معهد الآثار ، جامعة الجزائر ، ص 71 ."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0626-018-071,072-004|fn-p25-7",
+  "target_kind": "work",
+  "target_id": "0626-018-071,072-004|note:fn-p23-2|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "(26) Op. cit Ziauddin Sardar."
+  },
+  "target": {
+   "authors": "[[\"sardar\", \"Ziaudden\"]]",
+   "title": null,
+   "source": "Islam: Outline of Classificetion Scheme",
+   "year": "1979",
+   "note": "fn-p23-2",
+   "printed": "(2) Ziaudden sardar. Islam: Outline of Classificetion Scheme, London: Clive Bingley, 1979, P. 16."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0852-001-004,005-003|fn-p26-13",
+  "target_kind": "work",
+  "target_id": "0852-001-004,005-003|note:fn-p26-8|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "O'Brien op.cit. P. 334. . ١٣"
+  },
+  "target": {
+   "authors": "[[\"O'Brien\", \"B.\"]]",
+   "title": null,
+   "source": "The Revolution in Egypt, Economic System",
+   "year": "1967",
+   "note": "fn-p26-8",
+   "printed": "B. O'Brien: The Revolution in Egypt, Economic System, London: 1967. P. 333. .٨"
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0852-001-004,005-003|fn-p26-14",
+  "target_kind": "work",
+  "target_id": "0852-001-004,005-003|note:fn-p26-8|0",
+  "method": "backref-author",
+  "score": 0.9,
+  "cited": {
+   "note": "O'Brien op.cit. P. 90. .١٤"
+  },
+  "target": {
+   "authors": "[[\"O'Brien\", \"B.\"]]",
+   "title": null,
+   "source": "The Revolution in Egypt, Economic System",
+   "year": "1967",
+   "note": "fn-p26-8",
+   "printed": "B. O'Brien: The Revolution in Egypt, Economic System, London: 1967. P. 333. .٨"
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1110-020-001-047|fn-p22-25",
+  "target_kind": "work",
+  "target_id": "1110-020-001-047|note:fn-p22-13|0",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "57. مرزوق (محمد عبد العزيز) : المصحف الشريف دراسة تاريخية وفنية : المرجع السابق ، هامش ص 182 ."
+  },
+  "target": {
+   "authors": "[[\"مرزوق\", \"محمد عبد العزيز\"]]",
+   "title": null,
+   "source": "المصحف الشريف دراسة تاريخية وفنية",
+   "year": "1975 م",
+   "note": "fn-p22-13",
+   "printed": "45. مرزوق (محمد عبد العزيز) : المصحف الشريف دراسة تاريخية وفنية ، الهيئة المصرية العامة للكتاب ، 1975 م، ص 76، 77 ."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1708-000-005,006-017|fn-p3-1",
+  "target_kind": "work",
+  "target_id": "1708-000-005,006-017|note:fn-p1-1|0",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "9 Cette localité est à huit lieues à l'est de Batna ; il existe également une autre localité portant le même nom située à sept lieues au sud-ouest de Tébessa. Voir la monographie de cette localité dans : B. Moukraenta-Abed, L'image de l'Algérie antique au travers des sources arabes du Moyen Âge,op. "
+  },
+  "target": {
+   "authors": "[[\"Moukraenta\", \"B.\"]]",
+   "title": null,
+   "source": "L'image de l'Algérie antique au travers des sources arabes du Moyen Âge",
+   "year": "2013",
+   "note": "fn-p1-1",
+   "printed": "2 B. Moukraenta, L'image de l'Algérie antique au travers des sources arabes du Moyen Âge, Alger, 2013 (4 volumes)."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0368-000-003-003|fn-p14-9",
+  "target_kind": "work",
+  "target_id": "0368-000-003-003|note:fn-p13-15|4",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "Arthur I. Waskow, From Race - ٤٥ Riot to Sit-In, op. cit."
+  },
+  "target": {
+   "authors": "[[\"Waskow\", \"Arthur\"]]",
+   "title": null,
+   "source": "From Race Riot to Sit-In",
+   "year": "1967",
+   "note": "fn-p13-15",
+   "printed": "٢٤ - من بين ما كتبه فرانز فانون الكتب التالية : ١) معذبو الارض ، ترجمة سامي الدروبي وجمال الاتاسي ، دار الطليعة . The Wretched of the Earth (New York: Grove Press, Inc. 1963). وقد كتب جان بول سارتر مقدمة له . ٢) Black Skins, White Masks (New York: Gr"
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1110-020-001-047|fn-p21-29",
+  "target_kind": "work",
+  "target_id": "1110-020-001-047|ref:r32|0",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "29. ذنون (يوسف) : قديم وجديد في أصل الخط العربي ، المرجع السابق: ص 23 ."
+  },
+  "target": {
+   "authors": "[[\"ذنون\", \"يوسف\"]]",
+   "title": "قديم وجديد في أصل الخط العربي وتطوره في عصوره المختلفة",
+   "source": null,
+   "year": "1407",
+   "note": "r32",
+   "printed": ".1 ذنون (يوسف) 1407 هـ/1986م: قديم وجديد في أصل الخط العربي وتطوره في عصوره المختلفة، المجلد 15، العدد 04."
+  },
+  "verdict": "right (to the reference list)"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0419-000-044-007|fn-p10-9",
+  "target_kind": "work",
+  "target_id": "0419-000-044-007|note:fn-p3-1|0",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "9 . A-M La Rosa, « La preuve », in Commentaire du Statut de Rome de la Cour pénale internationale, op.cit., p. 1594."
+  },
+  "target": {
+   "authors": "[[\"La Rosa\", \"A-M\"]]",
+   "title": "La preuve",
+   "source": "Commentaire du Statut de Rome de la Cour pénale internationale",
+   "year": "2012",
+   "note": "fn-p3-1",
+   "printed": "1 . A-M La Rosa, « La preuve », in Commentaire du Statut de Rome de la Cour pénale internationale, (dir), Julian Fernandez et Xavier Pacreau, Paris, Pedone, 2012, p.1588."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2228-014-051-037|fn-p26-16",
+  "target_kind": "work",
+  "target_id": "2228-014-051-037|note:fn-p26-12|0",
+  "method": "backref-author-title",
+  "score": 0.95,
+  "cited": {
+   "note": "(5) C. Cys, et al., Land Evaluation Part II, Op cit., p.135."
+  },
+  "target": {
+   "authors": "[[\"Cys\", \"C.\"]]",
+   "title": null,
+   "source": "Land Evaluation Part I Principle in Land Evaluation and Crop Production Calculations",
+   "year": "1991",
+   "note": "fn-p26-12",
+   "printed": "(5) C. Cys, et al., Land Evaluation Part I Principle in Land Evaluation and Crop Production Calculations, Agricultural Publication, Brussels - Belgium, 1991, p.71."
+  },
+  "verdict": "wrong: «Land Evaluation Part II» resolved to Part I"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2051-000-002-017|fn-p5-1",
+  "target_kind": "work",
+  "target_id": "2051-000-002-017|note:fn-p3-6|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "14- ibid., p.42"
+  },
+  "target": {
+   "authors": "[[\"Sartre\", \"J.P.\"]]",
+   "title": "une idée fondamentale de la phénoménologie de Husserl : l'intentionnalité",
+   "source": "situations philosophiques",
+   "year": null,
+   "note": "fn-p3-6",
+   "printed": "* une idée fondamentale de la phénoménologie de Husserl : l'intentionnalité وقد نشر فيما بعد في J.P. Sartre, situations philosophiques, Ed. Tel. Gallimard, Paris, p.p. 38-42"
+  },
+  "verdict": "right (chain of ibid.)"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1110-020-001-047|fn-p22-3",
+  "target_kind": "work",
+  "target_id": "1110-020-001-047|note:fn-p21-26|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "35. المرجع نفسه ، ص 46 ."
+  },
+  "target": {
+   "authors": "[[\"جمعة\", \"إبراهيم\"]]",
+   "title": null,
+   "source": "دراسة في تطور الكتابات الكوفية على الأحجار في مصر في القرون الأولى للهجرة",
+   "year": "1969 م",
+   "note": "fn-p21-26",
+   "printed": "26. جمعة (إبراهيم): دراسة في تطور الكتابات الكوفية على الأحجار في مصر في القرون الأولى للهجرة ، دار الفكر العربي 1969 م، ص 132"
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1110-020-001-047|fn-p22-29",
+  "target_kind": "work",
+  "target_id": "1110-020-001-047|note:fn-p21-13|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "61. المرجع نفسه ، ص 77 ."
+  },
+  "target": {
+   "authors": "[[\"الدالي\", \"عيد العزيز\"]]",
+   "title": null,
+   "source": "الخطاطة \" الكتابة العربية\"",
+   "year": "1400",
+   "note": "fn-p21-13",
+   "printed": "13. الدالي (عيد العزيز) : الخطاطة \" الكتابة العربية\" ، مكتبة الخانجي ، القاهرة . مصر، 1400 هـ/ 1980م. ص 108 ."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1967-000-008-012|fn-p13-15",
+  "target_kind": "work",
+  "target_id": "1967-000-008-012|note:fn-p13-14|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "15 ،المرجع نفسه، ص152 ,153."
+  },
+  "target": {
+   "authors": "[[\"ابن دحية الكلبي\", \"\"]]",
+   "title": null,
+   "source": "المطرب من أشعار أهل المغرب",
+   "year": "1955م",
+   "note": "fn-p13-14",
+   "printed": "14 - ابن دحية الكلبي، المطرب من أشعار أهل المغرب، تحق: إبراهيم الأبياري، حامد عبد المجيد، أحمد أحمد بدوي، دار العلم للجميع، بيروت، 1474هـ، 1955م، ص59."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0419-000-044-007|fn-p16-8",
+  "target_kind": "work",
+  "target_id": "0419-000-044-007|note:fn-p3-1|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "8 . Ibid, §§ 405-415."
+  },
+  "target": {
+   "authors": "[[\"La Rosa\", \"A-M\"]]",
+   "title": "La preuve",
+   "source": "Commentaire du Statut de Rome de la Cour pénale internationale",
+   "year": "2012",
+   "note": "fn-p3-1",
+   "printed": "1 . A-M La Rosa, « La preuve », in Commentaire du Statut de Rome de la Cour pénale internationale, (dir), Julian Fernandez et Xavier Pacreau, Paris, Pedone, 2012, p.1588."
+  },
+  "verdict": "wrong: ibid. after an unparsed court judgment went to La Rosa"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2280-006-001-014|fn-p14-6",
+  "target_kind": "work",
+  "target_id": "2280-006-001-014|note:fn-p14-4|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "65 Ibid., pp. 95-96."
+  },
+  "target": {
+   "authors": "[[\"Rafi-ud-Din\", \"\"]]",
+   "title": null,
+   "source": null,
+   "year": null,
+   "note": "fn-p14-4",
+   "printed": "63 Rafi-ud-Din, The Qur’ān and Modern Knowledge, p. 87."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2280-006-001-014|fn-p17-2",
+  "target_kind": "work",
+  "target_id": "2280-006-001-014|note:fn-p16-5|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "78 Ibid., p. 30."
+  },
+  "target": {
+   "authors": "[[\"Rafi-ud-Din\", \"\"]]",
+   "title": null,
+   "source": "The Ideology of the Future",
+   "year": null,
+   "note": "fn-p16-5",
+   "printed": "75 Rafi-ud-Din, The Ideology of the Future, p. 31."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2280-006-001-014|fn-p17-3",
+  "target_kind": "work",
+  "target_id": "2280-006-001-014|note:fn-p16-5|0",
+  "method": "backref-previous",
+  "score": 0.7,
+  "cited": {
+   "note": "79 Ibid., p. 49."
+  },
+  "target": {
+   "authors": "[[\"Rafi-ud-Din\", \"\"]]",
+   "title": null,
+   "source": "The Ideology of the Future",
+   "year": null,
+   "note": "fn-p16-5",
+   "printed": "75 Rafi-ud-Din, The Ideology of the Future, p. 31."
+  },
+  "verdict": "right"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "1900-003-003,004-006|fn-p9-5",
+  "target_kind": "work",
+  "target_id": "1900-003-003,004-006|note:fn-p9-3|0",
+  "method": "backref-title",
+  "score": 0.8,
+  "cited": {
+   "note": "8- Vidal, F. \"Piaget avant Piaget. Pour une relecture de l'oeuvre piagetienne\", in, L'Esprit piagetien, .... op.cit. 2000."
+  },
+  "target": {
+   "authors": "[[\"Lecuyer\", \"R.\"]]",
+   "title": "De la pensee a l'acte",
+   "source": "L'Esprit piagetien. Hommage international a Jean Piaget",
+   "year": "2000",
+   "note": "fn-p9-3",
+   "printed": "6- Lecuyer, R. \"De la pensee a l'acte\", in, Houde, O. et Meljac, C (dir). L'Esprit piagetien. Hommage international a Jean Piaget, PUF. 2000."
+  },
+  "verdict": "wrong: op. cit. of the book «L'Esprit piagetien» went to another chapter of it"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0368-000-003-003|fn-p14-14",
+  "target_kind": "work",
+  "target_id": "0368-000-003-003|note:fn-p14-4|0",
+  "method": "backref-title",
+  "score": 0.8,
+  "cited": {
+   "note": "٥٠ - كتب واسكو يقول (( في سياسة العنف، يوجه الناس اهتمامهم الى ناحيتين : نحو التغييرات التي يجب أن تحقق ، ونحو الاقوياء الذين يقفون في طريق التغيير - أي العدو . أما في سياسة الفوضى فان الناس يركزون اهتمامهم على التغييرات التي يجب أن تحقق)). واسكو ، المصدر السابق ص ٢٧٨ . لقد قرنت حركة المقاومة الفلسط"
+  },
+  "target": {
+   "authors": "[[\"شرابي\", \"هشام\"]]",
+   "title": null,
+   "source": "المقاومة الفلسطينية في وجه اميركا واسرائيل",
+   "year": "١٩٧٠",
+   "note": "fn-p14-4",
+   "printed": "٤٠ - هشام شرابي ، المقاومة الفلسطينية في وجه اميركا واسرائيل (دار النهار للنشر ١٩٧٠) ص ٢١٥ . Hisham Sharabi, Palestine and Israel: The Lethal Dilemma (New York: Pegasus, 1969), p. 198. يوضح الدكتور شرابي الامر باحكام بارع جدا فيقول: (( فالمقاومة الفل"
+  },
+  "verdict": "wrong: «واسكو، المصدر السابق» (Arabic spelling of Waskow) matched Sharabi by title words of a long note"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0344-023-003,004-015|fn-p11-1",
+  "target_kind": "work",
+  "target_id": "0344-023-003,004-015|note:fn-p3-1|0",
+  "method": "backref-title",
+  "score": 0.8,
+  "cited": {
+   "note": "(٢٦) يشكل الملك الثقافي في هذا السياق أحد الوسائل لتحديد المعالم التاريخية للوعي الوطني وانعاشه. وإذا استمرت الدول المسلوبة ممتلكاتها في عدم الحرص عليها وزيادة الهوة الثقافية اتساعا بمجرد عدم الاكتراث بالمشكلات الخاصة بالعالم الثالث، فسوف تكون هذه الدول سببا في احداث مواجهة شاملة لقيمها. يراجع : Hon"
+  },
+  "target": {
+   "authors": null,
+   "title": null,
+   "source": "L'affirmation de l'dentité culturelle et la formation de la conscience nationale dans l'Afrique contemporaire",
+   "year": "1981",
+   "note": "fn-p3-1",
+   "printed": "(٥) يراجع : L'affirmation de l'dentité culturelle et la formation de la conscience nationale dans l'Afrique contemporaire. UNESCO PARIS 1981, p. 34. يؤكد المؤلف أن باحثين قاما بتحليل لمائة وستين تعريفا للثقافة صنفت في ست مجموعات دون العثور على واحد م"
+  },
+  "verdict": "right (AGUESSY, the same title misprinted)"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "2319-000-022,023-022|fn-p24-13",
+  "target_kind": "work",
+  "target_id": "2319-000-022,023-022|note:fn-p22-3|0",
+  "method": "backref-title",
+  "score": 0.8,
+  "cited": {
+   "note": "45 WOODS, D.E., COLLANTES DE TERÁN, F. et FERNÁNDEZ-CHICARRO, C., 1967, Carteia, Excavaciones Arqueológicas en España 58, Madrid ; PRESEDO, F.J., MUÑIZ, J., SANTERO, J.M. et CHAVES, F., 1982, Carteia I, Excavaciones Arqueológicas en España 120, Madrid; ROLDÁN et al., 2006, op. cit."
+  },
+  "target": {
+   "authors": "[[\"ARTEAGA\", \"C.\"], [\"GONZÁLEZ\", \"J.A.\"]]",
+   "title": "Las condiciones naturales de El Campo de Gibraltar: la excepcionalidad de un territorio",
+   "source": "Carteia II",
+   "year": "2003",
+   "note": "fn-p22-3",
+   "printed": "10 ARTEAGA, C. et GONZÁLEZ, J.A., 2003, « Las condiciones naturales de El Campo de Gibraltar: la excepcionalidad de un territorio », L. Roldán, M. Bendala, J. Blánquez, S. Martínez et D. Bernal (éd.), Carteia II, Universidad Autónoma de Madrid, p. 59"
+  },
+  "verdict": "wrong: «ROLDÁN et al., 2006, op. cit.» matched ARTEAGA by the word Carteia in a long note"
+ },
+ {
+  "from_kind": "backref",
+  "from_id": "0368-000-003-003|fn-p15-7",
+  "target_kind": "work",
+  "target_id": "0368-000-003-003|note:fn-p15-6|0",
+  "method": "backref-title",
+  "score": 0.8,
+  "cited": {
+   "note": "٥٩ - المصدر ذاته ، ص ٨ . هذا الموقف يشكل جوهر ايديولوجية الجبهة الشعبية الماركسية - اللينينية ."
+  },
+  "target": {
+   "authors": null,
+   "title": null,
+   "source": "الجبهة الشعبية والعمليات الخارجية",
+   "year": null,
+   "note": "fn-p15-6",
+   "printed": "٥٨ - الجبهة الشعبية والعمليات الخارجية . كتاب (( الهدف))، لا تاريخ ، ص ٧ ."
+  },
+  "verdict": "right"
+ }
+]
