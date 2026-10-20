@@ -313,3 +313,61 @@ def test_running_text_out_of_a_header_block():
     assert bl[1]["type"] == "list_item" and bl[1]["lines"] == ["4:3"] and bl[1]["list"] == "ol"
     assert len(log["header_text"]) == 1
     assert ans["pages"][1]["blocks"][0]["lines"] == ["5:1"]            # the running head stays
+
+
+# ------------------------------------------------------------------------------------------------ 2026-10-20 (fixes from the 300)
+
+def test_table_parts_two_columns():
+    rows = [[534, 842, 853, 861], [567, 869, 850, 885], [564, 889, 849, 902],           # foot of the right column
+            [164, 78, 432, 91], [270, 99, 431, 111], [129, 137, 433, 154]]              # head of the left one
+    assert RU.table_parts(rows) == [[0, 1, 2], [3, 4, 5]]
+    assert RU.table_parts(rows[:3]) == [[0, 1, 2]]
+
+
+def test_rubric():
+    assert RU.is_rubric("II. - JURISPRUDENCE") and RU.is_rubric("REVUE DES LIVRES") and RU.is_rubric("عرض كتاب")
+    assert not RU.is_rubric("LA JUSTICE ADMINISTRATIVE A MADAGASCAR")
+    lines = {"1:1": L("REVUE DES LIVRES", [300, 50, 700, 80]), "1:2": L("Un livre sur la démographie", [100, 100, 900, 120]),
+             "1:3": L("Cet ouvrage fait le point", [100, 130, 900, 150])}
+    ans = {"metadata": {"title": "REVUE DES LIVRES"},
+           "pages": [{"page": 1, "blocks": [{"type": "title", "lines": ["1:1"]}, {"type": "heading", "level": 2,
+                                                                                  "lines": ["1:2"]},
+                                            {"type": "paragraph", "lines": ["1:3"]}]}]}
+    out, log = RU.normalize(ans, lines)
+    b = out["pages"][0]["blocks"]
+    assert [x["type"] for x in b] == ["heading", "title", "paragraph"] and out["metadata"]["title"] == "Un livre sur la démographie"
+    assert log["rubric_title"][0]["action"] == "rubric -> heading"
+
+
+def test_page_numbers_lone_misreading():
+    lines = {f"{p}:1": L(t, [480, 960, 520, 975], p) for p, t in zip(range(1, 5), ["٣٤", "٣٥", "٣٩", "٣٧"])}
+    ans = {"pages": [{"page": p, "blocks": [{"type": "footer", "lines": [f"{p}:1"]}]} for p in range(1, 5)]}
+    out, log = RU.normalize(ans, lines)
+    assert log["page_numbers"] == [dict(line="3:1", page=3, printed_read="٣٩", now="٣٦", pages_agreeing=3)]
+    jump = {f"{p}:1": L(t, [480, 960, 520, 975], p) for p, t in zip(range(1, 6), ["34", "35", "36", "56", "57"])}
+    ans = {"pages": [{"page": p, "blocks": [{"type": "footer", "lines": [f"{p}:1"]}]} for p in range(1, 6)]}
+    assert RU.normalize(ans, jump)[1]["page_numbers"] == []                  # a jump in the issue: kept
+
+
+def test_math_parts_empty_latex():
+    lines = {"5:15": L("بحيث أن ||HT=maxx يوجد", [100, 100, 900, 120]), "5:16": L("-tostST", [400, 125, 500, 140])}
+    ans = {"pages": [{"page": 5, "blocks": [{"type": "paragraph", "lines": ["5:15", "5:16"]}]}],
+           "math": [{"line": "5:15", "from": "||HT=maxx", "latex": "\\mu_T"}, {"line": "5:16", "from": "-tostST", "latex": ""}]}
+    out, log = RU.normalize(ans, lines)
+    assert [f["from"] for f in out["fixes"] if f["to"] == ""] == ["-tostST"] and len(out["math"]) == 1
+
+
+def test_advert_whole():
+    lines = {f"2:{k}": L("كلمة من الإعلان", [60, 410 + 40 * k, 490, 430 + 40 * k], 2) for k in range(1, 4)}
+    ans = {"pages": [{"page": 2, "blocks": [{"type": "other_article", "lines": list(lines)},
+                                            {"type": "figure", "box": [56, 455, 496, 520], "lines": []},
+                                            {"type": "figure", "box": [268, 500, 494, 545], "lines": []}]}]}
+    out, log = RU.normalize(ans, lines)
+    b = out["pages"][0]["blocks"]
+    assert len(b) == 1 and b[0]["type"] == "figure" and b[0]["level"] == "other" and b[0]["lines"] == list(lines)
+
+
+def test_latin_join():
+    assert RU.latin_join("to establish a classificat-", "ion scheme for") == "join"
+    assert RU.latin_join("the Islamic perspective -", "and this") is None              # a dash, not a cut word
+    assert RU.latin_join("القسم-", "الثاني") is None

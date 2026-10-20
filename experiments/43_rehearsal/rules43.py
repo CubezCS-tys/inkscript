@@ -984,6 +984,49 @@ def page_numbers(ans, lines, log):
         log["page_numbers"].append(dict(line=x, page=p, printed_read=t, now=to, pages_agreeing=n))
 
 
+# ------------------------------------------------------------------------------------------------ a rubric as the title
+# (2026-10-20, coordinator / experiment 46: 0344-002-002-002 «II. - JURISPRUDENCE», 0814-007-020-008 «REVUE DES
+# LIVRES»: the journal's section label became the article's title; the catalogue has the heading that follows)
+RUBRICS = re.compile(r"^(jurisprudence|revue des livres|comptes? rendus?|bibliographie|chroniques?|documents?|"
+                     r"notes? de lecture|notes?|l[ée]gislation|doctrine|[ée]tudes|articles|informations|"
+                     r"book reviews?|reviews?|documents? et informations|varia|"
+                     r"عرض كتاب|عرض الكتب|مراجعة كتاب|مراجعات|قراءات|قراءة في كتاب|ملف العدد|دراسات|بحوث|وثائق|"
+                     r"تقارير|أخبار|اصدارات جديدة|إصدارات جديدة|تعريف بكتاب|ندوات|متابعات)$", re.I)
+NUMBERING = re.compile(r"^\s*([IVXLC]+|[0-9٠-٩]+|[A-Z])\s*[\.\)\-–—:]+\s*[\-–—]?\s*")
+
+
+def is_rubric(text: str) -> bool:
+    t = " ".join(NUMBERING.sub("", text or "").replace("-", " ").split()).strip(" .:-–—")
+    return bool(t) and bool(RUBRICS.match(t))
+
+
+def rubric_title(ans, lines, log):
+    """A title block that is a journal's section label (a rubric: «JURISPRUDENCE», «REVUE DES LIVRES», «عرض كتاب»,
+    numbered or not) becomes a heading (level 1) and the first heading after it on the first three pages becomes
+    the title (Gemini's metadata title too, when it was the rubric). Without such a heading nothing changes."""
+    pages = [pg for pg in ans.get("pages") or [] if isinstance(pg, dict)]
+    if not pages:
+        return
+    p0 = min(int(pg.get("page") or 0) for pg in pages)
+    seq = [(int(pg.get("page") or 0), b) for pg in sorted(pages, key=lambda g: int(g.get("page") or 0))
+           for b in pg.get("blocks") or [] if isinstance(b, dict)]
+    txt = lambda b: " ".join(lines[x]["text"] for x in (base_of(i, lines) for i in b.get("lines") or []) if x)  # noqa
+    for k, (p, b) in enumerate(seq):
+        if b.get("type") != "title" or p > p0 + 1 or not is_rubric(txt(b)):
+            continue
+        nxt = next((c for q, c in seq[k + 1:] if q <= p0 + 2 and c.get("type") == "heading"), None)
+        if nxt is None:
+            log["rubric_title"].append(dict(page=p, rubric=txt(b), action="kept (no heading after it)"))
+            continue
+        b["type"], b["level"] = "heading", 1
+        nxt["type"] = "title"
+        nxt.pop("level", None)
+        md = ans.get("metadata") if isinstance(ans.get("metadata"), dict) else None
+        if md is not None and is_rubric(str(md.get("title") or "")):
+            md["title"] = txt(nxt)
+        log["rubric_title"].append(dict(page=p, rubric=txt(b), title=txt(nxt)[:100], action="rubric -> heading"))
+
+
 def block_box(b, lines):
     return union([lines[x]["b"] for x in (base_of(i, lines) for i in block_ids(b)) if x])
 
@@ -1495,7 +1538,7 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[], rubric_title=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1509,6 +1552,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
                     log["other_article_lines"] += len(b.get("lines") or [])
     endnotes(ans, log)
     v3_types(ans, log)
+    rubric_title(ans, lines, log)
     bad_splits(ans, lines, log)
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)

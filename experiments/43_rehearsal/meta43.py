@@ -304,7 +304,65 @@ class Meta:
             etree.SubElement(c, "meta-value").text = (f"{e['field']}: «{e['printed']}» -> «{e['corrected']}» "
                                                       f"(source: {e['source']}; reason: {e['reason']})")
 
+    # ---------------------------------------------------------------- page range
+    def page_range(self):
+        """fpage / lpage consistent with the scan (2026-10-20, coordinator: 142 articles of the 300 where the
+        catalogue's range fits the scan's page count and the masters' does not, e.g. 1058-005-993-021: Gemini gave
+        «450-459», the range of its first chunk only; the folios read 450 ... 469 on the 20 pages). The printed
+        folios decide (lone numbers in the running heads / feet: the offset of the first pages gives fpage, of the
+        last pages lpage; a jump to a later part of the issue is kept); without two folios the catalogue's range
+        when it spans the scan's pages, else fpage + pages - 1. Logged like any D33 change."""
+        import statistics
+        n = len(self.M.pages)
+        p0, p1 = min(self.M.pages), max(self.M.pages)
+        fol = {}
+        for r in self.M.recs:
+            if r.get("type") not in ("header", "footer") or r.get("_other"):
+                continue
+            for lid in r.get("ids") or []:
+                L = self.M.S.lines.get(lid)
+                m = PAGE_NO.match(L["text"]) if L else None
+                if m:
+                    fol.setdefault(L["page"], []).append(int(m.group(1).translate(DIG)))
+        fol = {p: v[0] for p, v in fol.items() if len(v) == 1}
+        fp_el, lp_el = self.am.find("fpage"), self.am.find("lpage")
+        old = (fp_el.text if fp_el is not None else None, lp_el.text if lp_el is not None else None)
+        new, src = None, None
+        ps = sorted(fol)
+        if len(ps) >= 2:
+            head = [fol[p] - p for p in ps[:3]]
+            tail = [fol[p] - p for p in ps[-3:]]
+            o0, o1 = statistics.mode(head), statistics.mode(tail)
+            if head.count(o0) >= 2 or len(ps) == 2 and head[0] == head[-1]:
+                new = (p0 + o0, p1 + (o1 if tail.count(o1) >= 2 else o0))
+                src = "printed folios"
+        if new is None:
+            cat = catalogue_pages(self.M.stem)
+            if cat and cat[1] - cat[0] + 1 == n:
+                new, src = cat, "catalogue (its range spans the scan's pages)"
+            elif old[0] and old[0].isdigit():
+                f = int(old[0])
+                if not (old[1] and old[1].isdigit() and int(old[1]) - f + 1 == n):
+                    new, src = (f, f + n - 1), "the scan's page count"
+        if new is None or new[0] <= 0 or new[1] < new[0]:
+            return
+        for tag, el, v in (("fpage", fp_el, new[0]), ("lpage", lp_el, new[1])):
+            if el is not None and el.text == str(v):
+                continue
+            if el is None:
+                el = etree.Element(tag)
+                after = [x for x in ("fpage", "issue", "volume", "pub-date") if self.am.find(x) is not None]
+                if after:
+                    self.am.find(after[0]).addnext(el)
+                else:
+                    self.am.find("counts").addprevious(el)
+            printed = el.text
+            el.text = str(v)
+            self.log(tag, printed, str(v), src, "page range consistent with the scan's "
+                     f"{n} pages", pages_in_scan=n, folios=len(ps))
+
     def run(self):
+        self.page_range()
         self.title()
         self.authors()
         self.flags_in_place()
@@ -346,6 +404,26 @@ def unwrap(sec):
         par.insert(i, c)
         i += 1
     par.remove(sec)
+
+
+PAGE_NO = re.compile(r"^[\s\-–—_.]*([0-9٠-٩]{1,4})[\s\-–—_.]*$")
+DIG = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
+MARC = Path.home() / "data" / "marc" / "marc.db"
+
+
+def catalogue_pages(stem: str):
+    """(page_first, page_last) of the stem's catalogue record (marc.db, experiment 45), or None."""
+    if not MARC.exists():
+        return None
+    import sqlite3
+    try:
+        con = sqlite3.connect(f"file:{MARC}?mode=ro", uri=True)
+        row = con.execute("SELECT r.page_first, r.page_last FROM pdf_ids p JOIN records r ON r.rec = p.rec "
+                          "WHERE p.stem = ? AND r.page_first IS NOT NULL ORDER BY p.seq LIMIT 1", (stem,)).fetchone()
+        con.close()
+    except Exception:                                        # noqa: BLE001
+        return None
+    return (int(row[0]), int(row[1])) if row and row[1] is not None else None
 
 
 def apply(Mo, A):

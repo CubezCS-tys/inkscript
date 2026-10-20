@@ -40,6 +40,8 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   table_spans_columns  a table printed in two columns, drawn as one part per column                   medium
   letters_lost_vowelled  words in vocalised lines that are not words (lost letters?)                low
   inline_math_junk  Latin / formula tokens read unsure inside Arabic sentences, not taken as maths  medium
+  title_rubric      a section label (JURISPRUDENCE, REVUE DES LIVRES, عرض كتاب) was the title block: the
+                    heading after it made the title (low) or none found, kept (medium)
   guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
@@ -547,6 +549,10 @@ def check_fixes2(B):
             out.append(flag(B, "inline_math_junk", "medium", p, [e["line"] for e in es],
                             f"{len(ws)} Latin / formula token(s) Azure read unsure inside Arabic sentences, not "
                             f"taken as maths (a formula left as junk?): {' '.join(ws[:6])}"))
+        for e in log.get("rubric_title") or []:
+            out.append(flag(B, "title_rubric", "medium" if e["action"].startswith("kept") else "low", e["page"], [],
+                            f"the title block was a section label «{e['rubric'][:40]}»: {e['action']}"
+                            + (f"; title now «{e['title'][:50]}»" if e.get("title") else "")))
         for e in log.get("guillemets") or []:
             if e["decision"] == "unsure":
                 out.append(flag(B, "guillemets_unsure", "low", e["pages"][0], [],
