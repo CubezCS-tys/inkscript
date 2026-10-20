@@ -35,6 +35,8 @@ E41 = HERE.parent / "41_azure_structure"
 sys.path.insert(0, str(E41))
 sys.path.insert(0, str(HERE))
 import structure as ST  # noqa: E402
+import rechunk43  # noqa: E402
+rechunk43.install(ST)                 # chunks re-cut after a MAX_TOKENS failure (out/rechunk43.json)
 import reader as R  # noqa: E402
 import masters as M  # noqa: E402
 from lxml import etree  # noqa: E402

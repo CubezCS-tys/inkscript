@@ -39,6 +39,7 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   show_through      lines of pale ink (the reverse side showing through, a watermark) kept as noise     low
   table_spans_columns  a table printed in two columns, drawn as one part per column                   medium
   letters_lost_vowelled  words in vocalised lines that are not words (lost letters?)                low
+  inline_math_junk  Latin / formula tokens read unsure inside Arabic sentences, not taken as maths  medium
   guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
@@ -538,6 +539,14 @@ def check_fixes2(B):
             out.append(flag(B, "letters_lost_vowelled", "low", p, [e["line"] for e in es],
                             f"{len(ws)} word(s) in vocalised lines that are not words (letters Azure lost? a close-up "
                             f"re-read would tell): {' '.join(ws[:6])}"))
+        by = {}
+        for e in log.get("inline_math_junk") or []:
+            by.setdefault(e["page"], []).append(e)
+        for p, es in sorted(by.items()):
+            ws = [w for e in es for w in e["words"]]
+            out.append(flag(B, "inline_math_junk", "medium", p, [e["line"] for e in es],
+                            f"{len(ws)} Latin / formula token(s) Azure read unsure inside Arabic sentences, not "
+                            f"taken as maths (a formula left as junk?): {' '.join(ws[:6])}"))
         for e in log.get("guillemets") or []:
             if e["decision"] == "unsure":
                 out.append(flag(B, "guillemets_unsure", "low", e["pages"][0], [],

@@ -340,8 +340,36 @@ leave out fields that are empty instead of writing null.
 '''),
 ]
 PROMPT_V33 = _apply(PROMPT_V32, V33_CHANGES)
+
+# ------------------------------------------------------------------------------------------------ prompt v3.4 (candidate)
+# 2026-10-20, after the 300 (README "Fixes from the 300"): CANDIDATE ONLY, not live (run43.py --prompt v3.4 would
+# select it; nothing has been sent with it). (a) inline formulas inside an Arabic sentence as LaTeX (0168 p5:
+# «μT = max ||x||» left as Azure's «tostST- max»); (b) letters Azure drops in fully vowelled lines (1875 p17
+# «الزَّاد» -> «الْادُ»; rules43.vowelled_words flags them, it cannot restore them); (c) compact JSON (1764 pp9-15: 531
+# one-line table cells pretty-printed ran into the 27,000-token output limit twice).
+V34_CHANGES = [
+    ("""- "math": formulas Azure turned into garbage inside a running line (displayed formulas are equation blocks).
+""",
+     """- "math": formulas Azure turned into garbage inside a running line (displayed formulas are equation blocks).
+  v3.4: this includes a short formula inside an ARABIC sentence (e.g. «μT = max ||x|| بحيث أن»): Azure reads it as
+  Latin junk («tostST- max») and may move it within the line; "from" = that junk exactly as in Azure's text, "latex" =
+  the formula as printed. Never leave such junk in the text.
+"""),
+    ("""  dots or hamzas the print lacks.
+""",
+     """  dots or hamzas the print lacks.
+  v3.4: in FULLY VOWELLED lines (verse, Quran, hadith) Azure often drops a letter together with its marks («الزَّاد»
+  read «الْادُ», «الْكَرِيمِ» read «الْكَرِ»): check every word of such lines against the ink, letter by letter, and
+  restore what is printed with a fix.
+"""),
+    ("""- Return only the JSON object.""",
+     """- Return only the JSON object, compact (v3.4: no indentation or line breaks inside it; a long table of short cells
+  must still fit)."""),
+]
+PROMPT_V34 = _apply(PROMPT_V33, V34_CHANGES)
 PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3),
-           "v3.2": (PROMPT_V32, META_FULL_V32), "v3.3": (PROMPT_V33, META_FULL_V32)}
+           "v3.2": (PROMPT_V32, META_FULL_V32), "v3.3": (PROMPT_V33, META_FULL_V32),
+           "v3.4": (PROMPT_V34, META_FULL_V32)}
 # the names the earlier README section used for the (then not live) draft of (a)-(c)
 PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
 

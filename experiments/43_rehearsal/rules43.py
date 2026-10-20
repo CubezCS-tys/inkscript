@@ -834,6 +834,106 @@ def latin_join(prev: str, nxt: str) -> str | None:
     return "join"
 
 
+# ------------------------------------------------------------------------------------------------ inline maths junk
+# (2026-10-20, 0168 p5 in the 300: «μT = max ||x|| بحيث أن» became «… tostST- max …»: Azure's reading of a formula
+# inside an Arabic sentence left in the text; math_failed fired elsewhere, not there. Flag only; prompt v3.4 asks
+# for such formulas as LaTeX.)
+MATHISH = re.compile(r"[=<>≤≥|∑∫√±×÷∞≠≈^_{}]|[A-Za-z]")
+JUNK_CONF = 0.6
+
+
+def math_parts(ans, lines, log):
+    """A "math" entry with an empty LaTeX whose "from" holds no Arabic letter, on a line that has (or follows a line
+    that has) a math entry with LaTeX: the model's way of saying "this junk is part of that formula" (0168 p5:
+    «-tostST», the subscript of μ_T = max_{-t_0 ≤ t ≤ T} on the line above). Assembly rejects a math entry without
+    LaTeX, so the junk stayed in the text; it becomes a fix that takes it out (the ALTO keeps Azure's reading)."""
+    ms = [m for m in ans.get("math") or [] if isinstance(m, dict) and m.get("line") and m.get("from")]
+    with_tex = {base_of(m["line"], lines) for m in ms if (m.get("latex") or "").strip()}
+    keep = []
+    for m in ans.get("math") or []:
+        x = base_of(m.get("line"), lines) if isinstance(m, dict) and m.get("line") else None
+        if x and m.get("from") and not (m.get("latex") or "").strip() and not AR_LET.search(m["from"]) and \
+                m["from"] in lines[x]["text"]:
+            p, k = x.split(":")
+            prev = f"{p}:{int(k) - 1}"
+            if x in with_tex or prev in with_tex:
+                ans.setdefault("fixes", []).append({"line": m["line"], "from": m["from"], "to": "",
+                                                    "why": "code: part of the formula given as LaTeX on this or the "
+                                                           "line before (math with empty LaTeX; rules43.math_parts)"})
+                log["math_parts"].append(dict(line=x, page=lines[x]["page"], text=m["from"]))
+                continue
+        keep.append(m)
+    if "math" in ans:
+        ans["math"] = keep
+
+
+def inline_math_junk(ans, lines, words, log):
+    """Latin / formula tokens Azure read with low confidence (< JUNK_CONF) in the Arabic lines of running text, not
+    taken by the answer's "math" (or a fix): a formula left as junk. Also a short Latin-only line of such tokens
+    between Arabic lines of the same block. Logged; flags43 inline_math_junk."""
+    if words is None:
+        return
+    taken = {}
+    for m in list(ans.get("math") or []) + list(ans.get("fixes") or []):
+        if isinstance(m, dict) and m.get("line") and m.get("from"):
+            taken.setdefault(base_of(m["line"], lines), []).append(m["from"])
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict) or b.get("type") not in TEXT_TYPES | {"paragraph"}:
+                continue
+            ids = [x for x in (base_of(i, lines) for i in b.get("lines") or []) if x]
+            if not ids or not is_rtl(" ".join(lines[x]["text"] for x in ids)):
+                continue
+            for x in ids:
+                t = lines[x]["text"]
+                ws = words(x) or []
+                rtl = is_rtl(t)
+                if not rtl and len(ws) > 3:
+                    continue                      # a Latin line of its own (a quotation, a reference)
+                bad = [w["text"] for w in ws if MATHISH.search(w["text"]) and not AR_LET.search(w["text"])
+                       and (w.get("conf") or 1) < JUNK_CONF
+                       and not any(w["text"] in f or f in w["text"] for f in taken.get(x, []))]
+                if bad:
+                    log["inline_math_junk"].append(dict(line=x, page=lines[x]["page"], words=bad, text=t[:80]))
+
+
+# ------------------------------------------------------------------------------------------------ an advert in pieces
+# (2026-10-20, 1010-006 p2 in the 300: an advertisement for «الجلادون», rightly "another article", drawn as picture
+# pieces with its own words as small faint text between them)
+ADVERT_PICTURE = 0.4        # pictures covering this share of an other_article block's box: one picture
+
+
+def advert_whole(ans, lines, log):
+    """An other_article block that is mostly pictures (the pictures inside its box cover >= ADVERT_PICTURE of it)
+    becomes ONE figure of another article (level "other"): its box the union of the block and those pictures, its
+    lines the figure's words (ALTO pictureText; not in this article's JATS); the pieces go."""
+    for pg in ans.get("pages") or []:
+        blocks = pg.get("blocks") if isinstance(pg, dict) else None
+        if not isinstance(blocks, list):
+            continue
+        for b in list(blocks):
+            if not isinstance(b, dict) or b.get("type") != "other_article" or b not in blocks:
+                continue
+            bb = block_box(b, lines)
+            if not bb:
+                continue
+            area = max(1.0, (bb[2] - bb[0]) * (bb[3] - bb[1]))
+            figs = [f for f in blocks if isinstance(f, dict) and f.get("type") == "figure" and fig_box(f)
+                    and inside(fig_box(f), grow(bb, 10, 10)) >= 0.8]
+            cover = sum((fig_box(f)[2] - fig_box(f)[0]) * (fig_box(f)[3] - fig_box(f)[1]) for f in figs) / area
+            if not figs or cover < ADVERT_PICTURE:
+                continue
+            box = union([bb] + [fig_box(f) for f in figs])
+            ids = list(b.get("lines") or []) + [i for f in figs for i in f.get("lines") or []]
+            nf = {"type": "figure", "box": [round(float(v), 1) for v in box], "lines": ids, "level": "other",
+                  "advert": True}
+            k = blocks.index(b)
+            blocks[k] = nf
+            blocks[:] = [x for x in blocks if not any(x is f for f in figs)]
+            log["advert_whole"].append(dict(page=pg.get("page"), box=nf["box"], pieces=len(figs), lines=len(ids),
+                                            cover=round(cover, 2)))
+
+
 def block_box(b, lines):
     return union([lines[x]["b"] for x in (base_of(i, lines) for i in block_ids(b)) if x])
 
@@ -1345,7 +1445,7 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1370,11 +1470,14 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     text_in_figure(ans, lines, log)
     figure_trim(ans, lines, log)
     pictures(ans, lines, words, log)
+    advert_whole(ans, lines, log)
     text_in_figure(ans, lines, log)            # again: words printed inside a picture the ink rule found
     empty_rows(ans, log)
     table_columns(ans, lines, log)
     guillemets(ans, lines, words, log)
     vowelled_words(ans, lines, log)
+    math_parts(ans, lines, log)
+    inline_math_junk(ans, lines, words, log)
     fixes(ans, log)
     return ans, log
 

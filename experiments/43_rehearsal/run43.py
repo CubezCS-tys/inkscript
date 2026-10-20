@@ -46,6 +46,8 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import prompt43 as P  # noqa: E402
 ST = P.ST
+import rechunk43  # noqa: E402
+rechunk43.install(ST)                 # a MAX_TOKENS chunk asked again in smaller chunks (rechunk43.py)
 import common as C  # noqa: E402  (experiment 41's client: paths re-pointed below, before any call)
 
 OUT = HERE / "out"
@@ -209,7 +211,7 @@ def run_standard(arts, run, cap, threads):
             prompt, imgs, nimg = P.make_prompt(a, ci, x, y, state_for(a, ci, run))
             info = {}
             ans, usd = C.gemini(prompt, images=imgs, tag=f"{run}_{a['stem']}_c{x:03d}-{y:03d}", model=MODEL,
-                                max_out=max_out(y - x + 1), thinking=THINKING, json_out=True,
+                                max_out=rechunk43.max_out_for(a, x, y) or max_out(y - x + 1), thinking=THINKING, json_out=True,
                                 est_in=ST.est_tokens(prompt, nimg), info=info)
             rec = dict(stem=a["stem"], first=x, last=y, pages=y - x + 1, usd=usd, mode="standard",
                        prompt=P.PROMPT_VERSION, **{k: info.get(k) for k in ("finish", "tin", "tout", "think", "secs",
@@ -243,7 +245,7 @@ def request_line(a, ci, x, y, run, upload, client) -> tuple[str, dict, int, int]
         parts.append(img)
     parts.append({"text": prompt})
     key = f"{run}_{a['stem']}_c{x:03d}-{y:03d}"
-    mo = min(max_out(y - x + 1), BATCH_MAX_OUT)   # Batch refuses more (no decoding continuation); 41's largest answer: 13.9k
+    mo = min(rechunk43.max_out_for(a, x, y) or max_out(y - x + 1), BATCH_MAX_OUT)   # Batch refuses more (no decoding continuation); 41's largest answer: 13.9k
     req = {"contents": [{"role": "user", "parts": parts}],
            "generationConfig": {"maxOutputTokens": mo, "responseMimeType": "application/json",
                                 "thinkingConfig": {"thinkingLevel": THINKING.upper()}}}
