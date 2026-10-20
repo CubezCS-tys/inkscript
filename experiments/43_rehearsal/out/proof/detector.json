@@ -1,0 +1,639 @@
+[
+ {
+  "stem": "0135-001-003-005",
+  "page": 11,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0135-001-003-005",
+  "page": 13,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "inline_math_junk/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0138-011-013-012",
+  "page": 15,
+  "verdict": "minor",
+  "kinds": [
+   "missing_text:pageno"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0138-011-013-012",
+  "page": 23,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [
+   "note_no_call/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "human",
+    "note_link"
+   ]
+  ]
+ },
+ {
+  "stem": "0201-000-044-001",
+  "page": 3,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0201-000-044-001",
+  "page": 11,
+  "verdict": "serious",
+  "kinds": [
+   "table_picture:missing_cells"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0266-001-001,002-002",
+  "page": 3,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0266-001-001,002-002",
+  "page": 7,
+  "verdict": "minor",
+  "kinds": [
+   "format_loss:bidi"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0295-014-001-012",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "note_no_call/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0295-014-001-012",
+  "page": 3,
+  "verdict": "serious",
+  "kinds": [
+   "table_picture:missing_cells"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0345-045-004-015",
+  "page": 7,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0345-045-004-015",
+  "page": 17,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0368-000-045-002",
+  "page": 4,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0368-000-045-002",
+  "page": 8,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0416-009-000-008",
+  "page": 6,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0416-009-000-008",
+  "page": 8,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0511-000-051,052-036",
+  "page": 6,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:3"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0511-000-051,052-036",
+  "page": 10,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0527-055-002-016",
+  "page": 2,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0527-055-002-016",
+  "page": 5,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0529-004-007-007",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0529-004-007-007",
+  "page": 15,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0631-013-004-008",
+  "page": 1,
+  "verdict": "minor",
+  "kinds": [
+   "metadata:honorific"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0631-013-004-008",
+  "page": 3,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0633-026-004,006-030",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "cost_high/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0655-041-008-009",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0655-041-008-009",
+  "page": 2,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "letters_lost_vowelled/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0656-000-916-021",
+  "page": 2,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:2"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0656-000-916-021",
+  "page": 4,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:2"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0664-006-007-014",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0664-006-007-014",
+  "page": 2,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0700-000-093-002",
+  "page": 9,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0700-000-093-002",
+  "page": 15,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0732-001-005,006-002",
+  "page": 13,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [
+   "other_inner/medium"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0732-001-005,006-002",
+  "page": 17,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0733-001-004-016",
+  "page": 3,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:2"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0733-001-004-016",
+  "page": 10,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "overlap/medium"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0753-018-999-011",
+  "page": 6,
+  "verdict": "minor",
+  "kinds": [
+   "format_loss:interlinear"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0753-018-999-011",
+  "page": 7,
+  "verdict": "minor",
+  "kinds": [
+   "format_loss:interlinear"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0764-000-028-013",
+  "page": 1,
+  "verdict": "minor",
+  "kinds": [
+   "metadata:hijri_year"
+  ],
+  "flags": [
+   "cost_high/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0974-003-017-007",
+  "page": 4,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0974-003-017-007",
+  "page": 7,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "fixes_orth/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "1016-006-061-004",
+  "page": 3,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1016-006-061-004",
+  "page": 5,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:1"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1173-000-027-061",
+  "page": 3,
+  "verdict": "minor",
+  "kinds": [
+   "notes_links",
+   "word_errors:1"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1173-000-027-061",
+  "page": 8,
+  "verdict": "minor",
+  "kinds": [
+   "notes_links"
+  ],
+  "flags": [
+   "fixes_many/medium",
+   "note_no_call/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "1187-000-008-004",
+  "page": 7,
+  "verdict": "minor",
+  "kinds": [
+   "verse"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1187-000-008-004",
+  "page": 8,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1403-000-052-023",
+  "page": 8,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1403-000-052-023",
+  "page": 14,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1539-000-007-005",
+  "page": 1,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1539-000-007-005",
+  "page": 2,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "letters_lost_vowelled/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "auto",
+    "other_article"
+   ]
+  ]
+ },
+ {
+  "stem": "1697-000-017-004",
+  "page": 1,
+  "verdict": "minor",
+  "kinds": [
+   "wrong_kind"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "1697-000-017-004",
+  "page": 13,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "2009-000-010-015",
+  "page": 4,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "2009-000-010-015",
+  "page": 9,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "2483-000-003-017",
+  "page": 3,
+  "verdict": "right",
+  "kinds": [],
+  "flags": [
+   "fixes_many/medium"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "2483-000-003-017",
+  "page": 24,
+  "verdict": "minor",
+  "kinds": [
+   "word_errors:2"
+  ],
+  "flags": [],
+  "judge": []
+ },
+ {
+  "stem": "0549-014-157-007",
+  "page": 2,
+  "verdict": "minor",
+  "kinds": [
+   "table_picture:no_alt"
+  ],
+  "flags": [
+   "noise_left/low",
+   "noise_left/low"
+  ],
+  "judge": [
+   [
+    "flagged",
+    "none",
+    null
+   ]
+  ]
+ },
+ {
+  "stem": "0913-000-001-011",
+  "page": 2,
+  "verdict": "minor",
+  "kinds": [
+   "wrong_order:fragment"
+  ],
+  "flags": [],
+  "judge": []
+ }
+]

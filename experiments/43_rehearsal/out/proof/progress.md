@@ -1,0 +1,17 @@
+# proof pack progress (independent evaluator)
+- 09:31 start: read plan + README exam section
+- 09:33 drew 60 pages (seed 20261020, out/proof/draw.json); rendered side-by-sides out/proof/side/
+- 09:35 pages judged: 12/60 (pages.jsonl). Rule: inline styling not in masters at all (0 <italic>/<sub> in 300 JATS) -> one systemic gap, not per page
+- 09:37 finding: 0529-004-007-007 renders (out/pages = Gemini's image) lack Arabic glyphs; Azure read the PDF text. 26/60 judged
+- 09:38 38/60 judged. note: 0732 bottom strip = separate stream; judge unmark_other_article on p3/p6 merged it into main flow (check in step 5)
+- 09:42 step 1 done: 60/60 pages judged
+- 09:44 step 2 done: 10 pages (seed 20261021), 1532 words, 0 wrong words, 13 orthographic (hamza/diacritic) differences (words.jsonl)
+- 09:45 step 3a done: 80 citations (seed 20261022): 57/80 fully right; fields 313 right / 14 loose / 14 missing / 0 wrong; 1 invented
+- 09:46 step 3b done: 20 back references (seed 20261023): 15 right (14 links + 1 correctly unresolved), 1 wrong link, 4 missed; 8 of 20 from one article (0486)
+- 09:48 step 4 done: 30 articles (seed 20261024) - meta_score.json
+- 09:51 step 5: rendered before/after for 26 applied patches (out/proof/auto)
+- 09:54 step 5 done: judge auto 14 = 9 right/2 partial/3 doubtful/0 wrong; retries 12 = 7 better/5 no visible change/0 worse; my 2 serious pages: 0 flagged, 0 judged
+- 09:55 step 6 done: gold43 check 5/5 same (code regression check on first-sample gold, not an exam accuracy measure)
+- 09:55 step 7 done: consistency.json
+- 09:56 step 8: cost verified from spend log: run 27.068 (501 req, 2 MAX_TOKENS), judge 4.337 (599), retries 0.537 (15) = 31.943
+- 09:59 built proof.html + proof.md; served http://127.0.0.1:8899/proof/proof.html (200); committing text files (images stay local, out/ is gitignored)

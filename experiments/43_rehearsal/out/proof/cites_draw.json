@@ -1,0 +1,2274 @@
+{
+ "seed": 20261022,
+ "population": 3838,
+ "sample": [
+  {
+   "i": 1,
+   "stem": "1262-002-002-007",
+   "where": "ref r3",
+   "type": "journal",
+   "printed": "Boeing, H. (1991). Epidemiological research in stomach cancer :progress over the last ten years . J. Cancer Res. Clin. Oncol. 117:133-143.",
+   "fields": [
+    [
+     "authors",
+     "Boeing H."
+    ],
+    [
+     "article-title",
+     "Epidemiological research in stomach cancer :progress over the last ten years"
+    ],
+    [
+     "source",
+     "J. Cancer Res. Clin. Oncol."
+    ],
+    [
+     "year",
+     "1991"
+    ],
+    [
+     "volume",
+     "117"
+    ],
+    [
+     "fpage",
+     "133"
+    ],
+    [
+     "lpage",
+     "143"
+    ],
+    [
+     "page-range",
+     "133-143"
+    ]
+   ]
+  },
+  {
+   "i": 2,
+   "stem": "0604-003-008-001",
+   "where": "fn fn-p12-2",
+   "type": "book",
+   "printed": "(٢) الطبقات (٥: ٣١٤، ق: ٢ جـ: ٧ ص: ٧٧).",
+   "fields": [
+    [
+     "source",
+     "الطبقات"
+    ],
+    [
+     "volume",
+     "٥"
+    ],
+    [
+     "fpage",
+     "314"
+    ],
+    [
+     "page-range",
+     "٣١٤"
+    ]
+   ]
+  },
+  {
+   "i": 3,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p2-6 (1 of 2)",
+   "type": "book",
+   "printed": "6 Augeste Mariette, Catalogue general des monuments d'Abydos découverts pendant les fouilles de cette ville (Paris: Imprimerie Nationale, 1880), 186-187, no. 677. Also some of the names were mentioned by Millard. Anne Millard, \"The Position of Women in Family and in Society in Ancient Egypt, with Special References to the Middle Kingdom,\" (PhD diss., Department of Egyptology, University College, London, 1976), 113.",
+   "fields": [
+    [
+     "authors",
+     "Mariette Augeste"
+    ],
+    [
+     "source",
+     "Catalogue general des monuments d'Abydos découverts pendant les fouilles de cette ville"
+    ],
+    [
+     "year",
+     "1880"
+    ],
+    [
+     "publisher-name",
+     "Imprimerie Nationale"
+    ],
+    [
+     "publisher-loc",
+     "Paris"
+    ],
+    [
+     "fpage",
+     "186"
+    ],
+    [
+     "lpage",
+     "187"
+    ],
+    [
+     "page-range",
+     "186-187"
+    ]
+   ]
+  },
+  {
+   "i": 4,
+   "stem": "0486-000-007-005",
+   "where": "fn fn-p11-6",
+   "type": "book",
+   "printed": "(54) Emile Faguet, Drame Ancien, drame moderne, p. 5.",
+   "fields": [
+    [
+     "authors",
+     "Faguet Emile"
+    ],
+    [
+     "source",
+     "Drame Ancien, drame moderne"
+    ],
+    [
+     "fpage",
+     "5"
+    ],
+    [
+     "page-range",
+     "5"
+    ]
+   ]
+  },
+  {
+   "i": 5,
+   "stem": "2259-006-004-071",
+   "where": "fn fn-p13-1",
+   "type": "book",
+   "printed": "1 د.ذوقات عوبيدات وآخرون، البحث العلمي-مفهومه أدواته وأساليبه، ط7 ، دار الفكر للطباعة والنشر والتوزيع، عمانن2001، ص 99.",
+   "fields": [
+    [
+     "authors",
+     "عوبيدات د.ذوقات"
+    ],
+    [
+     "source",
+     "البحث العلمي-مفهومه أدواته وأساليبه"
+    ],
+    [
+     "year",
+     "2001"
+    ],
+    [
+     "publisher-name",
+     "دار الفكر للطباعة والنشر والتوزيع"
+    ],
+    [
+     "publisher-loc",
+     "عمانن"
+    ],
+    [
+     "fpage",
+     "99"
+    ],
+    [
+     "page-range",
+     "99"
+    ]
+   ]
+  },
+  {
+   "i": 6,
+   "stem": "0345-045-004-023",
+   "where": "ref r66",
+   "type": "journal",
+   "printed": "- Wasko. M. & Faraj, S. (2005). Why Should I Share? Examining Social Capital and Knowledge Contribution in Electronic Networks of Practice. MIS Quarterly, 29 (1), pp. 35-57.",
+   "fields": [
+    [
+     "authors",
+     "Wasko M. ; Faraj S."
+    ],
+    [
+     "article-title",
+     "Why Should I Share? Examining Social Capital and Knowledge Contribution in Electronic Networks of Practice"
+    ],
+    [
+     "source",
+     "MIS Quarterly"
+    ],
+    [
+     "year",
+     "2005"
+    ],
+    [
+     "volume",
+     "29"
+    ],
+    [
+     "issue",
+     "1"
+    ],
+    [
+     "fpage",
+     "35"
+    ],
+    [
+     "lpage",
+     "57"
+    ],
+    [
+     "page-range",
+     "35-57"
+    ]
+   ]
+  },
+  {
+   "i": 7,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p8-3",
+   "type": "book",
+   "printed": "(١٧) ابن الاثير : المصدر السابق ج١٠ ص ٥٥ . ابن كثير: البداية والنهاية ج١٢ ص ١٣٠",
+   "fields": [
+    [
+     "authors",
+     "ابن كثير"
+    ],
+    [
+     "source",
+     "البداية والنهاية"
+    ],
+    [
+     "volume",
+     "١٢"
+    ],
+    [
+     "fpage",
+     "130"
+    ],
+    [
+     "page-range",
+     "١٣٠"
+    ]
+   ]
+  },
+  {
+   "i": 8,
+   "stem": "2124-001-002-006",
+   "where": "ref r13",
+   "type": "journal",
+   "printed": "LACHAAB, Karima. 1992. « L'exigence du sens : Tahar DJAOUT »>. In Le Matin, Nº 228, Du vendredi 2 juin au samedi 13 juin.",
+   "fields": [
+    [
+     "authors",
+     "LACHAAB Karima"
+    ],
+    [
+     "article-title",
+     "L'exigence du sens : Tahar DJAOUT"
+    ],
+    [
+     "source",
+     "Le Matin"
+    ],
+    [
+     "year",
+     "1992"
+    ],
+    [
+     "issue",
+     "228"
+    ]
+   ]
+  },
+  {
+   "i": 9,
+   "stem": "0416-053-004-004",
+   "where": "fn fn-p17-1",
+   "type": "book",
+   "printed": "(٢٧) الديوان : ٥٦",
+   "fields": [
+    [
+     "source",
+     "الديوان"
+    ],
+    [
+     "fpage",
+     "56"
+    ],
+    [
+     "page-range",
+     "٥٦"
+    ]
+   ]
+  },
+  {
+   "i": 10,
+   "stem": "0416-009-000-008",
+   "where": "fn fn-p1-1 (3 of 3)",
+   "type": "book",
+   "printed": "(١) لم يذكر الفهرست من كتب الجاحظ غير كتاب نظم القرآن وكتاب المسائل فى القرآن.",
+   "fields": [
+    [
+     "authors",
+     "الجاحظ"
+    ],
+    [
+     "source",
+     "كتاب المسائل فى القرآن"
+    ]
+   ]
+  },
+  {
+   "i": 11,
+   "stem": "0416-009-000-008",
+   "where": "fn fn-p9-3 (1 of 4)",
+   "type": "book",
+   "printed": "(٣) راجع كارل بروكلمان: «تاريخ الأدب العربى» ترجمة الدكتور عبد الحليم النجار، جـ ١ ص ١٧٦. وراجع كذلك اسماعيل باشا البغدادى «هدية العارفين أسماء المؤلفين وآثار المصنفين» (استانبول، ١٩٥١) المجلد الأول، العمود ٣٩٢ حيث يذكر له مؤلفاً بعنوان: «منهاج البراعة في شرح نهج البلاغة»، وراجع كذلك كتاب «الأعلام)» لخير الدين الزركلي، الطبعة الثانية، جـ ٣ ص ١٥٧.",
+   "fields": [
+    [
+     "authors",
+     "بروكلمان كارل"
+    ],
+    [
+     "source",
+     "تاريخ الأدب العربى"
+    ],
+    [
+     "volume",
+     "١"
+    ],
+    [
+     "fpage",
+     "176"
+    ],
+    [
+     "page-range",
+     "١٧٦"
+    ]
+   ]
+  },
+  {
+   "i": 12,
+   "stem": "0040-007-004-002",
+   "where": "ref r12",
+   "type": "journal",
+   "printed": "Howark, W. (1995). A critique of existing practice for relenting mathematics instruction. DAI-(A 56), 101- 129.",
+   "fields": [
+    [
+     "authors",
+     "Howark W."
+    ],
+    [
+     "source",
+     "DAI"
+    ],
+    [
+     "year",
+     "1995"
+    ],
+    [
+     "volume",
+     "A 56"
+    ],
+    [
+     "fpage",
+     "101"
+    ],
+    [
+     "lpage",
+     "129"
+    ],
+    [
+     "page-range",
+     "101- 129"
+    ]
+   ]
+  },
+  {
+   "i": 13,
+   "stem": "1459-000-009-022",
+   "where": "ref r6",
+   "type": "book",
+   "printed": "Guillard.S, Guillemard.Jc, Manuel Pratique De Psychologie En Milieu Educatif, Masson, 1994.",
+   "fields": [
+    [
+     "authors",
+     "Guillard S ; Guillemard Jc"
+    ],
+    [
+     "source",
+     "Manuel Pratique De Psychologie En Milieu Educatif"
+    ],
+    [
+     "year",
+     "1994"
+    ],
+    [
+     "publisher-name",
+     "Masson"
+    ]
+   ]
+  },
+  {
+   "i": 14,
+   "stem": "2184-011-001-027",
+   "where": "ref r2",
+   "type": "journal",
+   "printed": "• أمينة ،م. (2011). النفط والطاقات البديلة المتجددة وغير المتجددة. مجلة الباحث.255",
+   "fields": [
+    [
+     "authors",
+     "أمينة م."
+    ],
+    [
+     "article-title",
+     "النفط والطاقات البديلة المتجددة وغير المتجددة"
+    ],
+    [
+     "source",
+     "مجلة الباحث"
+    ],
+    [
+     "year",
+     "2011"
+    ],
+    [
+     "fpage",
+     "255"
+    ],
+    [
+     "page-range",
+     "255"
+    ]
+   ]
+  },
+  {
+   "i": 15,
+   "stem": "0986-000-002-003",
+   "where": "fn fn-p5-1",
+   "type": "book",
+   "printed": "(14) عبد الكريم التميمي : المستفاد ... مصورة خاصة، ص 135.",
+   "fields": [
+    [
+     "authors",
+     "عبد الكريم التميمي"
+    ],
+    [
+     "source",
+     "المستفاد ..."
+    ],
+    [
+     "fpage",
+     "135"
+    ],
+    [
+     "page-range",
+     "135"
+    ]
+   ]
+  },
+  {
+   "i": 16,
+   "stem": "0295-014-001-012",
+   "where": "fn fn-p1-1",
+   "type": "journal",
+   "printed": "* صحيفة القبس ( الكويت ): العدد ٢٩٣٤، ١٥-٧ - ١٩٨٠ ، ص١٧",
+   "fields": [
+    [
+     "source",
+     "صحيفة القبس"
+    ],
+    [
+     "year",
+     "١٩٨٠"
+    ],
+    [
+     "issue",
+     "٢٩٣٤"
+    ],
+    [
+     "publisher-loc",
+     "الكويت"
+    ],
+    [
+     "fpage",
+     "17"
+    ],
+    [
+     "page-range",
+     "١٧"
+    ]
+   ]
+  },
+  {
+   "i": 17,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p20-2",
+   "type": "journal",
+   "printed": "(٥٨) انظر مقالة لعارف تأمر فى مجلة المشرق لسنة ١٩٥٦ ص ٤٥٤ -٤٥٥",
+   "fields": [
+    [
+     "authors",
+     "تأمر عارف"
+    ],
+    [
+     "source",
+     "مجلة المشرق"
+    ],
+    [
+     "year",
+     "١٩٥٦"
+    ],
+    [
+     "fpage",
+     "454"
+    ],
+    [
+     "lpage",
+     "455"
+    ],
+    [
+     "page-range",
+     "٤٥٤ -٤٥٥"
+    ]
+   ]
+  },
+  {
+   "i": 18,
+   "stem": "0389-002-000-002",
+   "where": "ref r5",
+   "type": "book",
+   "printed": "٥ - البلاذرى: «أحمد بن يحيى بن جابر» كتاب فتوح البلدان ، القاهرة ١٩٥٦م.",
+   "fields": [
+    [
+     "authors",
+     "البلاذرى"
+    ],
+    [
+     "source",
+     "كتاب فتوح البلدان"
+    ],
+    [
+     "year",
+     "١٩٥٦"
+    ],
+    [
+     "publisher-loc",
+     "القاهرة"
+    ]
+   ]
+  },
+  {
+   "i": 19,
+   "stem": "0389-002-000-002",
+   "where": "fn fn-p9-5",
+   "type": "book",
+   "printed": "(٥) أبو الريحان البيرونى: الآثار الباقية ص ١٣٢",
+   "fields": [
+    [
+     "authors",
+     "البيرونى أبو الريحان"
+    ],
+    [
+     "source",
+     "الآثار الباقية"
+    ],
+    [
+     "fpage",
+     "132"
+    ],
+    [
+     "page-range",
+     "١٣٢"
+    ]
+   ]
+  },
+  {
+   "i": 20,
+   "stem": "0527-055-002-059",
+   "where": "ref r16",
+   "type": "book",
+   "printed": "[16] سليمان رشيد،\" البعد الاستراتيجي للمعرفة \"، مركز الخليج للابحاث، دبي، ٢٠٠٤",
+   "fields": [
+    [
+     "authors",
+     "سليمان رشيد"
+    ],
+    [
+     "source",
+     "البعد الاستراتيجي للمعرفة"
+    ],
+    [
+     "year",
+     "٢٠٠٤"
+    ],
+    [
+     "publisher-loc",
+     "دبي"
+    ]
+   ]
+  },
+  {
+   "i": 21,
+   "stem": "1136-040-000-023",
+   "where": "ref r37",
+   "type": "journal",
+   "printed": "Ilin-Tomich, Alexander. \"Late Middle Kingdom Stelae Workshop at Thebes.\" GM 234 (2012): 59-84.",
+   "fields": [
+    [
+     "authors",
+     "Ilin-Tomich Alexander"
+    ],
+    [
+     "article-title",
+     "Late Middle Kingdom Stelae Workshop at Thebes"
+    ],
+    [
+     "source",
+     "GM"
+    ],
+    [
+     "year",
+     "2012"
+    ],
+    [
+     "volume",
+     "234"
+    ],
+    [
+     "fpage",
+     "59"
+    ],
+    [
+     "lpage",
+     "84"
+    ],
+    [
+     "page-range",
+     "59-84"
+    ]
+   ]
+  },
+  {
+   "i": 22,
+   "stem": "1408-000-040-020",
+   "where": "fn fn-p4-1 (1 of 2)",
+   "type": "web",
+   "printed": "(1) European Central Bank, Electronic Money, Available on the website: https://www.ecb.europa.eu/stats/money_credit_banking/electronic_money/html/index.en.ht ml, (accessed 08/10/2022); In the same meaning, look: Article L315-1, Code monétaire et financier en France, Modifié par LOI nº2013-100 du 28 janvier 2013 - art. 5, https://www.legifrance.gouv.fr/codes/texte_lc/LEGITEXT000006072026/2022-04-08/, (accédé 09/10/2022).",
+   "fields": [
+    [
+     "authors",
+     "European Central Bank"
+    ],
+    [
+     "article-title",
+     "Electronic Money"
+    ],
+    [
+     "ext-link",
+     "https://www.ecb.europa.eu/stats/money_credit_banking/electronic_money/html/index.en.html"
+    ]
+   ]
+  },
+  {
+   "i": 23,
+   "stem": "2207-000-006-002",
+   "where": "fn fn-p1-2",
+   "type": "book",
+   "printed": "2 - Yasmin Zahran, A Beggar at Damascus Gate (Sausalito: The Post-Apollo Press, 1995).",
+   "fields": [
+    [
+     "authors",
+     "Zahran Yasmin"
+    ],
+    [
+     "source",
+     "A Beggar at Damascus Gate"
+    ],
+    [
+     "year",
+     "1995"
+    ],
+    [
+     "publisher-name",
+     "The Post-Apollo Press"
+    ],
+    [
+     "publisher-loc",
+     "Sausalito"
+    ]
+   ]
+  },
+  {
+   "i": 24,
+   "stem": "1173-000-027-061",
+   "where": "fn fn-p8-17",
+   "type": "book",
+   "printed": "xiiiJérôme Bourdon, « Les étrangers au prime-time : la télé est-elle xénophobe ? », Télés d'Europe et immigration, la documentation française, institut national de l'audiovisuel, Paris, 1993",
+   "fields": [
+    [
+     "authors",
+     "Bourdon Jérôme"
+    ],
+    [
+     "article-title",
+     "Les étrangers au prime-time : la télé est-elle xénophobe ?"
+    ],
+    [
+     "source",
+     "Télés d'Europe et immigration"
+    ],
+    [
+     "year",
+     "1993"
+    ],
+    [
+     "publisher-name",
+     "la documentation française, institut national de l'audiovisuel"
+    ],
+    [
+     "publisher-loc",
+     "Paris"
+    ]
+   ]
+  },
+  {
+   "i": 25,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p17-2",
+   "type": "other",
+   "printed": "2 Pflüger, \"The Private Funerary Stelae\": 134.",
+   "fields": [
+    [
+     "authors",
+     "Pflüger"
+    ],
+    [
+     "source",
+     "The Private Funerary Stelae"
+    ],
+    [
+     "fpage",
+     "134"
+    ],
+    [
+     "page-range",
+     "134"
+    ]
+   ]
+  },
+  {
+   "i": 26,
+   "stem": "0236-016-003-003",
+   "where": "ref r28",
+   "type": "book",
+   "printed": "Gallor, C. T., Remetar, J. T., Bolanio. K. B. (22-24 November 2021). Moran's I Spatial Autocorrelation of COVID-19 Infection Rates: Is There Such In Butuan City. The 42nd Asian Conference on Remote Sensing, Can Tho University, Vietnam.",
+   "fields": [
+    [
+     "authors",
+     "Gallor C. T. ; Remetar J. T. ; Bolanio K. B."
+    ],
+    [
+     "chapter-title",
+     "Moran's I Spatial Autocorrelation of COVID-19 Infection Rates: Is There Such In Butuan City"
+    ],
+    [
+     "source",
+     "The 42nd Asian Conference on Remote Sensing"
+    ],
+    [
+     "year",
+     "2021"
+    ],
+    [
+     "string-date",
+     "22-24 November 2021"
+    ],
+    [
+     "publisher-name",
+     "Can Tho University"
+    ],
+    [
+     "publisher-loc",
+     "Vietnam"
+    ]
+   ]
+  },
+  {
+   "i": 27,
+   "stem": "1716-000-002-018",
+   "where": "fn fn-p17-1",
+   "type": "book",
+   "printed": "(1) عبد الغني بارة: الهيرمنيوطيقا والفلسفة،نحو مشروع عقل تأويلي ،منشورات الاختلاف،ط1،2008، ص . 13",
+   "fields": [
+    [
+     "authors",
+     "بارة عبد الغني"
+    ],
+    [
+     "source",
+     "الهيرمنيوطيقا والفلسفة،نحو مشروع عقل تأويلي"
+    ],
+    [
+     "year",
+     "2008"
+    ],
+    [
+     "publisher-name",
+     "منشورات الاختلاف"
+    ],
+    [
+     "fpage",
+     "13"
+    ],
+    [
+     "page-range",
+     "13"
+    ]
+   ]
+  },
+  {
+   "i": 28,
+   "stem": "1726-000-027-017",
+   "where": "fn fn-p16-8",
+   "type": "journal",
+   "printed": "8-Garcia Debanc,C. & Fayol.(2002) « Apports et limites des modèles du processus rédactionnel pour la didactique de la production écrite. Dialogue entre psycholinguiste et didacticiens » Pratiques, nº115/116, pp. 37-50",
+   "fields": [
+    [
+     "authors",
+     "Garcia Debanc C. ; Fayol"
+    ],
+    [
+     "article-title",
+     "Apports et limites des modèles du processus rédactionnel pour la didactique de la production écrite. Dialogue entre psycholinguiste et didacticiens"
+    ],
+    [
+     "source",
+     "Pratiques"
+    ],
+    [
+     "year",
+     "2002"
+    ],
+    [
+     "issue",
+     "115/116"
+    ],
+    [
+     "fpage",
+     "37"
+    ],
+    [
+     "lpage",
+     "50"
+    ],
+    [
+     "page-range",
+     "37-50"
+    ]
+   ]
+  },
+  {
+   "i": 29,
+   "stem": "0345-045-004-015",
+   "where": "ref r17",
+   "type": "journal",
+   "printed": "- Mbegu, S. (2018). \"The role professionalism in managing conflict at work place\", Open Access Library Journal, Vol. 5, No. 11, pp.1-5.",
+   "fields": [
+    [
+     "authors",
+     "Mbegu S."
+    ],
+    [
+     "article-title",
+     "The role professionalism in managing conflict at work place"
+    ],
+    [
+     "source",
+     "Open Access Library Journal"
+    ],
+    [
+     "year",
+     "2018"
+    ],
+    [
+     "volume",
+     "5"
+    ],
+    [
+     "issue",
+     "11"
+    ],
+    [
+     "fpage",
+     "1"
+    ],
+    [
+     "lpage",
+     "5"
+    ],
+    [
+     "page-range",
+     "1-5"
+    ]
+   ]
+  },
+  {
+   "i": 30,
+   "stem": "0913-000-001-011",
+   "where": "fn fn-p8-4",
+   "type": "journal",
+   "printed": "37 - الاشتقاق ودلالاته، الفصول الأربعة، ع 16، دجنبر 81، ص : 134.",
+   "fields": [
+    [
+     "article-title",
+     "الاشتقاق ودلالاته"
+    ],
+    [
+     "source",
+     "الفصول الأربعة"
+    ],
+    [
+     "year",
+     "دجنبر 81"
+    ],
+    [
+     "issue",
+     "16"
+    ],
+    [
+     "fpage",
+     "134"
+    ],
+    [
+     "page-range",
+     "134"
+    ]
+   ]
+  },
+  {
+   "i": 31,
+   "stem": "0260-000-019-003",
+   "where": "fn fn-p8-2",
+   "type": "book",
+   "printed": "2. E.W. Tedlock, Dylan Thomas: The Legend and the Poet (London: Heinemann, 1963), p. 160.",
+   "fields": [
+    [
+     "authors",
+     "Tedlock E.W."
+    ],
+    [
+     "source",
+     "Dylan Thomas: The Legend and the Poet"
+    ],
+    [
+     "year",
+     "1963"
+    ],
+    [
+     "publisher-name",
+     "Heinemann"
+    ],
+    [
+     "fpage",
+     "160"
+    ],
+    [
+     "page-range",
+     "160"
+    ]
+   ]
+  },
+  {
+   "i": 32,
+   "stem": "0413-007-000-023",
+   "where": "fn fn-p11-1 (1 of 6)",
+   "type": "book",
+   "printed": "(1) A glance at W. Gage's Contrastive Studies in linguistics (1961) will give us an indication of the great enthusiasm and interest in the subject in the early sixties. The other example is the Series sponsored by the Center for Applied Linguistics in the U.S.A.in the sixties (such as Agard and Di Pietro, 1965; Moulton 1962: Stockwell, Bowen,and Martin 1965). In the late sixties two international conferences had CA for main or major themes. (c.f. Alatis, 1968 and Nickel, 1971). Again in the mid - seventies, the International Association of Applied Linguistics had CA as a major theme in its Stuttgart conference (summer, 1975) .",
+   "fields": [
+    [
+     "authors",
+     "Gage W."
+    ],
+    [
+     "source",
+     "Contrastive Studies in linguistics"
+    ],
+    [
+     "year",
+     "1961"
+    ]
+   ]
+  },
+  {
+   "i": 33,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p7-1 (3 of 8)",
+   "type": "web",
+   "printed": "1 Stela AP 25 in Leiden dated to the late twelfth Dynasty or the thirteenth Dynasty from Abydos. Wolfram Grajetzki,\"Stela of the Overseer of Priests Iki\", in Ancient Egypt Transformed: The Middle Kingdom, eds. Adela Oppenheim and et al. (New York: The Metropolitan Museum of Art, 2015), 157, no. 93;https://pnm.unimainz.de/2/inscription/2339;https://www.rmo.nl/collectie/collectiezoeker/collectiestuk/ ?object=22614 (accessed: 28-7-2023); Statue AS 5046 in Vienna dated to the thirteenth - seventeenth Dynasty from Elkab. https://pnm.uni-mainz.de/2/inscription/3005 (accessed: 28-7-2023); https://www.khm.at/objektdb/detail/319706/ (accessed: 28-7-2023); stela ÄS 160 at the Kunsthistorisches Museum in Vienna dated to the late twelfth Dynasty or the thirteenth Dynasty, probably from Abydos https://www.khm.at/objektdb/detail/317451/ (accessed: 29-7-2023); https://pnm.unimainz.de/2/inscription/1859 (accessed: 29-7-2023), stela 1970.630 in Boston dated to the reign of Amenemhat IV or the early thirteenth Dynasty, probably from Abydos https://collections.mfa.org/objects/164241/stele-of-ameny (accessed: 29-7-2023); https://pnm.unimainz.de/2/inscription/1790 (accessed: 29-7-2023); Stelae ÄS 110 and ÄS 156 in Vienna from Abydos dated to the late twelfth Dynasty or the early thirteenth Dynasty. Irmgrad Hein and Helmut Satzinger, Stelen des Mittleren Reiches I, Corpus Antiquitatum Aegyptiacarum (Mainz am Rhein: Philipp von Zabern, 1989), 4,39, 4,91",
+   "fields": [
+    [
+     "ext-link",
+     "https://www.rmo.nl/collectie/collectiezoeker/collectiestuk/?object=22614"
+    ]
+   ]
+  },
+  {
+   "i": 34,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p13-1 (4 of 11)",
+   "type": "book",
+   "printed": "(1) Item, NEWBERRY, Scarabs, pl. XLII, nos 20 et 22. Collect. Lady Meux, nos 721, 722, 723 et 1622. Collect. Timins, pl. XIV, nº 13 .- De même Amon : NEWBERRY, Scarabs, pl. XXXIX, nº 5. Collect. Lady Meux, nos 509, 517, 588, 589, 591, 1587 et 1662. Le Caire 36627, 36923, 37095 et 37357. Collect. Hilton Price, nos 588 et 668. Collect. Timins, pl. XII, nos 18 et 32. BRUNTON, Matmar, pl. LXII, nº 45 ; Bastis : Collect. Hilton Price, nº 466 ; Isis : PETRIE, Buttons, nº 684. BRUNTON, Matmar, pl. LXIII, nº 95 ; Khonsou : Id., nº 96 ; Osiris NEWBERRY, Scarabs, pl. XXXIX, nos 28 et 29. Collect. Timins, pl. XII, nº 7. ROWE, Catal. Palestine archaeol. Museum. nº 783. Ancient Egypt 1916, p. 31, nº 115. PETRIE, Ancient Gaza II, pl. VIII, nº 135 ; Pakhet : Le Caire 36620 ; \"le Père des dieux \": Collect. Fraser, nº 441. Ancient Egypt 1916, p. 31, nº 130; Ptah : Collect Timins, pl. XII, nº 25 ; Thot : PETRIE, Buttons, pl. XII, nº 707.",
+   "fields": [
+    [
+     "authors",
+     "PETRIE"
+    ],
+    [
+     "source",
+     "Buttons"
+    ]
+   ]
+  },
+  {
+   "i": 35,
+   "stem": "0040-007-004-002",
+   "where": "ref r21",
+   "type": "journal",
+   "printed": "Snodgrass, H. (1992) Graduate versus undergraduate student evaluation of faculty. DAI-A 52 (12), 41-77.",
+   "fields": [
+    [
+     "authors",
+     "Snodgrass H."
+    ],
+    [
+     "source",
+     "DAI-A 52"
+    ],
+    [
+     "year",
+     "1992"
+    ],
+    [
+     "issue",
+     "12"
+    ],
+    [
+     "fpage",
+     "41"
+    ],
+    [
+     "lpage",
+     "77"
+    ],
+    [
+     "page-range",
+     "41-77"
+    ]
+   ]
+  },
+  {
+   "i": 36,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p6-3 (2 of 2)",
+   "type": "book",
+   "printed": "3 https://pnm.uni-mainz.de/2/name/675#1169 (accessed: 27-7-2023); PN I, 48. 48.",
+   "fields": [
+    [
+     "source",
+     "PN I"
+    ],
+    [
+     "page-range",
+     "48. 48"
+    ]
+   ]
+  },
+  {
+   "i": 37,
+   "stem": "0241-018-002-008",
+   "where": "ref r11",
+   "type": "web",
+   "printed": "7-11-Nanotechnology in Industrial Design - The Smallness of the Future ... Nanotechnology in Industrial Design. The Smallness of the Future ... Products, freed from conventional limitations, may start addressing design problems by focusing ... tim.griffins.ca/writings/old/nanotech-in-ID",
+   "fields": [
+    [
+     "article-title",
+     "Nanotechnology in Industrial Design - The Smallness of the Future"
+    ],
+    [
+     "ext-link",
+     "tim.griffins.ca/writings/old/nanotech-in-ID"
+    ]
+   ]
+  },
+  {
+   "i": 38,
+   "stem": "0679-000-001-004",
+   "where": "fn fn-p16-3",
+   "type": "journal",
+   "printed": "(٤٦) اللواء عدد ٣١ نوفمبر سنة ١٩٠٨ .",
+   "fields": [
+    [
+     "source",
+     "اللواء"
+    ],
+    [
+     "year",
+     "١٩٠٨"
+    ],
+    [
+     "string-date",
+     "٣١ نوفمبر سنة ١٩٠٨"
+    ]
+   ]
+  },
+  {
+   "i": 39,
+   "stem": "0342-000-012,013-042",
+   "where": "fn fn-p18-6",
+   "type": "book",
+   "printed": "٦. انظر المسالك والممالك، طبعة أوروبا (ص ٧٨).",
+   "fields": [
+    [
+     "source",
+     "المسالك والممالك"
+    ],
+    [
+     "publisher-loc",
+     "أوروبا"
+    ],
+    [
+     "fpage",
+     "78"
+    ],
+    [
+     "page-range",
+     "٧٨"
+    ]
+   ]
+  },
+  {
+   "i": 40,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p5-1 (6 of 7)",
+   "type": "book",
+   "printed": "1 He is a representative of the treasure bureau who was tasked with gathering supplies for the treasury. i.e. The economic arm of the palace, note the sources cited from expeditions outside the building and construction sites, the title also can be attached to a specific building within the residence or conduct royal business in particular area. Quirke, Titles and Bureux, 57; Quirke, \"The Regular Titles\": 110, 124- 125; https://pnm.uni-mainz.de/3/title/856 (accessed: 26-7-2023); Abdul Rahman Al-Ayedi, Index of Egyptian Administrative, Religious and Military Titles of the New Kingdom (Ismailia: Obelisk Publications, 2006), 43.79; Denise M. Doxey, Egyptian Non-Royal Epithets in the Middle Kingdom, PdÄ 12 (Brill: Leiden: Boston: Köln, 1998), 41. And according to Ward the translation is \"Chamberlain of the treasury\". Ward, Index of Egyptian Administrative, 16.84; and according to Taylor it is \"Keeper of the store room\". Taylor, An Index of Male, 16.144.",
+   "fields": [
+    [
+     "authors",
+     "Ward"
+    ],
+    [
+     "source",
+     "Index of Egyptian Administrative"
+    ],
+    [
+     "page-range",
+     "16.84"
+    ]
+   ]
+  },
+  {
+   "i": 41,
+   "stem": "0604-003-008-001",
+   "where": "fn fn-p5-1",
+   "type": "book",
+   "printed": "(١) الفهرست (ص ١٧٦).",
+   "fields": [
+    [
+     "source",
+     "الفهرست"
+    ],
+    [
+     "fpage",
+     "176"
+    ],
+    [
+     "page-range",
+     "١٧٦"
+    ]
+   ]
+  },
+  {
+   "i": 42,
+   "stem": "0829-013-025-033",
+   "where": "fn fn-p27-8",
+   "type": "book",
+   "printed": "٧٠ - جعفر مرتضى العاملي، الصحيح من سيرة النبي الاعظم (ص)، ط١، قم، دار الحديث للنشر، ١٤٢٦ هـ، ج ٧ ، ص ٧٦.",
+   "fields": [
+    [
+     "authors",
+     "العاملي جعفر مرتضى"
+    ],
+    [
+     "source",
+     "الصحيح من سيرة النبي الاعظم (ص)"
+    ],
+    [
+     "year",
+     "١٤٢٦ هـ"
+    ],
+    [
+     "volume",
+     "٧"
+    ],
+    [
+     "publisher-name",
+     "دار الحديث للنشر"
+    ],
+    [
+     "publisher-loc",
+     "قم"
+    ],
+    [
+     "fpage",
+     "76"
+    ],
+    [
+     "page-range",
+     "٧٦"
+    ]
+   ]
+  },
+  {
+   "i": 43,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p17-1",
+   "type": "other",
+   "printed": "(٤٦) ديوان الغزى ورقة ١٤٧-١٤٨",
+   "fields": [
+    [
+     "source",
+     "ديوان الغزى"
+    ],
+    [
+     "fpage",
+     "147"
+    ],
+    [
+     "lpage",
+     "148"
+    ],
+    [
+     "page-range",
+     "١٤٧-١٤٨"
+    ]
+   ]
+  },
+  {
+   "i": 44,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p24-2 (3 of 3)",
+   "type": "book",
+   "printed": "(٧٠) معجم الأدباء ج٦ ص ٣٦١ ، المحمدون من الشعراء (مخطوط) ورقة ١٢ ب-١٣ أ . والمطبوع (ت. حسن معمرى) ص ٥١ . وهناك اختلاف فى ورود عدد من الكلمات فى كل من معجم الادباء والمحمدون من الشعراء",
+   "fields": [
+    [
+     "source",
+     "المحمدون من الشعراء"
+    ],
+    [
+     "fpage",
+     "51"
+    ],
+    [
+     "page-range",
+     "٥١"
+    ]
+   ]
+  },
+  {
+   "i": 45,
+   "stem": "2207-000-006-002",
+   "where": "fn fn-p10-3",
+   "type": "book",
+   "printed": "28 - Nation: 'an extensive aggregate of persons, so closely associated with each other by common descent, language, or history, as to form a distinct race or people, usually organized as a separate political state or occupying a definite territory.' (Oxford English Dictionary).",
+   "fields": [
+    [
+     "source",
+     "Oxford English Dictionary"
+    ]
+   ]
+  },
+  {
+   "i": 46,
+   "stem": "0345-045-004-015",
+   "where": "ref r9",
+   "type": "journal",
+   "printed": "- Evetts, J. (2011). \"A new professionalism? challenges and opportunities\", Current Sociology, Vol. 59, No. 4, pp.406-422.",
+   "fields": [
+    [
+     "authors",
+     "Evetts J."
+    ],
+    [
+     "article-title",
+     "A new professionalism? challenges and opportunities"
+    ],
+    [
+     "source",
+     "Current Sociology"
+    ],
+    [
+     "year",
+     "2011"
+    ],
+    [
+     "volume",
+     "59"
+    ],
+    [
+     "issue",
+     "4"
+    ],
+    [
+     "fpage",
+     "406"
+    ],
+    [
+     "lpage",
+     "422"
+    ],
+    [
+     "page-range",
+     "406-422"
+    ]
+   ]
+  },
+  {
+   "i": 47,
+   "stem": "0345-045-004-015",
+   "where": "ref r3",
+   "type": "journal",
+   "printed": "- Assaad, R. (1997). \"The effects of public sector hiring and compensation policies on the Egyptian labor market\", The World Bank Economic Review, Vol. 11, No. 1, pp.85-118.",
+   "fields": [
+    [
+     "authors",
+     "Assaad R."
+    ],
+    [
+     "article-title",
+     "The effects of public sector hiring and compensation policies on the Egyptian labor market"
+    ],
+    [
+     "source",
+     "The World Bank Economic Review"
+    ],
+    [
+     "year",
+     "1997"
+    ],
+    [
+     "volume",
+     "11"
+    ],
+    [
+     "issue",
+     "1"
+    ],
+    [
+     "fpage",
+     "85"
+    ],
+    [
+     "lpage",
+     "118"
+    ],
+    [
+     "page-range",
+     "85-118"
+    ]
+   ]
+  },
+  {
+   "i": 48,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p16-1 (2 of 3)",
+   "type": "book",
+   "printed": "(1) Item, Collect. Hilton Price, nº 585. Collect. Lady Meux, nos 544 à 547, et 1420. BRUNTON, Matmar, pl. LXIII, nos 67 et 68. PEET, Cemeteries of Abydos II, pl. XXXVII, S 29 .- De même Ptah : NEWBERRY, Scarabs, pl. XL, nº 6.",
+   "fields": [
+    [
+     "authors",
+     "PEET"
+    ],
+    [
+     "source",
+     "Cemeteries of Abydos II"
+    ]
+   ]
+  },
+  {
+   "i": 49,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p27-6",
+   "type": "book",
+   "printed": "(٩٣) ابن الفوطى: الحوادث الجامعة ص ٣٨٢. فقهاء الحلة ص ١٤١",
+   "fields": [
+    [
+     "authors",
+     "ابن الفوطى"
+    ],
+    [
+     "source",
+     "الحوادث الجامعة"
+    ],
+    [
+     "fpage",
+     "382"
+    ],
+    [
+     "page-range",
+     "٣٨٢"
+    ]
+   ]
+  },
+  {
+   "i": 50,
+   "stem": "6238-002-000-002",
+   "where": "fn fn-p27-7",
+   "type": "book",
+   "printed": "١٩- علي السلمي: الإدارة الجديدة في ضوء المتغيرات البيئية والتكنولوچية - كتاب الأهرام الاقتصادي، العدد ٣٥ يناير ١٩٩١، ص ص ٥٧-٥٩.",
+   "fields": [
+    [
+     "authors",
+     "السلمي علي"
+    ],
+    [
+     "source",
+     "الإدارة الجديدة في ضوء المتغيرات البيئية والتكنولوچية"
+    ],
+    [
+     "year",
+     "١٩٩١"
+    ],
+    [
+     "issue",
+     "٣٥"
+    ],
+    [
+     "series",
+     "كتاب الأهرام الاقتصادي"
+    ],
+    [
+     "fpage",
+     "57"
+    ],
+    [
+     "lpage",
+     "59"
+    ],
+    [
+     "page-range",
+     "٥٧-٥٩"
+    ]
+   ]
+  },
+  {
+   "i": 51,
+   "stem": "0236-016-003-003",
+   "where": "ref r35",
+   "type": "web",
+   "printed": "Saudi Ministry of Health Website. (2023). COVID-19 Data User (4/5/2023). (https:// services6.arcgis.com/bKYAIIQgwHslVRaK/arcgis/rest/services/CasesByRegion_ViewLayer/FeatureServer/0).",
+   "fields": [
+    [
+     "authors",
+     "Saudi Ministry of Health Website"
+    ],
+    [
+     "article-title",
+     "COVID-19 Data User"
+    ],
+    [
+     "year",
+     "2023"
+    ]
+   ]
+  },
+  {
+   "i": 52,
+   "stem": "1003-000-048-048",
+   "where": "ref r9",
+   "type": "other",
+   "printed": "La Fédération Tunisienne des Agences de Voyage (FTAV).",
+   "fields": [
+    [
+     "source",
+     "La Fédération Tunisienne des Agences de Voyage (FTAV)"
+    ]
+   ]
+  },
+  {
+   "i": 53,
+   "stem": "0413-007-000-023",
+   "where": "ref r16",
+   "type": "book",
+   "printed": "Gleason, Jr., H.A. (1965) Linguistics and English Grammar. New York: Holt, Rinhart & Winston, Inc.",
+   "fields": [
+    [
+     "authors",
+     "Gleason, Jr. H.A."
+    ],
+    [
+     "source",
+     "Linguistics and English Grammar"
+    ],
+    [
+     "year",
+     "1965"
+    ],
+    [
+     "publisher-name",
+     "Holt, Rinhart & Winston, Inc."
+    ],
+    [
+     "publisher-loc",
+     "New York"
+    ]
+   ]
+  },
+  {
+   "i": 54,
+   "stem": "0913-000-001-011",
+   "where": "ref r6",
+   "type": "book",
+   "printed": "- الجوهري، اسماعيل بن حماد (؟ - 4001 هـ ) صحاح اللغة (تحقيق أحمد عبد الغفور عطار) دار العلم للملايين، بيروت، ط. 2 1979.",
+   "fields": [
+    [
+     "authors",
+     "الجوهري اسماعيل بن حماد"
+    ],
+    [
+     "source",
+     "صحاح اللغة"
+    ],
+    [
+     "year",
+     "1979"
+    ],
+    [
+     "publisher-name",
+     "دار العلم للملايين"
+    ],
+    [
+     "publisher-loc",
+     "بيروت"
+    ]
+   ]
+  },
+  {
+   "i": 55,
+   "stem": "6278-001-000-002",
+   "where": "fn fn-p22-5",
+   "type": "book",
+   "printed": "١٤- كيرتز، دور الجامعات فى عالم متغير (ترجمة: عبد العزيز سليمان وابراهيم مطاوع) القاهرة،دار نهضة مصر للطباعة والنشر ، ١٩٧٥ ، ص ٦٠ .",
+   "fields": [
+    [
+     "authors",
+     "كيرتز"
+    ],
+    [
+     "source",
+     "دور الجامعات فى عالم متغير"
+    ],
+    [
+     "year",
+     "١٩٧٥"
+    ],
+    [
+     "publisher-name",
+     "دار نهضة مصر للطباعة والنشر"
+    ],
+    [
+     "publisher-loc",
+     "القاهرة"
+    ],
+    [
+     "fpage",
+     "60"
+    ],
+    [
+     "page-range",
+     "٦٠"
+    ]
+   ]
+  },
+  {
+   "i": 56,
+   "stem": "0913-000-001-011",
+   "where": "ref r8",
+   "type": "book",
+   "printed": "- الزجاجي، أبو القاسم عبد الرحمن (؟ - 337 هـ) الايضاح في علل النحو (تحقيق مازن المبارك) دار النفائس، بيروت ط - 4، 1982.",
+   "fields": [
+    [
+     "authors",
+     "الزجاجي أبو القاسم عبد الرحمن"
+    ],
+    [
+     "source",
+     "الايضاح في علل النحو"
+    ],
+    [
+     "year",
+     "1982"
+    ],
+    [
+     "publisher-name",
+     "دار النفائس"
+    ],
+    [
+     "publisher-loc",
+     "بيروت"
+    ]
+   ]
+  },
+  {
+   "i": 57,
+   "stem": "0578-000-027-045",
+   "where": "fn fn-p20-4",
+   "type": "book",
+   "printed": "8- Besco P.L., Les enjeux actuels de l'évaluation des performances, in « Dialogues autour de la performance en entreprises » sous la direction de Benghozi P. J., Ed. L'Harmattan, 2000, p.15.",
+   "fields": [
+    [
+     "authors",
+     "Besco P.L."
+    ],
+    [
+     "chapter-title",
+     "Les enjeux actuels de l'évaluation des performances"
+    ],
+    [
+     "source",
+     "Dialogues autour de la performance en entreprises"
+    ],
+    [
+     "year",
+     "2000"
+    ],
+    [
+     "publisher-name",
+     "Ed. L'Harmattan"
+    ],
+    [
+     "fpage",
+     "15"
+    ],
+    [
+     "page-range",
+     "15"
+    ]
+   ]
+  },
+  {
+   "i": 58,
+   "stem": "0228-000-027-001",
+   "where": "ref r11",
+   "type": "book",
+   "printed": "١١. عادل أحمد عز الدين الأشول (١٩٨٧): موسوعة التربية الخاصة. القاهرة: مكتبة الأنجلو المصرية.",
+   "fields": [
+    [
+     "authors",
+     "الأشول عادل أحمد عز الدين"
+    ],
+    [
+     "source",
+     "موسوعة التربية الخاصة"
+    ],
+    [
+     "year",
+     "١٩٨٧"
+    ],
+    [
+     "publisher-name",
+     "مكتبة الأنجلو المصرية"
+    ],
+    [
+     "publisher-loc",
+     "القاهرة"
+    ]
+   ]
+  },
+  {
+   "i": 59,
+   "stem": "2230-000-008-019",
+   "where": "fn fn-p16-1",
+   "type": "other",
+   "printed": "27 Répondre au défi de l'énergie Le rôle de la CEI de 2010 à 2030, Septembre 2010, www.iec.ch.",
+   "fields": [
+    [
+     "source",
+     "Répondre au défi de l'énergie Le rôle de la CEI de 2010 à 2030"
+    ],
+    [
+     "year",
+     "2010"
+    ],
+    [
+     "string-date",
+     "Septembre 2010"
+    ],
+    [
+     "ext-link",
+     "www.iec.ch"
+    ]
+   ]
+  },
+  {
+   "i": 60,
+   "stem": "0375-001-001-011",
+   "where": "fn fn-p18-1 (5 of 5)",
+   "type": "book",
+   "printed": "١ - ديوان المعاني ١٩٣/١ وتأمل اسماء هذه الكتب في العربية ، حنين الابل للاوطان لربيعة البصري والمناهل والاعطان والحنين الى الاوطان للحسن بن عبد الرحمن بن خلاء الرامهرمزى ، والمنازل والديار لاسامة بن منقذ .. ولعل اروع ما كتب في هذا رسالة للجاحظ في الحنين الى الاوطان جاء فيها وقد كان العرب يحنون الى الجدب والحجر الصلد .. وتستوخم الريف ، ويقول كانت العرب : اذا غزت حملت معها من تربة بلادها ما تستنشقه عند نزله او زكام او صداع ويورد قول احد العجم : من علامة الرشد ان تكون النفس الى مولدها مشتاقة ، والى مسقط رأسها تواقه .. اما النظرة الحديثة الى الحنين فترى انه ينشأ من خلل في الخيال ، ينتج عنه اتجاه العصارة العصبية في اتجاه واحد في المخ ، فلا يوقظ الا فكرة واحدة بعينها وهي الرغبة في العودة إلى الوطن، وقد يكون وراء الحنين انقلاب داخلي مرتبط بظاهرة « الذاكرة» وتكون حاسة السمع هي العامل الرئيسي وراءه، وقد يكون مظهرا فاسدا مضطربا للحياة ، ويكون وراءه اصابة الجزء المعنوي والتأثري للفرد.",
+   "fields": [
+    [
+     "source",
+     "رسالة للجاحظ في الحنين الى الاوطان"
+    ]
+   ]
+  },
+  {
+   "i": 61,
+   "stem": "0742-000-011-007",
+   "where": "ref r20",
+   "type": "book",
+   "printed": "- Unified Dictionary of Linguistic Terms, Arab League Educational Cultural and scientific Organization, 1989.",
+   "fields": [
+    [
+     "source",
+     "Unified Dictionary of Linguistic Terms"
+    ],
+    [
+     "year",
+     "1989"
+    ],
+    [
+     "publisher-name",
+     "Arab League Educational Cultural and scientific Organization"
+    ]
+   ]
+  },
+  {
+   "i": 62,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p13-11",
+   "type": "web",
+   "printed": "11 https://pnm.uni-mainz.de/2/name/2145#3778 (accessed: 25-7-2023).",
+   "fields": [
+    [
+     "ext-link",
+     "https://pnm.uni-mainz.de/2/name/2145#3778"
+    ]
+   ]
+  },
+  {
+   "i": 63,
+   "stem": "1726-000-027-017",
+   "where": "ref r1",
+   "type": "book",
+   "printed": "1- Anis, J. (1988) « L'écriture : théories et description », De Boeck-wesmael SA.",
+   "fields": [
+    [
+     "authors",
+     "Anis J."
+    ],
+    [
+     "source",
+     "L'écriture : théories et description"
+    ],
+    [
+     "year",
+     "1988"
+    ],
+    [
+     "publisher-name",
+     "De Boeck-wesmael SA"
+    ]
+   ]
+  },
+  {
+   "i": 64,
+   "stem": "0739-000-009-001",
+   "where": "fn fn-p1-1 (4 of 13)",
+   "type": "book",
+   "printed": "(١) انظر ترجمته في: انباه الرواة ٣١٣/١، الانساب للسمعاني ٣٢١ب، بغية الوعاة ٢٢١ ، تاريخ بغداد ٣٤١/٧ ، الكامل في التاريخ لابن الاثير ٩٧/٧ ، روضات الجنات لمحمد باقر الخونساري ٣١٨ ، شذرات الذهب ٦٥/٣، طبقات النحويين للزبيدي ١٢٩، اللباب لابن الاثير ٥٨٦/١، معجم الادباء ١٤٥/٨، معجم البلدان ٥ /١٩٣، النجوم الزاهرة ١٣٣/٤ ، نزهة الالباء ( بتحقيق السامرائي ) ٢١١ .",
+   "fields": [
+    [
+     "source",
+     "تاريخ بغداد"
+    ],
+    [
+     "volume",
+     "٧"
+    ],
+    [
+     "fpage",
+     "341"
+    ],
+    [
+     "page-range",
+     "٣٤١"
+    ]
+   ]
+  },
+  {
+   "i": 65,
+   "stem": "0201-000-044-001",
+   "where": "ref r9",
+   "type": "thesis",
+   "printed": "٩. الشريف،سحر بنت ناصر عبد الله (٢٠٠٧). دور بيئة الروضة في اكساب الطفل بعض مهارات الاستعداد للقراءة \"دراسة ميدانية على بعض الروضات الحكومية في مدينة الرياض\". رسالة ماجستير منشورة، جامعة الملك سعود- الرياض",
+   "fields": [
+    [
+     "authors",
+     "الشريف سحر بنت ناصر عبد الله"
+    ],
+    [
+     "source",
+     "دور بيئة الروضة في اكساب الطفل بعض مهارات الاستعداد للقراءة \"دراسة ميدانية على بعض الروضات الحكومية في مدينة الرياض\""
+    ],
+    [
+     "year",
+     "٢٠٠٧"
+    ],
+    [
+     "publisher-name",
+     "جامعة الملك سعود"
+    ],
+    [
+     "publisher-loc",
+     "الرياض"
+    ]
+   ]
+  },
+  {
+   "i": 66,
+   "stem": "0739-000-009-001",
+   "where": "fn fn-p10-1",
+   "type": "book",
+   "printed": "(٢٩) مازن المبارك، الرماني النحوي (دمشق ١٩٦٣) ص ١٣٦ .",
+   "fields": [
+    [
+     "authors",
+     "المبارك مازن"
+    ],
+    [
+     "source",
+     "الرماني النحوي"
+    ],
+    [
+     "year",
+     "١٩٦٣"
+    ],
+    [
+     "publisher-loc",
+     "دمشق"
+    ],
+    [
+     "fpage",
+     "136"
+    ],
+    [
+     "page-range",
+     "١٣٦"
+    ]
+   ]
+  },
+  {
+   "i": 67,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p15-3",
+   "type": "journal",
+   "printed": "(3) Ancient Egypt 1916, p. 27, nº 24.",
+   "fields": [
+    [
+     "source",
+     "Ancient Egypt"
+    ],
+    [
+     "year",
+     "1916"
+    ],
+    [
+     "fpage",
+     "27"
+    ],
+    [
+     "page-range",
+     "27"
+    ]
+   ]
+  },
+  {
+   "i": 68,
+   "stem": "1426-000-010-017",
+   "where": "fn fn-p22-10",
+   "type": "book",
+   "printed": "9. ABADIE. L et MERCIER. S C, « finance internationale » édition ARMAND COLIN, France, 2011, p114.",
+   "fields": [
+    [
+     "authors",
+     "ABADIE L ; MERCIER S C"
+    ],
+    [
+     "source",
+     "finance internationale"
+    ],
+    [
+     "year",
+     "2011"
+    ],
+    [
+     "publisher-name",
+     "édition ARMAND COLIN"
+    ],
+    [
+     "publisher-loc",
+     "France"
+    ],
+    [
+     "fpage",
+     "114"
+    ],
+    [
+     "page-range",
+     "114"
+    ]
+   ]
+  },
+  {
+   "i": 69,
+   "stem": "1787-014-002-007",
+   "where": "ref r10",
+   "type": "book",
+   "printed": "10. فهمي، مصطفى. (1965). مجالات علم النفس. القاهرة: مكتبة مصر.",
+   "fields": [
+    [
+     "authors",
+     "فهمي مصطفى"
+    ],
+    [
+     "source",
+     "مجالات علم النفس"
+    ],
+    [
+     "year",
+     "1965"
+    ],
+    [
+     "publisher-name",
+     "مكتبة مصر"
+    ],
+    [
+     "publisher-loc",
+     "القاهرة"
+    ]
+   ]
+  },
+  {
+   "i": 70,
+   "stem": "1839-000-008-001",
+   "where": "fn fn-p15-13",
+   "type": "book",
+   "printed": "18 Krug, Gary, communication, Technology and culture chang, SAGE publications, London-Thousand Oaks, New Delhi,2001 P: 2.",
+   "fields": [
+    [
+     "authors",
+     "Krug Gary"
+    ],
+    [
+     "source",
+     "communication, Technology and culture chang"
+    ],
+    [
+     "year",
+     "2001"
+    ],
+    [
+     "publisher-name",
+     "SAGE publications"
+    ],
+    [
+     "publisher-loc",
+     "London-Thousand Oaks, New Delhi"
+    ],
+    [
+     "fpage",
+     "2"
+    ],
+    [
+     "page-range",
+     "2"
+    ]
+   ]
+  },
+  {
+   "i": 71,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p4-1",
+   "type": "book",
+   "printed": "(٣) انظر أبا الفرج الاصفهاني: الاغاني، دار الكتب المصرية، ج ١١ ص ٢٥٢ ٠",
+   "fields": [
+    [
+     "authors",
+     "أبا الفرج الاصفهاني"
+    ],
+    [
+     "source",
+     "الاغاني"
+    ],
+    [
+     "volume",
+     "١١"
+    ],
+    [
+     "publisher-name",
+     "دار الكتب المصرية"
+    ],
+    [
+     "fpage",
+     "252"
+    ],
+    [
+     "page-range",
+     "٢٥٢"
+    ]
+   ]
+  },
+  {
+   "i": 72,
+   "stem": "0292-000-003-001",
+   "where": "fn fn-p12-3",
+   "type": "book",
+   "printed": "(٢٢) البحر المحيط ٢٢٢/١.",
+   "fields": [
+    [
+     "source",
+     "البحر المحيط"
+    ],
+    [
+     "volume",
+     "١"
+    ],
+    [
+     "fpage",
+     "222"
+    ],
+    [
+     "page-range",
+     "٢٢٢"
+    ]
+   ]
+  },
+  {
+   "i": 73,
+   "stem": "2259-006-004-071",
+   "where": "fn fn-p12-1",
+   "type": "other",
+   "printed": "1 ج ج د ش، وزارة الشبيبة والرياضة، أمر رقم (09/95 ، (مرجع سابق الذكر.",
+   "fields": [
+    [
+     "authors",
+     "وزارة الشبيبة والرياضة"
+    ],
+    [
+     "article-title",
+     "أمر رقم (09/95"
+    ],
+    [
+     "source",
+     "ج ج د ش"
+    ]
+   ]
+  },
+  {
+   "i": 74,
+   "stem": "0680-003-011,012-011",
+   "where": "ref r8",
+   "type": "book",
+   "printed": "ابن خرداذبة ، أبو القاسم عبيد الله . كتاب المسالك والممالك ؛ تحقيق : دي غوية .- (ليدن، ١٨٨٩م).",
+   "fields": [
+    [
+     "authors",
+     "ابن خرداذبة أبو القاسم عبيد الله"
+    ]
+   ]
+  },
+  {
+   "i": 75,
+   "stem": "6678-000-000-007",
+   "where": "ref r3",
+   "type": "other",
+   "printed": "٣- قانون السلطة القضائية (١) لسنة ١٩٩١ م.",
+   "fields": [
+    [
+     "source",
+     "قانون السلطة القضائية (١) لسنة ١٩٩١ م"
+    ],
+    [
+     "year",
+     "١٩٩١"
+    ]
+   ]
+  },
+  {
+   "i": 76,
+   "stem": "0916-034-101-009",
+   "where": "ref r3",
+   "type": "book",
+   "printed": "3. Adams, D. M. Eductional Computing, Illinois, Charles Thomas publisher, 1986.",
+   "fields": [
+    [
+     "authors",
+     "Adams D. M."
+    ],
+    [
+     "source",
+     "Eductional Computing"
+    ],
+    [
+     "year",
+     "1986"
+    ],
+    [
+     "publisher-name",
+     "Charles Thomas publisher"
+    ],
+    [
+     "publisher-loc",
+     "Illinois"
+    ]
+   ]
+  },
+  {
+   "i": 77,
+   "stem": "0396-027-003-026",
+   "where": "ref r18",
+   "type": "web",
+   "printed": "Newline Group: FOX 22 haji jadr zana roshan avin barnamay fox. You Tube. October 6th 2021. Newline TV Channel. August 9th 2022. 33:08. https://youtu.be/shL1_EcxFnM.",
+   "fields": [
+    [
+     "authors",
+     "Newline Group"
+    ],
+    [
+     "article-title",
+     "FOX 22 haji jadr zana roshan avin barnamay fox"
+    ],
+    [
+     "source",
+     "You Tube"
+    ],
+    [
+     "year",
+     "2021"
+    ],
+    [
+     "ext-link",
+     "https://youtu.be/shL1_EcxFnM"
+    ]
+   ]
+  },
+  {
+   "i": 78,
+   "stem": "1717-006-001-005",
+   "where": "ref r17",
+   "type": "journal",
+   "printed": "Tamine-Gardes, J. Introduction à la syntaxe (suite) : l'adverbe . In: L'Information Grammaticale, N. 28, 1986. pp. 43-45.doi : 10.3406/igram.1986.3407",
+   "fields": [
+    [
+     "authors",
+     "Tamine-Gardes J."
+    ],
+    [
+     "article-title",
+     "Introduction à la syntaxe (suite) : l'adverbe"
+    ],
+    [
+     "source",
+     "L'Information Grammaticale"
+    ],
+    [
+     "year",
+     "1986"
+    ],
+    [
+     "issue",
+     "28"
+    ],
+    [
+     "fpage",
+     "43"
+    ],
+    [
+     "lpage",
+     "45"
+    ],
+    [
+     "page-range",
+     "43-45"
+    ],
+    [
+     "pub-id/doi",
+     "10.3406/igram.1986.3407"
+    ]
+   ]
+  },
+  {
+   "i": 79,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p19-1",
+   "type": "book",
+   "printed": "(٥١) مراة الزمان فى تاريخ الاعيان (حيدر أباد - الهند ١٩٥١-١٩٥٢) ج ٨ ص ١٥٥ .",
+   "fields": [
+    [
+     "source",
+     "مراة الزمان فى تاريخ الاعيان"
+    ],
+    [
+     "year",
+     "١٩٥١"
+    ],
+    [
+     "string-date",
+     "١٩٥١-١٩٥٢"
+    ],
+    [
+     "volume",
+     "٨"
+    ],
+    [
+     "publisher-loc",
+     "حيدر أباد - الهند"
+    ],
+    [
+     "fpage",
+     "155"
+    ],
+    [
+     "page-range",
+     "١٥٥"
+    ]
+   ]
+  },
+  {
+   "i": 80,
+   "stem": "2278-000-011-009",
+   "where": "ref r3",
+   "type": "book",
+   "printed": "Al-Zaeem, Ibrahim, Islamic Women Movement - Hamas, (London, E-Books, 2019, 1st. ed.).",
+   "fields": [
+    [
+     "authors",
+     "Al-Zaeem Ibrahim"
+    ],
+    [
+     "source",
+     "Islamic Women Movement - Hamas"
+    ],
+    [
+     "year",
+     "2019"
+    ],
+    [
+     "publisher-name",
+     "E-Books"
+    ],
+    [
+     "publisher-loc",
+     "London"
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+gold check: 5 item(s); today's code 950aa361c0
+  0747-001-003-001 (replay, whole article): same
+  0877-007-027-003 (replay, whole article): same
+  0924-012-005-007 (replay, whole article): same
+  1140-000-021-003 (replay, whole article): same
+  2382-005-003-001 (replay, whole article): same
+gold check: all the same

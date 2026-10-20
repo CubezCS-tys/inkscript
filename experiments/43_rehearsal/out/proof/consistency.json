@@ -1,0 +1,36 @@
+{
+ "articles": {
+  "0787-011-001-003": {
+   "words": 2540,
+   "same": 2526,
+   "kind": 0,
+   "only": 26,
+   "pages_diff_blocks": 3,
+   "pages": 13
+  },
+  "1010-006-011-015": {
+   "words": 5934,
+   "same": 5686,
+   "kind": 1,
+   "only": 491,
+   "pages_diff_blocks": 2,
+   "pages": 9
+  },
+  "1986-000-006-042": {
+   "words": 5722,
+   "same": 5721,
+   "kind": 0,
+   "only": 1,
+   "pages_diff_blocks": 1,
+   "pages": 16
+  }
+ },
+ "total": {
+  "words": 14196,
+  "same": 13933,
+  "kind": 1,
+  "only": 518,
+  "blocks_a": 520,
+  "blocks_b": 522
+ }
+}

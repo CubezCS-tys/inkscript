@@ -1,0 +1,110 @@
+{
+ "judge_auto": {
+  "0201-000-044-001 p1 set_kind other->title": [
+   "right",
+   "the paper title, now styled as title"
+  ],
+  "0241-011-004-002 p9 fix_picture_box": [
+   "right",
+   "box trimmed; no text covered; no visible change in the view"
+  ],
+  "0368-000-017-019 p6 mark_noise": [
+   "right",
+   "tiny scanner speck at the page edge"
+  ],
+  "0461-006-021-014 p3 set_kind ->header": [
+   "right",
+   "running head + folio"
+  ],
+  "0596-037-437-020 p2 set_kind ->footer": [
+   "right",
+   "journal running foot"
+  ],
+  "0700-000-015-004 p3 fix_picture_box": [
+   "partial",
+   "caption no longer masked, but the crop now cuts through the printed chart (its right axis title is gone)"
+  ],
+  "0732-001-005,006-002 p3 unmark_other_article": [
+   "doubtful",
+   "the bottom 3-column strip runs under every page with its own notes; unmarking it on p3 and p6 only leaves it other_article on the other pages (inconsistent article)"
+  ],
+  "0732-001-005,006-002 p6 unmark_other_article": [
+   "doubtful",
+   "same as p3"
+  ],
+  "0806-003-002-001 p4 set_kind ->header": [
+   "right",
+   "running head"
+  ],
+  "0849-012-001-002 p4 mark_noise": [
+   "partial",
+   "one show-through line removed, the other (\"ا ئلة لمن PAR منبن ليس قمساءلنا\") is still inside the paragraph; table show-through cells (رولعا, مهلج, Gr) untouched"
+  ],
+  "0877-006-023-014 p7 mark_noise": [
+   "right",
+   "pale mirrored line removed (residual junk \"عمله شاء بيبها\" in the caption remains)"
+  ],
+  "1009-007-080-012 p1 set_kind other->heading": [
+   "right",
+   "vertical banner words now kept (rendered overlapping in the view)"
+  ],
+  "1080-002-010-015 p9 mark_other_article": [
+   "doubtful",
+   "article is the China piece; p9 is a press-digest page - marking only the first item as another article while keeping the next (Israel) item is inconsistent"
+  ],
+  "1539-000-007-005 p2 mark_other_article": [
+   "right",
+   "book advertisement after the signature"
+  ]
+ },
+ "retries": {
+  "0040 p11": [
+   "no gain",
+   "table row 5 still shifted (row number lost, statement in the number column)"
+  ],
+  "0086 p17": [
+   "right",
+   "table header now aligned (5 columns)"
+  ],
+  "0300 p6": [
+   "right",
+   "the note's figures list now a proper table"
+  ],
+  "0510 p8": [
+   "right",
+   "title restored large; text over the photo still messy"
+  ],
+  "0528 p2": [
+   "right",
+   "small: stray superscript removed"
+  ],
+  "0701 p3": [
+   "no gain",
+   "advertisement page looks the same"
+  ],
+  "0715 p1": [
+   "no gain",
+   "two-column poem looks the same"
+  ],
+  "0737 p9": [
+   "right",
+   "advertisement panel split into books, as the builders reported"
+  ],
+  "1020 p6": [
+   "no gain",
+   "looks the same"
+  ],
+  "1136 p11": [
+   "right",
+   "JSON junk ({\"ar\": ...} \"Hieroglyphic sign\") removed from the text"
+  ],
+  "1187 p2": [
+   "no gain",
+   "still reads the two columns line by line interleaved (serious, unfixed)"
+  ],
+  "1187 p6": [
+   "right",
+   "verse now in proper hemistichs (big gain)"
+  ]
+ }
+}

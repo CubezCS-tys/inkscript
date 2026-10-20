@@ -1,0 +1,1179 @@
+{
+ "seed": 20261022,
+ "population": 3838,
+ "per_field": {
+  "source": {
+   "right": 73,
+   "loose": 1,
+   "missing": 1
+  },
+  "volume": {
+   "right": 15
+  },
+  "year": {
+   "right": 48,
+   "loose": 2,
+   "missing": 1
+  },
+  "pages": {
+   "right": 43,
+   "loose": 2
+  },
+  "authors": {
+   "right": 54,
+   "loose": 3,
+   "missing": 1
+  },
+  "title": {
+   "right": 18,
+   "missing": 2,
+   "loose": 1
+  },
+  "other": {
+   "missing": 5,
+   "loose": 1,
+   "right": 1
+  },
+  "place": {
+   "right": 21,
+   "loose": 2,
+   "missing": 2
+  },
+  "publisher": {
+   "right": 22,
+   "missing": 1,
+   "loose": 2
+  },
+  "issue": {
+   "right": 11
+  },
+  "citation": {
+   "invented": 1
+  },
+  "link": {
+   "right": 7,
+   "missing": 1
+  }
+ },
+ "fields_total": {
+  "right": 313,
+  "loose": 14,
+  "missing": 14
+ },
+ "citations_all_right": 57,
+ "items": [
+  {
+   "i": 1,
+   "stem": "1262-002-002-007",
+   "where": "ref r3",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 2,
+   "stem": "0604-003-008-001",
+   "where": "fn fn-p12-2",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "volume": "right",
+    "other": "missing"
+   },
+   "notes": {
+    "other": "second locus \"ق ٢ جـ ٧ ص ٧٧\" not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 3,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p2-6 (1 of 2)",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 4,
+   "stem": "0486-000-007-005",
+   "where": "fn fn-p11-6",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 5,
+   "stem": "2259-006-004-071",
+   "where": "fn fn-p13-1",
+   "verdicts": {
+    "source": "right",
+    "place": "loose",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "loose",
+    "other": "missing"
+   },
+   "notes": {
+    "authors": "title د. inside given name; وآخرون dropped",
+    "place": "printer typo عمانن kept",
+    "other": "edition ط7"
+   },
+   "all_right": false
+  },
+  {
+   "i": 6,
+   "stem": "0345-045-004-023",
+   "where": "ref r66",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 7,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p8-3",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "volume": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 8,
+   "stem": "2124-001-002-006",
+   "where": "ref r13",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 9,
+   "stem": "0416-053-004-004",
+   "where": "fn fn-p17-1",
+   "verdicts": {
+    "source": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 10,
+   "stem": "0416-009-000-008",
+   "where": "fn fn-p1-1 (3 of 3)",
+   "verdicts": {
+    "source": "right",
+    "authors": "right"
+   },
+   "notes": {
+    "citation": "a book mentioned in passing (not cited) parsed as a citation"
+   },
+   "all_right": false
+  },
+  {
+   "i": 11,
+   "stem": "0416-009-000-008",
+   "where": "fn fn-p9-3 (1 of 4)",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right",
+    "volume": "right",
+    "other": "missing"
+   },
+   "notes": {
+    "other": "translator"
+   },
+   "all_right": false
+  },
+  {
+   "i": 12,
+   "stem": "0040-007-004-002",
+   "where": "ref r12",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "missing"
+   },
+   "notes": {
+    "title": "article title \"A critique of existing practice...\" not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 13,
+   "stem": "1459-000-009-022",
+   "where": "ref r6",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 14,
+   "stem": "2184-011-001-027",
+   "where": "ref r2",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 15,
+   "stem": "0986-000-002-003",
+   "where": "fn fn-p5-1",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 16,
+   "stem": "0295-014-001-012",
+   "where": "fn fn-p1-1",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "pages": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 17,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p20-2",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 18,
+   "stem": "0389-002-000-002",
+   "where": "ref r5",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "place": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 19,
+   "stem": "0389-002-000-002",
+   "where": "fn fn-p9-5",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 20,
+   "stem": "0527-055-002-059",
+   "where": "ref r16",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "authors": "right",
+    "year": "right",
+    "publisher": "missing"
+   },
+   "notes": {
+    "publisher": "مركز الخليج للابحاث not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 21,
+   "stem": "1136-040-000-023",
+   "where": "ref r37",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 22,
+   "stem": "1408-000-040-020",
+   "where": "fn fn-p4-1 (1 of 2)",
+   "verdicts": {
+    "title": "right",
+    "link": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 23,
+   "stem": "2207-000-006-002",
+   "where": "fn fn-p1-2",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 24,
+   "stem": "1173-000-027-061",
+   "where": "fn fn-p8-17",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "loose",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {
+    "publisher": "two bodies merged into one publisher"
+   },
+   "all_right": false
+  },
+  {
+   "i": 25,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p17-2",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 26,
+   "stem": "0236-016-003-003",
+   "where": "ref r28",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "loose",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {
+    "publisher": "venue university as publisher"
+   },
+   "all_right": false
+  },
+  {
+   "i": 27,
+   "stem": "1716-000-002-018",
+   "where": "fn fn-p17-1",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 28,
+   "stem": "1726-000-027-017",
+   "where": "fn fn-p16-8",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 29,
+   "stem": "0345-045-004-015",
+   "where": "ref r17",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 30,
+   "stem": "0913-000-001-011",
+   "where": "fn fn-p8-4",
+   "verdicts": {
+    "source": "right",
+    "year": "loose",
+    "pages": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {
+    "year": "\"دجنبر 81\" - month + 2-digit year, not a year"
+   },
+   "all_right": false
+  },
+  {
+   "i": 31,
+   "stem": "0260-000-019-003",
+   "where": "fn fn-p8-2",
+   "verdicts": {
+    "source": "right",
+    "place": "missing",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {
+    "place": "London not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 32,
+   "stem": "0413-007-000-023",
+   "where": "fn fn-p11-1 (1 of 6)",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 33,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p7-1 (3 of 8)",
+   "verdicts": {
+    "link": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 34,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p13-1 (4 of 11)",
+   "verdicts": {
+    "source": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 35,
+   "stem": "0040-007-004-002",
+   "where": "ref r21",
+   "verdicts": {
+    "source": "loose",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "missing",
+    "issue": "right"
+   },
+   "notes": {
+    "title": "article title not parsed",
+    "source": "volume 52 merged into source \"DAI-A 52\""
+   },
+   "all_right": false
+  },
+  {
+   "i": 36,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p6-3 (2 of 2)",
+   "verdicts": {
+    "source": "right",
+    "pages": "loose"
+   },
+   "notes": {
+    "pages": "\"48. 48\" duplication kept"
+   },
+   "all_right": false
+  },
+  {
+   "i": 37,
+   "stem": "0241-018-002-008",
+   "where": "ref r11",
+   "verdicts": {
+    "title": "right",
+    "link": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 38,
+   "stem": "0679-000-001-004",
+   "where": "fn fn-p16-3",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "other": "loose"
+   },
+   "notes": {
+    "other": "\"عدد ٣١\" read as a day of the date; issue not separated"
+   },
+   "all_right": false
+  },
+  {
+   "i": 39,
+   "stem": "0342-000-012,013-042",
+   "where": "fn fn-p18-6",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "place": "loose"
+   },
+   "notes": {
+    "place": "\"طبعة أوروبا\" (European edition) put as place"
+   },
+   "all_right": false
+  },
+  {
+   "i": 40,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p5-1 (6 of 7)",
+   "verdicts": {
+    "source": "right",
+    "pages": "loose",
+    "authors": "right"
+   },
+   "notes": {
+    "pages": "16.84 is a title number, put as page"
+   },
+   "all_right": false
+  },
+  {
+   "i": 41,
+   "stem": "0604-003-008-001",
+   "where": "fn fn-p5-1",
+   "verdicts": {
+    "source": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 42,
+   "stem": "0829-013-025-033",
+   "where": "fn fn-p27-8",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "volume": "right",
+    "year": "loose",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {
+    "year": "Hijri \"١٤٢٦ هـ\" in <year>, not machine-readable"
+   },
+   "all_right": false
+  },
+  {
+   "i": 43,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p17-1",
+   "verdicts": {
+    "source": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 44,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p24-2 (3 of 3)",
+   "verdicts": {
+    "source": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 45,
+   "stem": "2207-000-006-002",
+   "where": "fn fn-p10-3",
+   "verdicts": {
+    "source": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 46,
+   "stem": "0345-045-004-015",
+   "where": "ref r9",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 47,
+   "stem": "0345-045-004-015",
+   "where": "ref r3",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 48,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p16-1 (2 of 3)",
+   "verdicts": {
+    "source": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 49,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p27-6",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 50,
+   "stem": "6238-002-000-002",
+   "where": "fn fn-p27-7",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "other": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 51,
+   "stem": "0236-016-003-003",
+   "where": "ref r35",
+   "verdicts": {
+    "title": "right",
+    "year": "right",
+    "link": "missing",
+    "authors": "right"
+   },
+   "notes": {
+    "link": "URL not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 52,
+   "stem": "1003-000-048-048",
+   "where": "ref r9",
+   "verdicts": {
+    "source": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 53,
+   "stem": "0413-007-000-023",
+   "where": "ref r16",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "loose"
+   },
+   "notes": {
+    "authors": "\"Jr.\" inside surname"
+   },
+   "all_right": false
+  },
+  {
+   "i": 54,
+   "stem": "0913-000-001-011",
+   "where": "ref r6",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right",
+    "other": "missing"
+   },
+   "notes": {
+    "other": "editor (تحقيق) and edition not parsed"
+   },
+   "all_right": false
+  },
+  {
+   "i": 55,
+   "stem": "6278-001-000-002",
+   "where": "fn fn-p22-5",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 56,
+   "stem": "0913-000-001-011",
+   "where": "ref r8",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 57,
+   "stem": "0578-000-027-045",
+   "where": "fn fn-p20-4",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 58,
+   "stem": "0228-000-027-001",
+   "where": "ref r11",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 59,
+   "stem": "2230-000-008-019",
+   "where": "fn fn-p16-1",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "link": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 60,
+   "stem": "0375-001-001-011",
+   "where": "fn fn-p18-1 (5 of 5)",
+   "verdicts": {
+    "source": "right",
+    "authors": "missing"
+   },
+   "notes": {
+    "authors": "الجاحظ not parsed as author"
+   },
+   "all_right": false
+  },
+  {
+   "i": 61,
+   "stem": "0742-000-011-007",
+   "where": "ref r20",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "publisher": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 62,
+   "stem": "1136-040-000-023",
+   "where": "fn fn-p13-11",
+   "verdicts": {
+    "link": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 63,
+   "stem": "1726-000-027-017",
+   "where": "ref r1",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 64,
+   "stem": "0739-000-009-001",
+   "where": "fn fn-p1-1 (4 of 13)",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "volume": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 65,
+   "stem": "0201-000-044-001",
+   "where": "ref r9",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 66,
+   "stem": "0739-000-009-001",
+   "where": "fn fn-p10-1",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 67,
+   "stem": "0756-001-000-012",
+   "where": "fn fn-p15-3",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 68,
+   "stem": "1426-000-010-017",
+   "where": "fn fn-p22-10",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 69,
+   "stem": "1787-014-002-007",
+   "where": "ref r10",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 70,
+   "stem": "1839-000-008-001",
+   "where": "fn fn-p15-13",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 71,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p4-1",
+   "verdicts": {
+    "source": "right",
+    "volume": "right",
+    "publisher": "right",
+    "pages": "right",
+    "authors": "loose"
+   },
+   "notes": {
+    "authors": "accusative form أبا الفرج kept as the name"
+   },
+   "all_right": false
+  },
+  {
+   "i": 72,
+   "stem": "0292-000-003-001",
+   "where": "fn fn-p12-3",
+   "verdicts": {
+    "source": "right",
+    "pages": "right",
+    "volume": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 73,
+   "stem": "2259-006-004-071",
+   "where": "fn fn-p12-1",
+   "verdicts": {
+    "source": "right",
+    "title": "loose",
+    "authors": "right"
+   },
+   "notes": {
+    "title": "unbalanced parenthesis \"أمر رقم (09/95\""
+   },
+   "all_right": false
+  },
+  {
+   "i": 74,
+   "stem": "0680-003-011,012-011",
+   "where": "ref r8",
+   "verdicts": {
+    "source": "missing",
+    "place": "missing",
+    "authors": "right",
+    "year": "missing",
+    "other": "missing"
+   },
+   "notes": {
+    "source": "title كتاب المسالك والممالك",
+    "year": "١٨٨٩",
+    "place": "ليدن",
+    "other": "editor دي غوية"
+   },
+   "all_right": false
+  },
+  {
+   "i": 75,
+   "stem": "6678-000-000-007",
+   "where": "ref r3",
+   "verdicts": {
+    "source": "right",
+    "year": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 76,
+   "stem": "0916-034-101-009",
+   "where": "ref r3",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 77,
+   "stem": "0396-027-003-026",
+   "where": "ref r18",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "authors": "right",
+    "title": "right",
+    "link": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 78,
+   "stem": "1717-006-001-005",
+   "where": "ref r17",
+   "verdicts": {
+    "source": "right",
+    "year": "right",
+    "pages": "right",
+    "authors": "right",
+    "title": "right",
+    "link": "right",
+    "issue": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 79,
+   "stem": "0138-005-006-003",
+   "where": "fn fn-p19-1",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "volume": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "all_right": true
+  },
+  {
+   "i": 80,
+   "stem": "2278-000-011-009",
+   "where": "ref r3",
+   "verdicts": {
+    "source": "right",
+    "place": "right",
+    "year": "right",
+    "publisher": "right",
+    "authors": "right"
+   },
+   "notes": {},
+   "all_right": true
+  }
+ ]
+}

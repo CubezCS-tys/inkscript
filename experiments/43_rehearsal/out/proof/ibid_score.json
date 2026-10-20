@@ -1,0 +1,581 @@
+{
+ "seed": 20261023,
+ "population": 510,
+ "sample": [
+  {
+   "backref": "0048-011-042-001|fn-p27-4",
+   "stem": "0048-011-042-001",
+   "note": "fn-p27-4",
+   "marker": "مرجع سابق",
+   "printed": "٤ - محمد صلاح الدين مجاور، مرجع سابق، ص٧٧ .",
+   "target": null,
+   "previous": [
+    [
+     "fn-p27-1",
+     "١ - رفيقة حمود، بعض الأساليب التربوية الحديثة في التعليم الابتدائي، قطر، كلية التربية، الدوحة (ندوة كلية التربية ومركز البحوث التربوية)، نحو تربية أفضل لتلميذ المرحلة الابتدائية، ص١."
+    ],
+    [
+     "fn-p27-2",
+     "٢ - محمد صلاح الدين مجاور وفتحي عبد المقصود الدين، المنهج المدرسي أسسه وتطبيقاته التربوية، الكويت، دار القلم، ط٦، سنة ١٩٨٣م، ص٢٨."
+    ],
+    [
+     "fn-p27-3",
+     "٣ - يطلق على المرحلة التي يلحق بها الطفل من ٦ - ١٢ سنة المرحلة الابتدائية أو التعليم الأساسي."
+    ]
+   ],
+   "verdict": "missed",
+   "why": "co-author مجاور full citation is note 2 just above; no link"
+  },
+  {
+   "backref": "0138-011-013-012|fn-p22-1",
+   "stem": "0138-011-013-012",
+   "note": "fn-p22-1",
+   "marker": "Ibid",
+   "printed": "(1) C . J . Dodson , Ibid , p . 48 .",
+   "target": {
+    "work": "0138-011-013-012|note:fn-p15-1|0",
+    "method": "backref-author",
+    "first_author": "J . C . Dodson",
+    "source": null,
+    "printed": "(1) J . C . Dodson , Language Teaching and the Bilingual Method , Isaac Pittmannt sons , London , 1974 P . 46 ."
+   },
+   "previous": [
+    [
+     "fn-p16-1",
+     "(1) W . E . Lambert , \" Psychological Approaches to the study of Language \" in H . B . Allen , ed . , op . cit . , PP 37 -- 38 ."
+    ],
+    [
+     "fn-p17-1",
+     "(1) The type of English we teach in the Arab countries is that spoken in England . This means that the semantic units which may face our learners should be related to the English culture and not to other English speaking"
+    ],
+    [
+     "fn-p21-1",
+     "(1) C . J . Dodson , op . cit . , p . 36 ."
+    ]
+   ],
+   "verdict": "right",
+   "why": "Dodson Ibid -> Dodson full citation"
+  },
+  {
+   "backref": "0416-053-004-004|fn-p5-1",
+   "stem": "0416-053-004-004",
+   "note": "fn-p5-1",
+   "marker": "المصدر نفسه",
+   "printed": "(٨) المصدر نفسه : ٣٥",
+   "target": {
+    "work": "0416-053-004-004|note:fn-p4-2|0",
+    "method": "backref-previous",
+    "first_author": "عبد الجبار عباس",
+    "source": "السياب",
+    "printed": "(٧) السياب ، عبد الجبار عباس : ٢١ . دار الحرية للطباعة ، بغداد ١٩٧٢م ."
+   },
+   "previous": [
+    [
+     "fn-p3-2",
+     "(٥) الفن والحلم والفعل ، جبرا ابراهيم جبرا : ٢١٤ دار الشؤون الثقافية ، بغداد ١٩٨٦ ."
+    ],
+    [
+     "fn-p4-1",
+     "(٦) أدباء معاصرون : ٨٤ ."
+    ],
+    [
+     "fn-p4-2",
+     "(٧) السياب ، عبد الجبار عباس : ٢١ . دار الحرية للطباعة ، بغداد ١٩٧٢م ."
+    ]
+   ],
+   "verdict": "right",
+   "why": "previous note"
+  },
+  {
+   "backref": "0465-021-003-005|fn-p11-2",
+   "stem": "0465-021-003-005",
+   "note": "fn-p11-2",
+   "marker": "ibid.",
+   "printed": "(32) ibid.",
+   "target": {
+    "work": "0465-021-003-005|note:fn-p11-1|0",
+    "method": "backref-previous",
+    "first_author": "Jones Ben",
+    "source": "Christian Science Monitor",
+    "printed": "(31) Ben, Jones. (1995) \"Immigration pushes Europe to Steady Southern Fringe\" Christian Science Monitor, Vol.88 Issue1, Third QuarterlyD ."
+   },
+   "previous": [
+    [
+     "fn-p9-4",
+     "(29) For more info miation see Fischer (1993)."
+    ],
+    [
+     "fn-p10-1",
+     "(30) Fawzy samah (2002)."
+    ],
+    [
+     "fn-p11-1",
+     "(31) Ben, Jones. (1995) \"Immigration pushes Europe to Steady Southern Fringe\" Christian Science Monitor, Vol.88 Issue1, Third QuarterlyD ."
+    ]
+   ],
+   "verdict": "right",
+   "why": "previous note"
+  },
+  {
+   "backref": "0484-060-338-007|fn-p4-4",
+   "stem": "0484-060-338-007",
+   "note": "fn-p4-4",
+   "marker": "op. cit.",
+   "printed": "(٤) Debbasch, op. cit., pp. 236",
+   "target": null,
+   "previous": [
+    [
+     "fn-p4-1",
+     "(١) Ibid, p. 328."
+    ],
+    [
+     "fn-p4-2",
+     "(٢) Ibid, p. 329."
+    ],
+    [
+     "fn-p4-3",
+     "(٣) Debbasch, op. cit., 236."
+    ]
+   ],
+   "verdict": "missed",
+   "why": "Debbasch full citation in fn-p3-3; no link"
+  },
+  {
+   "backref": "0484-060-338-007|fn-p9-1",
+   "stem": "0484-060-338-007",
+   "note": "fn-p9-1",
+   "marker": "Ibid",
+   "printed": "(١) Ibid, p. 237. وانظر فى هذا الشأن Major R.R. Baxter, The Duty of obedience. To the Belligerent occupant, British yearbook of International Law, 1950, pp. 253 - 257.",
+   "target": null,
+   "previous": [
+    [
+     "fn-p7-1",
+     "(١) نأمل أن نعود الى ذلك فى دراسة مفصلة فى عدد قادم من اعداد هذه المجلة."
+    ],
+    [
+     "fn-p8-1",
+     "(١) Debbasch, op. cit., pp. 232 _ 233."
+    ],
+    [
+     "fn-p8-2",
+     "(٢) Ibid, pp. 233 - 234."
+    ]
+   ],
+   "verdict": "missed",
+   "why": "Ibid after \"Ibid\" after Debbasch op. cit.; chain unresolved"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p11-1",
+   "stem": "0486-000-007-005",
+   "note": "fn-p11-1",
+   "marker": "Ibid.",
+   "printed": "(49) Ibid., p. 75.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p10-6|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(47) S.R.C., p. 110."
+   },
+   "previous": [
+    [
+     "fn-p10-5",
+     "(46) Cf. la Préface d'Emile Magne, p. XVI, dans :«S.R.C»."
+    ],
+    [
+     "fn-p10-6",
+     "(47) S.R.C., p. 110."
+    ],
+    [
+     "fn-p10-7",
+     "(48) Ibid., p. 21-22."
+    ]
+   ],
+   "verdict": "right",
+   "why": "Ibid chain -> S.R.C."
+  },
+  {
+   "backref": "0486-000-007-005|fn-p15-1",
+   "stem": "0486-000-007-005",
+   "note": "fn-p15-1",
+   "marker": "Ibid.",
+   "printed": "(70) Ibid., p. 43.45.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p13-4|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(63) S.R.C., p. 109."
+   },
+   "previous": [
+    [
+     "fn-p14-1",
+     "(67) Ibid., p. 5."
+    ],
+    [
+     "fn-p14-2",
+     "(68) Ibid., p. 7."
+    ],
+    [
+     "fn-p14-3",
+     "(69) Ibid., p. 8."
+    ]
+   ],
+   "verdict": "right",
+   "why": "Ibid chain -> S.R.C. (63)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p16-4",
+   "stem": "0486-000-007-005",
+   "note": "fn-p16-4",
+   "marker": "Ibid.",
+   "printed": "(78) Ibid., p. 104.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p13-4|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(63) S.R.C., p. 109."
+   },
+   "previous": [
+    [
+     "fn-p16-1",
+     "(75) Ibid., p. 16."
+    ],
+    [
+     "fn-p16-2",
+     "(76) Ibid., p. 48."
+    ],
+    [
+     "fn-p16-3",
+     "(77) Ibid., p. 50-51."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (63)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p21-1",
+   "stem": "0486-000-007-005",
+   "note": "fn-p21-1",
+   "marker": "Ibid.",
+   "printed": "(98) Ibid., p. 5.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p19-1|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(90) S.R.C., p. 13."
+   },
+   "previous": [
+    [
+     "fn-p20-3",
+     "(95) Ibid., p. 125."
+    ],
+    [
+     "fn-p20-4",
+     "(96) Ibid., p. 109."
+    ],
+    [
+     "fn-p20-5",
+     "(97) Ibid., p. 31."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (90)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p21-4",
+   "stem": "0486-000-007-005",
+   "note": "fn-p21-4",
+   "marker": "Ibid.",
+   "printed": "(101) Ibid., p. 24.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p19-1|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(90) S.R.C., p. 13."
+   },
+   "previous": [
+    [
+     "fn-p21-1",
+     "(98) Ibid., p. 5."
+    ],
+    [
+     "fn-p21-2",
+     "(99) Ibid., p. 11."
+    ],
+    [
+     "fn-p21-3",
+     "(100) Ibid., p. 16."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (90)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p22-3",
+   "stem": "0486-000-007-005",
+   "note": "fn-p22-3",
+   "marker": "Ibid.",
+   "printed": "(108) Ibid., p. 13.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p19-1|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(90) S.R.C., p. 13."
+   },
+   "previous": [
+    [
+     "fn-p21-8",
+     "(105) Ibid., p. 105-106."
+    ],
+    [
+     "fn-p22-1",
+     "(106) İbid., p. 107."
+    ],
+    [
+     "fn-p22-2",
+     "(107) Ibid., p. 10."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (90)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p27-1",
+   "stem": "0486-000-007-005",
+   "note": "fn-p27-1",
+   "marker": "Ibid.",
+   "printed": "(127) Ibid., p. 10.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p23-4|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(117) S.R.C., p. 7."
+   },
+   "previous": [
+    [
+     "fn-p26-3",
+     "(124) Ibid., p. 11."
+    ],
+    [
+     "fn-p26-4",
+     "(125) Ibid., p. 11."
+    ],
+    [
+     "fn-p26-5",
+     "(126) Ibid., p. 29."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (117)"
+  },
+  {
+   "backref": "0486-000-007-005|fn-p27-5",
+   "stem": "0486-000-007-005",
+   "note": "fn-p27-5",
+   "marker": "Ibid.",
+   "printed": "(131) Ibid., p. 35.",
+   "target": {
+    "work": "0486-000-007-005|note:fn-p23-4|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "S.R.C.",
+    "printed": "(117) S.R.C., p. 7."
+   },
+   "previous": [
+    [
+     "fn-p27-2",
+     "(128) Ibid., p. 11."
+    ],
+    [
+     "fn-p27-3",
+     "(129) Ibid., p. 26."
+    ],
+    [
+     "fn-p27-4",
+     "(130) Ibid., p. 27."
+    ]
+   ],
+   "verdict": "right",
+   "why": "chain -> S.R.C. (117)"
+  },
+  {
+   "backref": "0679-000-001-004|fn-p24-1",
+   "stem": "0679-000-001-004",
+   "note": "fn-p24-1",
+   "marker": "المرجع السابق",
+   "printed": "(٥٦) عصام ضياء الدين ، المرجع السابق، ص ٦٤-٦٩ .",
+   "target": null,
+   "previous": [
+    [
+     "fn-p22-1",
+     "(٥٣) المرجع السابق، ص ٣١ ."
+    ],
+    [
+     "fn-p22-2",
+     "(٥٤) جريدة اللواء ، عدد أول فبراير سنة ١٩٠٨ ."
+    ],
+    [
+     "fn-p22-3",
+     "(٥٥) جريدة اللواء ، العدد ٢ نوفمبر سنة ١٩٠٨."
+    ]
+   ],
+   "verdict": "missed",
+   "why": "عصام ضياء الدين full citation is fn-p15-1; no link"
+  },
+  {
+   "backref": "0679-000-001-004|fn-p9-2",
+   "stem": "0679-000-001-004",
+   "note": "fn-p9-2",
+   "marker": "المرجع السابق",
+   "printed": "(٢٤) أحمد شفيق، المرجع السابق، ص ١٦٦ .",
+   "target": {
+    "work": "0679-000-001-004|note:fn-p7-1|0",
+    "method": "backref-author",
+    "first_author": "أحمد شفيق",
+    "source": "مذكرتى فى نصف قرن",
+    "printed": "(١٤) أحمد شفيق، مذكرتى فى نصف قرن، القسم الثناى من الجزء الثانى ( ١٩٠٣ - ١٩١٤) القاهرة سنة ١٩٣٦، ص ١٤٢ ."
+   },
+   "previous": [
+    [
+     "fn-p8-2",
+     "(٢١) اللواء عدد ١٤ مارس سنة ١٩٠٨ ."
+    ],
+    [
+     "fn-p8-3",
+     "(٢٢) عبد الرحمن الرافعى ، محمد فريد ، ص ٩٥، ٩٦."
+    ],
+    [
+     "fn-p9-1",
+     "(٢٣) اللواء عدد ٢١ نوفمبر سنة ١٩٠٨."
+    ]
+   ],
+   "verdict": "right",
+   "why": "أحمد شفيق -> مذكرتى"
+  },
+  {
+   "backref": "1626-000-016,017-026|fn-p4-1",
+   "stem": "1626-000-016,017-026",
+   "note": "fn-p4-1",
+   "marker": "Op. Cit.",
+   "printed": "(17) Mejri (2000) Op. Cit.",
+   "target": {
+    "work": "1626-000-016,017-026|ref:r12|0",
+    "method": "backref-author",
+    "first_author": "S. Mejri",
+    "source": "Meta : journal des traducteurs",
+    "printed": "Mejri, S. «Figement et traduction : problématique générale», Meta : journal des traducteurs, Volume 53, numéro 2, 2008 pp. 244-252"
+   },
+   "previous": [
+    [
+     "fn-p2-1",
+     "(19) M. Pergnier Les fondements sociolinguistiques de la traduction. Paris : Honoré Champion. 1982"
+    ],
+    [
+     "fn-p2-2",
+     "(20) J Darbelnet «Traduction littérale ou traduction libre?», Meta : Journal destraducteurs, Volume 15, numéro 2 1970, pp. 88-94. (p. 94)"
+    ],
+    [
+     "fn-p3-1",
+     "(18) M. Lederer, La traduction aujourd'hui, le modèle interprétatif, Paris, Caen, Lettres modernes Minard, 2006 p. 46"
+    ]
+   ],
+   "verdict": "wrong",
+   "why": "\"Mejri (2000)\" linked to Mejri 2008; the 2000 work is ref r10"
+  },
+  {
+   "backref": "1635-082-003-006|fn-p2-24",
+   "stem": "1635-082-003-006",
+   "note": "fn-p2-24",
+   "marker": "Ibid.",
+   "printed": "24 - Ibid. P.170",
+   "target": {
+    "work": "1635-082-003-006|note:fn-p2-23|0",
+    "method": "backref-previous",
+    "first_author": "Valerie Colin- Simard",
+    "source": "Pères d'aujourd'hui, fille de demain",
+    "printed": "23- Colin- Simard Valerie, Pères d'aujourd'hui, fille de demain, Éd. Anne Carrière, Paris, P.176"
+   },
+   "previous": [
+    [
+     "fn-p2-21",
+     "21 -Chuntal Calatayud, accepter l'autre tels qu'il est, Ed. Jouvence, Paris, 2004, P.37-38"
+    ],
+    [
+     "fn-p2-22",
+     "22- OP.cit P. 107"
+    ],
+    [
+     "fn-p2-23",
+     "23- Colin- Simard Valerie, Pères d'aujourd'hui, fille de demain, Éd. Anne Carrière, Paris, P.176"
+    ]
+   ],
+   "verdict": "right",
+   "why": "previous note"
+  },
+  {
+   "backref": "2278-000-011-009|fn-p10-5",
+   "stem": "2278-000-011-009",
+   "note": "fn-p10-5",
+   "marker": "Ibid.",
+   "printed": "(391) Ibid.",
+   "target": {
+    "work": "2278-000-011-009|note:fn-p10-3|0",
+    "method": "backref-previous",
+    "first_author": null,
+    "source": "Palestine TV",
+    "printed": "(389) The freed prisoner Areej Orouq, Palestine TV, December 28, 2019."
+   },
+   "previous": [
+    [
+     "fn-p10-2",
+     "(388) Ibid: pp. 146-147."
+    ],
+    [
+     "fn-p10-3",
+     "(389) The freed prisoner Areej Orouq, Palestine TV, December 28, 2019."
+    ],
+    [
+     "fn-p10-4",
+     "(390) Ibid."
+    ]
+   ],
+   "verdict": "right",
+   "why": "Ibid chain -> Palestine TV"
+  },
+  {
+   "backref": "8485-000-000-007|fn-p10-1",
+   "stem": "8485-000-000-007",
+   "note": "fn-p10-1",
+   "marker": "المرجع السابق",
+   "printed": "(1) الدكتور / سامي حامد سليمان، المرجع السابق، ص 154.",
+   "target": null,
+   "previous": [
+    [
+     "fn-p9-2",
+     "(2) T.C, 15 Mars 1902, Mascarqs."
+    ],
+    [
+     "fn-p9-3",
+     "(3) T.C. 20 Janvel 1900. vhel, P 51."
+    ],
+    [
+     "fn-p9-4",
+     "(4) T.C. 15. feb. 1890. Vincent, p 180"
+    ]
+   ],
+   "verdict": "right",
+   "why": "left unresolved; no full citation of سامي حامد سليمان in this article (correct)"
+  }
+ ],
+ "tally": {
+  "missed": 4,
+  "right": 15,
+  "wrong": 1
+ }
+}

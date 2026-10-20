@@ -1,0 +1,624 @@
+{
+ "seed": 20261024,
+ "per_field": {
+  "title": {
+   "right": 28,
+   "loose": 2
+  },
+  "authors": {
+   "loose": 6,
+   "right": 23,
+   "wrong": 1
+  },
+  "year": {
+   "right": 27,
+   "wrong": 1,
+   "loose": 1,
+   "unverified": 1
+  },
+  "pages": {
+   "right": 30
+  },
+  "affiliation": {
+   "right": 14,
+   "loose": 1
+  }
+ },
+ "fully_right": 18,
+ "d33_changes": 16,
+ "d33_articles": 13,
+ "d33_sensible": 16,
+ "catalogue_wrong_ours_right": [
+  "0821-000-044-037 pages (catalogue 1, print p.194)",
+  "1289-000-001-006 pages (catalogue 51-52, print صفحة 9)"
+ ],
+ "items": [
+  {
+   "i": 1,
+   "stem": "0071-020-144-001",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "authors": "honorific أ.د. kept in the name"
+   },
+   "d33": [
+    {
+     "field": "fpage",
+     "printed": "2",
+     "corrected": "1",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 10 pages",
+     "pages_in_scan": 10,
+     "folios": 9
+    }
+   ],
+   "all_right": false
+  },
+  {
+   "i": 2,
+   "stem": "0167-000-111-054",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "589",
+     "corrected": "596",
+     "source": "printed folios (first and last page)",
+     "reason": "page range consistent with the scan's 15 pages",
+     "pages_in_scan": 15,
+     "folios": 15
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 3,
+   "stem": "0260-000-019-003",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 4,
+   "stem": "0266-001-001,002-002",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "wrong",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "year": "print gives 1409هـ/1989م; <year> holds the Hijri 1409"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 5,
+   "stem": "0330-002-004-002",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 6,
+   "stem": "0331-000-076-003",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 7,
+   "stem": "0367-000-006-017",
+   "verdicts": {
+    "title": "loose",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "title": "book review: title is the reviewed book \"Edward Said L'ORIENTALISME (Paris, Seuil, 1980).\""
+   },
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "276",
+     "corrected": "277",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 10 pages",
+     "pages_in_scan": 10,
+     "folios": 9
+    }
+   ],
+   "all_right": false
+  },
+  {
+   "i": 8,
+   "stem": "0486-000-007-005",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "10",
+     "corrected": "28",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 28 pages",
+     "pages_in_scan": 28,
+     "folios": 27
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 9,
+   "stem": "0529-004-007-007",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "158",
+     "corrected": "165",
+     "source": "printed folios (first and last page)",
+     "reason": "page range consistent with the scan's 15 pages",
+     "pages_in_scan": 15,
+     "folios": 15
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 10,
+   "stem": "0596-037-437-020",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "loose",
+    "pages": "right"
+   },
+   "notes": {
+    "year": "Hijri 1429 in <year> (catalogue 2008)"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 11,
+   "stem": "0597-012-011-002",
+   "verdicts": {
+    "title": "loose",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {
+    "title": "section label \"افتتاحية العدد\" prepended to the title"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 12,
+   "stem": "0620-004-002-003",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 13,
+   "stem": "0706-000-011-021",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "258",
+     "corrected": "274",
+     "source": "printed folios (first and last page)",
+     "reason": "page range consistent with the scan's 24 pages",
+     "pages_in_scan": 24,
+     "folios": 24
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 14,
+   "stem": "0728-022-003-013",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 15,
+   "stem": "0735-003-005,006-027",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "389",
+     "corrected": "390",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 6 pages",
+     "pages_in_scan": 6,
+     "folios": 5
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 16,
+   "stem": "0744-000-063-045",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {
+    "authors": "readers' mail: initials \"ع. م.\" and a letter writer as authors"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 17,
+   "stem": "0806-003-002-001",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 18,
+   "stem": "0806-003-004-010",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {
+    "authors": "profession \"المحامى\" kept in the name"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 19,
+   "stem": "0821-000-044-037",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 20,
+   "stem": "0875-002-005-006",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 21,
+   "stem": "0924-009-007-003",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "unverified",
+    "pages": "right"
+   },
+   "notes": {
+    "year": "p1 starts mid-journal; 1929 vs catalogue 1928 not decidable from the scan"
+   },
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "634",
+     "corrected": "643",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 19 pages",
+     "pages_in_scan": 19,
+     "folios": 15
+    }
+   ],
+   "all_right": false
+  },
+  {
+   "i": 22,
+   "stem": "1009-010-110-010",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 23,
+   "stem": "1036-000-182-010",
+   "verdicts": {
+    "title": "right",
+    "authors": "wrong",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "authors": "Latin spelling \"Giuseppe Caruso\" made a 2nd author; translator (ترجمة) made a 3rd author"
+   },
+   "d33": [
+    {
+     "field": "fpage",
+     "printed": "156",
+     "corrected": "155",
+     "source": "printed folios (offset from the pages that carry one)",
+     "reason": "page range consistent with the scan's 22 pages",
+     "pages_in_scan": 22,
+     "folios": 21
+    },
+    {
+     "field": "lpage",
+     "printed": "162",
+     "corrected": "176",
+     "source": "printed folios (offset from the pages that carry one)",
+     "reason": "page range consistent with the scan's 22 pages",
+     "pages_in_scan": 22,
+     "folios": 21
+    }
+   ],
+   "all_right": false
+  },
+  {
+   "i": 24,
+   "stem": "1289-000-001-006",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 25,
+   "stem": "1459-000-009-022",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "333",
+     "corrected": "340",
+     "source": "printed folios (first and last page)",
+     "reason": "page range consistent with the scan's 14 pages",
+     "pages_in_scan": 14,
+     "folios": 14
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 26,
+   "stem": "1633-000-006-019",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "loose"
+   },
+   "notes": {
+    "authors": "8 rapporteurs from the last page as authors (catalogue: Editorial Board)",
+    "affiliation": "\"(Président ...)\" with parenthesis"
+   },
+   "d33": [],
+   "all_right": false
+  },
+  {
+   "i": 27,
+   "stem": "1717-006-001-005",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [],
+   "all_right": true
+  },
+  {
+   "i": 28,
+   "stem": "2005-019-003-008",
+   "verdicts": {
+    "title": "right",
+    "authors": "right",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {},
+   "d33": [
+    {
+     "field": "lpage",
+     "printed": "117",
+     "corrected": "124",
+     "source": "printed folios (first and last page)",
+     "reason": "page range consistent with the scan's 15 pages",
+     "pages_in_scan": 15,
+     "folios": 15
+    }
+   ],
+   "all_right": true
+  },
+  {
+   "i": 29,
+   "stem": "2483-000-019-001",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "authors": "honorifics أ.د/ د / kept in names"
+   },
+   "d33": [
+    {
+     "field": "fpage",
+     "printed": "441",
+     "corrected": "439",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 21 pages",
+     "pages_in_scan": 21,
+     "folios": 18
+    },
+    {
+     "field": "lpage",
+     "printed": "445",
+     "corrected": "459",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 21 pages",
+     "pages_in_scan": 21,
+     "folios": 18
+    }
+   ],
+   "all_right": false
+  },
+  {
+   "i": 30,
+   "stem": "8480-000-000-002",
+   "verdicts": {
+    "title": "right",
+    "authors": "loose",
+    "year": "right",
+    "pages": "right",
+    "affiliation": "right"
+   },
+   "notes": {
+    "authors": "honorific أ.د. kept in the name"
+   },
+   "d33": [
+    {
+     "field": "fpage",
+     "printed": "21",
+     "corrected": "19",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 20 pages",
+     "pages_in_scan": 20,
+     "folios": 18
+    },
+    {
+     "field": "lpage",
+     "printed": "28",
+     "corrected": "38",
+     "source": "catalogue (its range spans the scan's pages)",
+     "reason": "page range consistent with the scan's 20 pages",
+     "pages_in_scan": 20,
+     "folios": 18
+    }
+   ],
+   "all_right": false
+  }
+ ]
+}
