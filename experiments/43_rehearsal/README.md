@@ -1157,6 +1157,96 @@ vowelled_words, latin_join, math_parts, inline_math_junk, advert_whole, page_num
 `views43.py` (table parts, ragged rows, join_lines, signature, blended crops), `flags43.py` (8 kinds, `--out`),
 `jats43.py` (appendix heading), `prompt43.py` (v3.4), `run43.py` (rechunk hook), `test_rules43.py`.
 
+## Correction tool v1 (2026-10-20; owner-approved, docs/ideas.md "A correction tool on the Layout view"; no calls)
+
+**For the owner, in plain words.** Open <http://127.0.0.1:8899/correct/edit/index.html> (also linked from the 300's
+index: "correction tool"). Pick an article: it is the Layout view you know — the scan on the left, our page on the
+right — with a panel on the right (at the bottom on a phone; ▾ folds it). The blue **Correcting** button in the bar
+turns the tool on and off.
+
+* **Click a block on our page** (or a line on the scan) — it is outlined on both sides and the panel shows it:
+  * *What this block is* — paragraph, title, heading 1–3, author line, abstract, footnote, endnote, verse, list item,
+    caption, quotation, boxed text, reference, running head, page foot, **from another article**, or **not on the page
+    (noise)** with its kind (show-through / junk / bleed). Pick, then **Apply**.
+  * *Lines* — every printed line of the block, Azure's words one by one (pale yellow = Azure unsure). Tick lines, then
+    **Selected lines are noise**, or **Split before the first selected line** (e.g. author name | affiliation).
+  * **Click a word** — the panel shows that word cut from the scan, what Azure read (and its confidence), and Gemini's
+    correction if it made one. Type what the print shows, then either **Azure misread → correct to this** (the text
+    changes) or **Misprint in the print → flag with this correction** (the printed text stays as printed and the
+    correction is recorded beside it, D30). **Azure was right** takes Gemini's correction away.
+  * *Reading order* — **Move up / Move down** among the page's blocks (the list under the buttons is the page's order
+    as it is now; click an entry to go to that block), **Merge with the next block**.
+  * *Note calls* — each call in the block with the note it points to; pick another note (the page's notes first) and
+    **Link**; or link a new call (line, marker as printed, note).
+  * *Picture box* — **Redraw the box on the scan**: drag the four orange corners, then **Save the box**.
+* Each change appears at once: an orange tag on our page ("→ heading 2", "split before line 1:7", "word corrected: …"),
+  and under *Corrections here*, each with **Undo**. **My corrections** lists all of the article's, with **Show** and
+  **Undo**, and the box **This article is now right** (it then joins the gold set).
+* Nothing changes in the masters while you work. Corrections stay in this browser; **Export** (in the panel or on the
+  index page) saves those of every article as one file `corrections_v33_300_<date>.json`. Then:
+
+      .venv/bin/python experiments/43_rehearsal/correct43.py import corrections_v33_300_….json --run v33_300
+      .venv/bin/python experiments/43_rehearsal/gold43.py import corrections_v33_300_….json   # "now right" articles
+
+  The first writes them into `out/v33_300_judged/patches/<stem>.json` (your earlier corrections of that article are
+  replaced by the file's; the judge's stay) and rebuilds those articles' masters in `out/v33_300_judged/masters/`.
+
+**How it works.** `correct43.py build --run v33_300` makes the Layout view of each article (views43 with one hook:
+`data-alto` on each piece, the ALTO block it draws) into `out/correct/v33_300/views/mirror/` and the editing page
+`views/edit/<stem>.html` = that page + `correct43.js` / `correct43.css` + the article's data: its blocks as the run's
+answers have them (`out/v33_300/rules`), Azure's lines and words with boxes and confidences (Store43, `azure_words`),
+Gemini's fixes and misprint flags, the notes, and which Azure lines each ALTO block holds (the ALTO TextLine boxes are
+Azure's own boxes, so they match exactly: 317/317, 459/459, 93/93 lines on the three test articles). A click finds the
+block again by its Azure lines, never by position. Each correction is a **patch with source "person"** in
+`patches43.py`'s format (`h-<stem4>-p<page>-<time>`, created = the moment, keyed to Azure line ids; actions set_kind,
+mark/unmark_other_article, mark_noise, split_block, merge_blocks, reorder, relink_call, fix_picture_box, fix_word). The
+page replays the person's patches in the browser by the same rules (patches43.apply_one in JavaScript) to show the
+page's blocks as they now are; a correction an undo left without its target is shown struck through ("no longer
+applies") and is skipped at import, as the patch layer skips it. localStorage is wrapped in try/catch (a warning in the
+panel when the browser keeps nothing). **Built for the 300** (2026-10-20): 299 editing pages (the 300th article has no
+master), 1 min 14 s, peak 1.4 GB, 120 MB of pages (scans and crops hard-linked); all 40,569 pieces of our pages
+find their ALTO block (1,049 of them pictures, found by box), none unmapped; HTTP 200 on the 8899 server.
+
+**Changes to the patch layer** (`patches43.py`, `test_patches43.py` 11 pass):
+* `fix_word` (a person only — refused from the judge or a retry, tested): kind *misread* → a fix line / from (Azure's
+  word) / to in the answer's fixes, replacing a Gemini fix of that line that covered the word (kept as `_was`); to ==
+  from takes the fix away; kind *misprint* → a sic flag line / text / corr, and a fix that had changed the word goes.
+  It touches the word, not the line, so a structure patch on the same line still applies.
+* A person's patches never override one another (split, then the new part's kind; the order made is kept by
+  `created`).
+* A judge's (or retry's) mark_noise over lines a person touched only in part keeps its other lines (logged
+  "partly overridden"). Found by the test: on 0744 p1 the judge marks ~60 show-through lines; the person marked 15 of
+  them; under the old rule the judge's whole patch yielded and 45 lines came back as text.
+* `set_kind` takes `note_kind` (footnote / endnote). Every kind of the menu, applied to a paragraph of 0744, builds a
+  DTD + XSD valid master (14 kinds checked).
+
+**gold43.py**: `gold43.py import <corrections export>` — an article marked "now right" becomes a gold item
+(`gold/<stem>__<run>.json`, scope the whole article) holding the person's patches; `snapshot`, `check` and `accept`
+apply them after the rules, so the gold check compares today's code + the corrections with the snapshot.
+
+**End-to-end test** (`correct_test43.py` in headless Chromium with experiment 40's Playwright venv, then
+`correct_check43.py`): ten corrections made by clicking, on three articles of the 300 —
+0744 p1: the first show-through block → noise via the kind menu, ten more lines ticked → noise, one word corrected
+(misread), one word flagged as a misprint, a note call relinked (en-1 → en-2); 2048 p1: the byline split before the
+affiliation (1:7), two paragraphs of p2 merged, the "Paper received …" block moved up; 0617: the p3 signature (drawn as
+a large heading) → paragraph, the p1 picture's box redrawn by dragging a corner, one change made and undone (not
+exported), the article ticked "now right". Exported from the index page, imported into a test folder with the judge's
+patches of the three articles, masters rebuilt. **All pass**: every person patch applied (10/10); the judge's
+overlapping patches yield as they should (2048's identical split "overridden"; 0744's show-through "partly
+overridden", its other 45 lines still noise); each correction did what was asked in the masters (ALTO roles and
+blocks per Azure line, the ALTO word with Azure's reading as ALTERNATIVE, JATS sic with the correction, one JATS xref
+rid changed, ALTO block order, the Illustration box = the dragged box + the crop margin); **nothing else changed**
+(every Azure line whose role, block or words differ from the judge-only master is one the corrections touched or a
+line sharing a block with one); JATS DTD + ALTO XSD valid; **patches off = the master without the patch layer, byte
+for byte** (stamps stripped); the gold item made from 0617's corrections checks "same". Report:
+`out/correct/test/check.json`, `check.log`; screenshots `out/correct/shots/` (0744_p1_after, 0744_my_corrections,
+0744_relink, 2048_p1_split, 2048_p1_after, 0617_p1_box, 0617_my_corrections, phone_2048_p1, index).
+
+Files: `correct43.py`, `correct43.js`, `correct43.css`, `correct_test43.py`, `correct_check43.py`; hooks in
+`views43.py` (`alto_attr`), `patches43.py`, `gold43.py`. Outputs: `out/correct/` (progress.md, build.json,
+v33_300/views/{mirror,edit,scans,crops}, linked on the 8899 server as `correct/`; test/).
+Version 2 (logins, a shared server, review of others' corrections, a queue of flagged pages) is not built.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).

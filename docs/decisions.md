@@ -440,3 +440,13 @@ source (Gemini, the catalogue, a person) and the reason (misprint, misread, cut 
 a corrected field and show the printed form on hover; a person's correction wins over Gemini's; the catalogue
 (full title, the author's authority name) is a source. The abstract is the author's prose and stays as printed
 with D30's flags ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
+
+**D34 · A person's correction is a patch, and a judge's noise yields only the lines the person touched
+(2026-10-20, correction tool v1).** The owner's corrections are never edits to a master: each is a patch with source
+"person" keyed to Azure's line ids (patches43), exported from the browser and imported by a command, so a rerun keeps
+them and switching them off gives back the master exactly. Only a person may change a word (`fix_word`): "Azure
+misread" changes the text; "misprint" keeps the print and flags the correction (D30). A person's patches never
+override one another (they are one person's edits in order). Precedence stays person > judge > retry, but a judge's
+mark_noise over lines a person touched only in part keeps its other lines: under the whole-patch rule, marking 15 of
+the judge's ~60 show-through lines on 0744 p1 brought the other 45 back as text
+([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), "Correction tool v1").

@@ -124,6 +124,12 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 
 ## In flight / where outputs are (this machine)
 
+- **Correction tool v1 (2026-10-20)** for the owner on the Layout view of the 300:
+  http://127.0.0.1:8899/correct/edit/index.html (kinds, noise, split / merge / order, note links, picture boxes, word
+  fixes as misread or misprint); corrections → person patches → `correct43.py import` rebuilds the masters; tested end
+  to end on 3 articles, 10 corrections, all as intended, valid, reversible
+  ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md) "Correction tool v1").
+
 - **Second branch, the open reading stack (started 2026-10-11)**, beside the ink-as-text
   work, which stays alive ([vision.md](vision.md), [roadmap.md](roadmap.md)). Research and plan:
   [experiments/32_open_stack](../experiments/32_open_stack/README.md) (plan page:

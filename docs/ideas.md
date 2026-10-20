@@ -461,7 +461,9 @@ reason is recorded), **open** (voiced, not yet judged).
 - **Sending the PDF file instead of page images**: *not chosen for now*. Gemini turns PDF pages into images
   itself at a size we don't control, adds born-digital text layers that are often broken, and Azure's boxes
   are measured on our own render; an A/B test (~$1–2) stays available if needed.
-- **A correction tool on the Layout view** (owner, 2026-10-18): *planned*. Version 1 first, for the owner
+- **A correction tool on the Layout view** (owner, 2026-10-18): *version 1 built 2026-10-20* (correct43.py /
+  correct43.js, served at http://127.0.0.1:8899/correct/edit/index.html for the 300; README "Correction tool v1";
+  end-to-end test on 0744 / 2048 / 0617 passes; rescuing noise lines back into a block is not in v1). Version 1 first, for the owner
   alone in the browser: fix a word (Azure's reading and the scan crop shown; "Azure misread" or "misprint"),
   change a block's kind, mark/unmark another article, rescue noise, link a call to its note, reorder, merge or
   split blocks. Corrections are stored beside the master as patches keyed to Azure's line ids (never edits to
