@@ -7,6 +7,9 @@ A patch (one JSON object):
   run         the run whose answers it edits (v33_300)        article  stem        page  int
   action      mark_noise | set_kind | reorder | split_block | merge_blocks | relink_call | mark_other_article |
               unmark_other_article | fix_picture_box          (no action changes a word)
+              | fix_word: a PERSON only (correct43.py, the correction tool): kind "misread" (Azure misread the ink:
+              a fix line/from/to into the answer's fixes) or "misprint" (D30: the printed text stays, a sic flag
+              line/text/corr); refused from the judge or a retry
   targets     {"lines": [...]} and/or {"blocks": [{"id": "p1b3", "lines": [...], "type", "box"}]} — a block is found
               again by its lines (or, without lines, by type + box), never by its position alone
   payload     action's data: kind (noise kind show-through|bleed|scanner-junk, or a block kind), level, order
@@ -38,7 +41,8 @@ sys.path.insert(0, str(HERE))
 OUT = HERE / "out"
 
 ACTIONS = ("mark_noise", "set_kind", "reorder", "split_block", "merge_blocks", "relink_call", "mark_other_article",
-           "unmark_other_article", "fix_picture_box", "replace_page_blocks")
+           "unmark_other_article", "fix_picture_box", "replace_page_blocks", "fix_word")
+# fix_word: from a person only (correction tool v1, 2026-10-20); payload kind misread|misprint, line, from, to, why
 # replace_page_blocks: only from a bespoke retry (retry43.py) or a person — the page's blocks and noise as the retry
 # answered them (line ids only: the words stay Azure's and the first answer's fixes; checked there that every line
 # of the page is used once and every call's note exists)
@@ -97,6 +101,9 @@ def touched(p: dict) -> set:
         s |= {f"L{x}" for x in b.get("lines") or []} or {f"B{b.get('type')}{b.get('box')}"}
     if p["action"] == "reorder":
         s.add(f"O{p['page']}")
+    if p["action"] == "fix_word":              # a word, not the line's place: structure patches still apply
+        pay = p.get("payload") or {}
+        return {f"W{pay.get('line')}|{pay.get('from')}"}
     return s
 
 
@@ -123,6 +130,8 @@ def apply_one(answers: dict, p: dict) -> str | None:
         return "page not in the answers"
     ans = rec["answer"]
     blocks = pg.setdefault("blocks", [])
+    if a == "fix_word":
+        return fix_word(ans, p)
     if a == "mark_noise":
         ids = {str(x) for x in t.get("lines") or []}
         present = {x for b in blocks if isinstance(b, dict) for x in block_lines(b)}
@@ -155,6 +164,8 @@ def apply_one(answers: dict, p: dict) -> str | None:
         b = bl[idx[0]]
         b["_was"] = b.get("_was") or b.get("type")
         b["type"] = pay["kind"]
+        if pay.get("note_kind"):                      # a person: footnote / endnote
+            b["note_kind"] = pay["note_kind"]
         if pay["kind"] == "heading":
             b["level"] = pay.get("level") or b.get("level") or 2
         return None
@@ -233,15 +244,46 @@ def apply_one(answers: dict, p: dict) -> str | None:
     return f"unknown action {a}"
 
 
+def fix_word(ans: dict, p: dict) -> str | None:
+    """A person's word correction. misread: Azure's `from` (a substring of Azure's line) reads `to` — any earlier
+    fix of that line whose `from` holds the word is replaced (to == from: the fix is taken away, Azure was right);
+    misprint (D30): the printed `from` stays, a sic flag with the correction, and a fix that changed it is taken away."""
+    if p.get("source") != "person":
+        return "fix_word is for a person only"
+    pay = p.get("payload") or {}
+    line, frm, to, kind = str(pay.get("line") or ""), pay.get("from") or "", pay.get("to") or "", pay.get("kind")
+    if not line or not frm or kind not in ("misread", "misprint"):
+        return "fix_word needs line, from and kind misread|misprint"
+    fixes = ans.setdefault("fixes", [])
+    keep = [f for f in fixes if not (isinstance(f, dict) and str(f.get("line")) == line and frm in (f.get("from") or ""))]
+    gone = [f for f in fixes if f not in keep]
+    ans["fixes"] = keep
+    why = pay.get("why") or "person"
+    if kind == "misread":
+        if to != frm:
+            keep.append({"line": line, "from": frm, "to": to, "why": why, "source": "person",
+                         **({"_was": gone} if gone else {})})
+        return None
+    if not to or to == frm:
+        return "a misprint needs its correction"
+    sic = ans.setdefault("sic", [])
+    sic[:] = [s for s in sic if not (isinstance(s, dict) and str(s.get("line")) == line and s.get("text") == frm)]
+    sic.append({"line": line, "text": frm, "corr": to, "why": why, "source": "person"})
+    return None
+
+
 def apply_all(answers: dict, patches: list[dict]) -> tuple[dict, list[dict]]:
-    """Deep copy of answers with every patch marked apply=true applied, by precedence; a log entry per patch."""
+    """Deep copy of answers with every patch marked apply=true applied, by precedence; a log entry per patch.
+    A person's patches never override each other (they are one person's edits in the order made: a split, then the
+    new part's kind); a lower source touching what a higher one touched is skipped."""
     out = copy.deepcopy(answers)
     claimed, log = {}, []
     todo = sorted((p for p in patches if p.get("apply")),
                   key=lambda p: (RANK.get(p.get("source"), 9), p.get("created", ""), p["id"]))
     for p in todo:
         tch = touched(p)
-        hit = sorted({claimed[x] for x in tch if x in claimed})
+        hit = sorted({claimed[x][0] for x in tch if x in claimed
+                      if not (claimed[x][1] == "person" and p.get("source") == "person")})
         if hit:
             log.append(dict(id=p["id"], action=p["action"], applied=False, why=f"overridden by {', '.join(hit)}"))
             continue
@@ -253,7 +295,7 @@ def apply_all(answers: dict, patches: list[dict]) -> tuple[dict, list[dict]]:
                         **({"why": why} if why else {})))
         if why is None:
             for x in tch:
-                claimed[x] = p["id"]
+                claimed.setdefault(x, (p["id"], p.get("source")))
     return out, log
 
 

@@ -133,3 +133,38 @@ def test_build_off_equals_build_without_layer():
         assert log["applied"][0]["id"] == p["id"]
         from inkscript.enrich.schemas import validate_jats
         assert not validate_jats(td / "j" / "masters" / f"{STEM}.jats.xml")
+
+
+# ------------------------------------------------------------------ correction tool v1: a person's word fixes and chains
+
+def test_fix_word_person_only_and_kinds():
+    a = answers()
+    a["x_c001-002.json"]["answer"]["fixes"] = [dict(line="1:4", **{"from": "جماو الكبير", "to": "جمار الكبير"}, why="g")]
+    j = P("fix_word", source="judge", line="1:4", kind="misread", to="x", **{"from": "y"})
+    out, log = PA.apply_all(a, [j])
+    assert out == a and not log[0]["applied"] and "person" in log[0]["why"]
+    h = P("fix_word", source="person", line="1:4", kind="misread", to="جمال", **{"from": "جماو"})
+    out, log = PA.apply_all(a, [h])
+    fx = out["x_c001-002.json"]["answer"]["fixes"]
+    assert log[0]["applied"] and len(fx) == 1 and fx[0]["from"] == "جماو" and fx[0]["to"] == "جمال"
+    assert fx[0]["_was"][0]["to"] == "جمار الكبير"                 # the model's fix it replaced is kept beside it
+    m = P("fix_word", source="person", line="1:6", kind="misprint", to="وإرثه", pid="m", **{"from": "ووإرثه"})
+    out, _ = PA.apply_all(a, [m])
+    ans = out["x_c001-002.json"]["answer"]
+    assert ans["sic"] == [dict(line="1:6", text="ووإرثه", corr="وإرثه", why="person", source="person")]
+    assert ans["fixes"] == a["x_c001-002.json"]["answer"]["fixes"]     # D30: the printed text stays
+    back = P("fix_word", source="person", line="1:4", kind="misread", to="جماو", pid="b", **{"from": "جماو"})
+    assert PA.apply_all(a, [back])[0]["x_c001-002.json"]["answer"]["fixes"] == []   # Azure was right
+
+
+def test_person_chain_and_word_fix_beside_structure():
+    a = answers()
+    s = P("split_block", source="person", blocks=[fp(blk(a, 1, 2))], at_line="1:5", created="2026-10-20T10:00:01", pid="h1")
+    k = P("set_kind", source="person", blocks=[dict(id="b", lines=["1:5", "1:6"], type="paragraph")], kind="quote",
+          created="2026-10-20T10:00:02", pid="h2")
+    w = P("fix_word", source="person", line="1:5", kind="misread", to="b", created="2026-10-20T10:00:03", pid="h3",
+          **{"from": "a"})
+    j = P("mark_noise", source="judge", lines=["1:6"], kind="scanner-junk", pid="j1")
+    out, log = PA.apply_all(a, [j, s, k, w])
+    assert [e["applied"] for e in log] == [True, True, True, False]      # person's three, then the judge overridden
+    assert blk(out, 1, 3)["type"] == "quote" and blk(out, 1, 3)["lines"] == ["1:5", "1:6"]
