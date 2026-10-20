@@ -512,6 +512,8 @@ PALE = 0.3                  # a line whose ink share is under this part of the p
 PALE_MIN_MEDIAN = 0.04      # ... judged only when the page's own text has at least this much ink (dark_share)
 GHOST_CONF = 0.5            # or: Azure's mean word confidence under this ...
 GHOST_KNOWN = 0.5           # ... and under this share of its words in the word list (wordlist43), >= 3 judged
+GHOST_FAINT = 0.5           # or: ink under half the page's text median ...
+GHOST_FAINT_CONF = 0.4      # ... and Azure's mean confidence under this
 
 
 def show_through(cand, used, lines, words, log) -> set:
@@ -545,6 +547,9 @@ def show_through(cand, used, lines, words, log) -> set:
             why = "pale"
         elif conf is not None and conf < GHOST_CONF and n >= 3 and k / n < GHOST_KNOWN:
             why = "non-words"
+        elif med[p] is not None and med[p] >= PALE_MIN_MEDIAN and d < GHOST_FAINT * med[p] and \
+                conf is not None and conf < GHOST_FAINT_CONF:
+            why = "faint and unsure"                         # 0744 p1 1:27 / 1:28: ink 0.46 / 0.32 of the page's, conf 0.3
         if why:
             out.add(i)
             log["show_through"].append(dict(line=i, page=p, why=why, ink=round(d, 3),
