@@ -96,11 +96,67 @@ Judge answers are read for the base run (`v33_300_judged` → `v33_300`).
 - Options: `--masters DIR`, `--flags FILE`, `--patches DIR` (repeatable) when a run's files are not in the usual places.
 - People, institutions, journals and issues are rebuilt from the article rows on every load (deterministic, < 1 s).
 - Serving: `setsid nohup .venv/bin/datasette serve /home/yassine/data/platform/platform.db -h 127.0.0.1 -p 8002
-  --metadata experiments/46_platform_db/metadata46.json --setting sql_time_limit_ms 10000 --setting max_returned_rows 2000 &`
+  --metadata experiments/46_platform_db/metadata46.json --static diagram:/home/yassine/data/platform/
+  --setting sql_time_limit_ms 10000 --setting max_returned_rows 2000 >> /home/yassine/data/platform/datasette.log 2>&1 &`
+  (`--static` serves the schema diagram at http://127.0.0.1:8002/diagram/schema.html; it also exposes the folder's
+  files on localhost)
   (not `--immutable`, so loads show at once; Datasette opens the file read-only). Canned queries
   ([metadata46.json](metadata46.json)): articles by author (any spelling), who cites whom, most cited catalogue records,
   catalogue disagreements (list and counts), judge findings by type, flags per article, one article beside the
   catalogue, institution clusters, full-text search. All return 200.
+
+## Foreign keys and the diagram (2026-10-20)
+
+[schema46.sql](schema46.sql) declares 64 foreign keys: `stem → articles(stem)` in every per-article table (24),
+`run → runs(run)` in every table read from a run, `articles.journal_id → journals`, `articles.issue_id → issues`,
+`issues.journal_id → journals`, `article_authors.person_key` and `person_names.person_key → people`,
+`affiliations.org_key / faculty_key / dept_key → institutions`, `institutions.parent_key → institutions`,
+`institution_variants.inst_key → institutions`, `work_authors.work_id → works`, and five compound ones:
+`note_calls (stem, note_id)` and `back_references (stem, note_id) → notes`, `catalogue_authors (stem, rec) →
+catalogue_records`, `affiliations (stem, author_seq) → article_authors`, `judge_findings (run, patch_id) → patches`
+(patch ids are unique per run only). `citation_links` is polymorphic (`from_kind`/`target_kind`); link46 now also
+writes typed copies — `from_work_id → works`, `from_backref_id → back_references`, `target_stem → articles`,
+`target_work_id → works`, `target_rec` (a marc.db row, mostly not in this db, so not a key) — and adds the columns
+to an older db that lacks them.
+
+They are **declared, not enforced**: the loaders keep `PRAGMA foreign_keys=OFF` (children are inserted before
+their parents). They are for Datasette — a row links to its parent (article_authors → the person's name, affiliation
+→ institution), and an article's page lists "Links from other tables" with counts (blocks, notes, works, flags,
+judge findings…) — and as documentation. Datasette follows single-column keys only (59 of 64); the five compound
+ones are documentation. Label columns (metadata46.json): articles → title, people → display_name, institutions →
+name, journals → title_masters, works → source_title.
+
+**Orphans** ([fk46.py](fk46.py), `out_fk/orphans.json`): 0 on all 64 keys (2026-10-20, after the rebuild).
+
+**Diagram**: [diagram46.py](diagram46.py) draws the tables from the db itself (PRAGMA), grouped (people &
+institutions, catalogue & bibliographic, content, citations, quality & provenance), each box with its primary key,
+its foreign keys and a few telling columns and its row count, each name linking to the table in Datasette; inline
+SVG, light/dark, scrolls sideways on a phone, with a plain list of every table and its keys below.
+`/home/yassine/data/platform/schema.html` → http://127.0.0.1:8002/diagram/schema.html (linked from the database
+description). Screenshots: `out_fk/schema_diagram.png`, `out_fk/schema_diagram_phone_dark.png`,
+`out_fk/article_row_links.png`, `out_fk/article_authors_people_links.png`.
+
+**Rebuild from scratch** (how the db with keys was made; the previous db is kept as
+`/home/yassine/data/platform/platform_before_fk.db`). `CREATE TABLE IF NOT EXISTS` does not change an existing
+table, so a schema change needs a fresh file built with `--db`, then swapped in with Datasette stopped:
+
+```
+B=/home/yassine/data/platform/platform_new.db; P=experiments/46_platform_db
+.venv/bin/python $P/load46.py --db $B --run v33_300
+.venv/bin/python $P/load46.py --db $B --run v2_55 --current if-new
+.venv/bin/python $P/load46.py --db $B --run v33_300_judged --stem 0368-000-013-009   # the one article first loaded from it
+.venv/bin/python $P/load46.py --db $B --run v33_300_final --note "first 300 final: fixes2 code + judge certain patches + 1764 rechunked (2026-10-20 step F)"
+.venv/bin/python $P/link46.py --db $B
+sqlite3 $B "attach '<old db>' as o; insert into link_checks select * from o.link_checks"   # the hand check (or checks46.py)
+.venv/bin/python $P/fk46.py --db $B --counts          # compare with the old db; fk46.py --db $B for orphans
+.venv/bin/python $P/diagram46.py --db $B --out /home/yassine/data/platform/schema.html
+```
+
+(`v33_300_judged/masters` was rewritten at 03:09 and now holds 77 articles; loading all of it adds 76 rows to
+`article_runs` and nothing else.) The rebuild of 2026-10-20 matched the old db on all 35 tables, row for row
+(counts, and key columns compared with EXCEPT on articles, article_authors, affiliations, blocks, citation_links,
+judge_findings, patches, article_runs); the only new values are the five typed columns of citation_links (790 rows:
+484 from works, 306 from back references, 6 to articles, 478 to catalogue records, 306 to works).
 
 ## Citation linking (link46.py)
 
@@ -202,8 +258,11 @@ a French article catalogued under its Arabic title, and 0944 is the catalogue's 
 | [link46.py](link46.py) | citation linking |
 | [common46.py](common46.py) | paths, experiment 45's Arabic folding, similarity |
 | [sample46.py](sample46.py), [checks46.py](checks46.py), sample46.json, sample46_checked.json | the hand-checked sample |
-| [metadata46.json](metadata46.json) | Datasette title, descriptions, canned queries |
-| progress.md | the run log |
+| [metadata46.json](metadata46.json) | Datasette title, descriptions, label columns, canned queries |
+| [fk46.py](fk46.py) | declared foreign keys and their orphans; `--counts` rows per table |
+| [diagram46.py](diagram46.py) | the schema diagram page (`schema.html`) |
+| out_fk/ | rebuild log, orphans.json, screenshots of Datasette links and the diagram |
+| progress.md, progress_fk.md | the run logs |
 
 ## What it changed / next
 

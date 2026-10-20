@@ -43,7 +43,7 @@ def init(con):
     con.executescript((HERE / "schema46.sql").read_text(encoding="utf-8"))
     con.execute("CREATE VIRTUAL TABLE IF NOT EXISTS blocks_fts USING fts5(text_folded, content='blocks', "
                 "content_rowid='id', tokenize='unicode61 remove_diacritics 2')")
-    con.execute("INSERT OR REPLACE INTO meta VALUES ('schema', 'experiment 46 v1')")
+    con.execute("INSERT OR REPLACE INTO meta VALUES ('schema', 'experiment 46 v1, declared foreign keys')")
 
 
 def insert(con, table, rows):

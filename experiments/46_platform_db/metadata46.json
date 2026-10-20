@@ -1,9 +1,15 @@
 {
   "title": "Platform database (experiment 46)",
   "description": "Mandumah articles read by the inkscript pipeline (experiment 43 masters: JATS + ALTO) beside the MARC catalogue (experiment 45). Every row carries its source (masters | catalogue | judge | person | link46) and, for masters values, the run. Read only.",
+  "description_html": "Mandumah articles read by the inkscript pipeline (experiment 43 masters: JATS + ALTO) beside the MARC catalogue (experiment 45). Every row carries its source (masters | catalogue | judge | person | link46) and, for masters values, the run. Read only. <b><a href=\"/diagram/schema.html\">The tables and their links (diagram)</a></b>: foreign keys are declared, so a row links to its parents and an article's page lists the rows of other tables that point at it.",
   "databases": {
     "platform": {
       "tables": {
+        "articles": {"label_column": "title"},
+        "people": {"label_column": "display_name"},
+        "institutions": {"label_column": "name"},
+        "journals": {"label_column": "title_masters"},
+        "works": {"label_column": "source_title"},
         "blocks": {"fts_table": "blocks_fts", "fts_pk": "id", "description": "Every block of every article in reading order, with its ALTO line ids and box (pixels at 300 dpi). Search: type folded Arabic (no diacritics, ا for أإآ, ه for ة, ي for ى)."},
         "citation_links": {"description": "Links made by link46.py; best = 1 is a confident link (title and author or year agree); best = 0 keeps a candidate (a review of the book, a study about it, a part of it, a title-only match)."},
         "catalogue_disagreements": {"description": "Masters vs catalogue, field by field. kind catalogue-fits-scan = the masters' page range is the one that is off; missing-in-catalogue = the print has it, the catalogue does not."},

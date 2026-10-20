@@ -1,0 +1,46 @@
+run v33_300: 299 masters, 299 loaded, 0 unchanged, 0 kept under another run; 731 flags, 0 patches, 628 judge findings (9 s)
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:08.99
+	Maximum resident set size (kbytes): 81728
+run v2_55: 55 masters, 54 loaded, 0 unchanged, 1 kept under another run; 59 flags, 0 patches, 6 judge findings (2 s)
+run v33_300_judged: 77 masters, 77 loaded, 0 unchanged, 0 kept under another run; 0 flags, 125 patches, 628 judge findings (3 s)
+run v33_300_final: 300 masters, 300 loaded, 0 unchanged, 0 kept under another run; 876 flags, 125 patches, 628 judge findings (7 s)
+{
+ "works": 4789,
+ "works linked to article": 6,
+ "works linked to catalogue": 478,
+ "works linked (any)": 484,
+ "back references": 544,
+ "back references resolved": {
+  "backref-author": 98,
+  "backref-author-title": 81,
+  "backref-previous": 110,
+  "backref-title": 17
+ },
+ "catalogue links by work type": {
+  "book": 319,
+  "journal": 97,
+  "other": 29,
+  "thesis": 29,
+  "web": 4
+ },
+ "works by type": {
+  "book": 3224,
+  "journal": 856,
+  "other": 365,
+  "thesis": 154,
+  "web": 190
+ }
+}
+=== build2 (judged: only the one stem the backup holds) ===
+run v33_300: 299 masters, 299 loaded, 0 unchanged, 0 kept under another run; 731 flags, 0 patches, 628 judge findings (7 s)
+run v2_55: 55 masters, 54 loaded, 0 unchanged, 1 kept under another run; 59 flags, 0 patches, 6 judge findings (1 s)
+run v33_300_judged: 1 masters, 1 loaded, 0 unchanged, 0 kept under another run; 0 flags, 125 patches, 628 judge findings (1 s)
+run v33_300_final: 300 masters, 300 loaded, 0 unchanged, 0 kept under another run; 876 flags, 125 patches, 628 judge findings (7 s)
+{
+ "works": 4789,
+ "works linked to article": 6,
+ "works linked to catalogue": 478,
+ "works linked (any)": 484,
+ "back references": 544,
+ "back references resolved": {
+  "backref-author": 98,

@@ -255,6 +255,18 @@ def link_backrefs(con, stem):
     return out
 
 
+TYPED = (("from_work_id", "TEXT"), ("from_backref_id", "TEXT"), ("target_stem", "TEXT"), ("target_rec", "INTEGER"),
+         ("target_work_id", "TEXT"))
+
+
+def typed(r) -> tuple:
+    """from_id / target_id split by kind into the typed (key) columns."""
+    fk, tk, tid = r["from_kind"], r["target_kind"], r["target_id"]
+    return (r["from_id"] if fk == "work" else None, r["from_id"] if fk == "backref" else None,
+            tid if tk == "article" else None, int(tid) if tk == "catalogue" else None,
+            tid if tk == "work" else None)
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--all", action="store_true")
@@ -264,6 +276,10 @@ def main(argv=None):
     a = ap.parse_args(argv)
     con = connect(Path(a.db))
     con.execute("CREATE TABLE IF NOT EXISTS link_runs (stem TEXT PRIMARY KEY, linked TEXT)")
+    have = {r[1] for r in con.execute("PRAGMA table_info(citation_links)")}
+    for c, t in TYPED:  # typed copies of from_id / target_id (declared as keys in schema46.sql; added to older dbs)
+        if c not in have:
+            con.execute(f"ALTER TABLE citation_links ADD COLUMN {c} {t}")
     if not a.report:
         if a.stem:
             stems = a.stem
@@ -293,9 +309,10 @@ def main(argv=None):
             rows += link_backrefs(con, stem)
             ts = time.strftime("%Y-%m-%d %H:%M:%S")
             con.executemany("INSERT OR REPLACE INTO citation_links (from_kind, from_id, target_kind, target_id, score, "
-                            "method, best, evidence, linked, source) VALUES (?,?,?,?,?,?,?,?,?, 'link46')",
+                            "method, best, evidence, linked, source, from_work_id, from_backref_id, target_stem, "
+                            "target_rec, target_work_id) VALUES (?,?,?,?,?,?,?,?,?, 'link46',?,?,?,?,?)",
                             [(r["from_kind"], r["from_id"], r["target_kind"], r["target_id"], r["score"], r["method"],
-                              r["best"], r["evidence"], ts) for r in rows])
+                              r["best"], r["evidence"], ts) + typed(r) for r in rows])
             con.execute("INSERT OR REPLACE INTO link_runs VALUES (?, ?)", (stem, ts))
             if (i + 1) % 20 == 0:
                 con.commit()

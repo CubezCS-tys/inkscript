@@ -1,0 +1,6 @@
+- 07:18 started FK work; reading schema/loaders
+- 07:20 context read; Datasette drops compound FKs (single-column only shown); writing FKs into schema46.sql
+- 07:22 backup /home/yassine/data/platform/platform_before_fk.db (sqlite .backup, WAL included); building platform_fk_build.db
+- 07:24 build2 = backup on all 35 tables (counts + key columns); judged loaded with --stem 0368-000-013-009 because its folder now holds 77 masters (rewritten 03:09) vs 1 when first loaded
+- 07:27 fk46.py (0 orphans on 64 keys), diagram46.py drawn and looked at (light+dark); metadata: diagram link + label columns; next: swap db, restart Datasette
+- 07:28 live db swapped (old = platform_before_fk.db), Datasette restarted with --static (pid 7647), checks + screenshots done; README updated; committing

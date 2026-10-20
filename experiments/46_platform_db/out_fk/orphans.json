@@ -1,0 +1,514 @@
+[
+ {
+  "child": "abstracts(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 241,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "abstracts(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 379,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(stem, author_seq)",
+  "parent": "article_authors(stem, seq)",
+  "datasette": false,
+  "with_value": 247,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 247,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(dept_key)",
+  "parent": "institutions(inst_key)",
+  "datasette": true,
+  "with_value": 84,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(faculty_key)",
+  "parent": "institutions(inst_key)",
+  "datasette": true,
+  "with_value": 109,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(org_key)",
+  "parent": "institutions(inst_key)",
+  "datasette": true,
+  "with_value": 203,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "affiliations(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 247,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_authors(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 413,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_authors(person_key)",
+  "parent": "people(person_key)",
+  "datasette": true,
+  "with_value": 413,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_authors(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 413,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_dates(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 455,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_dates(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 455,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_runs(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 655,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "article_runs(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 655,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "articles(issue_id)",
+  "parent": "issues(issue_id)",
+  "datasette": true,
+  "with_value": 354,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "articles(journal_id)",
+  "parent": "journals(journal_id)",
+  "datasette": true,
+  "with_value": 354,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "articles(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 354,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "back_references(stem, note_id)",
+  "parent": "notes(stem, note_id)",
+  "datasette": false,
+  "with_value": 544,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "back_references(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 544,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "back_references(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 544,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "blocks(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 51791,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "blocks(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 51791,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "catalogue_authors(stem, rec)",
+  "parent": "catalogue_records(stem, rec)",
+  "datasette": false,
+  "with_value": 429,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "catalogue_authors(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 429,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "catalogue_disagreements(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 253,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "catalogue_disagreements(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 253,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "catalogue_records(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 354,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "citation_links(target_work_id)",
+  "parent": "works(work_id)",
+  "datasette": true,
+  "with_value": 306,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "citation_links(target_stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 6,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "citation_links(from_backref_id)",
+  "parent": "back_references(backref_id)",
+  "datasette": true,
+  "with_value": 306,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "citation_links(from_work_id)",
+  "parent": "works(work_id)",
+  "datasette": true,
+  "with_value": 484,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "figures(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 1910,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "figures(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 1910,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "fixes(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 13369,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "fixes(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 13369,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "flags(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 1666,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "flags(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 1666,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "institution_variants(inst_key)",
+  "parent": "institutions(inst_key)",
+  "datasette": true,
+  "with_value": 316,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "institutions(parent_key)",
+  "parent": "institutions(inst_key)",
+  "datasette": true,
+  "with_value": 154,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "issues(journal_id)",
+  "parent": "journals(journal_id)",
+  "datasette": true,
+  "with_value": 353,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "judge_findings(run, patch_id)",
+  "parent": "patches(run, patch_id)",
+  "datasette": false,
+  "with_value": 138,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "judge_findings(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 634,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "judge_findings(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 634,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "keywords(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 722,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "keywords(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 1179,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "link_runs(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 354,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "metadata_changes(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 174,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "metadata_changes(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 174,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "misprints(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 1798,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "misprints(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 1798,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "note_calls(stem, note_id)",
+  "parent": "notes(stem, note_id)",
+  "datasette": false,
+  "with_value": 3970,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "note_calls(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 4024,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "note_calls(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 4024,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "notes(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 4084,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "notes(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 4084,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "patches(built_run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 124,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "patches(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 124,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "patches(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 124,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "person_names(person_key)",
+  "parent": "people(person_key)",
+  "datasette": true,
+  "with_value": 881,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "subjects(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 3007,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "work_authors(work_id)",
+  "parent": "works(work_id)",
+  "datasette": true,
+  "with_value": 4638,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "works(run)",
+  "parent": "runs(run)",
+  "datasette": true,
+  "with_value": 4789,
+  "orphans": 0,
+  "examples": []
+ },
+ {
+  "child": "works(stem)",
+  "parent": "articles(stem)",
+  "datasette": true,
+  "with_value": 4789,
+  "orphans": 0,
+  "examples": []
+ }
+]
