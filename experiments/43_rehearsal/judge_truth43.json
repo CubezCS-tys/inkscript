@@ -23,7 +23,7 @@
   {"run": "v33_300", "page": "1709-000-106-005:7", "src": "look", "problems": []},
   {"run": "v33_300", "page": "0315-000-015-001:5", "src": "look", "problems": []},
   {"run": "v33_300", "page": "0787-011-001-003:5", "src": "look", "problems": []},
-  {"run": "v2_55", "page": "0478-007-002-005:4", "src": "known (fixed in views43)", "problems": []},
+  {"run": "v2_55", "page": "0478-007-002-005:4", "src": "known; the v2_55 answer still merges the columns (the views43 fix cuts boxes, it cannot undo this answer's blocks)", "problems": [{"what": "lines of both columns merged into blocks drawn over each other", "types": ["wrong_order", "other"]}]},
   {"run": "v2_55", "page": "0355-000-002-006:1", "src": "known (box swap fixed in code)", "problems": []},
   {"run": "replay", "page": "0747-001-003-001:1", "src": "owner 183/183", "problems": []},
   {"run": "replay", "page": "0747-001-003-001:3", "src": "owner 183/183", "problems": []},

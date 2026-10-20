@@ -193,6 +193,8 @@ def check(action: str, payload: dict, page: dict) -> dict:
         return dict(ok=False, why="target block not on the page")
     if action == "set_kind":
         k, b = payload.get("kind"), bs[0]
+        if b["type"] == "other_article":
+            return dict(ok=False, why="the block is marked another article: unmark it first (owner's call)")
         bx, n = b["box"] or [0, 0, 0, 0], len(b["lines"])
         if k in ("header",) and bx[1] > 150:
             return dict(ok=False, why=f"a running head below the top of the page (y {bx[1]})")
@@ -227,6 +229,12 @@ def check(action: str, payload: dict, page: dict) -> dict:
         if at not in b["lines"] or b["lines"].index(at) == 0:
             return dict(ok=False, why="split line not inside the block")
         k = b["lines"].index(at)
+        if b["type"] == "byline":
+            rest = " ".join(page["line_text"].get(i, "") for i in b["lines"][k:])
+            aff = re.search(r"جامعة|كلية|قسم|معهد|مركز|أستاذ|استاذ|عميد|باحث|University|Universit|Facult|Department|"
+                            r"Institut|College|Professor|Demonstrator|Lecturer|@", rest)
+            return dict(ok=bool(aff), why=("the second part names an affiliation («" + aff.group(0) + "»)") if aff
+                        else "no affiliation word in the second part")
         L = page["line_box"]
         top, bot = union([L.get(i) for i in b["lines"][:k]]), union([L.get(i) for i in b["lines"][k:]])
         if not top or not bot:
@@ -250,7 +258,11 @@ def check(action: str, payload: dict, page: dict) -> dict:
         ids = [b["id"] for b in page["blocks"] if b["type"] not in ("header", "footer", "noise")]
         pos = sorted(ids.index(b["id"]) for b in bs if b["id"] in ids)
         if action == "unmark_other_article":
-            return dict(ok=bool(pos), why="block on the page")
+            ours = [i for i, b in enumerate(page["blocks"]) if b["type"] not in ("header", "footer", "other_article")]
+            idx = [i for i, b in enumerate(page["blocks"]) if b["id"] in {x["id"] for x in bs}]
+            inside = bool(ours) and bool(idx) and min(ours) < min(idx) and max(idx) < max(ours)
+            return dict(ok=inside, why="between blocks of this article on the page" if inside else
+                        "at the edge of the page's reading order: whether it is another article is the owner's call")
         edge = pos and (pos[0] == 0 or pos[-1] == len(ids) - 1 or
                         pos == list(range(pos[0], len(ids))) or pos == list(range(0, pos[-1] + 1)))
         return dict(ok=bool(edge), why="at the start or end of the page's reading order" if edge
@@ -259,12 +271,15 @@ def check(action: str, payload: dict, page: dict) -> dict:
         nb = payload.get("box")
         if not nb or len(nb) != 4 or not (0 <= nb[0] < nb[2] <= 1000 and 0 <= nb[1] < nb[3] <= 1000):
             return dict(ok=False, why="box not on the page")
+        ob = bs[0].get("box")
+        if ob and overlap(ob, nb) < 0.5 and overlap(nb, ob) < 0.5:
+            return dict(ok=False, why="the new box is elsewhere: another picture (missing), not this one re-boxed")
         own = set(bs[0]["lines"])
-        hit = [i for b in page["blocks"] if b["type"] in RUNNING for i in b["lines"]
+        hit = [i for b in page["blocks"] if b["type"] not in ("figure", "table", "equation", "caption") for i in b["lines"]
                if i not in own and page["line_box"].get(i) and overlap(page["line_box"][i], nb) > 0.3]
         if hit:
-            return dict(ok=False, why=f"would cover {len(hit)} running-text lines")
-        return dict(ok=True, why="covers no running text")
+            return dict(ok=False, why=f"would cover {len(hit)} lines of text ({', '.join(hit[:4])})")
+        return dict(ok=True, why="covers no line of text")
     if action == "relink_call":
         line = payload.get("line")
         txt = page["line_text"].get(line, "")
@@ -273,6 +288,34 @@ def check(action: str, payload: dict, page: dict) -> dict:
         return dict(ok=ok, why=f"marker {'in' if mk and mk in txt else 'not in'} the line; note "
                     f"{'exists' if payload.get('fn') in page.get('notes', set()) else 'unknown'}")
     return dict(ok=False, why=f"no check for {action}")
+
+
+def continuation(block: dict, line_box: dict) -> dict:
+    """Is a block that spans two columns just a paragraph running from the foot of one column to the top of the
+    next (right column first for Arabic, left first for Latin)? Then the judge's "columns mixed" is a false alarm
+    (calibration: 4 of 4 such claims of Flash were this)."""
+    bs = [(i, line_box.get(i)) for i in block["lines"] if line_box.get(i)]
+    if len(bs) < 2:
+        return dict(ok=False, why="too few lines")
+    xc = [(b[0] + b[2]) / 2 for _, b in bs]
+    srt = sorted(xc)
+    gaps = [(srt[k + 1] - srt[k], k) for k in range(len(srt) - 1)]
+    g, k = max(gaps)
+    if g < 150:                                   # 0-1000: one column
+        return dict(ok=False, why="one column")
+    cut = (srt[k] + srt[k + 1]) / 2
+    side = ["R" if x > cut else "L" for x in xc]
+    runs = [side[0]] + [side[j] for j in range(1, len(side)) if side[j] != side[j - 1]]
+    if len(runs) != 2:
+        return dict(ok=False, why=f"the block goes back and forth between the columns ({len(runs) - 1} turns)")
+    first = [b for (_, b), sd in zip(bs, side) if sd == runs[0]]
+    second = [b for (_, b), sd in zip(bs, side) if sd == runs[1]]
+    down = lambda part: all(part[j + 1][1] >= part[j][1] - 5 for j in range(len(part) - 1))
+    low_then_high = min(b[1] for b in first) > min(b[1] for b in second)
+    ok = down(first) and down(second) and low_then_high
+    return dict(ok=ok, why=(f"foot of the {'right' if runs[0] == 'R' else 'left'} column, then the top of the "
+                            f"{'left' if runs[1] == 'L' else 'right'}: a paragraph running on" if ok else
+                            "two columns, but not a run from the foot of one to the top of the next"), first=runs[0])
 
 
 def main():

@@ -1,0 +1,31 @@
+{
+ "about": "My look (2026-10-20) at every calibration finding whose type did not match a known problem, on out/judge/side/<run>/<stem>_pNNN.jpg (scan with our blocks | our page). Key: <answers dir>|<stem:page>|<finding number>. verdict: real (a problem nobody had listed) / debatable (either reading defensible; the owner's call) / false; catches: index of the known problem it catches under another label.",
+ "verdicts": {
+  "gemini-3.8-flash|0747-001-003-001:3|1": {"verdict": "false", "note": "the ٥ between the verse halves is an ornament (owner 183/183 yes), not a call"},
+  "gemini-3.8-flash|0877-007-027-003:1|1": {"verdict": "false", "note": "title printed at the foot of the page; its place in the block order does not matter (owner: right)"},
+  "gemini-3.8-flash|0037-000-015-006:9|1": {"verdict": "false", "note": "the columns read right; the block that runs from one column to the next is one paragraph"},
+  "gemini-3.8-flash|0368-000-013-009:11|1": {"verdict": "real", "catches": 0, "note": "labelled wrong_order, the evidence is the table across the columns"},
+  "gemini-3.8-flash|0617-024-021,024-010:3|1": {"verdict": "real", "note": "the right one of the two ornaments round «سلسلة عظماء الإسلام» is not drawn"},
+  "gemini-3.8-flash|0729-008-030-020:2|1": {"verdict": "debatable", "note": "the second poem as another article: the 300 agent said plausible either way"},
+  "gemini-3.8-flash|0736-039-001,002-001:1|1": {"verdict": "false", "note": "a paragraph continuing from the foot of the right column to the top of the left: right"},
+  "gemini-3.8-flash|1010-006-011-015:2|1": {"verdict": "false", "note": "p2b10 = foot of the right column + top of the left: one paragraph, right"},
+  "gemini-4-argon|0877-007-027-003:1|1": {"verdict": "false", "note": "title at the foot of the page (owner: right)"},
+  "gemini-4-argon|0315-000-015-001:5|1": {"verdict": "real", "note": "row 8 of the table lost its middle cell «٥»; the cases cell spans two columns"},
+  "gemini-4-argon|0617-024-021,024-010:3|1": {"verdict": "debatable", "note": "stepped (staircase) verse drawn as one line without a gap"},
+  "gemini-4-argon|0729-008-030-020:2|1": {"verdict": "debatable", "note": "the second poem as another article (owner's call)"},
+  "gemini-4-argon|0729-008-030-020:2|2": {"verdict": "debatable", "note": "follows from unmarking the poem"},
+  "gemini-4-argon|0729-008-030-020:2|3": {"verdict": "real", "catches": 0, "note": "free verse joined two printed lines per row (labelled wrong_kind → verse)"},
+  "gemini-4-argon|0744-000-059-007:1|2": {"verdict": "debatable", "note": "the marbled background: a picture or paper texture"},
+  "gemini-3.8-flash_v2|1140-000-021-003:1|1": {"verdict": "real", "note": "a small running head on the top banner is not drawn (small)"},
+  "gemini-3.8-flash_v2|0037-000-015-006:9|1": {"verdict": "false", "note": "column continuation, right"},
+  "gemini-3.8-flash_v2|0617-024-021,024-010:3|1": {"verdict": "real", "note": "the right ornament is not drawn"},
+  "gemini-3.8-flash_v2|0658-049-003-006:4|1": {"verdict": "false", "note": "column continuation, right (the 300 agent: right)"},
+  "gemini-3.8-flash_v2|0729-008-030-020:2|1": {"verdict": "debatable", "note": "the second poem as another article (owner's call)"},
+  "gemini-3.8-flash_v2|0729-008-030-020:2|2": {"verdict": "debatable", "note": "follows from unmarking the poem"},
+  "gemini-3.8-flash_v2|0729-008-030-020:2|3": {"verdict": "real", "catches": 0, "note": "free verse drawn as prose rows (labelled wrong_kind → verse)"},
+  "gemini-3.8-flash_v2|0736-039-001,002-001:1|1": {"verdict": "real", "note": "author and affiliation in one byline (the same small point as 2048 p1)"},
+  "gemini-3.8-flash_v2|0744-000-059-007:1|2": {"verdict": "debatable", "note": "the shaded box: picture or texture"},
+  "gemini-3.8-flash_v2|0875-001-001-019:4|1": {"verdict": "false", "note": "column continuation, right (the 300 agent: right)"},
+  "gemini-3.8-flash_v2|1010-006-011-015:2|1": {"verdict": "false", "note": "column continuation, right"}
+ }
+}

@@ -28,6 +28,7 @@ sys.path.insert(0, str(HERE))
 import masters43 as M43  # noqa: E402
 import run43  # noqa: E402
 import patches43 as PA  # noqa: E402
+import evidence43 as EV  # noqa: E402
 
 ST, C = M43.ST, run43.C
 OUT = HERE / "out"
@@ -289,6 +290,38 @@ Rules:
   look at the region again; "human" when only a person can settle it.
 """
 
+# v2 (2026-10-20, after calibrating v1: Flash caught 3 of 10 known problems): the same, plus a checklist the
+# judge answers first, question by question (docs/ideas.md: "answers fixed questions as data")
+PROMPT_V2 = PROMPT.replace("""
+Rules:
+""", """CHECKS_PLACEHOLDER
+Rules:
+""", 1)
+PROMPT_V2 = PROMPT_V2.replace("CHECKS_PLACEHOLDER", """
+First go through these nine questions in order, comparing the scan (image 1) with our page (image 3) region by
+region, and answer each in "checks" in a few words ("ok" or what is wrong and where):
+ 1 show-through: is any text of ours not printed on this side (pale mirrored print from the reverse, bleed, junk)?
+ 2 missing: is any printed text missing from our page (a line, a side tab or margin label, a caption, a stamp with
+   words)? Running heads and page numbers count too.
+ 3 pictures: is every picture, drawing and ornament drawn whole, in its place, as one piece, not over text, and is
+   no picture missing (e.g. one of a pair of ornaments)?
+ 4 tables: is every table drawn like the print (a table printed in two parts in two columns = two parts, each in
+   its own place; no table box over running text)?
+ 5 kinds: is each block the right kind — title, heading, byline (an author and an affiliation are two blocks),
+   signature at the end (not a heading), caption, running head, footnote?
+ 6 order: does the reading order follow the columns? (A paragraph that runs from the foot of one column to the
+   top of the next is ONE block and right. The title may be printed low on the page: its place in the order does
+   not matter.)
+ 7 notes: are the notes laid out as printed (notes printed side by side in one row are separate notes) and does
+   each call point to its note? (A star, ٥ or other ornament between verse halves is not a call.)
+ 8 verse: are the poem's lines and hemistichs as printed (one printed line per row, halves not joined)?
+ 9 other article: is any block of a different article or an advertisement in our text, or is one of ours wrongly
+   marked other_article?
+Then list every "no" as a problem below (a problem for each wrong thing).
+""")
+PROMPTS = {"v1": PROMPT, "v2": PROMPT_V2}
+PV = "v1"                          # judge43 --prompt; answers of v2 go to <model>_v2/
+
 SCHEMA = {"type": "object", "properties": {
     "verdict": {"type": "string", "enum": ["none", "problems"]},
     "problems": {"type": "array", "items": {"type": "object", "properties": {
@@ -313,6 +346,11 @@ SCHEMA = {"type": "object", "properties": {
 }, "required": ["verdict", "problems"]}
 
 
+SCHEMA_V2 = {"type": "object", "properties": dict(checks={"type": "array", "items": {"type": "string"}},
+                                                  **SCHEMA["properties"]),
+             "required": ["checks", "verdict", "problems"]}
+
+
 def rest_schema(s):
     """The schema in the REST shape the Batch JSONL takes (types upper-case)."""
     if isinstance(s, dict):
@@ -327,11 +365,20 @@ def request(run: str, stem: str, p: int):
     v = page_view(run, stem, p)
     shots(run, stem, [p])
     imgs = [scan_jpeg(a, p), scan_jpeg(a, p, v), ours_jpeg(run, stem, p)]
-    return PROMPT.format(page=p, blocks=block_table(v)), imgs, v
+    return PROMPTS[PV].format(page=p, blocks=block_table(v)), imgs, v
+
+
+def mdir(model: str) -> str:
+    return model if PV == "v1" else f"{model}_{PV}"
+
+
+def schema():
+    return SCHEMA if PV == "v1" else SCHEMA_V2
 
 
 def answer_path(model: str, run: str, stem: str, p: int) -> Path:
-    return J / "answers" / model / run / f"{stem}_p{p:03d}.json"
+    """model may already be a dir name (gemini-3.8-flash_v2)"""
+    return J / "answers" / (model if "_v" in model else mdir(model)) / run / f"{stem}_p{p:03d}.json"
 
 
 def ask(run: str, stem: str, p: int, model: str, dry: bool = False) -> dict | None:
@@ -345,9 +392,9 @@ def ask(run: str, stem: str, p: int, model: str, dry: bool = False) -> dict | No
         return None
     C.CAP = CAP_TOTAL
     info = {}
-    ans, usd = C.gemini(prompt, images=imgs, tag=f"judge_{model}_{run}_{stem}_p{p:03d}", model=model, max_out=6000,
-                        schema=SCHEMA, thinking="low", json_out=True, est_in=est, info=info)
-    rec = dict(run=run, stem=stem, page=p, model=model, mode="standard", usd=usd, answer=ans, view=_jsonable(v),
+    ans, usd = C.gemini(prompt, images=imgs, tag=f"judge_{mdir(model)}_{run}_{stem}_p{p:03d}", model=model, max_out=6000,
+                        schema=schema(), thinking="low", json_out=True, est_in=est, info=info)
+    rec = dict(run=run, stem=stem, page=p, model=model, prompt=PV, mode="standard", usd=usd, answer=ans, view=_jsonable(v),
                **{k: info.get(k) for k in ("finish", "tin", "tout", "think", "secs", "cached", "error")})
     if ans is not None:
         f.parent.mkdir(parents=True, exist_ok=True)
@@ -374,7 +421,7 @@ def log_spend(tag, model, tin, tout, think, usd, finish, mode):
 def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, poll: int = 30):
     """All pages in one Batch job (Flash: a page is ~6k tokens in); answers saved like ask()'s."""
     from google.genai import types
-    st_f = J / f"batch_{model}_{run}.json"
+    st_f = J / f"batch_{mdir(model)}_{run}.json"
     state = json.loads(st_f.read_text()) if st_f.exists() else {}
     client = C._client()
     pin, pout = (x / 2 for x in PRICE[model])
@@ -389,10 +436,10 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
                 parts.append({"inlineData": {"mimeType": "image/jpeg", "data": base64.b64encode(im).decode()},
                               "mediaResolution": {"level": "MEDIA_RESOLUTION_HIGH"}})
             parts.append({"text": prompt})
-            key = f"judge_{model}_{run}_{s}_p{p:03d}"
+            key = f"judge_{mdir(model)}_{run}_{s}_p{p:03d}"
             req = {"contents": [{"role": "user", "parts": parts}],
                    "generationConfig": {"maxOutputTokens": 6000, "responseMimeType": "application/json",
-                                        "responseSchema": rest_schema(SCHEMA),
+                                        "responseSchema": rest_schema(schema()),
                                         "thinkingConfig": {"thinkingLevel": "LOW"}}}
             w = (len(prompt) / 2.5 + 1200 * len(imgs)) / 1e6 * pin + 6000 / 1e6 * pout
             if C.spent() + worst + w > cap_total:
@@ -405,10 +452,10 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
         if not lines:
             print("nothing to send")
             return
-        bf = J / "batch" / f"{model}_{run}.jsonl"
+        bf = J / "batch" / f"{mdir(model)}_{run}.jsonl"
         bf.parent.mkdir(parents=True, exist_ok=True)
         bf.write_text("".join(lines), encoding="utf-8")
-        (J / "batch" / f"{model}_{run}_views.json").write_text(json.dumps(views, ensure_ascii=False))
+        (J / "batch" / f"{mdir(model)}_{run}_views.json").write_text(json.dumps(views, ensure_ascii=False))
         up = client.files.upload(file=str(bf), config=types.UploadFileConfig(display_name=f"judge-{run}",
                                                                              mime_type="jsonl"))
         job = client.batches.create(model=model, src=up.name, config={"display_name": f"judge-{run}"})
@@ -424,7 +471,7 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
         time.sleep(poll)
     if s != "JOB_STATE_SUCCEEDED" or state.get("collected"):
         return
-    views = json.loads((J / "batch" / f"{model}_{run}_views.json").read_text())
+    views = json.loads((J / "batch" / f"{mdir(model)}_{run}_views.json").read_text())
     rows = [json.loads(x) for x in client.files.download(file=job.dest.file_name).decode().splitlines() if x.strip()]
     n = 0
     for row in rows:
@@ -442,8 +489,8 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
             ans = json.loads(text)
         except Exception:
             ans = None
-        s_, p_ = key[len(f"judge_{model}_{run}_"):].rsplit("_p", 1)
-        rec = dict(run=run, stem=s_, page=int(p_), model=model, mode="batch", usd=usd, answer=ans, view=views.get(key),
+        s_, p_ = key[len(f"judge_{mdir(model)}_{run}_"):].rsplit("_p", 1)
+        rec = dict(run=run, stem=s_, page=int(p_), model=model, prompt=PV, mode="batch", usd=usd, answer=ans, view=views.get(key),
                    finish=fin, tin=tin, tout=tout, think=think)
         f = answer_path(model, run, s_, int(p_))
         f.parent.mkdir(parents=True, exist_ok=True)
@@ -461,7 +508,6 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
 def decide(rec: dict, threshold: float = THRESHOLD) -> list[dict]:
     """Every problem of one judged page with its route: auto (two keys), retry, human, or none; a patch when auto
     or proposed."""
-    import evidence43 as EV
     run, stem, p = rec["run"], rec["stem"], rec["page"]
     v = rec["view"] or page_view(run, stem, p)
     v = dict(v, notes=set(v.get("notes") or []))
@@ -476,6 +522,19 @@ def decide(rec: dict, threshold: float = THRESHOLD) -> list[dict]:
         if act in ("retry", "human") or pr.get("route") in ("retry", "human") or act not in PA.ACTIONS:
             f["route"] = "retry" if (act == "retry" or pr.get("route") == "retry") else "human"
             f["check"] = dict(ok=None, why="no edit proposed")
+            if pr.get("type") in ("wrong_order", "other"):
+                # "columns mixed": a block running from the foot of one column to the top of the next is right
+                import re
+                named = [b for b in dict.fromkeys(f["blocks"] + re.findall(r"p\d+b\d+", pr.get("evidence") or ""))
+                         if b in B]
+                named = [b for b in named if B[b]["type"] in EV.RUNNING]      # a table across columns is no run-on
+                spans = [EV.continuation(B[b], v["line_box"]) for b in named]
+                spans = [(b, c) for b, c in zip(named, spans) if c["why"] != "one column" and c["why"] != "too few lines"]
+                if spans and all(c["ok"] for _, c in spans):
+                    f["route"] = "dismissed"
+                    f["check"] = dict(ok=False, why="code: " + "; ".join(f"{b} {c['why']}" for b, c in spans))
+                elif spans:
+                    f["check"] = dict(ok=True, why="code: " + "; ".join(f"{b} {c['why']}" for b, c in spans))
             out.append(f)
             continue
         bl = [b for b in f["blocks"] if b in B]
@@ -525,7 +584,7 @@ def decide(rec: dict, threshold: float = THRESHOLD) -> list[dict]:
 def write_patches(model: str, run: str, dst: Path):
     """Every judged page's proposals -> dst/patches/<stem>.json (judge patches replaced, others kept)."""
     by = {}
-    for f in sorted((J / "answers" / model / run).glob("*_p[0-9][0-9][0-9].json")):
+    for f in sorted((J / "answers" / mdir(model) / run).glob("*_p[0-9][0-9][0-9].json")):
         rec = json.loads(f.read_text(encoding="utf-8"))
         for x in decide(rec):
             if x.get("patch"):
@@ -557,8 +616,11 @@ def main():
     ap.add_argument("--model", default="gemini-3.8-flash")
     ap.add_argument("--cap", type=float, default=CAP_TOTAL, help="log total not to cross")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--prompt", default="v1", choices=["v1", "v2"])
     ap.add_argument("--out", default=str(OUT / "v33_300_judged"))
     a = ap.parse_args()
+    global PV
+    PV = a.prompt
     pages = parse_pages(a.pages + (Path(a.pagelist).read_text().split() if a.pagelist else []))
     if a.cmd == "shots":
         by = {}
