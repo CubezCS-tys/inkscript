@@ -816,8 +816,8 @@ LA_START = re.compile(r"^([a-zà-ÿœæ][A-Za-zÀ-ɏ]*)")
 def latin_join(prev: str, nxt: str) -> str | None:
     """A Latin line ending in a hyphen after letters, the next line starting with a lower-case word: "join" (the
     word was cut: no hyphen, no space), "hyphen" (a compound cut at its own hyphen, «well-» «known»: hyphen kept, no
-    space), None (not a cut word). Decided with wordlist43 when it exists (join unless the joined word is unknown and
-    both halves are words, or the hyphenated form is known)."""
+    space), None (not a cut word). Decided with wordlist43 when it exists: the hyphenated form known -> hyphen; the
+    joined word known -> join; else the second part a word of its own -> hyphen («hispano-maghrébine»); else join."""
     a, b = LA_END.search((prev or "").rstrip()), LA_START.match((nxt or "").lstrip())
     if not a or not b or is_rtl(prev):
         return None
@@ -829,8 +829,12 @@ def latin_join(prev: str, nxt: str) -> str | None:
     if not W:
         return "join"
     x, y = a.group(1).split()[-1], b.group(1)
-    if WL.freq(f"{x}-{y}", W) or (not WL.freq(x + y, W) and WL.freq(x, W) and WL.freq(y, W) and len(y) >= 3):
+    if WL.freq(f"{x}-{y}", W):
         return "hyphen"
+    if WL.freq(x + y, W):
+        return "join"
+    if len(y) >= 3 and WL.freq(y, W):
+        return "hyphen"                    # the second part is a word of its own: «hispano-» «maghrébine» (1140)
     return "join"
 
 
