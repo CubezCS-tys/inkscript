@@ -448,6 +448,12 @@ reason is recorded), **open** (voiced, not yet judged).
   that chunk with extra full-sharpness crops of the flagged regions from the 300 dpi render ("Image 3b: close-up
   of page 3, region [x0,y0,x1,y1]"), found from Azure alone (small line heights, packed lines, tables,
   equations, vowelled verse). About 1,100 tokens a close-up ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
+  2026-10-20: the first concrete target — letters Azure drops in vocalised verse («الزَّاد» read «الْادُ», 1875 p17):
+  code can flag the doubtful words (`letters_lost_vowelled`, 114 pages of the 300, about a third real) but not
+  restore them; a close-up re-read of just those lines is the fix route (prompt v3.4 candidate asks for it too).
+- **Italics and other type styles in French / English text** (2026-10-20, the 300): *open*. Azure prebuilt-read
+  returns no font style (its `styles` hold only `isHandwritten`), so titles of works lose their italics. Routes:
+  prebuilt-layout with the font-styling add-on (cost per page to check), or the model marking italic spans.
 - **Structured references and cited works** (parsed authors / year / title / source … per reference and per
   note): *candidate* in prompt v3.2 (not live; each field an exact substring of the print), masters code ready
   (`element-citation` beside the printed `mixed-citation`, editions print each once), ~$1.7 more on the 300

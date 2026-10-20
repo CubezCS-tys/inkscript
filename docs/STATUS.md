@@ -177,6 +177,14 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   Argon retries fixed a table split across columns and a page drawn as one picture. Masters in
   `out/v33_300_judged/` only; page http://127.0.0.1:8899/judge/judge_review.html
   ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "The judge").
+- **Experiment 43, fixes from the 300 (2026-10-20, no calls)**: show-through kept out by ink strength (112 lines,
+  0744's ~40 a page), whole-page "frame" pictures no longer swallow text (5 pages), a table over two columns drawn
+  per part, «» from (( )) where the ink shows guillemets (101 chunks, unsure ones flagged), Latin line-end hyphens
+  joined, free verse row by row, an advert as one picture, page ranges spanning the scan 161 → 294 of 299 (folios /
+  catalogue, D33 log), section labels no longer titles; lost letters in vocalised verse flagged (114 pages, fix route
+  a close-up retry); prompt v3.4 candidate (not live); 1764's MAX_TOKENS chunk can be re-asked in smaller chunks
+  (`rechunk43.py`, one call). The 300 re-flagged: high 0.48 → 0.26 per 100 pages. 299/299 + 55/55 valid, gold 5/5
+  ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), section "Fixes from the 300").
 - **The editions (2026-10-11, experiment 35)**: every derived edition of the 205 documents in
   `experiments/35_edition/out/editions/<id>/` (513 MB), the hand-made table/maths tests in
   `out/testmasters/`, the owner's page `experiments/35_edition/out/report.html`. Nothing is running.

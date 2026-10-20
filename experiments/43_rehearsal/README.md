@@ -1107,6 +1107,56 @@ marks on the review page would grow it); the judge missed 1010 p2's shredded adv
 model, and 1412 p2's interleaved columns; confidence is uninformative; 548 judged pages were picked by flags, so the
 auto rate on unflagged pages (1 in 50) is a small sample.
 
+## Fixes from the 300 (2026-10-20; owner-approved fix list + two items from experiment 46; no calls)
+
+The fix list from "Looked at by eye" and the coordinator's two catalogue disagreements, all in code and replayed free
+on the saved answers through today's code into new folders (`pictures43.py --run R --build out/fixes2/R`, script
+`out/fixes2/rebuild.sh`): **the 300: 299/299, the 55: 55/55, the v3 / v3.1 / v3.2 tests: 6/6, 2/2, 6/6 JATS DTD +
+ALTO XSD valid**; masters 8.3 min, peak 2.0 GB. Views `out/fixes2/v33_300/views/`, flags `out/fixes2/<run>/flags.txt`,
+counts `out/fixes2/v33_300/counts.json`, page ranges `out/fixes2/pages_check.json`, progress log
+`out/fixes2/progress.md`. Scan beside our view, before: `out/v33_300/shots/side_*.jpg`, `out/fixes2/shots/before/<stem>/`;
+after: `out/fixes2/shots/after/<stem>/` (all looked at). **Gold 5/5 the same** after one accepted change (0877: its
+((…)) are printed «…», `out/fixes2/guill_0877_p2-3.jpg`). Unit tests 49 pass (+6). Issues i11–i26.
+
+| # | what was wrong | what changed (code) | over the 300 (the 55) |
+|---|---|---|---|
+| 1 | show-through put back as text (0744 p1: ~40 lines a page) | `rules43.show_through` inside the never-noise rule: a line stays noise when its ink (`dark_share`) is < 0.3 of the page's text median, or < 0.5 with Azure's confidence < 0.4, or confidence < 0.5 with mostly non-words (`wordlist43.py`: 273k words seen in >= 3 catalogue abstracts / titles of marc.db or of the 355 articles' Azure text); ALTO `role.showThrough` (the view leaves it to the scan), flag `show_through` | **112 lines** kept out (0744 ×77, 0720, 1054, 0527, 0751, 0461, 0471, 0419's watermark, …), every non-0744 line looked at on crops (`out/fixes2/showthrough_check*.jpg`): reverse-side text, watermarks, ghosts, none printed; lines rescued 123 → 11; 0744's body 2,172 → 1,767 words (0) |
+| — | (found) the ink rule made a whole page a "figure" of its frame, swallowing the text | `rules43.pictures`: a blob over 40% of the page holding >= 10 text lines is a frame, skipped | 5 pages (0368-003 pp11–12, 0751 p2, 1080-003 p9, 1080-005 p5) back as text |
+| 2 | a table over two columns drawn as one box over the page (0368-013 p11) | `rules43.table_parts` (a row jumping back up the page into other columns starts a part); `masters43.table`: one ALTO ComposedBlock per part (later parts `flow.continued`, same JATS `table-wrap`); `views43.table_part_html` draws each part's rows; flag `table_spans_columns` | 1 table (0) |
+| 3 | letters lost in vocalised verse (1875 p17 «الزَّاد» → «الْادُ») | flag only: `rules43.vowelled_words` — in lines with >= 0.3 marks a letter, a word with impossible marks (lam with sukun before a bare alef, stacked vowels) or never seen once the marks are off; `letters_lost_vowelled` | 365 words on 287 lines, **114 pages flagged** (16 in the 55); on 1875 about a third are real losses (مُوِقَاتِ الدُّنُوبْ, الْجْدِيبُ, بِقْتِرَابِ, الْادِي), the rest classical words the list lacks. Fix route: a close-up re-read of the flagged lines (docs/ideas.md) + prompt v3.4 line |
+| 4 | «» read as (( )) | `rules43.guillemets`, per chunk: the height of the ink at an opening (( (300 dpi crop, outermost piece) against the article's single ( before a word; guillemets (< 0.36 of the word height, or < 0.8 of the single ( and < 0.5; with no single ( < 0.33) → fixes ((→« ))→» (why "code: …"; the ALTO keeps Azure's reading); clearly printed (( kept; in between → flag `guillemets_unsure`, unchanged (D30) | **101 chunks changed (2,746 marks)**, 14 kept as printed, 47 unsure; contact sheets: 15/16 converted chunks are guillemets in the ink, the 16th (0701, printed (( at 0.38, no yardstick) led to the 0.33 bar (`out/fixes2/guill_converted_sample.jpg`, `guill_kept_sample.jpg`). Kept and unsure chunks are often guillemets too (Azure reads some « as a single "(", which spoils the yardstick): safe side. (12 chunks / 402 marks in the 55) |
+| 5 | Latin line-end hyphens kept with a space («classificat- ion») | `rules43.latin_join` + `masters43.fill` (JATS: joined, hyphen out; kept for a compound when the second part is a word: «hispano-maghrébine», «well-known») + `views43.join_lines`; the ALTO keeps the printed line | 2483, 0310, 0814, 1140 (gold same). **Italics: not possible from Azure** — prebuilt-read gives no font style (`styles` hold only `isHandwritten`, 173 of 240 docs): a gap (ideas.md) |
+| 6 | free verse two printed lines a row; a drawing over three verse ends (0729 p2) | cause: the poem is one other_article block and the view flowed its lines like prose → `views43.ragged`: a block whose rows mostly end short (< 95% of its widest row in >= 60% of rows, >= 4 rows) is drawn row by row; `masters43.crop` paints the page's own text lines out of a picture's crop (paper colour) and the view blends crops (multiply), so printed words are not drawn twice | 0729 p2 right; ragged blocks also in typewritten / list pages (7672: 19 pieces) |
+| 7 | inline maths left as junk (0168 p5 «tostST- max») | cause: the model DID give the formula as LaTeX and listed the next line's junk «-tostST» as math with an EMPTY LaTeX, which assembly rejects → `rules43.math_parts` turns such entries into removal fixes; `rules43.inline_math_junk` flags Latin tokens with an operator or mixed-case junk read unsure in Arabic sentences (`inline_math_junk`, low); prompt v3.4 line | math_parts 2 (0168); flag 4 lines |
+| 8 | an advert in pieces (1010-006 p2) | `rules43.advert_whole`: an other_article block whose box is >= 40% pictures becomes one figure of another article, its words the figure's text | 2 regions; other_middle (high) 6 → 4 |
+| 9 | 1764 pp9–15 MAX_TOKENS twice | `rechunk43.py` (map `out/rechunk43.json`, installed into `ST.chunks` by masters43 / run43; the failed chunk asked as 9–11, 12–14, 15 with maxOutputTokens 32,768); dry run $0.13 expected / $0.25 worst on Batch. **Not run, and the map is not left installed** (preview `out/fixes2/rechunk43_1764_preview.json`). Command: `rechunk43.py --run v33_300 --stems 1764-003-005-006`, then `run43.py --set b --prompt v3.3 --run v33_300 --stems 1764-003-005-006 --cap <logged + 1>` | — |
+| 10 | small | page number: the print of 1010 p2 **is** ٣٥ (crop `out/fixes2/pageno_1010.jpg`, between ٣٤ and ٣٦): the look was wrong; `rules43.page_numbers` fixes a lone number out of sequence between two in-sequence pages (10 in the 300, 3 in the 55); a signature (0617 p3) drawn as plain text (`views43`: a byline after the first page); author + affiliation in one byline (2048): not by rule (prompt) | |
+| 11 | fpage–lpage not the scan's pages (exp 46: 142 rows; 1058: Gemini's «450-459» was its first chunk's range) | `meta43.page_range` (D33, logged as a metadata change): kept when it spans the scan's pages; else the folios read on the first and last page (a jump to a later part of the issue kept: 1010-006 34–58); else the catalogue's range (marc.db) when it spans the scan; else the folios' offset; else fpage + pages − 1 | ranges spanning the scan: **161 → 294 of 299**; equal to the catalogue where it spans the scan 273 of 274; left: 0700 (two sequences), 0814-026, 1010-006, 1634, 2342 (folios / catalogue disagree with the page count) |
+| 12 | a French section label as the title (0344 «II. - JURISPRUDENCE», 0814 «REVUE DES LIVRES») | `rules43.rubric_title`: a title block that is a rubric (a short list, FR / EN / AR, numbered or not) becomes a heading and the next heading on the first three pages the title (Gemini's metadata title too); flag `title_rubric` | 2 (0344 → «COUR SUPREME (Chambre de Droit Privé) 2 décembre 1964», 0814 → the reviewed book's heading) |
+
+**Flags** (per 100 pages, the 300 / the 55): high **0.48 → 0.26** / 0.75 → 0.75; medium 8.06 → **7.27** / 8.02 → 8.02;
+low 12.21 → 17.17 / 6.02 → 12.53 (new low kinds: letters_lost_vowelled 114, guillemets_unsure 47, show_through 23).
+noise_rescued 37 → 10, overlap 109 → 91; `fixes_many` counts only the model's fixes now (rules43's own fixes say
+"code: …"). Also: `flags43.py --out` (a run's own flags.json kept), `jats43` appendix headings with «» (0295's
+«ملحق رقم ٣» stayed an appendix).
+
+**Text changed** (JATS body words, the 300 against `out/v33_300/masters`): 63 articles — show-through out (0744 −405,
+0461 −17, 0527 −17, …), the 5 frame pages back, guillemets (the word count moves only because a fix is its own
+element), 0814's title out of the body, 0168's junk out. Everything else the same.
+
+**Not fixable by code**: restoring letters in vocalised verse (close-up retry or prompt), italics (Azure gives no
+styles), author / affiliation in one block (prompt), Azure lines spanning two columns (0751 p2, now visible since its
+frame no longer hides the page: needs splits from the model), the side tab of 0037 p9, and (( )) where the ink test
+is unsure (47 chunks: a person or a close-up). **Prompt v3.4 candidate** (`prompt43.PROMPT_V34`, `V34_CHANGES`; not
+live, nothing sent): inline formulas in Arabic sentences as LaTeX, lost letters in fully vowelled lines, compact JSON
+(+670 characters).
+
+Files: `wordlist43.py`, `rechunk43.py` (new); `rules43.py` (show_through, table_parts / table_columns, guillemets,
+vowelled_words, latin_join, math_parts, inline_math_junk, advert_whole, page_numbers, rubric_title, the frame skip),
+`masters43.py` (table parts, fill, crop, role.showThrough, words.image, rechunk hook), `meta43.py` (page_range),
+`views43.py` (table parts, ragged rows, join_lines, signature, blended crops), `flags43.py` (8 kinds, `--out`),
+`jats43.py` (appendix heading), `prompt43.py` (v3.4), `run43.py` (rechunk hook), `test_rules43.py`.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -1117,9 +1167,9 @@ auto rate on unflagged pages (1 in 50) is a small sample.
    `--prompt v3`; watch pictures filed as other_article / noise and the fix count (section "Prompt v3 and JATS coverage").
 4. ~~Fetch the 114 catalogue documents, measure their layouts, swap from the reserve to fill verse / equations, then the
    rehearsal (`--set b`)~~ (done: "The 300 (v3.3)").
-5. Owner hand-checks the 10 articles (`out/v33_300/handcheck/`); then the fix list from "Looked at by eye": show-through
-   as noise, a table split across columns, Latin line-end hyphens, (( )) for « », restored letters in vocalised verse,
-   inline maths in Arabic sentences; 1764 pages 9–15 (raise its output limit or split the chunk).
+5. Owner hand-checks the 10 articles (`out/v33_300/handcheck/`); ~~then the fix list from "Looked at by eye"~~ (done:
+   "Fixes from the 300"); 1764 pages 9–15: `rechunk43.py` then run43 (one call, ~$0.13, owner's cap); decide prompt
+   v3.4 (candidate) and whether the 47 unsure (( )) chunks go to a close-up or a person.
 
 ## Files
 
@@ -1127,7 +1177,7 @@ auto rate on unflagged pages (1 in 50) is a small sample.
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `judge43.py`, `patches43.py` + `test_patches43.py`, `evidence43.py`, `retry43.py`, `judge_calib43.py`, `judge_review43.py`, `judge_truth43.json`, `judge_verdicts43.json` (the judge; out/judge/, out/v33_300_judged/) · `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `wordlist43.py` (word list: show-through, vocalised lines, Latin hyphens) · `rechunk43.py` (a MAX_TOKENS chunk asked again in smaller chunks) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets), `sample2/` (the second sample: draw, fetch,

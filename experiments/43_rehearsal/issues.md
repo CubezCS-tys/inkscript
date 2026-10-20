@@ -2,11 +2,13 @@
 
 Written by `gold43.py` from `issues.json` (edit with `gold43.py issue ID --status ... --pattern ...`). Each "no" from a hand check or a review page, with its note, the pattern it belongs to, and what became of it: open / code rule (rules43, replayed free on saved answers) / prompt change (needs calls) / won't fix.
 
-## open (0)
+## open (1)
 
-(none)
+| id | date | article | run | page | lines | pattern | note | rule / change |
+|---|---|---|---|---|---|---|---|---|
+| i21 | 2026-10-20 | 1764-003-005-006 | v33_300 | 9 |  | max_tokens | Pages 9-15 hit MAX_TOKENS twice (531 one-line table cells, pretty-printed answer). | rechunk43.py: the chunk asked again as 9-11, 12-14, 15 with maxOutputTokens 32768 (code only; needs a call, ~$0.13 on Batch); prompt v3.4 candidate: compact JSON. |
 
-## code rule (9)
+## code rule (20)
 
 | id | date | article | run | page | lines | pattern | note | rule / change |
 |---|---|---|---|---|---|---|---|---|
@@ -19,13 +21,29 @@ Written by `gold43.py` from `issues.json` (edit with `gold43.py issue ID --statu
 | i8 | 2026-10-18 | 1769-014-002-002 | v2_55 | 3 |  | picture_in_line | Pictures inside a printed line (hieroglyph groups): the view draws the picture but the line's text runs under it; on p3's top lines the text overlaps itself. | masters43: a picture inside a row of running text (≤ 3.2 line heights, beside or inside the row) is an <inline-graphic> at its word position in the paragraph (ALTO Illustration → it); v3.1 picture ornaments become inline pictures too, their box from the ink round Azure's junk word. views43: the row is cut round the picture (words on each side their own boxes). p3's self-overlap: the row's two Azure lines (cut at the picture) became two boxes, the second covering the rows below: rows now stay together. v2: 3 inline pictures; v3: 3; v3.1: 11 (8 from ornaments). |
 | i9 | 2026-10-18 | 1769-014-002-002 | v2_55 | 3 |  | figure_text_button | A 'text' button on figures whose words are junk («D A», «#»). | views43: the button only when the figure's words are ≥ 4 words or ≥ 20 letters; the words stay in the JATS. |
 | i10 | 2026-10-18 | 2382-005-003-001 | v2_55 | 6 |  | mathml_names | MathML splits END / EGR / POV into letters. | masters43.mathml43: a run of 3+ capitals with a subscript or under \ln / \log / \Delta is one mml:mi (\mathrm), plain ln / log / sin → the function; matrix products (VRV', IWX in 1147) and two capitals stay letters. 2382: 12 names; gold accepted. |
+| i11 | 2026-10-20 | 0744-000-059-007 | v33_300 | 1 |  | show_through | Show-through of the reverse side read as ~60 lines of garbled text, put back by the never-noise rule. | rules43.show_through: a line kept out of the text when its ink is < 0.3 of the page's text median (dark_share), or < 0.5 and Azure's confidence < 0.4, or confidence < 0.5 with mostly non-words (wordlist43); ALTO role.showThrough, flag show_through. |
+| i12 | 2026-10-20 | 0368-000-013-009 | v33_300 | 11 |  | table_spans_columns | A table printed at the foot of the right column and the head of the left one drawn as one box over the whole page. | rules43.table_parts / masters43.table: one ALTO block per part (later parts flow.continued), one JATS table; views43 draws each part's rows; flag table_spans_columns. |
+| i13 | 2026-10-20 | 0368-000-003-003 | v33_300 | 11 |  | page_frame_as_picture | (found while fixing) The ink rule made a whole-page 'figure' of the page's frame and swallowed the text (5 pages: 0368-003 pp11-12, 0751 p2, 1080-003 p9, 1080-005 p5). | rules43.pictures: a blob over 40% of the page holding >= 10 text lines is a frame or border, skipped. |
+| i15 | 2026-10-20 | 0658-049-003-006 | v33_300 | 4 |  | guillemets | Printed «…» read by Azure as ((…)) and kept. | rules43.guillemets: per chunk, the height of the opening (( against the article's single ( on the 300 dpi crops; guillemets -> fixes ((->« ))->» (why 'code: …'); unsure -> flag guillemets_unsure; printed (( )) kept (1956, 0618). Gold 0877 accepted. |
+| i16 | 2026-10-20 | 2483-000-006-015 | v33_300 | 3 |  | latin_hyphen | Latin words cut at a line end kept their hyphen and a space («classificat- ion»). | rules43.latin_join + masters43.fill + views43.join_lines: joined in the JATS and the view (hyphen kept for a compound: wordlist43), ALTO keeps the printed line. |
+| i18 | 2026-10-20 | 0729-008-030-020 | v33_300 | 2 |  | free_verse_flowed | Free verse drawn two printed lines per row; a drawing's box over three verse ends showing the printed words twice. | views43.ragged: a block whose rows mostly end short is drawn row by row; masters43.crop paints the page's own text lines out of a picture's crop; the view blends crops (multiply). |
+| i19 | 2026-10-20 | 0168-029-002-020 | v33_300 | 5 |  | inline_math_junk | Inline formula in an Arabic sentence left as Azure's junk («tostST- max»). | Cause: the model gave the formula as LaTeX and listed the next line's junk as math with an EMPTY LaTeX, which assembly rejects: rules43.math_parts turns it into a removal fix; rules43.inline_math_junk flags the rest (flag inline_math_junk); prompt v3.4 candidate line. |
+| i20 | 2026-10-20 | 1010-006-011-015 | v33_300 | 2 |  | advert_shredded | An advertisement (rightly another article) drawn as picture pieces with its words between. | rules43.advert_whole: an other_article block >= 40% pictures becomes one figure of another article, its words the figure's text. |
+| i23 | 2026-10-20 | 0617-024-021,024-010 | v33_300 | 3 |  | signature_heading | A signature line (name, place) drawn as a large heading. | views43: a byline after the article's first page is drawn as plain text. |
+| i25 | 2026-10-20 | 1058-005-993-021 | v33_300 | 1 |  | page_range | fpage-lpage not the scan's pages (Gemini gave its first chunk's range 450-459; folios 450…469); 133 of the 300. | meta43.page_range (D33, logged): kept when it spans the scan; else the folios of the first and last page; else the catalogue's range when it spans the scan; else the folios' offset; else fpage + pages - 1. |
+| i26 | 2026-10-20 | 0814-007-020-008 | v33_300 | 1 |  | rubric_title | A journal's section label («REVUE DES LIVRES», 0344 «II. - JURISPRUDENCE») taken as the article's title. | rules43.rubric_title: a title block that is a rubric becomes a heading and the next heading on the first three pages the title (flag title_rubric). |
 
-## prompt change (0)
+## prompt change (2)
 
-(none)
+| id | date | article | run | page | lines | pattern | note | rule / change |
+|---|---|---|---|---|---|---|---|---|
+| i14 | 2026-10-20 | 1875-005-020-001 | v33_300 | 17 |  | letters_lost_vowelled | Letters Azure lost in vocalised verse («الزَّاد» -> «الْادُ») not restored. | rules43.vowelled_words flags them (flag letters_lost_vowelled; about a third real on 1875); prompt v3.4 candidate asks for them; the route to restore them is the close-up retry (docs/ideas.md). |
+| i24 | 2026-10-20 | 2048-015-001-019 | v33_300 | 1 |  | byline_affiliation | Author and affiliation run into one byline block. | Not by rule: the printed block holds both; needs the model to give the affiliation its own block. |
 
-## won't fix (1)
+## won't fix (3)
 
 | id | date | article | run | page | lines | pattern | note | rule / change |
 |---|---|---|---|---|---|---|---|---|
 | i1 | 2026-10-18 | 0197-002-001-003 | v2_55 | 1 |  | page_number_missing | Page number «-٨-» missing at the foot of the first page (later pages show theirs). Same article as the (!) issue. | Azure never read it: no line or word at the foot of p1 in Azure's JSON (p2's «- ٩ -» is read and placed). Every page-number line Azure read in the 55 is already furniture (185 lines). Not invented in code. |
+| i17 | 2026-10-20 | 0310-000-089-011 | v33_300 | 18 |  | italics | Italics (titles of works) lost in French / English text. | Azure prebuilt-read gives no font style (styles hold only isHandwritten); needs prebuilt-layout with the font add-on, or the model. |
+| i22 | 2026-10-20 | 1010-006-011-015 | v33_300 | 2 |  | page_number_misread | Page number looked misread (print ٤٥, ours ٣٥). | The print is ٣٥ (crop out/fixes2/pageno_1010.jpg, between ٣٤ and ٣٦): the look was wrong. rules43.page_numbers fixes a lone number out of sequence between two in-sequence pages. |
