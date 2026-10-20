@@ -1321,6 +1321,100 @@ Files: `ab43.py` (new: A/B numbers, gold, changed pages); `flags43.py --patches`
 each answer as `thinking`); `experiments/46_platform_db/load46.py` (`*_final` runs). Outputs: `out/v33_300_final/`,
 `out/g0_v34_low/`, `out/g0_v34_high/`, `out/g0a_*`, `out/g0_v3*_low_rep/`, `out/stepEF/`.
 
+## The exam: second 300 (2026-10-20; owner-approved overnight plan step G; **$31.94 billed**: run $27.07 + judge $4.34 + retries $0.54, log $72.50)
+
+Held-out: `sample43b.json` (300 articles, 3,404 pages, unseen), pipeline **frozen** as stamped in `out/overnight_plan.md`
+and checked before use (prompt v3.3 d6b2156150, thinking low, Argon, Batch; rules_hash 950aa361c0, rules43 47ea994c65,
+masters43 98cf2e7cd6, prompt43 4627a07cfb, evidence43 2436f36042; judge prompt v2 35fd897dea, confidence ≥ 0.85 AND
+the code key). **Deviations from the frozen config: none.** Code touched (commit 65dcc21, no output change): set c in
+the downstream scripts (`pictures43 --set c`, `views43`/`flags43`/`handcheck43` find sample43b, `judge43.RUNS`
+v33_300b(+_final), `patches43`/`summary43`/`correct43` pick set c for v33_300b*, `retry43` writes exam patches to
+`out/v33_300b_final/patches`), `judge43` cap from `JUDGE43_CAP` (its hard-wired cap was the first judge's), and
+`judge_review43 --run/--judged/--out/--no-calib`. judge43 / patches43 file hashes differ from the stamp by these lines only.
+Log of every step: `out/v33_300b/progress.md`.
+
+**Run** (`run43.py --set c --prompt v3.3 --thinking low --run v33_300b --cap 76.12`). Nine Batch jobs, all SUCCEEDED
+(BST, create → end; Batch itself 2.4–7 min a job):
+
+| job | requests | time | failures |
+|---|---|---|---|
+| 1 (round 1, 211 by the enqueued-token cut) | 211 | 05:21 → 05:28 | 0700-000-093-002 pp1–8 MAX_TOKENS (30,000); 0728-001-001-005 pp1–4 STOP but malformed JSON |
+| 2 | 157 (cut by the cap's worst case) | 05:36 → 05:42 | 0 |
+| — | laptop rebooted 05:45–06:49 (Windows Update) while job 3 was being built; relaunched 06:52, nothing lost | | |
+| 3 | 89 | 07:06 → 07:11 | 0 (the result download hit a Google 502; relaunch collected it, nothing double-counted) |
+| 4 / 5 | 28 / 6 | 07:25 → 07:31 / 07:32 → 07:38 | 2666-004-001-003 pp11–20 MAX_TOKENS (32,768) |
+| 6–9 (retries in smaller chunks) | 3 / 3 / 2 / 2 | 07:42 → 07:58 | 0 |
+
+**Retries**: once each, through `rechunk43.py --run v33_300b` (0700 1–8 → 1–3, 4–6, 7–8; 2666 11–20 → 11–13, 14–16,
+17–19, 20); 0728 (not a MAX_TOKENS failure, so rechunk43 skips it) got a map entry by hand with `rechunk43.split`
+(1–4 → 1–2, 3–4). All 10 STOP ($0.386). **300/300 articles answered, 300/300 masters JATS DTD + ALTO XSD valid**
+(`out/v33_300b/masters`; 14.3 min, peak 1.46 GB). The three failed answers cost $0.433.
+
+**Turnaround**: 05:12 launch → 07:58 last answer (2 h 46 min, of which 64 min reboot + 19 min re-rendering on a cold
+disk) → masters/views/flags/summary 08:29 → judge screenshots 08:49 → judge (2 Batch jobs, 08:57 → 09:01 and 09:04 →
+09:08; the first upload of the 417 MB JSONL failed with a server disconnect, nothing sent) → decide, 15 retries,
+patched masters ~09:16 → final flags/views 09:24 → review, hand-check, correction pages, platform.db ~09:35.
+
+**Judge** (Argon, judge v2, Batch; `out/judge/answers/gemini-4-argon_v2/v33_300b/`): every flagged page (549, any
+severity, as on the first 300) + **50 random unflagged pages (seed 4345)**: 599 pages, **$4.337 = $0.0072 a page**.
+Every finding with its route: `out/v33_300b/judge_findings.jsonl`, `judge_summary.json`.
+
+| pages | judged | nothing wrong | auto (two keys) | retry | owner |
+|---|---|---|---|---|---|
+| flagged | 549 | 456 | 14 | 19 | 60 |
+| random unflagged | 50 | 48 | 0 | 0 | 2 |
+(a page counts under its most serious route.) **110 findings**: auto 14, retry 23, owner 73 (63 with a proposed edit,
+10 without), dismissed by the code 0. By type: wrong_kind 46 (auto 5, owner 41), picture_box 13 (2 / 5 retry / 6),
+table_box 9 (retry 6, owner 3), text_not_on_scan 8 (auto 3, owner 5), other 8 (retry 3, owner 5), verse_layout 7
+(retry 6, owner 1), other_article 6 (auto 4, owner 2), note_link 5, wrong_order 4, missing_text 4.
+
+**Retries** (bespoke, one page, Argon Standard, `retry43.py`; `out/v33_300b/retries_plan.json`): 21 pages routed to a
+retry, **15 drawn at random (seed 4347)** and sent ($0.537, $0.036 each, all STOP); **13 passed the code check**, 2 go
+to the owner (0300 p20 and 0775 p10: split parts unknown); the other 6 stay proposals (0228 p1, 0295 p2, 0375 p22,
+0528 p11, 0877 p7, 1187 p3).
+
+**Patches** (`out/v33_300b_final/`; `patches43.py build --run v33_300b --out out/v33_300b_final`; list
+`patches_applied.json`): **26 applied in 24 articles** — judge 14 (set_kind 5: 0201 p1, 0461 p3, 0596 p2, 0806 p4,
+1009 p1; mark_noise 3: 0368 p6, 0849 p4, 0877 p7; fix_picture_box 2: 0241 p9, 0700-015 p3; unmark_other_article 2:
+0732 pp3, 6; mark_other_article 2: 1080-002 p9, 1539 p2) + 12 page retries; 1 retry skipped (0201 p1, overridden by
+the judge's patch on the same lines: person > judge > gemini-retry); 61 judge edits and 2 retries recorded as
+proposals (apply false). `masters_before_patches/` keeps the plain masters of the 63 articles with any patch (applied or proposed);
+**300/300 JATS DTD + ALTO XSD valid** after patching. Looked at: 0737 p9 (the advertisement panel, before: one
+run-on list; after the retry: each book its own block, the heading and price lines apart).
+
+**Flags** per 100 pages (3,404 pp): **run 0.59 / 7.26 / 12.16** (high 20 / medium 247 / low 414) → **after the judge
+0.53 / 7.17 / 12.22** (18 / 244 / 416). High: other_middle 14 (0732 ×5, 0701 ×5 of them), call_no_note 2, line_twice 2,
+noise_rescued 1, other_most 1. (First 300 final: 0.26 / 7.44 / 17.17.)
+
+**Summary** (`out/v33_300b/summary.txt`): 36,337 blocks (by type in the answers); calls 2,909, linked 2,821 (97.0%); sic 1,476; model fixes
+12,606; 264 other_article blocks on 50 pages; 433 tables (17,272 cells); 127 equation blocks; 14 lines rescued from noise.
+
+**Cost** (real tokens; Batch now; £ incl. 20% VAT at 1.33 $/£):
+
+| | total | per article | per page |
+|---|---|---|---|
+| run (501 answers incl. failures and retries) | $27.07 | $0.090 (£0.081) | $0.0080 (£0.0072) |
+| judge (599 pages) | $4.34 | $0.014 | $0.0013 ($0.0072 a judged page) |
+| retries (15) | $0.54 | $0.002 | $0.0002 |
+| **all** | **$31.94** | **$0.106 (£0.096)** | **$0.0094 (£0.0085)** |
+Per million documents at this mix (11.3 pages an article): ≈ $106k now (≈ £96k), double from 1 Dec 2026.
+
+**Pages** (http://127.0.0.1:8899/…, symlinks in `experiments/41_azure_structure/out/views/`): run
+`v33_300b/index.html`; final `v33_300b_final/index.html` (hardest first), review of 678 flagged spots
+`v33_300b_final/review.html`, judge findings `judge/judge_review_v33_300b.html` (107 cards: 95 pages with findings,
+the after-edit picture where applied, 12 "none"), correction tool `v33_300b_final/correct/edit/index.html` (300
+editing pages, errors 0). **Hand-check** (8 articles, one a decade, seeded random draw seed 4346 —
+`out/v33_300b/handcheck_draw.json`; not the hardest): `v33_300b_final/handcheck/index.html` — 0737-002-044-004
+(pre-1960), 0484-060-338-007 (1960s), 0138-005-006-003 (1970s), 0421-003-011-017 (1980s), 0048-009-034-003 (1990s),
+0510-008-001-001 (2000s), 1716-000-002-018 (2010s), 2259-006-004-071 (2020s).
+
+**platform.db** (`load46.py --run v33_300b`, then `--run v33_300b_final`, `link46.py`): v33_300b 300 articles, 681
+flags (20 / 247 / 414), 614 judge rows (110 findings + 504 pages with none); v33_300b_final 300 articles (current), 678
+flags (18 / 244 / 416), 91 patches (judge 14 applied + 61 proposed; retries 12 applied, 2 proposed, 1 skipped) — the
+same counts as the files.
+
+The proof pack (random pages beside the scan, error rates, citation sample, gold) is left to an independent evaluation.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -1341,7 +1435,7 @@ each answer as `thinking`); `experiments/46_platform_db/load46.py` (`*_final` ru
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `judge43.py`, `patches43.py` + `test_patches43.py`, `evidence43.py`, `retry43.py`, `judge_calib43.py`, `judge_review43.py`, `judge_truth43.json`, `judge_verdicts43.json` (the judge; out/judge/, out/v33_300_judged/) · `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `wordlist43.py` (word list: show-through, vocalised lines, Latin hyphens) · `rechunk43.py` (a MAX_TOKENS chunk asked again in smaller chunks) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `wordlist43.py` (word list: show-through, vocalised lines, Latin hyphens) · `rechunk43.py` (a MAX_TOKENS chunk asked again in smaller chunks) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`; the exam: `out/v33_300b/`, `out/v33_300b_final/`). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets), `sample2/` (the second sample: draw, fetch,
