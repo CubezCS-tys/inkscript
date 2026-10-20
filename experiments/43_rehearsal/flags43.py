@@ -38,6 +38,7 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   (2026-10-20, the fixes from the 300)
   show_through      lines of pale ink (the reverse side showing through, a watermark) kept as noise     low
   table_spans_columns  a table printed in two columns, drawn as one part per column                   medium
+  letters_lost_vowelled  words in vocalised lines that are not words (lost letters?)                low
   guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
@@ -529,6 +530,14 @@ def check_fixes2(B):
             out.append(flag(B, "table_spans_columns", "medium", e["page"], [],
                             f"a table printed in {len(e['parts'])} columns ({' + '.join(map(str, e['parts']))} rows): "
                             f"drawn as {len(e['parts'])} parts, one table in the JATS", boxes=e["boxes"]))
+        by = {}
+        for e in log.get("vowelled_doubtful") or []:
+            by.setdefault(e["page"], []).append(e)
+        for p, es in sorted(by.items()):
+            ws = [w["word"] for e in es for w in e["words"]]
+            out.append(flag(B, "letters_lost_vowelled", "low", p, [e["line"] for e in es],
+                            f"{len(ws)} word(s) in vocalised lines that are not words (letters Azure lost? a close-up "
+                            f"re-read would tell): {' '.join(ws[:6])}"))
         for e in log.get("guillemets") or []:
             if e["decision"] == "unsure":
                 out.append(flag(B, "guillemets_unsure", "low", e["pages"][0], [],

@@ -3,7 +3,7 @@ No model calls.
 
     wordlist43.py build [--abstracts N]   out/wordlist43.txt: every word seen in >= MIN_DOCS catalogue abstracts / titles
                                           (marc.db, 520 and 245) and in the Azure text of the 355 articles (>= MIN_DOCS
-                                          documents), folded (see fold), one per line
+                                          documents), folded (see fold), one per line with its document count (word<TAB>count)
     wordlist43.py check TEXT...           folded form and whether each word is in the list
 
 fold: tashkeel and tatweel out, alef forms -> ا, ى -> ي, ة -> ه, Latin lower-cased, punctuation stripped. A word with a
@@ -46,10 +46,22 @@ def tokens(text: str):
 
 
 @lru_cache(maxsize=1)
-def load() -> frozenset:
+def load() -> dict:
+    """word -> number of documents it was seen in (>= MIN_DOCS)."""
     if not LIST.exists():
-        return frozenset()
-    return frozenset(LIST.read_text(encoding="utf-8").split())
+        return {}
+    out = {}
+    for ln in LIST.read_text(encoding="utf-8").splitlines():
+        w, _, c = ln.partition("\t")
+        if w:
+            out[w] = int(c or MIN_DOCS)
+    return out
+
+
+def freq(t: str, W=None) -> int:
+    """Documents the folded word was seen in (0: never); no clitic stripping."""
+    W = load() if W is None else W
+    return W.get(fold(t), 0)
 
 
 def known(t: str, W=None) -> bool | None:
@@ -119,7 +131,7 @@ def build(n_abs: int):
             df.update(seen)
     W = sorted(w for w, c in df.items() if c >= MIN_DOCS)
     LIST.parent.mkdir(parents=True, exist_ok=True)
-    LIST.write_text("\n".join(W) + "\n", encoding="utf-8")
+    LIST.write_text("\n".join(f"{w}\t{df[w]}" for w in W) + "\n", encoding="utf-8")
     print(f"{len(W)} words (of {len(df)} seen) -> {LIST}")
 
 
@@ -135,7 +147,7 @@ def main():
         build(a.abstracts)
     else:
         for t in " ".join(a.text).split():
-            print(t, fold(t), known(t))
+            print(t, fold(t), known(t), freq(t))
 
 
 if __name__ == "__main__":

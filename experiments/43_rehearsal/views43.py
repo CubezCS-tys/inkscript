@@ -37,6 +37,7 @@ from views import (E, FS_K, GROUP, WHOLE, FONTS, KATEX, BASE_CSS, LAYOUT_CSS, CO
                    PAGE_TPL, bar, boxstyle, continues_next, crop, pieces_of, rows_of, scan)
 
 CSS43 = r"""
+.pc.fg img{mix-blend-mode:multiply}
 .pc.t-other_article .tx{color:color-mix(in srgb,var(--ink) 66%,var(--paper))}
 .pc.oa.fg img{opacity:.9}
 .pc.oa .tx{color:color-mix(in srgb,var(--ink) 66%,var(--paper))}
@@ -314,6 +315,34 @@ def row_groups(ids, LX):
     return rows
 
 
+RAGGED_W = 0.95           # a row narrower than this share of the block's widest row ...
+RAGGED_SHARE = 0.6        # ... in this share of the rows (the last aside): printed line by line (free verse)
+
+
+def join_lines(ids, LX) -> str:
+    """The lines' HTML, one space between; none where a Latin word was cut at the line end (masters43.fill joined
+    it in the JATS; the ALTO line keeps its hyphen, which decides here: rules43.latin_join)."""
+    import rules43 as RU
+    out = ""
+    for k, x in enumerate(ids):
+        h = LX[x]["html"] or ""
+        if k:
+            out += "" if RU.latin_join(LX[ids[k - 1]].get("text") or "", LX[x].get("text") or "") else " "
+        out += h
+    return out
+
+
+def ragged(ids, LX) -> bool:
+    """A block printed line by line (free verse the model gave as a paragraph or as another article's text: 0729
+    p2): most of its rows end well short of the box. Drawn one printed row per row (2026-10-20), not flowed."""
+    rows = row_groups(ids, LX)
+    if len(rows) < 4:
+        return False
+    bw = max(r["box"][2] - r["box"][0] for r in rows) or 1
+    short = sum(1 for r in rows[:-1] if (r["box"][2] - r["box"][0]) < RAGGED_W * bw)
+    return short >= RAGGED_SHARE * (len(rows) - 1)
+
+
 def pieces43(ids, LX, W, group, inline_boxes=(), rtl=True):
     """experiment 41's pieces_of (a block's lines cut where the reading turns a column), with three changes
     (2026-10-18, owner's marks on 0478 p4, 1769 p3, 1010 p2):
@@ -581,7 +610,11 @@ def build_layout43(a, doc):
                     content = (f'<div class="tx eq" dir="ltr"><span class="math">\\[{E(rec["latex"])}\\]</span></div>')
                 else:
                     nrow = 1 if pc.get("one_row") else rows_of([LX[x]["px"] for x in pc["ids"]])
-                    txt = pc["html"] if pc.get("html") is not None else " ".join(LX[x]["html"] or "" for x in pc["ids"])
+                    if pc.get("html") is None and g in ("body", "other") and ragged(pc["ids"], LX):
+                        txt = "<br>".join(join_lines(r["ids"], LX) for r in row_groups(pc["ids"], LX))
+                        stats["ragged_rows"] = stats.get("ragged_rows", 0) + 1
+                    else:
+                        txt = pc["html"] if pc.get("html") is not None else join_lines(pc["ids"], LX)
                     if j == 0 and rec["continued"]:
                         txt = '<span class="contmark" title="continues from the previous page">&#8627;</span>' + txt
                     if last_piece:

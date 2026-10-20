@@ -38,6 +38,7 @@ import structure as ST  # noqa: E402
 import reader as R  # noqa: E402
 import masters as M  # noqa: E402
 from lxml import etree  # noqa: E402
+import numpy as np  # noqa: E402
 
 OUT = HERE / "out"
 ST.COARSE.setdefault("other_article", "other")
@@ -301,6 +302,85 @@ class Master43(M.Master):
         if rec.get("ids"):                         # words printed in the picture: the picture shows them
             M.Master.tb(self, p, self.bid(p), "pictureText", rec["ids"])
         self.stats["figures_other_article"] += 1
+
+    def fill(self, el, ids, sep_first=False, tbid=None, of=None):
+        """experiment 41's fill (one space between lines); a Latin word cut at a line end with a hyphen
+        (rules43.latin_join) is joined: no space, the hyphen out (kept for a compound, «well-known»). The line break
+        stays (the target), and the ALTO keeps the printed line with its hyphen (2026-10-20, 2483 / 0310)."""
+        import rules43 as RU
+        of = of if of is not None else ids
+        if el.text is None and not len(el):
+            el.text = ""
+        for k, lid in enumerate(ids):
+            if k or sep_first:
+                how = RU.latin_join(self.S.lines[ids[k - 1]]["text"], self.S.lines[lid]["text"]) if k else None
+                tail = (el[-1].tail if len(el) else el.text) or ""
+                if how and tail.rstrip().endswith(("-", "‐", "‑")):
+                    t = tail.rstrip()
+                    t = t[:-1] if how == "join" else t
+                    if len(el):
+                        el[-1].tail = t
+                    else:
+                        el.text = t
+                    self.stats["latin_hyphen_" + how] += 1
+                else:
+                    M.add_text(el, " ")
+            if tbid and self.S.lines[lid]["text"].split():
+                M.sub(el, "target", {"id": f"{tbid}l{of.index(lid) + 1}"})
+            self.put_runs(el, self.runs(lid))
+
+    def crop(self, p, box_px, name, rel_pad=False) -> str | None:
+        """experiment 41's crop; a picture's crop (rel_pad) has the page's own text lines that run into it painted
+        out (paper colour), so the view does not draw the printed words twice (2026-10-20, 0729 p2: the drawing's
+        box over the ends of three verse lines, «المتاجر ،» drawn from the scan inside the picture). Lines of the
+        picture itself (its words) stay."""
+        if not rel_pad:
+            return super().crop(p, box_px, name, rel_pad)
+        import cv2
+        img = cv2.imread(str(ST.page_image(self.a, p)), cv2.IMREAD_COLOR)
+        if img is None:
+            return None
+        H, W = img.shape[:2]
+        x0, y0, x1, y1 = box_px
+        px, py = 4 * W / 1000, 4 * H / 1000
+        x0, y0 = max(0, int(x0 - px)), max(0, int(y0 - py))
+        x1, y1 = min(W, int(x1 + px)), min(H, int(y1 + py))
+        c = img[y0:y1, x0:x1].copy()
+        if c.size == 0 or c.shape[0] < 6 or c.shape[1] < 6:
+            return None
+        own = set()
+        for r in self.recs:
+            if r.get("type") == "figure" and r.get("page") == p:
+                own.update(r.get("ids") or [])
+        paper = None
+        n = 0
+        for r in self.recs:
+            if r.get("page") != p or r.get("type") in ("figure",):
+                continue
+            for i in r.get("ids") or []:
+                L = self.S.lines.get(i)
+                if i in own or not L or not L.get("px") or not L["text"].split():
+                    continue
+                a0, b0, a1, b1 = L["px"]
+                if a1 <= x0 or a0 >= x1 or b1 <= y0 or b0 >= y1 or (y1 - y0) < 4 * (b1 - b0):
+                    continue                     # not in the crop; or a picture inside a printed line (its row)
+                if paper is None:
+                    g = cv2.cvtColor(c, cv2.COLOR_BGR2GRAY)
+                    sel = c[g >= np.percentile(g, 60)]
+                    paper = [int(v) for v in np.median(sel, axis=0)] if len(sel) else [255, 255, 255]
+                h = b1 - b0
+                cv2.rectangle(c, (int(a0 - x0 - 0.15 * h), int(b0 - y0 - 0.1 * h)),
+                              (int(a1 - x0 + 0.15 * h), int(b1 - y0 + 0.1 * h)), paper, -1)
+                n += 1
+        if n:
+            self.stats["picture_text_painted_out"] += n
+        if c.shape[1] > 1600:
+            c = cv2.resize(c, (1600, int(c.shape[0] * 1600 / c.shape[1])), interpolation=cv2.INTER_AREA)
+        self.crops.mkdir(parents=True, exist_ok=True)
+        if R._colourless(c):
+            c = cv2.cvtColor(c, cv2.COLOR_BGR2GRAY)
+        (self.crops / name).write_bytes(cv2.imencode(".jpg", c, [cv2.IMWRITE_JPEG_QUALITY, 82])[1].tobytes())
+        return f"{self.stem}.crops/{name}"
 
     def table(self, rec, parent, cap_rec, caption_into):
         """experiment 41's table; then a table printed in two columns (rules43.table_parts) is drawn as one ALTO

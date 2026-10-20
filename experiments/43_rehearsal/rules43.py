@@ -766,6 +766,74 @@ def guillemets(ans, lines, words, log):
     log["guillemets"].append(dict(rec, decision="guillemets", fixes=n))
 
 
+# ------------------------------------------------------------------------------------------------ vocalised lines
+# (2026-10-20, 1875 p17 in the 300: in densely vowelled verse Azure loses letters: «الزَّاد» -> «الْادُ», «الْكَرِيمِ»
+# -> «الْكَرِ»; the model did not restore them. Flag only: the fix route is a close-up re-read of the line.)
+VOWELLED = 0.3              # diacritics per letter from which a line is "vocalised"
+BAD_TASHKEEL = re.compile(r"^[وفبكل]?الْا[^ِ]|^[وفبكل]?الْا$|[ًٌٍَُِْ]{2,}|^[ًٌٍَُِّْ]|ّ{2}")   # «الْا»: the article's
+                                                       # lam with sukun before a bare alef (a lost letter); stacked vowels
+
+
+def vowelled_words(ans, lines, log):
+    """Words in a vocalised line (verse, a quotation) that are not words: an impossible mark (sukun before alef, two
+    vowels on a letter) or never seen once the marks are taken off, even without its clitics (wordlist43). Logged; flagged by flags43
+    (letters_lost_vowelled); nothing changes."""
+    try:
+        import wordlist43 as WL
+        W = WL.load()
+    except Exception:                                        # noqa: BLE001
+        return
+    if not W:
+        return
+    used = {base_of(i, lines) for pg in ans.get("pages") or [] if isinstance(pg, dict)
+            for b in pg.get("blocks") or [] if isinstance(b, dict) and b.get("type") not in ("header", "footer")
+            for i in block_ids(b)} - {None}
+    for i in sorted(used, key=lambda x: (lines[x]["page"], int(x.split(":")[1]))):
+        t = lines[i]["text"]
+        n = letters(t)
+        if n < 8 or len(TASHKEEL.findall(t)) < VOWELLED * n:
+            continue
+        bad = []
+        for w in t.split():
+            core = re.sub(r"^[^\w]+|[^\w]+$", "", w)
+            if len(AR_LET.findall(core)) < 3:
+                continue
+            if BAD_TASHKEEL.search(core):
+                bad.append(dict(word=w, why="impossible marks"))
+            elif not WL.known(core, W) and not (WL.fold(core).endswith("ا") and WL.known(WL.fold(core)[:-1], W)):
+                bad.append(dict(word=w, why="not a word"))
+        if bad:
+            log["vowelled_doubtful"].append(dict(line=i, page=lines[i]["page"], words=bad, text=t[:80]))
+
+
+# ------------------------------------------------------------------------------------------------ Latin line-end hyphens
+# (2026-10-20, 2483 and 0310 in the 300: «classificat- ion», «tradition- nel»: a word cut at the line end kept its
+# hyphen and got a space in the JATS)
+LA_END = re.compile(r"([A-Za-zÀ-ɏ]{2,})[-‐‑]$")
+LA_START = re.compile(r"^([a-zà-ÿœæ][A-Za-zÀ-ɏ]*)")
+
+
+def latin_join(prev: str, nxt: str) -> str | None:
+    """A Latin line ending in a hyphen after letters, the next line starting with a lower-case word: "join" (the
+    word was cut: no hyphen, no space), "hyphen" (a compound cut at its own hyphen, «well-» «known»: hyphen kept, no
+    space), None (not a cut word). Decided with wordlist43 when it exists (join unless the joined word is unknown and
+    both halves are words, or the hyphenated form is known)."""
+    a, b = LA_END.search((prev or "").rstrip()), LA_START.match((nxt or "").lstrip())
+    if not a or not b or is_rtl(prev):
+        return None
+    try:
+        import wordlist43 as WL
+        W = WL.load()
+    except Exception:                                        # noqa: BLE001
+        return "join"
+    if not W:
+        return "join"
+    x, y = a.group(1).split()[-1], b.group(1)
+    if WL.freq(f"{x}-{y}", W) or (not WL.freq(x + y, W) and WL.freq(x, W) and WL.freq(y, W) and len(y) >= 3):
+        return "hyphen"
+    return "join"
+
+
 def block_box(b, lines):
     return union([lines[x]["b"] for x in (base_of(i, lines) for i in block_ids(b)) if x])
 
@@ -1277,7 +1345,7 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1306,6 +1374,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     empty_rows(ans, log)
     table_columns(ans, lines, log)
     guillemets(ans, lines, words, log)
+    vowelled_words(ans, lines, log)
     fixes(ans, log)
     return ans, log
 
