@@ -404,8 +404,8 @@ def load_patches(con, run: str, mdir: Path, pdirs: list[Path]) -> int:
 
 
 def base_run(run: str) -> str:
-    """v33_300_judged / v33_300_fixed → v33_300 (the run whose pages the judge looked at)."""
-    return re.sub(r"_(judged|fixed|patched)\w*$", "", run)
+    """v33_300_judged / v33_300_fixed / v33_300_final → v33_300 (the run whose pages the judge looked at)."""
+    return re.sub(r"_(judged|fixed|patched|final)\w*$", "", run)
 
 
 def load_judge(con, run: str) -> int:

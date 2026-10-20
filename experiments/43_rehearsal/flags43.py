@@ -65,6 +65,7 @@ import rules43 as RU  # noqa: E402
 from masters43 import ST, M, etree  # noqa: E402
 
 OUT = HERE / "out"
+PATCHES: Path | None = None                 # --patches DIR: apply the patch layer (patches43) before checking
 SEV = {"high": 3, "medium": 2, "low": 1}
 FURNITURE = {"header", "footer"}
 T = dict(                                   # thresholds (tuned on experiment 41's 55 + the Batch test, 2026-10-18)
@@ -137,6 +138,16 @@ def load(a: dict, raw: Path, tmp: Path) -> dict:
         B["logs"].append(log)
         B["lines"].update(lines)
         (tmp / c["f"].name).write_text(json.dumps(dict(rec, answer=ans), ensure_ascii=False), encoding="utf-8")
+    pf = PATCHES / f"{a['stem']}.json" if PATCHES else None
+    if pf is not None and pf.exists() and all(c["f"] for c in ch):     # the patch layer (judge / retry / person)
+        import patches43 as PA
+        names = [c["f"].name for c in ch if c["f"]]
+        recs = {n: dict(r, first=r["x"], last=r["y"], answer=ans) for n, r, ans in zip(names, B["recs"], B["answers"])}
+        recs, B["patch_log"] = PA.apply_all(recs, PA.load_patches(PATCHES, a["stem"]))
+        B["answers"] = [recs[n]["answer"] for n in names]
+        for n in names:
+            src = ST.jl(tmp / n)
+            (tmp / n).write_text(json.dumps(dict(src, answer=recs[n]["answer"]), ensure_ascii=False), encoding="utf-8")
     if all(c["f"] for c in ch):
         B["cap"] = M43.capture43(a, tmp)
     return B
@@ -654,7 +665,10 @@ def main():
     ap.add_argument("--run", required=True)
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--out", help="folder for flags.json / flags.txt (default out/<run>/)")
+    ap.add_argument("--patches", help="folder of patches43 patch files: the answers are patched before the checks")
     a = ap.parse_args()
+    global PATCHES
+    PATCHES = Path(a.patches).resolve() if a.patches else None
     res = run_flags(a.run, a.stems, a.out)
     print(report(res))
 

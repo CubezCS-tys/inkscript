@@ -214,7 +214,7 @@ def run_standard(arts, run, cap, threads):
                                 max_out=rechunk43.max_out_for(a, x, y) or max_out(y - x + 1), thinking=THINKING, json_out=True,
                                 est_in=ST.est_tokens(prompt, nimg), info=info)
             rec = dict(stem=a["stem"], first=x, last=y, pages=y - x + 1, usd=usd, mode="standard",
-                       prompt=P.PROMPT_VERSION, **{k: info.get(k) for k in ("finish", "tin", "tout", "think", "secs",
+                       prompt=P.PROMPT_VERSION, thinking=THINKING, **{k: info.get(k) for k in ("finish", "tin", "tout", "think", "secs",
                                                                            "cached", "error")})
             if ans is None:
                 jdump(rf.parent / (rf.stem + ".failed.json"), dict(rec, failed=True))
@@ -293,7 +293,7 @@ def collect(job, run, meta, client):
         elif resp:                     # an answer without usage metadata: log the worst case, never nothing
             usd = meta.get("worst_usd", 0) / max(1, len(meta.get("keys") or [1]))
             log_spend(key, 0, 0, 0, usd, fin + " (no usage metadata: worst-case share logged)", "batch")
-        rec = dict(stem=stem, first=x, last=y, pages=y - x + 1, usd=usd, mode="batch", prompt=P.PROMPT_VERSION,
+        rec = dict(stem=stem, first=x, last=y, pages=y - x + 1, usd=usd, mode="batch", prompt=P.PROMPT_VERSION, thinking=THINKING,
                    finish=fin, tin=tin, tout=tout, think=think, job=job.name)
         ans = None
         if "MAX_TOKENS" not in fin and text.strip():
@@ -384,6 +384,8 @@ def main():
     ap.add_argument("--stems", nargs="*")
     ap.add_argument("--run", help="output folder name under out/ (default v2_55 / v2_fresh)")
     ap.add_argument("--prompt", default="v2", help="prompt version (prompt43.PROMPTS): v2 or v3 (live 2026-10-18)")
+    ap.add_argument("--thinking", choices=["low", "high"], default="low",
+                    help="Argon thinking level (2026-10-20 G0 A/B; the runs before were all low)")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--upload-images", action="store_true", help="batch: pages through the File API, not inline")
     ap.add_argument("--poll", type=int, default=60, help="seconds between job polls")
@@ -391,6 +393,8 @@ def main():
                     help="input tokens per job (Argon Tier 1 allows 5M enqueued tokens across active jobs)")
     args = ap.parse_args()
     P.use(args.prompt)
+    global THINKING
+    THINKING = args.thinking
     run = args.run or SETS[args.set][0]
     if args.set in ("b", "c"):                # page renders of the fresh samples stay in this experiment
         ST.PAGES = OUT / "pages"
