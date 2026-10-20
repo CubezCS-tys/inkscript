@@ -39,7 +39,7 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   show_through      lines of pale ink (the reverse side showing through, a watermark) kept as noise     low
   table_spans_columns  a table printed in two columns, drawn as one part per column                   medium
   letters_lost_vowelled  words in vocalised lines that are not words (lost letters?)                low
-  inline_math_junk  Latin / formula tokens read unsure inside Arabic sentences, not taken as maths  medium
+  inline_math_junk  Latin / formula tokens read unsure inside Arabic sentences, not taken as maths  low
   title_rubric      a section label (JURISPRUDENCE, REVUE DES LIVRES, عرض كتاب) was the title block: the
                     heading after it made the title (low) or none found, kept (medium)
   guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
@@ -547,7 +547,7 @@ def check_fixes2(B):
             by.setdefault(e["page"], []).append(e)
         for p, es in sorted(by.items()):
             ws = [w for e in es for w in e["words"]]
-            out.append(flag(B, "inline_math_junk", "medium", p, [e["line"] for e in es],
+            out.append(flag(B, "inline_math_junk", "low", p, [e["line"] for e in es],
                             f"{len(ws)} Latin / formula token(s) Azure read unsure inside Arabic sentences, not "
                             f"taken as maths (a formula left as junk?): {' '.join(ws[:6])}"))
         for e in log.get("rubric_title") or []:

@@ -685,7 +685,7 @@ DD_MIN = 2                  # at least this many (( / )) measured in the chunk
 SP_MIN = 3                  # single ( measured: the article's own parenthesis height, the yardstick
 DD_REL = 0.8                # (( this much shorter than a single ( ...
 DD_ABS = 0.5                # ... and under this share of the word height: guillemets
-DD_ALONE = 0.4              # no single ( to compare with: under this share
+DD_ALONE = 0.33             # no single ( to compare with: under this share (0701: printed (( at 0.38)
 DD_SURE = 0.36              # under this share whatever the single ( (1010-001 pp7-10: 0.32 against 0.40)
 
 
@@ -851,6 +851,29 @@ MATHISH = re.compile(r"[=<>≤≥|∑∫√±×÷∞≠≈^_{}]|[A-Za-z]")
 JUNK_CONF = 0.6
 
 
+OPS = re.compile(r"[=<>≤≥|∑∫√±^{}]")
+MIXED = re.compile(r"[a-z][A-Z]|^[A-Z]{2,4}$")
+
+
+def formula_junk(t: str, conf) -> bool:
+    """A token that looks like Azure's reading of a formula: Latin letters with an operator in the same token
+    («||HT=maxx», «sup|hi(t)|»), or mixed-case / short capital soup («tostST», «DJO») read unsure (< JUNK_CONF);
+    not a name or a word (wordlist43), not a lone dash or bar."""
+    c = 1.0 if conf is None else conf
+    if AR_LET.search(t) or c >= JUNK_CONF or not LA_LET.search(t) or len(t) < 2:
+        return False
+    if OPS.search(t):
+        return True
+    core = re.sub(r"[^A-Za-z]", "", t)
+    if not MIXED.search(core):
+        return False
+    try:
+        import wordlist43 as WL
+        return not WL.freq(core)
+    except Exception:                                        # noqa: BLE001
+        return True
+
+
 def math_parts(ans, lines, log):
     """A "math" entry with an empty LaTeX whose "from" holds no Arabic letter, on a line that has (or follows a line
     that has) a math entry with LaTeX: the model's way of saying "this junk is part of that formula" (0168 p5:
@@ -899,8 +922,7 @@ def inline_math_junk(ans, lines, words, log):
                 rtl = is_rtl(t)
                 if not rtl and len(ws) > 3:
                     continue                      # a Latin line of its own (a quotation, a reference)
-                bad = [w["text"] for w in ws if MATHISH.search(w["text"]) and not AR_LET.search(w["text"])
-                       and (w.get("conf") or 1) < JUNK_CONF
+                bad = [w["text"] for w in ws if formula_junk(w["text"], w.get("conf"))
                        and not any(w["text"] in f or f in w["text"] for f in taken.get(x, []))]
                 if bad:
                     log["inline_math_junk"].append(dict(line=x, page=lines[x]["page"], words=bad, text=t[:80]))
