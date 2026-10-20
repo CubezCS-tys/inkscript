@@ -5,16 +5,118 @@
   "databases": {
     "platform": {
       "tables": {
-        "articles": {"label_column": "title"},
-        "people": {"label_column": "display_name"},
-        "institutions": {"label_column": "name"},
-        "journals": {"label_column": "title_masters"},
-        "works": {"label_column": "source_title"},
-        "blocks": {"fts_table": "blocks_fts", "fts_pk": "id", "description": "Every block of every article in reading order, with its ALTO line ids and box (pixels at 300 dpi). Search: type folded Arabic (no diacritics, ا for أإآ, ه for ة, ي for ى)."},
-        "citation_links": {"description": "Links made by link46.py; best = 1 is a confident link (title and author or year agree); best = 0 keeps a candidate (a review of the book, a study about it, a part of it, a title-only match)."},
-        "catalogue_disagreements": {"description": "Masters vs catalogue, field by field. kind catalogue-fits-scan = the masters' page range is the one that is off; missing-in-catalogue = the print has it, the catalogue does not."},
-        "judge_findings": {"description": "Every problem the judge named (experiment 43 judge43.py), with the patch made of it when there is one; route auto = two keys, applied."},
-        "patches": {"description": "The patch layer (experiment 43 patches43.py): judge, person and retry edits keyed to Azure line ids; status from the masters' sidecar."}
+        "articles": {
+          "label_column": "title",
+          "description": "One row per article — the centre of everything: ids, titles, dates, pages, language, and which run built it."
+        },
+        "people": {
+          "label_column": "display_name",
+          "description": "One row per real person, however many articles they wrote (linked to Mandumah's author records when known)."
+        },
+        "institutions": {
+          "label_column": "name",
+          "description": "One row per university, faculty or department, with its parent (e.g. a faculty inside a university)."
+        },
+        "journals": {
+          "label_column": "title_masters",
+          "description": "One row per journal: its Mandumah code, names (printed and catalogue) and ISSN."
+        },
+        "works": {
+          "label_column": "source_title",
+          "description": "Every work the article cites (from its reference list or footnotes), split into author, year, title, journal, pages."
+        },
+        "blocks": {
+          "fts_table": "blocks_fts",
+          "fts_pk": "id",
+          "description": "The article's text, block by block (paragraph, heading, verse…), with page and place on the scan — for full-text search."
+        },
+        "citation_links": {
+          "description": "The links we found: a cited work → an article in the archive or a catalogue record, with a match score."
+        },
+        "catalogue_disagreements": {
+          "description": "Where the printed article and Mandumah's catalogue disagree — the list for Mandumah to review."
+        },
+        "judge_findings": {
+          "description": "What the judge model reported on each page it looked at, and what happened (fixed, retried, sent to a person)."
+        },
+        "patches": {
+          "description": "Every correction applied on top of Gemini's answer — by the judge, a retry or a person — reversible and logged."
+        },
+        "issues": {
+          "description": "One row per journal issue: volume, issue number and year."
+        },
+        "article_runs": {
+          "description": "Which processing runs produced each article, and which version is the current one."
+        },
+        "runs": {
+          "description": "One row per processing run (e.g. the first 300, the exam): model, prompt and when it was loaded."
+        },
+        "catalogue_records": {
+          "description": "The article's record in Mandumah's MARC catalogue, as the catalogue has it."
+        },
+        "catalogue_authors": {
+          "description": "The authors as the catalogue lists them, with their authority ids."
+        },
+        "article_dates": {
+          "description": "Dates printed on or known for the article: received, accepted, published."
+        },
+        "abstracts": {
+          "description": "The article's abstracts in each language — printed on the page and/or from the catalogue."
+        },
+        "keywords": {
+          "description": "Keywords: the author's own (printed) and the catalogue's, in each language."
+        },
+        "subjects": {
+          "description": "Subject headings and fields of study from the catalogue."
+        },
+        "person_names": {
+          "description": "Every spelling of each person's name: as printed, as catalogued, in Latin script."
+        },
+        "article_authors": {
+          "description": "Who wrote which article: the author's position, the name as printed there, email, and the match to a person."
+        },
+        "affiliations": {
+          "description": "Where each author worked on each article: university, faculty, department, country, as printed."
+        },
+        "institution_variants": {
+          "description": "Every spelling of each institution's name (e.g. جامعة القاهرة / جامعة القاهره / Cairo University)."
+        },
+        "notes": {
+          "description": "Footnotes and endnotes, with their text."
+        },
+        "note_calls": {
+          "description": "Where each note is called from in the text (the little number), linked to its note."
+        },
+        "figures": {
+          "description": "Pictures, tables and equations: captions, descriptions in Arabic and English, words inside pictures."
+        },
+        "work_authors": {
+          "description": "The authors of each cited work, one row each."
+        },
+        "back_references": {
+          "description": "Citations like «المرجع السابق» / ibid. / op. cit. that point back to an earlier citation."
+        },
+        "link_checks": {
+          "description": "Links a person checked by hand, with the verdict (right / near / wrong)."
+        },
+        "link_runs": {
+          "description": "When citation linking was last run for each article."
+        },
+        "flags": {
+          "description": "Doubtful spots the code found on each page (e.g. a note with no call, overlapping blocks), with severity."
+        },
+        "fixes": {
+          "description": "Words where Azure misread the print and the text was corrected (Azure's reading kept)."
+        },
+        "misprints": {
+          "description": "Suspected printing mistakes: the printed word is kept, with the likely correction beside it."
+        },
+        "metadata_changes": {
+          "description": "Corrections to metadata (title, author name, pages…): printed form, corrected form, source and reason."
+        },
+        "meta": {
+          "description": "Facts about the database itself (version, when built)."
+        }
       },
       "queries": {
         "articles_by_author": {

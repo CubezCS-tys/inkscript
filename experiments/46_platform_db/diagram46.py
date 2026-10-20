@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import html
+import json
 import sqlite3
 import sys
 from pathlib import Path
@@ -181,7 +182,7 @@ def build(con):
     # boxes on top
     for name, p in pos.items():
         x0, y0 = p["x"], p["y"]
-        svg.append(f'<a href="{BASE}{name}" target="_blank"><g class="box">'
+        svg.append(f'<a href="{BASE}{name}" target="_blank"><title>{html.escape(DESC.get(name, ""))}</title><g class="box">'
                    f'<rect class="body" x="{x0}" y="{y0}" width="{W}" height="{p["h"]}" rx="6"/>'
                    f'<path class="head" d="M{x0},{y0 + HEAD} V{y0 + 6} a6,6 0 0 1 6,-6 H{x0 + W - 6} a6,6 0 0 1 6,6 '
                    f'V{y0 + HEAD} Z"/>'
@@ -204,6 +205,9 @@ def build(con):
                        tlist=table_list(T, pos))
 
 
+DESC = json.load(open(Path(__file__).with_name("table_descriptions.json"), encoding="utf-8"))
+
+
 def table_list(T, pos):
     out = []
     for title, cls, cols in GROUPS:
@@ -211,6 +215,7 @@ def table_list(T, pos):
         for name in [n for col in cols for n in col if n in T]:
             rel = "; ".join(f"{', '.join(cs)} → {p}" for p, cs, _ in T[name]["fks"]) or "—"
             items.append(f'<li><a href="{BASE}{name}">{name}</a> <span class="n">{T[name]["n"]:,}</span>'
+                         f'<br><span class="desc">{html.escape(DESC.get(name, ""))}</span>'
                          f'<br><span class="rel">{html.escape(rel)}</span></li>')
         out.append(f'<section><h3 class="{cls}-t">{html.escape(title)}</h3><ul>{"".join(items)}</ul></section>')
     return "".join(out)
@@ -256,7 +261,7 @@ svg {{ display:block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, mon
 .tlabel {{ font:12px system-ui, sans-serif; fill:var(--chip-stem); }}
 .list {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:4px 24px; padding-bottom:32px; }}
 .list h3 {{ font-size:1rem; margin:14px 0 4px; }} .list ul {{ list-style:none; padding:0; margin:0; }}
-.list li {{ margin:0 0 6px; font-size:14px; }} .rel {{ color:var(--muted); font-size:12.5px; }}
+.list li {{ margin:0 0 6px; font-size:14px; }} .rel {{ color:var(--muted); font-size:12.5px; }} .desc {{ font-size:13.5px; }}
 .n {{ color:var(--muted); font-size:12px; }}
 </style></head><body>
 <header>
