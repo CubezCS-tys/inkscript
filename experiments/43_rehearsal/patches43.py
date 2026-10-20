@@ -38,7 +38,10 @@ sys.path.insert(0, str(HERE))
 OUT = HERE / "out"
 
 ACTIONS = ("mark_noise", "set_kind", "reorder", "split_block", "merge_blocks", "relink_call", "mark_other_article",
-           "unmark_other_article", "fix_picture_box")
+           "unmark_other_article", "fix_picture_box", "replace_page_blocks")
+# replace_page_blocks: only from a bespoke retry (retry43.py) or a person — the page's blocks and noise as the retry
+# answered them (line ids only: the words stay Azure's and the first answer's fixes; checked there that every line
+# of the page is used once and every call's note exists)
 RANK = {"person": 0, "judge": 1, "gemini-retry": 2}
 NOISE_KINDS = ("show-through", "bleed", "scanner-junk")
 
@@ -129,6 +132,16 @@ def apply_one(answers: dict, p: dict) -> str | None:
         noise = ans.setdefault("noise", [])
         noise.extend(sorted(ids & present - set(map(str, noise))))
         ans.setdefault("_noise_kinds", {}).update({i: pay.get("kind", "noise") for i in ids & present})
+        return None
+    if a == "replace_page_blocks":
+        if p.get("source") not in ("gemini-retry", "person"):
+            return "replace_page_blocks is for a retry or a person only"
+        old = {x for b in blocks if isinstance(b, dict) for x in block_lines(b)}
+        if old != {str(x) for x in pay.get("was_lines") or []}:
+            return "page changed since the retry (lines differ)"
+        pg["blocks"] = copy.deepcopy(pay["blocks"])
+        pre = f"{p['page']}:"
+        ans["noise"] = [x for x in ans.get("noise") or [] if not str(x).startswith(pre)] + list(pay.get("noise") or [])
         return None
     tb = t.get("blocks") or []
     idx = [find_block(pg, b) for b in tb]
