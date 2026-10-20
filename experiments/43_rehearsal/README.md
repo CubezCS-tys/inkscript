@@ -948,6 +948,60 @@ pages an article): **$96k now (≈ £87k incl. VAT), $193k from 1 Dec (≈ £174
 real figure. Turnaround at scale is set by the 5M enqueued-token limit of Tier 1 (≈ 200 requests a job, a job ≈ 6 min):
 a million documents (~1.7M requests) would need a higher tier or many weeks.
 
+## The second sample (2026-10-20; `sample43b.py` → `sample43b.json`; owner-approved; no calls) — **300 articles, ready to run**
+
+**Unseen**: no article of experiments 35, 40, 41 (the 55), the first 300 (and its proposal) or any batch test (every
+stem in a file name under `out/`; 525 excluded); no dissertation journal (98xx); ≤ 3 per journal. **Pools**: 318 local
+articles left (experiment 41's inventory, mostly 2010s / 2020s), the first sample's reserve left over (246, JSON already
+here), and a **new catalogue draw from `~/data/marc/marc.db` filtered first by `44_bucket_map/out/ids_main.txt`**
+(777,152 eligible: one PDF per record, 1–30 printed pages, a year, Article or untyped; seed 4344): 45 French, 40
+English, 45 Literary Text, 15–45 Arabic articles per decade (370), then two draws of literature (773 $4 الادب) before
+1990 for verse (104 + 74). **Fetch** (`sample43b.py fetch`, the venv's `aws`, 4 threads; S3 reads only): **548 of 548
+JSONs** and **all PDFs** (202 for the sample, 51 for the contact sheets) — **none missing**: the ids_main filter
+works (the first sample's draw lost 43 of 214). `out/sample2/fetch/` holds 1.1 GB; reserve PDFs went into
+`out/fetch/reserve/<id>/`.
+
+**Layouts by eye** (contact sheets `out/sample2/sheets/`): **equations 26 of 62** formula-rule candidates show formulas
+or worked arithmetic (the rest: statistics tables, "p < 0.05", code, charts, rate lists; `EYE_EQ`); **verse 22 of 27**
+(not verse: two reference lists, a table, two two-column prose pages; `EYE_VERSE_NO`). Literary Text gave verse 3 of
+45 by the rule (prose, free verse); literature before 1990 gave 11 of 178.
+
+**Selection** (`select`): layout quotas rarest first (verse 25, equations 15, French 23, English 30, shared 20, two
+columns 60, tables 55), each pick in the thinnest decade, no decade past 40; then decades to 37; local first, then the
+reserve, then the draw. **Checks** (`check`): every PDF opens, its pages = Azure's, 1–30 pages, a year: **300 of 300
+usable, 0 swaps**; 0 in the excluded set, 0 outside ids_main, 0 98xx.
+
+**Strata** (300: 59 local + 66 reserve + 175 drawn; 224 journals, max 3; **3,404 pages**, median 10; 492 chunks;
+Arabic only 247; `out/sample2/strata.md`):
+
+| decade | articles (local + cat.) | pages | verse | tables | equations | two columns | French | English | shared |
+|---|---|---|---|---|---|---|---|---|---|
+| pre-1960 | 38 (0 + 38) | 375 | 3 | 4 | 0 | 5 | 0 | 1 | 8 |
+| 1960s | 38 (4 + 34) | 255 | 4 | 1 | 0 | 16 | 1 | 0 | 2 |
+| 1970s | 38 (1 + 37) | 398 | 5 | 6 | 0 | 16 | 1 | 2 | 2 |
+| 1980s | 38 (0 + 38) | 359 | 6 | 5 | 0 | 12 | 0 | 2 | 3 |
+| 1990s | 37 (3 + 34) | 400 | 1 | 12 | 1 | 4 | 0 | 3 | 5 |
+| 2000s | 37 (20 + 17) | 484 | 0 | 13 | 2 | 7 | 3 | 1 | 3 |
+| 2010s | 37 (16 + 21) | 557 | 2 | 10 | 2 | 0 | 17 | 0 | 3 |
+| 2020s | 37 (15 + 22) | 576 | 1 | 25 | 10 | 2 | 1 | 21 | 0 |
+| **all** | **300 (59 + 241)** | **3,404** | **22** | **76** | **15** | **62** | **23** | **30** | **26** |
+
+Pages: ≤ 5: 94 · 6–10: 60 · 11–15: 60 · 16–20: 40 · 21–25: 28 · 26–30: 18. Against the first 300: more pre-1960 pages
+(375 vs 209), shared pages 26 vs 21, verse 22 the same, equations 15 vs 8 (all by eye), tables 76 vs 64.
+
+**Dry run** (`run43.py --set c --prompt v3.3 --run v33_300b --dry-run`; `--set c` = `sample43b.json`, renders into
+`out/pages/` like set b): **492 requests (rounds 300 / 146 / 46), 12.4M input tokens, 3.3M output expected (13.2M
+worst): Batch now $28.9 expected, $78.2 worst** (from 1 Dec $57.8 / $156.5; Standard now $57.8 / $156.5). The first
+300's dry run said $31.0 and billed $28.88. Disk: C: 28 GB free; the run adds ~2.7 GB of page renders and ~2.1 GB of
+Batch JSONL. **Run** (`--cap` is the whole log's total: the log at launch + the run's $40):
+
+```
+.venv/bin/python run43.py --set c --prompt v3.3 --run v33_300b --cap <log + 40>
+```
+
+The downstream scripts (`pictures43 --set`, `views43`, `flags43`, `handcheck43`) know sets a / b only: they need
+`sample43b.json` for set c.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -968,7 +1022,8 @@ a million documents (~1.7M requests) would need a higher tier or many weeks.
 `views43.py` (Layout view from a masters folder) · `jats43.py` + `test_jats43.py` (JATS slots) · `coverage43.py`, `jats_coverage.md` · `v3diff43.py` · `flags43.py` + `test_flags43.py` (doubtful spots) ·
 `cites43.py` (v3.2 citation audit: dump / score / orth) · `summary43.py` (a run's summary numbers) · `handcheck43.py` (owner's hand-check pages) · `review43.py` (owner's review page) · `gold43.py` + `gold/` (gold set, check, stale, issues) · `issues.json` / `issues.md` · `replay43.py` (harness, rules, masters, compare, simulate) ·
 `side43.py` (scan beside our Layout view, one JPEG a page) · `shots43.py` (Layout-view screenshots; experiment 40's Playwright venv; now waits for the mirror's `fitted` class instead of a 60 s timeout, `SHOTS_SCALE`) · `page43.py` (owner's page) · `run43.py`
-(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps). Outputs under `out/`
+(Batch / Standard runner, dry run) · `compare43.py` (a run vs 41 and the replay, per article) · `probe43.py` (Batch request-shape probe) · `sample43.py` + `sample43.json` (fresh sample) · `fetched43.py` (fetched sample: layouts, checks, swaps) · `sample43b.py` + `sample43b.json` (the second 300; `run43.py --set c`). Outputs under `out/`
 (gitignored): `replay/`, `masters/` (v2 rules), `masters_id/` (harness), `masters_sim/`, `simulated/`, `views/`
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
-`features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets).
+`features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets), `sample2/` (the second sample: draw, fetch,
+measure, sheets, strata, log, progress), `v33_300b/dry_run.json`.

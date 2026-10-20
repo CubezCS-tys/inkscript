@@ -11,7 +11,7 @@ Chunks are experiment 41's (<= 10 pages; an article of 11-30 pages is 2-3 chunks
 chunk's answer (the outline so far and the last block, exp 40 E), so the Batch API runs in ROUNDS: round 1 = every
 article's first chunk, round 2 = the second chunks of the articles whose first came back, ... (3 rounds at most).
 
-Outputs (out/<run>/, run = v2_55 for set a, v2_fresh for set b):
+Outputs (out/<run>/, run = v2_55 for set a, v2_fresh for set b, v33_300b for set c = sample43b.json):
   raw/<stem>_cAAA-BBB.json  experiment 41's raw format (answer + tokens + usd + mode); saved as it arrives: a rerun
                             skips what is there (resume)
   batch_state.json          the job of each round (a rerun polls an unfinished job instead of submitting again)
