@@ -13,7 +13,8 @@ Layouts as fetched43 (page_feats; formula rule for equations, then by eye: EYE b
 catalogue's language (or experiment 41's inventory for local) with a Latin share > 0.3.
 
     .venv/bin/python sample43b.py draw      -> out/sample2/draw.json, out/sample2/json_ids.txt
-    .venv/bin/python sample43b.py fetch     -> out/sample2/fetch/<id>/<id>.json (JSON only, resumable)
+    .venv/bin/python sample43b.py draw_verse -> 120 more (literature before 1990, for verse), out/sample2/json_ids2.txt
+    .venv/bin/python sample43b.py fetch [json_ids2.txt] -> out/sample2/fetch/<id>/<id>.json (JSON only, resumable)
     .venv/bin/python sample43b.py measure   -> out/sample2/measure.json
     .venv/bin/python sample43b.py sheet     -> out/sample2/sheets/equations.jpg (formula-rule pages, to look at)
     .venv/bin/python sample43b.py select    -> sample43b.json (proposal), out/sample2/pdf_ids.txt
@@ -48,11 +49,21 @@ DRAW_PER_DECADE = {"pre-1960": 45, "1960s": 40, "1970s": 35, "1980s": 30, "1990s
 DRAW_LANG = dict(fre=45, eng=40)
 DRAW_LITERARY = 45
 LAYOUTS = F.LAYOUTS
-QUOTA = dict(verse=25, equations=12, french=23, english=30, shared=20, two_columns=60, tables=55)
+QUOTA = dict(verse=25, equations=15, french=23, english=30, shared=20, two_columns=60, tables=55)
 N = 300
 DEC_MAX = 40                     # a layout pick may not push a decade past this
 # Equations by eye (out/sample2/sheets/equations*.jpg: each formula-rule article's best page), as fetched43.EYE
-EYE_EQ: set[str] = set()
+# 2026-10-20: 26 of the 62 formula-rule candidates show formulas or worked arithmetic; the rest are statistics tables,
+# "p < 0.05", code, charts, a list of exchange rates, notation keys.
+EYE_EQ: set[str] = {
+    "0163-003-003-007", "0236-016-003-003", "0396-022-005-010", "0430-012-002-008", "0470-021-037-015",
+    "0484-060-338-005", "0527-006-001-004", "0527-013-001-011", "0527-054-001-051", "0527-055-002-016",
+    "0527-055-002-059", "0528-043-006-006", "0630-000-015-017", "0700-000-034-001", "0700-000-093-002",
+    "0782-010-023-018", "0946-034-046-002", "1127-015-004-105", "1147-000-030-003", "1148-000-065-003",
+    "1188-000-144-004", "1786-000-015-005", "2259-006-004-071", "2461-003-001-005", "2532-028-004-036",
+    "2532-029-004-035"}
+# Verse by eye (out/sample2/sheets/verse_*.jpg): the rule's page is not verse
+EYE_VERSE_NO = {"0368-000-065-003", "0701-001-004-015", "0917-004-007,008-003", "1010-035-007,008,009-005"}
 
 
 def jl(f):
@@ -174,6 +185,46 @@ def cmd_draw():
     log(f"draw: {len(picked)} drawn; {dict(Counter(x['drawn_for'] for x in picked))}")
 
 
+DRAW_VERSE = 120
+
+
+def cmd_draw_verse():
+    """A second draw for verse (the first gave 16 by the rule, target 25; Literary Text gave 3 of 45): Arabic
+    articles in literature (773 $4 holds الادب / الأدب) before 1990, same filters; appended to draw.json, ids to
+    json_ids2.txt."""
+    ex = excluded()
+    inv = {r["stem"] for r in jl(HERE.parent / "41_azure_structure/out/inventory.json")}
+    reserve = set(jl(HERE / "sample43.json")["reserve"])
+    d = jl(OUT / "draw.json")
+    have = {x["stem"] for x in d["drawn"]}
+    per_j = Counter(st[:4] for st in have)
+    main = set(Path(IDS_MAIN).read_text().split())
+    db = sqlite3.connect(f"file:{MARC}?mode=ro", uri=True)
+    rows = db.execute("select p.stem, r.year_int, r.page_first, r.page_last, r.type_en, r.language, r.journal "
+                      "from pdf_ids p join records r on r.rec = p.rec where r.year_int < 1990 and r.n_pdfs = 1 and "
+                      "(r.fields_of_study like '%الادب%' or r.fields_of_study like '%الأدب%') and r.language = 'ara' "
+                      "and r.type_en in ('Article', '') order by p.stem").fetchall()
+    cand = [r for r in rows if r[0] in main and r[0] not in ex and r[0] not in inv and r[0] not in reserve
+            and r[0] not in have and not r[0].startswith("98") and r[2] is not None and r[3] is not None
+            and 1 <= r[3] - r[2] + 1 <= S.MAX_PAGES]
+    del main
+    random.Random(SEED + 1).shuffle(cand)
+    new = []
+    for st, y, a, b, t, lang, j in cand:
+        if len(new) >= DRAW_VERSE:
+            break
+        if per_j[st[:4]] >= (2 if not d.get("verse_draws") else 3):    # a second verse draw: 3 per journal
+            continue
+        per_j[st[:4]] += 1
+        new.append(dict(stem=st, year=str(y), decade=S.decade(y), lang=lang, type=t or "", journal=j,
+                        printed=f"{a}-{b}", pages=b - a + 1, kind="article", drawn_for="literature before 1990 (verse)"))
+    d["drawn"] += new
+    d.setdefault("verse_draws", []).append(dict(candidates=len(cand), drawn=len(new), seed=SEED + 1))
+    jdump(OUT / "draw.json", d)
+    (OUT / "json_ids2.txt").write_text("\n".join(x["stem"] for x in new) + "\n")
+    log(f"draw verse: {len(cand)} candidates, {len(new)} drawn; {dict(Counter(x['decade'] for x in new))}")
+
+
 # ------------------------------------------------------------------------------------------------ fetch
 
 def fetch_ids(ids: list[str], exts) -> dict:
@@ -194,9 +245,10 @@ def folder_of(st: str) -> Path:
 
 
 def cmd_fetch():
-    ids = [l.strip() for l in (OUT / "json_ids.txt").read_text().splitlines() if l.strip()]
+    f = OUT / (sys.argv[2] if len(sys.argv) > 2 else "json_ids.txt")
+    ids = [l.strip() for l in f.read_text().splitlines() if l.strip()]
     res = fetch_ids(ids, ("json",))
-    jdump(OUT / "fetch_json.json", res)
+    jdump(OUT / f"fetch_{f.stem}.json", res)
     log(f"fetch json: {sum(1 for g in res.values() if 'json' in g)} of {len(ids)}")
 
 
@@ -254,39 +306,43 @@ def cmd_measure():
 
 # ------------------------------------------------------------------------------------------------ sheet (by eye)
 
+def best_page(x: dict, flag: str) -> tuple[int, int]:
+    a = jl(x["azure"])
+    a = a.get("analyzeResult", a)
+    pages = a.get("pages", [])
+    if flag == "equations":
+        sc = [F.math_page(p) for p in pages]
+    else:
+        sc = [int(S.page_feats(p)["verse"]) * len(p.get("lines", [])) for p in pages]
+    i = max(range(len(sc)), key=lambda k: sc[k])
+    return i, sc[i]
+
+
 def cmd_sheet():
-    """Each formula-rule candidate's best page (most formula lines) on a contact sheet; candidates without a PDF yet
-    get it fetched first (PDF only)."""
+    """Each rule-flagged candidate's best page on contact sheets (12 a sheet, pymupdf only), to look at by eye:
+    equations (formula rule) and verse (rhyme rule). Candidates without a PDF get it fetched first (PDF only)."""
     import pymupdf
-    from PIL import Image, ImageDraw
     m = jl(OUT / "measure.json")
-    xs = [x for x in m.values() if "error" not in x and x.get("equations")]
-    fetch_ids([x["stem"] for x in xs if not Path(x["pdf"]).exists()], ("pdf",))
-    tiles = []
-    for x in sorted(xs, key=lambda x: x["stem"]):
-        a = jl(x["azure"])
-        a = a.get("analyzeResult", a)
-        ml = [F.math_page(p) for p in a.get("pages", [])]
-        i = max(range(len(ml)), key=lambda k: ml[k])
-        try:
-            with pymupdf.open(x["pdf"]) as d:
-                pix = d[i].get_pixmap(dpi=60)
-                im = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-        except Exception as e:
-            log(f"sheet: {x['stem']} {e}")
-            continue
-        im.thumbnail((420, 600))
-        t = Image.new("RGB", (420, 625), "white")
-        t.paste(im, (0, 25))
-        ImageDraw.Draw(t).text((4, 4), f"{x['stem']} p{i + 1} ({ml[i]})", fill="red")
-        tiles.append(t)
     (OUT / "sheets").mkdir(parents=True, exist_ok=True)
-    for k in range(0, len(tiles), 12):
-        sheet = Image.new("RGB", (420 * 4, 625 * 3), "white")
-        for j, t in enumerate(tiles[k:k + 12]):
-            sheet.paste(t, ((j % 4) * 420, (j // 4) * 625))
-        sheet.save(OUT / "sheets" / f"equations_{k // 12 + 1}.jpg", quality=80)
-    log(f"sheet: {len(tiles)} formula-rule candidates on {-(-len(tiles) // 12)} sheets in {OUT / 'sheets'}")
+    for flag in sys.argv[2:] or ["equations", "verse"]:
+        xs = sorted([x for x in m.values() if "error" not in x and x.get(flag)], key=lambda x: x["stem"])
+        fetch_ids([x["stem"] for x in xs if not Path(x["pdf"]).exists()], ("pdf",))
+        W, H, k = 420, 620, 0
+        for k in range(0, len(xs), 12):
+            out = pymupdf.open()
+            pg = out.new_page(width=4 * W, height=3 * H)
+            for j, x in enumerate(xs[k:k + 12]):
+                r = pymupdf.Rect((j % 4) * W, (j // 4) * H + 18, (j % 4 + 1) * W - 4, (j // 4 + 1) * H - 2)
+                try:
+                    i, sc = best_page(x, flag)
+                    with pymupdf.open(x["pdf"]) as src:
+                        pg.show_pdf_page(r, src, i)
+                    pg.insert_text(((j % 4) * W + 4, (j // 4) * H + 13), f"{x['stem']} p{i + 1} ({sc})", fontsize=11,
+                                   color=(0.8, 0, 0))
+                except Exception as e:
+                    log(f"sheet {flag}: {x['stem']} {type(e).__name__}: {e}")
+            pg.get_pixmap(dpi=80).save(OUT / "sheets" / f"{flag}_{k // 12 + 1}.jpg", jpg_quality=80)
+        log(f"sheet {flag}: {len(xs)} candidates on {-(-len(xs) // 12)} sheets in {OUT / 'sheets'}")
 
 
 # ------------------------------------------------------------------------------------------------ select
@@ -299,7 +355,7 @@ def usable_pool(m: dict, ex: dict) -> list[dict]:
         if not 1 <= (x.get("azure_pages") or 0) <= S.MAX_PAGES:
             continue
         pool.append(dict(x, decade=S.decade(x["year"]), equations=x["stem"] in EYE_EQ,
-                         verse=bool(x.get("verse")) and x["stem"] not in F.EYE["verse"]["no"]))
+                         verse=bool(x.get("verse")) and x["stem"] not in F.EYE["verse"]["no"] | EYE_VERSE_NO))
     return pool
 
 
@@ -455,5 +511,5 @@ def table(arts: list[dict]) -> str:
 
 
 if __name__ == "__main__":
-    {"draw": cmd_draw, "fetch": cmd_fetch, "measure": cmd_measure, "sheet": cmd_sheet, "select": cmd_select,
+    {"draw": cmd_draw, "draw_verse": cmd_draw_verse, "fetch": cmd_fetch, "measure": cmd_measure, "sheet": cmd_sheet, "select": cmd_select,
      "fetchpdf": cmd_fetchpdf, "check": cmd_check}[sys.argv[1]]()
