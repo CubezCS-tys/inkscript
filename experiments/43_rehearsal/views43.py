@@ -5,7 +5,8 @@ build_layout43 with the changes below).
 * text of another article (ALTO role.otherArticle): slightly muted text, one quiet mark per contiguous region (a
   thin rule on its outer side, one small label "from another article" at its top); pictures and captions inside the
   region belong to it; the bar's "Hide other articles" hides them all (remembered in the browser);
-* ornaments (ALTO role.ornament) and what Azure read from a picture's ink (role.pictureJunk) are left to the scan;
+* ornaments (ALTO role.ornament), what Azure read from a picture's ink (role.pictureJunk) and pale ink that is not
+  the page's print (role.showThrough: show-through, watermarks) are left to the scan;
 * a picture of another article (ALTO Illustration role.otherArticle with its crop as FILEID, not in the JATS) is
   drawn muted with that article's region;
 * a figure with words printed inside it (JATS <p content-type="text-in-figure">) is the picture only, with a small
@@ -161,7 +162,7 @@ def load43(a):
     for b in doc["D"].A.iter(MR._q("TextBlock")):
         if "role.otherArticle" in (b.get("TAGREFS") or ""):
             other.add(b.get("ID"))
-        if "role.ornament" in (b.get("TAGREFS") or "") or "role.pictureJunk" in (b.get("TAGREFS") or ""):
+        if any(f"role.{r}" in (b.get("TAGREFS") or "") for r in ("ornament", "pictureJunk", "showThrough")):
             orn.add(b.get("ID"))
     for rec in doc["blocks"]:
         if rec.get("alto") in other:
@@ -572,7 +573,7 @@ def build_layout43(a, doc):
                     cls = "verse" + (" free" if len(hems) == 1 else "")
                     content = f'<div class="tx {cls}" dir="{d}" style="{cols[1:]}">{inner}</div>'
                 elif T == "table":
-                    h = MR.table_html(D, rec["table"], d, lg)
+                    h = table_part_html(D, rec, d, lg)
                     nrow = max(1, h.count("<tr>"))
                     content = f'<div class="tx" dir="{d}">{h}</div>'
                 elif T == "equation" and rec.get("latex"):
@@ -702,6 +703,29 @@ def art43(stem: str) -> dict:
     except StopIteration:
         arts = json.loads((HERE / "sample43.json").read_text(encoding="utf-8"))["articles"]
         return dict(next(a for a in arts if a["stem"] == stem), set="b")
+
+
+def table_part_html(D, rec, d: str, lg: str) -> str:
+    """experiment 41's table_html; for one part of a table printed in two columns (masters43: one ALTO block per
+    part, one JATS table) only the rows whose lines this part holds (2026-10-20, 0368-013 p11)."""
+    el, own = rec["table"], {L["id"] for L in rec.get("lines") or []}
+    trs = list(el.iter("tr"))
+    tid = lambda tr: {t.get("id") for t in tr.iter("target")}        # noqa: E731
+    if not own or all(tid(tr) <= own for tr in trs):
+        return MR.table_html(D, el, d, lg)
+    rows = []
+    for tr in trs:
+        if not tid(tr) & own:
+            continue
+        cells = []
+        for c in tr:
+            if c.tag not in ("th", "td"):
+                continue
+            sp = "".join(f' {k}="{c.get(k)}"' for k in ("colspan", "rowspan") if c.get(k))
+            ts = [t.get("id") for t in c.iter("target")]
+            cells.append(f"<{c.tag}{sp}>" + " ".join(D.seg.get(t, "") for t in ts) + f"</{c.tag}>")
+        rows.append("<tr>" + "".join(cells) + "</tr>")
+    return f'<table dir="{d}" lang="{E(lg)}">' + "".join(rows) + "</table>"
 
 
 def main():

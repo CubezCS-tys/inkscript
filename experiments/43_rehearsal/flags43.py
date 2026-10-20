@@ -35,6 +35,10 @@ a severity (high / medium / low) and a one-line reason in plain words. Kinds:
   overlap           two text boxes of the Layout view (after its box cutting) overlapping > 25% of the
                     smaller one by area (2026-10-18; 0478 p4)                                         medium
   inline_picture_over_text  a picture inside a printed line still over > 25% of the text           medium
+  (2026-10-20, the fixes from the 300)
+  show_through      lines of pale ink (the reverse side showing through, a watermark) kept as noise     low
+  table_spans_columns  a table printed in two columns, drawn as one part per column                   medium
+  guillemets_unsure (( )) whose ink is neither clearly guillemets nor clearly double brackets          low
 
 Output: out/<run>/flags.json (versions used, thresholds, per article: counts + flags) and out/<run>/flags.txt.
 """
@@ -209,9 +213,10 @@ def check_noise(B):
                                 f"{len(ids)} line(s) with words were {said}; the code {action}: "
                                 f"«{es[0]['text'][:50]}»"))
     for ans in B["answers"]:
+        ghost = set(ans.get("_show_through") or [])
         for x in ans.get("noise") or []:
             i = RU.base_of(x, B["lines"])
-            if i and RU.letters(B["lines"][i]["text"]) >= T["noise_left_letters"]:
+            if i and i not in ghost and RU.letters(B["lines"][i]["text"]) >= T["noise_left_letters"]:
                 L = B["lines"][i]
                 out.append(flag(B, "noise_left", "low", L["page"], [i],
                                 f"left as noise, judged a speck by the code: «{L['text'][:40]}»"))
@@ -509,7 +514,30 @@ def check_overlaps(B):
     return out
 
 
-CHECKS = [check_noise, check_lines, check_notes, check_verse, check_other, check_mix, check_headings, check_tables,
+def check_fixes2(B):
+    """What the rules of 2026-10-20 (the fixes from the 300) found."""
+    out = []
+    for log in B["logs"]:
+        by = {}
+        for e in log.get("show_through") or []:
+            by.setdefault(e["page"], []).append(e)
+        for p, es in sorted(by.items()):
+            out.append(flag(B, "show_through", "low", p, [e["line"] for e in es],
+                            f"{len(es)} line(s) of pale ink (show-through, watermark) kept out of the text: "
+                            f"«{es[0]['text'][:40]}»"))
+        for e in log.get("table_columns") or []:
+            out.append(flag(B, "table_spans_columns", "medium", e["page"], [],
+                            f"a table printed in {len(e['parts'])} columns ({' + '.join(map(str, e['parts']))} rows): "
+                            f"drawn as {len(e['parts'])} parts, one table in the JATS", boxes=e["boxes"]))
+        for e in log.get("guillemets") or []:
+            if e["decision"] == "unsure":
+                out.append(flag(B, "guillemets_unsure", "low", e["pages"][0], [],
+                                f"(( )) on {e['lines']} line(s): the ink does not tell guillemets from double "
+                                f"brackets ((: {e['double']} of the word height, single (: {e['single']}); kept as read"))
+    return out
+
+
+CHECKS = [check_fixes2, check_noise, check_lines, check_notes, check_verse, check_other, check_mix, check_headings, check_tables,
           check_math, check_fixes, check_layout_rules, check_overlaps]
 
 

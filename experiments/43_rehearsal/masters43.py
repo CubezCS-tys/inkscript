@@ -75,6 +75,7 @@ def azure_words(a):
         return ink43.dark_share(ST.page_image(a, p), box)
     words.ink = ink
     words.dark = dark
+    words.image = lambda p: ST.page_image(a, p)          # rules43.guillemets: the page render (300 dpi)
     return words
 
 
@@ -116,6 +117,7 @@ class Store43(ORIG_STORE):
             for o in ans.get("_ornaments") or []:
                 self.take_ornament(o, words)
             self.picture_junk.update(str(i) for i in ans.get("_picture_junk") or [])
+        self.show_through = {str(i) for ans in answers for i in ans.get("_show_through") or []}
 
     def take_ornament(self, o, words):
         base = o["line"]
@@ -277,6 +279,9 @@ class Master43(M.Master):
         if role == "noise" and ids and all(i in getattr(self.S, "picture_junk", ()) for i in ids):
             role = "pictureJunk"                    # rules43.pictures: Azure's reading of a picture's ink
             self.stats["picture_junk_lines"] += len(ids)
+        elif role == "noise" and ids and all(i in getattr(self.S, "show_through", ()) for i in ids):
+            role = "showThrough"                    # rules43.show_through: pale ink, not this page's print
+            self.stats["show_through_lines"] += len(ids)
         return super().tb(p, bid, role, ids, target, lang, seq, own)
 
     def other_figure(self, rec, cap_rec):
@@ -297,7 +302,37 @@ class Master43(M.Master):
             M.Master.tb(self, p, self.bid(p), "pictureText", rec["ids"])
         self.stats["figures_other_article"] += 1
 
+    def table(self, rec, parent, cap_rec, caption_into):
+        """experiment 41's table; then a table printed in two columns (rules43.table_parts) is drawn as one ALTO
+        block per part (one JATS table-wrap; the later parts point at it and are tagged flow.continued)."""
+        al = self.alto[self.lp(rec["page"])]
+        n = len(al)
+        super().table(rec, parent, cap_rec, caption_into)
+        n = next((k for k in range(n, len(al)) if al[k].get("kind") == "table"), None)
+        if n is None:
+            return
+        import rules43 as RU
+        L = self.S.lines
+        rbs = [ST.union([L[i]["px"] for c in r for i in c.get("ids") or [] if i in L]) for r in rec.get("rows") or []]
+        parts = RU.table_parts(rbs)
+        if len(parts) < 2:
+            return
+        T, at = al.pop(n), n
+        for k, rows in enumerate(parts):
+            ids = {i for ri in rows for c in rec["rows"][ri] for i in c.get("ids") or []}
+            cells = [c for c in T["cells"] if set(c["ids"]) & ids]
+            box = ST.union([L[i]["px"] for i in ids if i in L])
+            if not box:
+                continue
+            al.insert(at, dict(T, id=T["id"] if k == 0 else f"{T['id']}p{k + 1}", box=box, cells=cells, part=k))
+            at += 1
+        self.stats["tables_in_columns"] += 1
+
     def alto_block(self, parent, b, lp, q):
+        if b.get("kind") == "table" and b.get("part"):          # a later part of a table printed in two columns
+            super().alto_block(parent, b, lp, q)
+            parent[-1].set("TAGREFS", "flow.continued")
+            return
         if b.get("kind") == "ill" and (b.get("role") or b.get("file")):
             el = M.sub(parent, q("Illustration"), {"ID": b["id"], "TYPE": b["type"]})
             for k, v in zip(("HPOS", "VPOS", "WIDTH", "HEIGHT"),
@@ -582,7 +617,10 @@ class Master43(M.Master):
                                   "of the text, its ink kept here"),
                      ("pictureJunk", "what Azure read from a picture's ink (hieroglyphs, symbols, a drawing): not text, "
                                      "left out of the JATS; the picture is drawn from the page image (experiment 43, "
-                                     "rules43.pictures)")):
+                                     "rules43.pictures)"),
+                     ("showThrough", "a line Azure read from ink that is not this page's print: the reverse side "
+                                     "showing through, a watermark, a faint ghost (pale against the page's text; "
+                                     "rules43.show_through, 2026-10-20): left out of the JATS")):
             el = etree.Element(f"{{{ns}}}StructureTag", {"ID": f"role.{r}", "TYPE": "paragraph-role", "LABEL": r,
                                                          "DESCRIPTION": d})
             first_other.addprevious(el)

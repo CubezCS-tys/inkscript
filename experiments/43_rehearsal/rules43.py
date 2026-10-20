@@ -505,7 +505,56 @@ def in_gap(ws, toks, w) -> bool:
     return bool(near) and max(near) >= max(3 * med, 8)
 
 
-def never_noise(ans, lines, log):
+# ------------------------------------------------------------------------------------------------ show-through
+# (2026-10-20, 0744 p1 in the 300: the reverse side's text shows through mirrored and pale; Azure reads it as garbled
+# words, the model rightly calls it noise and the never-noise rule put ~40 lines a page back)
+PALE = 0.3                  # a line whose ink share is under this part of the page's text median is not print
+PALE_MIN_MEDIAN = 0.04      # ... judged only when the page's own text has at least this much ink (dark_share)
+GHOST_CONF = 0.5            # or: Azure's mean word confidence under this ...
+GHOST_KNOWN = 0.5           # ... and under this share of its words in the word list (wordlist43), >= 3 judged
+
+
+def show_through(cand, used, lines, words, log) -> set:
+    """Lines that are not real print: pale against the page's text (show-through, a stain), or read with low
+    confidence and mostly non-words. They stay noise (ALTO role.showThrough, flagged). Needs words.dark (the page
+    image); without it nothing is judged."""
+    dark = getattr(words, "dark", None)
+    if dark is None:
+        return set()
+    try:
+        import wordlist43 as WL
+        W = WL.load()
+    except Exception:                                        # noqa: BLE001
+        WL, W = None, frozenset()
+    med = {}
+    for p in sorted({lines[i]["page"] for i in cand}):
+        txt = [i for i in used if lines[i]["page"] == p and has_words(lines[i])]
+        txt = sorted(txt, key=lambda i: -letters(lines[i]["text"]))[:25]
+        ds = sorted(dark(p, lines[i]["b"]) for i in txt)
+        med[p] = ds[len(ds) // 2] if ds else None
+    out = set()
+    for i in cand:
+        L, p = lines[i], lines[i]["page"]
+        d = dark(p, L["b"])
+        ws = words(i) or []
+        cs = [w.get("conf") for w in ws if w.get("conf") is not None]
+        conf = sum(cs) / len(cs) if cs else None
+        k, n = WL.known_share(L["text"], W) if WL and W else (0, 0)
+        why = None
+        if med[p] is not None and med[p] >= PALE_MIN_MEDIAN and d < PALE * med[p]:
+            why = "pale"
+        elif conf is not None and conf < GHOST_CONF and n >= 3 and k / n < GHOST_KNOWN:
+            why = "non-words"
+        if why:
+            out.add(i)
+            log["show_through"].append(dict(line=i, page=p, why=why, ink=round(d, 3),
+                                            page_ink=None if med[p] is None else round(med[p], 3),
+                                            conf=None if conf is None else round(conf, 2), known=f"{k}/{n}",
+                                            text=L["text"][:80]))
+    return out
+
+
+def never_noise(ans, lines, log, words=None):
     """Put back every line with words that the answer called noise or dropped (see the module doc)."""
     pages = ans.get("pages") or []
     used = set()
@@ -520,6 +569,12 @@ def never_noise(ans, lines, log):
     cand = [i for i in lines if i not in used and has_words(lines[i])]
     if not cand:
         return
+    ghost = show_through(cand, used, lines, words, log)
+    if ghost:
+        cand = [i for i in cand if i not in ghost]
+        ans.setdefault("_show_through", []).extend(sorted(ghost))
+        if not cand:
+            return
     page_of = {}
     for pg in pages:
         if isinstance(pg, dict):
@@ -576,6 +631,139 @@ def never_noise(ans, lines, log):
                                                text=lines[i]["text"][:80]))
     if taken:
         ans["noise"] = [x for x in noise if base_of(x, lines) not in taken]
+
+
+# ------------------------------------------------------------------------------------------------ table over two columns
+# (2026-10-20, 0368-013 p11 in the 300: a table printed at the foot of the right column and continued at the head of
+# the left one was one table whose box covered the whole page, over both columns of text)
+def table_parts(row_boxes) -> list[list[int]]:
+    """Rows (each its box, 0-1000 or px, None for an empty row) -> runs of rows printed in one place. A new run starts
+    where a row jumps back up the page by more than the table's own height so far and does not share the run's
+    columns (horizontal overlap < 30%): the table continues in another column. One run: the table is whole."""
+    parts, cur, cb = [], [], None
+    for k, rb in enumerate(row_boxes):
+        if rb is None:
+            cur.append(k)
+            continue
+        if cb is not None and rb[3] < cb[1] + 0.25 * (cb[3] - cb[1]) and xoverlap(rb, cb) < 0.3:
+            parts.append(cur)
+            cur, cb = [], None
+        cur.append(k)
+        cb = rb if cb is None else union([cb, rb])
+    if cur:
+        parts.append(cur)
+    return parts
+
+
+def table_columns(ans, lines, log):
+    """Count (and log) tables printed in two columns; the masters draw each part as its own ALTO block (one JATS
+    table), the flags mark them table_spans_columns."""
+    for pg in ans.get("pages") or []:
+        for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
+            if not isinstance(b, dict) or b.get("type") != "table" or not isinstance(b.get("rows"), list):
+                continue
+            rbs = []
+            for r in b["rows"]:
+                ids = [base_of(i, lines) for c in (r if isinstance(r, list) else [])
+                       for i in ((c.get("lines") or []) if isinstance(c, dict) else [c])]
+                rbs.append(union([lines[x]["b"] for x in ids if x]))
+            parts = table_parts(rbs)
+            if len(parts) > 1:
+                log["table_columns"].append(dict(page=pg.get("page"), rows=len(rbs), parts=[len(x) for x in parts],
+                                                 boxes=[union([rbs[k] for k in x if rbs[k]]) for x in parts]))
+
+
+# ------------------------------------------------------------------------------------------------ guillemets
+# (2026-10-20, the 300: Azure reads printed «…» as ((…)) in many articles; some prints do use (( )), so the ink
+# decides. A parenthesis is nearly as tall as the line's words; a guillemet is a small chevron at mid-height.)
+DD_MIN = 2                  # at least this many (( / )) measured in the chunk
+SP_MIN = 3                  # single ( measured: the article's own parenthesis height, the yardstick
+DD_REL = 0.8                # (( this much shorter than a single ( ...
+DD_ABS = 0.5                # ... and under this share of the word height: guillemets
+DD_ALONE = 0.4              # no single ( to compare with: under this share
+DD_SURE = 0.36              # under this share whatever the single ( (1010-001 pp7-10: 0.32 against 0.40)
+
+
+def bracket_height(img, box, side, lh) -> float | None:
+    """Height of the outermost ink piece at one end of a word (side "R" / "L"), as a share of the line's word
+    height lh (300 dpi px)."""
+    import cv2
+    x0, y0, x1, y1 = (int(v) for v in box)
+    w = int(lh)
+    xa, xb = (x1 - w, x1) if side == "R" else (x0, x0 + w)
+    crop = img[max(0, int(y0 - 0.3 * lh)):max(0, int(y1 + 0.3 * lh)), max(0, xa):max(0, xb)]
+    if crop.size == 0:
+        return None
+    _, bw = cv2.threshold(crop, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    n, _, st, _ = cv2.connectedComponentsWithStats(bw)
+    c = [(st[k, 0], st[k, 2], st[k, 3]) for k in range(1, n) if st[k, 4] > 4]
+    if not c:
+        return None
+    c = sorted(c, key=lambda z: -(z[0] + z[1]) if side == "R" else z[0])[:2]
+    return max(h for _, _, h in c) / lh
+
+
+def guillemets(ans, lines, words, log):
+    """(( … )) Azure read where the print has « … »: decided per chunk from the ink (bracket_height of the (( / ))
+    against the article's single parentheses); when they are guillemets every (( / )) of the chunk's lines becomes
+    « / » through a fix (why "code: guillemets in the ink"); when unsure nothing changes and the chunk is logged
+    (flag guillemets_unsure). D30 holds: the text is what is printed."""
+    image = getattr(words, "image", None)
+    hits = [i for i, L in lines.items() if "((" in L["text"] or "))" in L["text"]]
+    if image is None or not hits:
+        return
+    import cv2
+    import statistics
+    dd, sp, imgs = [], [], {}
+    for i in sorted(lines, key=lambda i: (lines[i]["page"], i in hits)):
+        L = lines[i]
+        if not re.search(r"\(", L["text"]) or (len(dd) >= 12 and len(sp) >= 12):
+            continue
+        ws = words(i) or []
+        if not ws:
+            continue
+        p = L["page"]
+        if p not in imgs:
+            imgs[p] = cv2.imread(str(image(p)), cv2.IMREAD_GRAYSCALE)
+        if imgs[p] is None:
+            continue
+        lh = statistics.median(w["box"][3] - w["box"][1] for w in ws) or 1
+        rtl = is_rtl(L["text"])
+        for w in ws:
+            t = w["text"]
+            o, c = ("R", "L") if rtl else ("L", "R")
+            if (t == "((" or re.match(r"^\(\([^\W\d_]", t)) and len(dd) < 12:      # an opening (( before letters
+                r = bracket_height(imgs[p], w["box"], o, lh)
+                if r:
+                    dd.append(r)
+            elif re.match(r"^\([^\W\d_]{3}", t) and len(sp) < 12:              # a single ( before a word
+                r = bracket_height(imgs[p], w["box"], o, lh)
+                if r:
+                    sp.append(r)
+    if len(dd) < DD_MIN:
+        return
+    md = statistics.median(dd)
+    ms = statistics.median(sp) if len(sp) >= SP_MIN else None
+    if ms is not None:
+        ok = md < DD_SURE or (md < DD_REL * ms and md < DD_ABS)
+        sure = ok or md >= 0.9 * ms
+    else:
+        ok = md < DD_ALONE
+        sure = ok or md >= 0.6
+    rec = dict(pages=sorted({lines[i]["page"] for i in hits}), lines=len(hits), double=round(md, 2), n_double=len(dd),
+               single=None if ms is None else round(ms, 2), n_single=len(sp))
+    if not ok:
+        log["guillemets"].append(dict(rec, decision="brackets as printed" if sure else "unsure"))
+        return
+    n = 0
+    fx = ans.setdefault("fixes", [])
+    for i in hits:
+        t = lines[i]["text"]
+        for frm, to in (("((", "«"), ("))", "»")):
+            for _ in range(t.count(frm)):
+                fx.append({"line": i, "from": frm, "to": to, "why": "code: guillemets in the ink (rules43.guillemets)"})
+                n += 1
+    log["guillemets"].append(dict(rec, decision="guillemets", fixes=n))
 
 
 def block_box(b, lines):
@@ -800,6 +988,8 @@ PIC_KEEP = {"title", "trans_title", "heading", "byline", "header", "footer", "ca
 PIC_MASK = {"figure", "table", "equation"}                 # their boxes are pictures / ink already accounted for
 BRIDGE = 120                                               # 0-1000: widest run of words between two halves
 NARROW = 60                                                # 0-1000: a junk line narrower than this is not masked
+FRAME_AREA = 400000                                        # 0-1000 squared: a "picture" over 40% of the page ...
+FRAME_LINES = 10                                           # ... holding this many lines of text is a frame / border
 SMALL = 150                                                # 0-1000: a found picture smaller both ways, with no
                                                            # words read from it, is a decoration (0493 p1's cartoon)
 
@@ -1008,6 +1198,10 @@ def pictures(ans, lines, words, log):
             if box[1] >= 920 and any(inside(lines[x]["b"], grow(box, 10, 10)) > 0 for x in foot):
                 log["pictures_skipped"].append(dict(page=p, box=box, why="the page number's ornament"))
                 continue                           # 0498 p5: the dark box round the page number
+            if bw * bh >= FRAME_AREA and sum(1 for i in ids_p if i not in junk_all and
+                                             inside(lines[i]["b"], box) >= 0.8 and has_words(lines[i])) >= FRAME_LINES:
+                log["pictures_skipped"].append(dict(page=p, box=box, why="the page's frame or border round its text"))
+                continue                           # 2026-10-20: 0368-003 pp11-12, 1080 ×2, 0751: whole-page "figure"
             if max(bw, bh) >= 10 * min(bw, bh) and bl["fill"] >= 0.35:
                 log["pictures_skipped"].append(dict(page=p, box=box, why="a bar"))
                 continue
@@ -1083,7 +1277,7 @@ def new_log() -> dict:
                 other_article_lines=0, empty_rows=0, exclamation_kept=[], exclamation_calls_dropped=[],
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
-                long_headings=[], header_text=[], inline_pictures=[])
+                long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
@@ -1100,7 +1294,7 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     bad_splits(ans, lines, log)
     verse_cuts(ans, lines, log)
     ornaments(ans, lines, words, log)
-    never_noise(ans, lines, log)
+    never_noise(ans, lines, log, words)
     long_headings(ans, lines, log)
     header_text(ans, lines, log)
     exclamation(ans, log)
@@ -1110,6 +1304,8 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     pictures(ans, lines, words, log)
     text_in_figure(ans, lines, log)            # again: words printed inside a picture the ink rule found
     empty_rows(ans, log)
+    table_columns(ans, lines, log)
+    guillemets(ans, lines, words, log)
     fixes(ans, log)
     return ans, log
 
