@@ -3,7 +3,9 @@
     gold43.py import FILE...        the owner's marks: an experiment 41 hand-check export (handcheck_<stem>_argon.json)
                                     or a review43 export (review_<run>.json). "yes" joins the gold set (the article
                                     or the spot's lines, snapshotted as today's code makes them); "no" becomes an open
-                                    issue with its note (issues.json, issues.md)
+                                    issue with its note (issues.json, issues.md); or a correction-tool export
+                                    (correct43.py, kind inkscript-corrections): an article marked "now right" joins
+                                    the gold set with the person's patches (applied after the rules in every check)
     gold43.py add STEM... --run R --source TEXT   whole articles judged right by eye
     gold43.py check [--stems ...]   today's rules + masters on each gold article's saved answers, diffed against the
                                     snapshot: text, block kinds, order, lines, links. Plain report; exit 1 on any change
@@ -58,9 +60,9 @@ def plain(html: str) -> str:
 
 # ------------------------------------------------------------------------------------------------ snapshot
 
-def snapshot(a: dict, raw: Path) -> dict:
+def snapshot(a: dict, raw: Path, patches: list | None = None) -> dict:
     """Today's rules and masters on the saved answers: blocks (page, kind, level, lines, text, links) and the JATS
-    (text, links, notes), in a temporary folder."""
+    (text, links, notes), in a temporary folder. patches: a person's corrections (patches43), applied after the rules."""
     F.use_pages_of(a)
     with tempfile.TemporaryDirectory() as td:
         rules, mast = Path(td) / "rules", Path(td) / "masters"
@@ -76,6 +78,12 @@ def snapshot(a: dict, raw: Path) -> dict:
                     lines[L["id"]] = dict(text=L["text"], b=L["b"], page=p)
             ans, _ = RU.normalize(rec["answer"], lines, M43.azure_words(a))
             (rules / f.name).write_text(json.dumps(dict(rec, answer=ans), ensure_ascii=False), encoding="utf-8")
+        if patches:                                       # a corrected article (correct43.py): its patches on top
+            import patches43 as PA
+            got = {f.name: json.loads(f.read_text(encoding="utf-8")) for f in rules.glob("*.json")}
+            done, log = PA.apply_all(got, patches)
+            for name, rec in done.items():
+                (rules / name).write_text(json.dumps(rec, ensure_ascii=False), encoding="utf-8")
         cap = M43.capture43(a, rules)
         blocks = []
         for b in cap["blocks"]:
@@ -169,14 +177,17 @@ def merge_scope(old, new):
                                                                for v in re.split(r"[:a-p]", i) if v])
 
 
-def add_gold(stem: str, run: str, scope, source: str, note: str = "", marks: dict | None = None) -> Path:
+def add_gold(stem: str, run: str, scope, source: str, note: str = "", marks: dict | None = None,
+             patches: list | None = None) -> Path:
     a = F.all_articles()[stem]
     raw = F.run_dirs(run)["raw"]
     f = gold_file(stem, run)
     g = jload(f)
-    if g is None:
-        g = dict(stem=stem, run=run, raw=str(Path(raw).resolve().relative_to(REPO)), scope=None, checked=[],
-                 stamp=M43.stamp_of(a, raw, run), snapshot=snapshot(a, raw), accepted=[])
+    if g is None or (patches is not None and patches != g.get("patches")):
+        old = g or {}
+        g = dict(stem=stem, run=run, raw=str(Path(raw).resolve().relative_to(REPO)), scope=old.get("scope"),
+                 checked=old.get("checked", []), stamp=M43.stamp_of(a, raw, run), snapshot=snapshot(a, raw, patches),
+                 accepted=old.get("accepted", []), **({"patches": patches} if patches else {}))
     g["checked"].append(dict(date=time.strftime("%Y-%m-%d"), source=source, scope=scope, note=note,
                              **({"marks": marks} if marks else {})))
     g["scope"] = merge_scope(g["scope"], scope)
@@ -234,6 +245,16 @@ def cmd_import(files: list[str]):
             for s in no:
                 it = new_issue(s["stem"], run, s["page"], s["lines"], s["kind"], s.get("note") or "", src)
                 print(f"{s['stem']}: {s['kind']} p{s['page']} wrong -> issue {it['id']}")
+        elif d.get("kind") == "inkscript-corrections":     # the correction tool (correct43.py)
+            run = d["run"]
+            for stem, item in sorted((d.get("articles") or {}).items()):
+                if not item.get("gold"):
+                    continue
+                ps = [dict(p, run=run, article=stem) for p in item.get("patches") or [] if p.get("source") == "person"]
+                f = add_gold(stem, run, "article", f"owner's corrections, article marked now right ({src})",
+                             f"{len(ps)} correction(s): " + "; ".join(sorted({p['action'] for p in ps})),
+                             dict(corrections=len(ps), exported=d.get("exported")), patches=ps)
+                print(f"{stem}: corrected article -> {f.name} ({len(ps)} patches)")
         else:
             print(f"{fn}: not a hand-check or review export")
     write_issues_md()
@@ -249,7 +270,7 @@ def cmd_check(stems=None) -> int:
         if stems and g["stem"] not in stems:
             continue
         try:
-            now = snapshot(arts[g["stem"]], REPO / g["raw"])
+            now = snapshot(arts[g["stem"]], REPO / g["raw"], g.get("patches"))
         except Exception as e:
             print(f"  {g['stem']} ({g['run']}): ERROR {type(e).__name__}: {e}")
             changed += 1
@@ -273,7 +294,7 @@ def cmd_accept(stem, run, why):
     f = gold_file(stem, run)
     g = jload(f)
     a = F.all_articles()[stem]
-    g["snapshot"] = snapshot(a, REPO / g["raw"])
+    g["snapshot"] = snapshot(a, REPO / g["raw"], g.get("patches"))
     g["stamp"] = M43.stamp_of(a, REPO / g["raw"], run)
     g.setdefault("accepted", []).append(dict(date=time.strftime("%Y-%m-%d"), why=why,
                                              rules_hash=g["stamp"]["rules_hash"]))

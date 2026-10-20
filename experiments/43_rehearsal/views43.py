@@ -488,6 +488,12 @@ def overlaps(boxes, share=0.25):
     return out
 
 
+def alto_attr(rec) -> str:
+    """HOOK for the correction tool (correct43.py, 2026-10-20): the ALTO block a piece draws, so a click finds the
+    answer's block again (by its Azure lines). Nothing else reads it."""
+    return f' data-alto="{E(rec["alto"])}"' if rec.get("alto") else ""
+
+
 def build_layout43(a, doc):
     """experiment 41's views.build_layout (copied; 41 is never edited) with experiment 43's changes:
     * a figure with words printed inside it is drawn as the picture only, with a "text" button that opens its words
@@ -554,7 +560,7 @@ def build_layout43(a, doc):
                 btn = (f'<button type="button" class="figtx" title="The words printed in this picture" '
                        f'data-text="{E(ftx)}" data-lang="{E(rec.get("lang") or lang)}">text</button>' if ftx else "")
                 oa = " oa" if id(rec) in oa_figs or rec.get("other") else ""
-                els.append(f'<div class="pc fg t-figure{oa}" data-t="figure" style="{boxstyle(bx, W, H)}">{im}{btn}'
+                els.append(f'<div class="pc fg t-figure{oa}" data-t="figure"{alto_attr(rec)} style="{boxstyle(bx, W, H)}">{im}{btn}'
                            f'<span class="ob">{num}</span></div>')
                 arrows_seq.append((bx, num, False))
                 stats["blocks"] += 1
@@ -637,7 +643,7 @@ def build_layout43(a, doc):
                 badge = f'<span class="ob">{num}</span>' if j == 0 else ""
                 if last_piece and cont_next:
                     badge += '<span class="ob nx" title="continues on the next page">&#8618;</span>'
-                els.append(f'<div class="pc g-{g} t-{T}{extra}" data-t="{T}" data-g="{g}" '
+                els.append(f'<div class="pc g-{g} t-{T}{extra}" data-t="{T}" data-g="{g}"{alto_attr(rec)} '
                            f'style="{boxstyle(bx, W, H)};--f:{f0:.3f};--lh:{lh:.3f}">{content}{badge}</div>')
                 arrows_seq.append((bx, num, j > 0))
                 stats["pieces"] += 1

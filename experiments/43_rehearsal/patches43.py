@@ -255,7 +255,8 @@ def fix_word(ans: dict, p: dict) -> str | None:
     if not line or not frm or kind not in ("misread", "misprint"):
         return "fix_word needs line, from and kind misread|misprint"
     fixes = ans.setdefault("fixes", [])
-    keep = [f for f in fixes if not (isinstance(f, dict) and str(f.get("line")) == line and frm in (f.get("from") or ""))]
+    keep = [f for f in fixes if not (isinstance(f, dict) and str(f.get("line")) == line and
+                                            (frm in (f.get("from") or "") or (f.get("from") or "\0") in frm))]
     gone = [f for f in fixes if f not in keep]
     ans["fixes"] = keep
     why = pay.get("why") or "person"
@@ -275,7 +276,8 @@ def fix_word(ans: dict, p: dict) -> str | None:
 def apply_all(answers: dict, patches: list[dict]) -> tuple[dict, list[dict]]:
     """Deep copy of answers with every patch marked apply=true applied, by precedence; a log entry per patch.
     A person's patches never override each other (they are one person's edits in the order made: a split, then the
-    new part's kind); a lower source touching what a higher one touched is skipped."""
+    new part's kind); a lower source touching what a higher one touched is skipped — except a judge's or retry's
+    mark_noise over lines a person touched only in part: its other lines still go (logged "partly overridden")."""
     out = copy.deepcopy(answers)
     claimed, log = {}, []
     todo = sorted((p for p in patches if p.get("apply")),
@@ -284,6 +286,13 @@ def apply_all(answers: dict, patches: list[dict]) -> tuple[dict, list[dict]]:
         tch = touched(p)
         hit = sorted({claimed[x][0] for x in tch if x in claimed
                       if not (claimed[x][1] == "person" and p.get("source") == "person")})
+        part = ""
+        if hit and p["action"] == "mark_noise" and all(claimed[x][1] == "person" for x in tch if x in claimed) \
+                and any(x not in claimed for x in tch):
+            # a person marked some of these lines (as noise or otherwise): the judge's noise keeps the rest
+            p = dict(p, targets=dict(p.get("targets") or {}, lines=[x for x in (p.get("targets") or {}).get("lines") or []
+                                                                       if f"L{x}" not in claimed]))
+            tch, part, hit = touched(p), f"partly overridden by {', '.join(hit)}", []
         if hit:
             log.append(dict(id=p["id"], action=p["action"], applied=False, why=f"overridden by {', '.join(hit)}"))
             continue
@@ -292,7 +301,7 @@ def apply_all(answers: dict, patches: list[dict]) -> tuple[dict, list[dict]]:
         else:
             why = apply_one(out, p)
         log.append(dict(id=p["id"], action=p["action"], source=p.get("source"), page=p["page"], applied=why is None,
-                        **({"why": why} if why else {})))
+                        **({"why": why} if why else {}), **({"note": part} if part else {})))
         if why is None:
             for x in tch:
                 claimed.setdefault(x, (p["id"], p.get("source")))

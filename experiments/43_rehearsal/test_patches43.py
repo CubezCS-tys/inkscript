@@ -168,3 +168,17 @@ def test_person_chain_and_word_fix_beside_structure():
     out, log = PA.apply_all(a, [j, s, k, w])
     assert [e["applied"] for e in log] == [True, True, True, False]      # person's three, then the judge overridden
     assert blk(out, 1, 3)["type"] == "quote" and blk(out, 1, 3)["lines"] == ["1:5", "1:6"]
+
+
+def test_person_takes_part_of_judge_noise():
+    """the person marks 1:2 noise (or keeps it as text): the judge's noise of 1:2 + 1:3 still takes 1:3"""
+    a = answers()
+    j = P("mark_noise", source="judge", lines=["1:2", "1:3"], kind="show-through", pid="j1")
+    h = P("set_kind", source="person", blocks=[dict(id="b", lines=["1:2", "1:3"])], kind="paragraph", pid="h1")
+    out, log = PA.apply_all(a, [j, h])
+    assert [e["applied"] for e in log] == [True, False]                    # the whole block: the judge yields
+    h2 = P("mark_noise", source="person", lines=["1:2"], kind="scanner-junk", pid="h2")
+    out, log = PA.apply_all(a, [j, h2])
+    assert [e["applied"] for e in log] == [True, True] and "partly" in log[1]["note"]
+    ans = out["x_c001-002.json"]["answer"]
+    assert ans["_noise_kinds"] == {"1:2": "scanner-junk", "1:3": "show-through"}
