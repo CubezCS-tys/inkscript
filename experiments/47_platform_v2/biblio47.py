@@ -12,7 +12,7 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from common47 import (E46, OUT43, akey, calendar_of, country_iso, fill_pk, hashed_id, heading_display, spk,
+from common47 import (E46, OUT43, akey, calendar_of, country_iso, fill_pk, hashed_id, heading_display, heading_key, catalogue_holders, spk,
                       split_life, fold, greg_to_hijri, hijri_to_greg, insert, issn_clean, jdump, key,
                       latin_key, name_key, name_parts, now, ratio, script, split_titles, to_int, year_of)
 
@@ -115,9 +115,20 @@ def put_record(con, mcon, rec: int) -> str | None:
         ar = term if script(term) == "Arab" else None
         insert(con, "subject_terms", [dict(scheme=sch, term_ar=ar, term_en=None if ar else term, term_key=tk)],
                "INSERT OR IGNORE")
-        sid = con.execute("SELECT subject_id FROM subject_terms WHERE scheme = ? AND term_key = ?", (sch, tk)).fetchone()[0]
+        sid, have = con.execute("SELECT subject_id, coalesce(term_ar, term_en) FROM subject_terms WHERE scheme = ? AND "
+                                "term_key = ?", (sch, tk)).fetchone()
+        if have != term and _label_rank(term) < _label_rank(have):
+            # fix round 2: the label is chosen by a rule (hamza written, then text order), never by which record
+            # loaded first — «الإعاقة» over «الاعاقة» in every build
+            con.execute(f"UPDATE subject_terms SET {'term_ar' if ar else 'term_en'} = ? WHERE subject_id = ?",
+                        (term, sid))
         con.execute("INSERT OR IGNORE INTO record_subjects VALUES (?,?,?)", (c, sid, k))
     return c
+
+
+def _label_rank(t):
+    t = t or ""
+    return (-sum(t.count(c) for c in "أإآؤئ"), t)
 
 
 def stem_parts(stem: str):
@@ -668,9 +679,9 @@ def refresh_persons(con, mcon, load_id):
     auth_names = defaultdict(set)
     for c in contrib.values():
         if c["authority_id"] and not c["is_org"]:
-            for n in (c["name"], heading_display(c["name"]), c["latin"], heading_display(c["latin"])):
+            for n in (c["name"], c["latin"]):
                 if n:
-                    auth_names[c["authority_id"]].add(name_key(split_life(n)[0]))
+                    auth_names[c["authority_id"]].add(heading_key(n))
     au = [dict(r) for r in con.execute(
         "SELECT a.authorship_pk, a.pub_id, a.position, a.c999, a.catalogue_seq, a.method, a.evidence, a.inst_id, "
         "a.role_code FROM authorships a ORDER BY a.pub_id, a.position")]
@@ -696,6 +707,21 @@ def refresh_persons(con, mcon, load_id):
             if k:
                 key_auth[k].add(aid)
     homonym_cache = {}
+    # fix round 2: who else in the WHOLE catalogue carries a printed / cited name (not only the target's heading)
+    want = set()
+    for a in au:
+        for m in mention_of.get(a["authorship_pk"], []):
+            want.add(name_key(m["name_text"] or m["printed"]))
+        for n in (json.loads(a["evidence"] or "{}").get("printed") or []):
+            want.add(name_key(n))
+    for r in con.execute("SELECT printed FROM cited_work_authors"):
+        want.add(name_key(r[0]))
+    holders = catalogue_holders(mcon, want)
+    n_clash = Counter()
+
+    def clash(nk, aid):
+        """the catalogue gives this folded name to an authority other than aid"""
+        return bool(holders.get(nk, set()) - {aid})
 
     def homonym(aid):
         """the authority's own folded heading is held by another authority id in the catalogue too"""
@@ -723,7 +749,9 @@ def refresh_persons(con, mcon, load_id):
         ms = mention_of.get(a["authorship_pk"], [])
         names = [m["name_text"] or m["printed"] for m in ms] or (json.loads(a["evidence"] or "{}").get("printed") or [])
         hits = {x for n in names for x in key_auth.get(name_key(n), ())}
-        if len(hits) == 1 and len(_toks(names[0] if names else "")) >= 2 and not homonym(next(iter(hits))):
+        if len(hits) == 1 and any(clash(name_key(n), next(iter(hits))) for n in names):
+            n_clash["authorship"] += 1
+        elif len(hits) == 1 and len(_toks(names[0] if names else "")) >= 2 and not homonym(next(iter(hits))):
             assign[a["authorship_pk"]] = (f"auth:{hits.pop()}", "name-key-to-authority", 0.7)
             continue
         best = max(names, key=lambda n: (len(_toks(n)), script(n) == "Arab")) if names else ""
@@ -833,7 +861,10 @@ def refresh_persons(con, mcon, load_id):
         if not got and len(_toks(r["printed"])) >= MIN_CLUSTER_TOKENS and len(key_auth.get(nk, ())) == 1 and \
                 not homonym(next(iter(key_auth[nk]))):
             aid = next(iter(key_auth[nk]))
-            got = (f"auth:{aid}", aid, "name-key-to-authority", 0.7)
+            if clash(nk, aid):
+                n_clash["cited"] += 1
+            else:
+                got = (f"auth:{aid}", aid, "name-key-to-authority", 0.7)
         if got:
             pid = got[4] if len(got) > 4 else public_id(con, "person", got[0], load_id)
             cu.append((pid, got[1], got[2], got[3], r["cited_work_pk"], r["seq"]))
@@ -950,6 +981,8 @@ def refresh_institutions(con, load_id):
                     [(r["stem"], r["byline_pos"], pk[r["mention_pk"]]["person_id"] if r["mention_pk"] in pk else None)
                      for r in rows])
     st = inst46.rebuild(mem)
+    old_links = {(r[0], r[1]): r[2] for r in con.execute("SELECT aff_pk, level, inst_id FROM affiliation_links")}
+    old_live = {r[0] for r in con.execute("SELECT inst_id FROM institutions")}
     con.execute("DELETE FROM affiliation_links")
     con.execute("DELETE FROM institution_relations")
     con.execute("DELETE FROM institution_names WHERE source = 'masters'")
@@ -1020,10 +1053,28 @@ def refresh_institutions(con, load_id):
             con.execute("INSERT OR IGNORE INTO institution_relations VALUES (?,?, 'split-from', NULL, NULL, 'masters', ?)",
                         (nid, iid[ok], f"a numbered university (number {num}) printed in the affiliation"))
         split[aff] = nid
+        # fix round 2: the faculty and department of a numbered university are its own, not the base's (inst46's
+        # «fac:org:<base>/…» keys drop the number too): same key + number, parent the numbered university
+        fk = mem.execute("SELECT faculty_key, dept_key FROM affiliations WHERE aff_pk = ?", (aff,)).fetchone()
+        parent = nid
+        for lvl, col in (("faculty", "faculty_key"), ("dept", "dept_key")):
+            k_ = fk[col]
+            if not k_ or k_ not in iid:
+                continue
+            sid = public_id(con, "institution", f"inst46:{k_}#{num}", load_id)
+            base = con.execute("SELECT kind, country_code FROM institutions WHERE inst_id = ?", (iid[k_],)).fetchone()
+            con.execute("INSERT OR REPLACE INTO institutions (inst_id, kind, parent_id, country_code, status, source) "
+                        "VALUES (?,?,?,?, 'active', 'masters')", (sid, base[0], parent, base[1]))
+            con.execute("INSERT OR IGNORE INTO institution_relations VALUES (?,?, 'parent', NULL, NULL, 'masters', ?)",
+                        (sid, parent, f"printed as part of a numbered university (number {num}) in an affiliation"))
+            con.execute("""INSERT OR IGNORE INTO institution_names SELECT ?, name, lang, script, type, name_key, n_seen,
+                           source FROM institution_names WHERE inst_id = ?""", (sid, iid[k_]))
+            split[(aff, lvl)] = sid
+            parent = sid
     for r in mem.execute("SELECT * FROM affiliations ORDER BY aff_pk"):
         for lvl, col in (("org", "org_key"), ("faculty", "faculty_key"), ("dept", "dept_key")):
             if r[col] and r[col] in iid:
-                tgt = split.get(r["aff_pk"]) if lvl == "org" and r["aff_pk"] in split else iid[r[col]]
+                tgt = split.get(r["aff_pk"] if lvl == "org" else (r["aff_pk"], lvl), iid[r[col]])
                 con.execute("INSERT OR IGNORE INTO affiliation_links VALUES (?,?,?, ?, NULL, 'link47', ?)",
                             (r["aff_pk"], tgt, lvl, "inst46-pieces+folded-key" if tgt == iid[r[col]] else
                              "inst46-pieces+folded-key+university-number", jdump(dict(key=r[col]))))
@@ -1031,6 +1082,28 @@ def refresh_institutions(con, load_id):
         fac = mem.execute("SELECT name FROM institutions WHERE inst_key = ?", (r["faculty_key"],)).fetchone()
         if fac:
             fac_rows.append((fac[0], r["aff_pk"]))
+    # an institution of the masters that nothing points at any more (a faculty moved under its numbered university)
+    # is dropped, with its names and relations
+    while True:
+        dead = [r[0] for r in con.execute("""SELECT i.inst_id FROM institutions i WHERE i.source = 'masters' AND
+                   i.inst_id NOT IN (SELECT inst_id FROM affiliation_links) AND
+                   i.inst_id NOT IN (SELECT parent_id FROM institutions WHERE parent_id IS NOT NULL) AND
+                   i.inst_id NOT IN (SELECT inst_id FROM authorships WHERE inst_id IS NOT NULL) AND
+                   i.inst_id NOT IN (SELECT inst_id FROM publishers WHERE inst_id IS NOT NULL) AND
+                   i.inst_id NOT IN (SELECT inst_id FROM supervisions WHERE inst_id IS NOT NULL)""")]
+        if not dead:
+            break
+        for d in dead:
+            con.execute("DELETE FROM institution_names WHERE inst_id = ?", (d,))
+            con.execute("DELETE FROM institution_relations WHERE from_id = ? OR to_id = ?", (d, d))
+            con.execute("DELETE FROM institutions WHERE inst_id = ?", (d,))
+    live = {r[0] for r in con.execute("SELECT inst_id FROM institutions")}
+    new_links = {(r[0], r[1]): r[2] for r in con.execute("SELECT aff_pk, level, inst_id FROM affiliation_links")}
+    for k, oi in sorted(old_links.items()):
+        ni = new_links.get(k)
+        if oi in old_live and oi not in live and ni in live:
+            con.execute("INSERT OR IGNORE INTO merged_ids VALUES (?,?, 'institution', 'merged-into', ?, ?, 'link47', "
+                        "NULL)", (oi, ni, now(), "its affiliations now sit under a numbered university"))
     # the faculty inst46 reads out of an affiliation, for the shown versions only (the printed parts are never
     # overwritten, so a version shown once and then replaced keeps exactly what it was loaded with)
     con.execute("UPDATE affiliation_mentions SET faculty_text = NULL")

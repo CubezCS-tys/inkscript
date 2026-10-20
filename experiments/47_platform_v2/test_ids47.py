@@ -9,6 +9,9 @@ Build A: load v33_300, load v33_300_final, link            (PYTHONHASHSEED=1)
 Build B: load v33_300_final, load v33_300, link, load v33_300 again (load after link), link again (relink with
          nothing changed)                                  (PYTHONHASHSEED=2)
 
+Build C (--full only): v33_300_final, the judged copy, link, v2_55, v33_300, link (PYTHONHASHSEED=13) — the
+         re-verifier's order (fix round 2).
+
 Every table is then compared row by row (all columns but the clock and load-event ones), so a renumbered key, an id
 minted from load order or a layer that depends on which step ran last all show up as a difference."""
 from __future__ import annotations
@@ -103,6 +106,16 @@ def check(full: bool = False, keep: Path | None = None) -> dict:
     build(b, tmp / "wb", order_b, 2, stems)
     res = compare(a, b)
     bad = {t: r for t, r in res.items() if r["only_a"] or r["only_b"]}
+    if full:
+        # fix round 2: the re-verifier's order (final first, a link between the loads) under a third hash seed;
+        # it caught subject labels taken from whichever record loaded first
+        c = tmp / "c.db"
+        for x in (c, Path(f"{c}-wal"), Path(f"{c}-shm")):
+            x.unlink(missing_ok=True)
+        (tmp / "wc").mkdir(exist_ok=True)
+        build(c, tmp / "wc", ["v33_300_final", "v33_300_judged", "link", "v2_55", "v33_300", "link"], 13, stems)
+        res_c = compare(a, c)
+        bad.update({f"{t} (A vs C)": r for t, r in res_c.items() if r["only_a"] or r["only_b"]})
     return dict(folder=str(tmp), tables=len(res), differing=bad,
                 ids=dict(persons=res["persons"]["rows_a"], institutions=res["institutions"]["rows_a"],
                          cited_works=res["cited_works"]["rows_a"], citation_mentions=res["citation_mentions"]["rows_a"],

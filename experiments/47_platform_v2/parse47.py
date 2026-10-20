@@ -39,7 +39,7 @@ REGION_ROLES = {"pageHeader", "pageNumber", "pageFooter", "noise", "pictureText"
 # back-reference markers (longest first); kind ibid = the work cited just before, op_cit = an earlier work (named by
 # its author / title before the marker), loc_cit = the same place
 MARKERS = [
-    (r"المرجع\s+السابق\s+نفسه|المصدر\s+السابق\s+نفسه|السابق\s+نفسه|السابق\s+ذاته", "ibid"),
+    (r"نفس\s+المرجع\s+السابق|نفس\s+المصدر\s+السابق|المرجع\s+السابق\s+نفسه|المصدر\s+السابق\s+نفسه|السابق\s+نفسه|السابق\s+ذاته", "ibid"),
     (r"المرجع\s+نفسه|المصدر\s+نفسه|المرجع\s+ذاته|المصدر\s+ذاته|نفس\s+المرجع|نفس\s+المصدر|المرجع\s+عينه|المصدر\s+عينه",
      "ibid"),
     (r"\bibid\b\.?|\bibidem\b|\bid\.(?=\s)|\bidem\b", "ibid"),
@@ -812,7 +812,17 @@ def citation_mentions(root, R, bobj, bmap, ink, anchor, stem) -> list:
                     if j >= 0:
                         hint_start = max(hint_start, j + len(sep))
                 hint = text[hint_start:a]
-                hint = re.sub(r"^\s*[\(\[]?\s*[0-9٠-٩*]+\s*[\)\].\-–]?\s*", "", hint).strip(" ،,:.-")
+                if not re.search(r"[^\W\d_]", hint) and hint_start > prev_end:
+                    # fix round 2: «محمد مرشد ناجي. (المرجع السابق)»: the author ends with a period before the bracketed
+                    # marker, so the segment after the last «. » holds only «(»; the hint is the segment before it
+                    h0 = prev_end
+                    for sep in ("وانظر", "انظر", "ينظر", ". ", "؛"):
+                        j = text.rfind(sep, prev_end, hint_start - 2)
+                        if j >= 0:
+                            h0 = max(h0, j + len(sep))
+                    hint_start = h0
+                    hint = text[hint_start:a]
+                hint = re.sub(r"^\s*[\(\[]?\s*[0-9٠-٩*]+\s*[\)\].\-–]?\s*", "", hint).strip(" ،,:.-()[]")
                 tail = text[b:nxt][:40]
                 vp = VOLPAGE_RE.search(tail)
                 lm = LOCATOR_RE.search(tail)

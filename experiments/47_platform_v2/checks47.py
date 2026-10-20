@@ -18,7 +18,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from common47 import DB, V46, connect  # noqa: E402
+from common47 import DB, V46, catalogue_holders, connect, marc, name_key  # noqa: E402
 
 CUR = "version_id IN (SELECT version_id FROM versions WHERE is_current = 1)"
 # v46 table, v2 table, v2 count query, why (when they differ; '' = must be equal)
@@ -300,6 +300,44 @@ def main(argv=None):
     F["public ids not of the hashed form"] = q1(
         "SELECT count(*) FROM id_registry WHERE length(public_id) < 10")
     out["fix_round_1"] = F
+    # ---- fix round 2 (re-verify round 1's failures)
+    G = {}
+    byname = [(r[0], r[1], r[2]) for r in con.execute(
+        """SELECT 'cited', printed, authority_id FROM cited_work_authors WHERE match_method = 'name-key-to-authority'
+           UNION ALL SELECT 'authorship', coalesce(b.name_text, b.printed), substr(r.natural_key, 6)
+           FROM authorships a JOIN authorship_mentions am USING (authorship_pk) JOIN byline_mentions b USING (mention_pk)
+           JOIN id_registry r ON r.public_id = a.person_id WHERE a.method = 'name-key-to-authority'""")]
+    hold = catalogue_holders(marc(), {name_key(n) for _, n, _ in byname})
+    G["name-key-to-authority matches (cited / authorship)"] = [sum(1 for k, *_ in byname if k == "cited"),
+                                                               sum(1 for k, *_ in byname if k == "authorship")]
+    G["... whose printed name the catalogue gives to another authority id"] = sum(
+        1 for _, n, aid in byname if hold.get(name_key(n), set()) - {aid})
+    G["cited «عبد الحليم محمود»: authority ids"] = sorted({r[0] or "-" for r in con.execute(
+        "SELECT authority_id FROM cited_work_authors WHERE name_key = 'عبدالحليممحمود'")})
+    G["faculty / dept links whose university is not the affiliation's org link"] = q1(
+        """SELECT count(*) FROM affiliation_links f JOIN affiliation_links o ON o.aff_pk = f.aff_pk AND o.level = 'org'
+           WHERE f.level IN ('faculty', 'dept') AND NOT EXISTS (
+             WITH RECURSIVE up(i) AS (SELECT f.inst_id UNION SELECT parent_id FROM institutions, up
+                                      WHERE inst_id = up.i AND parent_id IS NOT NULL)
+             SELECT 1 FROM up WHERE i = o.inst_id)
+           AND EXISTS (SELECT 1 FROM institutions WHERE inst_id = f.inst_id AND parent_id IS NOT NULL)""")
+    G["institutions nothing points at"] = q1(
+        """SELECT count(*) FROM institutions i WHERE i.source = 'masters' AND inst_id NOT IN (SELECT inst_id FROM
+           affiliation_links) AND inst_id NOT IN (SELECT parent_id FROM institutions WHERE parent_id IS NOT NULL)""")
+    G["«جامعة قسنطينة 2» and what hangs under it"] = [list(r) for r in con.execute(
+        """WITH RECURSIVE dn(i, d) AS (SELECT inst_id, 0 FROM institution_names WHERE name = 'جامعة قسنطينة 2'
+           UNION SELECT c.inst_id, d + 1 FROM institutions c JOIN dn ON c.parent_id = dn.i)
+           SELECT DISTINCT dn.i, i.kind, (SELECT min(name) FROM institution_names n WHERE n.inst_id = dn.i)
+           FROM dn JOIN institutions i ON i.inst_id = dn.i ORDER BY d""")]
+    G["notes with two back references resolved to one work (shown)"] = q1(
+        f"""SELECT count(*) FROM (SELECT version_id, container_id, full_mention_pk FROM citation_mentions WHERE
+            kind IN ('ibid', 'op_cit', 'loc_cit') AND full_mention_pk IS NOT NULL AND {CUR}
+            GROUP BY 1, 2, 3 HAVING count(*) > 1)""")
+    G["best links agreeing on the whole name only"] = q1(
+        "SELECT count(*) FROM citation_links WHERE best = 1 AND evidence LIKE '%whole_name%'")
+    G["candidates with no author to compare"] = q1(
+        "SELECT count(*) FROM citation_links WHERE status = 'candidate' AND evidence LIKE '%\"agreement\": \"unknown\"%'")
+    out["fix_round_2"] = G
     out["hand_checks"] = dict(con.execute("SELECT verdict, count(*) FROM reviews WHERE source_file = 'link_checks' "
                                           "GROUP BY 1").fetchall())
     out["hand_checks_attached"] = dict(con.execute(

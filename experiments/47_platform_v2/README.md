@@ -399,3 +399,30 @@ inside their own citation, «Land Evaluation Part II» goes to Part II, ROLDÁN 
 verifier read; `platform_v2.db.fix1-draft` and `.fix1-draft2` are this round's intermediate builds (proposed for
 deletion, 0.55 GB together); `link_cache47.json.bak-fix0` and `metrics47.json.bak-fix0` are the earlier cache and
 metrics; `build47_fix1.log` and `checks47_fix1.log` are the logs of the final build.
+
+## Fix round 2 (2026-10-20)
+
+The re-verifier's failures and gaps ([VERIFY.md](VERIFY.md), "Re-verify round 1"), each fixed where it starts, with
+the change and how it was checked. Measured on the rebuilt db (clean build, `build47.sh`); the db the re-verifier
+read is kept as `/home/yassine/data/platform_v2/platform_v2.db.bak-20261020-fix1`. `checks47.py` writes the measures
+below to `out/checks47.json` under `fix_round_2`.
+
+| # | failure | root cause | change | evidence |
+|---|---|---|---|---|
+| 1 | three cited «عبد الحليم محمود» given authority 123266 («السيد، عبدالحليم محمود», the psychologist), though the catalogue gives «محمود، عبدالحليم» to 438086, 491220 and 637316 | (a) a catalogue heading was keyed like a printed name: «السيد» dropped as the title "Mr." although it is the family name, and the heading not turned round; (b) the homonym test asked only whether another authority holds the *target's* heading; (c) only authorities already in the db were known | (a) `common47.heading_key`: a heading is turned round, its life note dropped, and no word taken for a title; (b)+(c) `common47.catalogue_holders`: who in the **whole** catalogue (2.2M contributor rows, a derived index built once, `marc_heading_keys47_<sig>.sqlite`) carries the printed or cited name; a name joins an authority by name only when no other authority id carries that name (authorships and cited authors alike) | the three are now unmatched (`cited «عبد الحليم محمود»: authority ids` = none); name-key-to-authority matches whose name another authority carries: **0** of 33 (was 3 of 37; the 4th old match is now `surname-in-linked-record` through a newly accepted link); authorships: 0 name-only matches |
+| 2 | «جامعة قسنطينة 2»'s faculty and department under «جامعة قسنطينة» | inst46's faculty and department keys (`fac:org:<base>/…`) drop the number like the university key | a numbered university's faculty and department are institutions of their own: the same key + the number, parent the numbered university; an institution nothing points at any more is dropped, its id written to `merged_ids` when it was live | IXTRD7CFDX «جامعة قسنطينة 2» → INEH6E8Q4G faculty → I586QN4MX5 department; faculty/department links whose university is not the affiliation's university: **0**; institutions nothing points at: 0 |
+| 3 | 5 `subject_terms.term_ar` labels depend on which record loaded first | the label was the first form inserted | the label is chosen by a rule: hamza written first («الإعاقة» over «الاعاقة»), then text order | `test_ids47.py --full` (7.5 min, peak 0.6 GB) now also builds C in the re-verifier's order (final, judged, link, v2_55, v33_300, link; seed 13): A, B and C **identical** in all 81 tables (580 persons, 315 institutions, 3,080 cited works, 10,930 mentions, 461 authorships) |
+| 4 | 0344: «نفس المرجع السابق» split into an ibid «نفس المرجع» and an op. cit. «السابق», counted twice in `v_times_cited` | the marker list had «المرجع السابق نفسه» but not «نفس المرجع السابق» | `parse47.MARKERS`: «نفس المرجع السابق» / «نفس المصدر السابق» are one ibid marker | fn-p25-3 and fn-p26-1 hold one ibid each; notes with two back references to one work: **0** (see 6) |
+| 5 | «الإرهاب الجديد» (أحمد إبراهيم محمود) → W307323 kept as a candidate "with no author to compare" | not stale evidence: every word of «أحمد إبراهيم محمود» is a common given name, so the token comparison had nothing left on either side | `link47.judge_link`: when the tokens leave nothing, the whole folded name is compared (cited name vs the catalogue heading turned round); equal = agree, a difference proves nothing (stays unknown) | the link is accepted and best; accepted 91 → 92; candidates with no author to compare 19 → 18; best links without author agreement 0; contradicted candidates 0 |
+| 6 | (found on the way, by measure 4) 2449: «محمد مرشد ناجي. (المرجع السابق)» back references sent to «Facebook» and other wrong notes | the author ends with a period before a bracketed marker, so the text after the last «. » — the hint — was only «(» | `parse47`: a hint with no letter falls back to the segment before that period; brackets stripped from the hint | 14 back references in 3 articles had such a hint; the 12 in 2449 now go to the named author's work (ناجي, السقاف, سارجنت, العمري; two السقاف ones at 0.5 because he has two earlier entries), the other 2 unchanged |
+| — | back references missed because of the text v2 is given: «Craws haw» split by a space (0702), the Refai note the masters did not parse (1769) | upstream | not changed: the fix belongs to the reading, not the linker | — |
+
+**Unchanged by this round** (checked): 0 orphans, `line_map` rows pointing at nothing 0, 24 true self-citations,
+577 of 1,508 short forms tied, 0 authority ids on two persons, provenance gaps 0, the 15 views and 17 canned queries
+(all 200 on the restarted :8003).
+
+**Files of this round** (in `/home/yassine/data/platform_v2/`): `platform_v2.db.bak-20261020-fix1` is the db the
+re-verifier read; `platform_v2.db.fix2-draft` the first build of this round, before fix 6 (proposed for deletion,
+0.33 GB); `marc_heading_keys47_<sig>.sqlite` (42 MB) the derived catalogue name index, rebuilt by itself when marc.db
+or the key rule changes; `build47_fix2.log` the final build's log; `link_cache47.json.bak-fix1` and
+`metrics47.json.bak-fix1` the earlier cache and metrics.

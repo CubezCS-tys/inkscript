@@ -35,7 +35,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import biblio47  # noqa: E402
 from common47 import (DATA, DB, E46, V46, akey, split_life, calendar_of, connect, fill_pk, fold, greg_to_hijri,  # noqa: E402
-                      hijri_to_greg, insert, jdump, key, marc, name_key, name_parts, now, ratio, sha_files, script,
+                      hijri_to_greg, insert, jdump, key, marc, name_key, heading_key, name_parts, now, ratio, sha_files, script,
                       to_int, tokset, year_of)
 
 sys.path.insert(0, str(E46))
@@ -628,11 +628,19 @@ def judge_link(confident: bool, authors: list, target_names: list, where: str):
             tgt.add(lat.replace(" ", "").replace("-", ""))
             tgt |= {w for w in lat.split() if len(w) >= 3 and w not in COMMON}
     shared = sorted({a for a in cited for b in tgt if near_token(a, b)})
+    # fix round 2: a name made only of common words («أحمد إبراهيم محمود») leaves no token to compare; then the
+    # whole folded name is compared (equal = agree; a difference proves nothing, so it stays unknown)
+    cfull = {name_key(f"{gn or ''} {sn or ''}") for sn, gn in authors or []} - {""}
+    tfull = {heading_key(x) if re.search("[،,]", x) else name_key(x) for n, lat in target_names for x in (n, lat)
+             if x} - {""}
+    whole = sorted(cfull & tfull)
     if not cited or not tgt:
-        agree = "unknown"
+        agree = "agree" if whole else "unknown"
     else:
-        agree = "agree" if shared else "contradict"
+        agree = "agree" if shared or whole else "contradict"
     ev = dict(agreement=agree, cited=sorted(cited), target=sorted(tgt), shared=shared)
+    if whole:
+        ev["whole_name"] = whole
     base = "catalogue-fts" if where == "catalogue" else "article-fts"
     if agree == "contradict":
         return "rejected", 0, f"{base} (authors contradict)", ev

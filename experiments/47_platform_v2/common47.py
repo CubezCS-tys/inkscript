@@ -406,6 +406,62 @@ def heading_display(name: str | None) -> str | None:
     return " ".join(s.split())
 
 
+def heading_key(name: str | None) -> str:
+    """Folded key of a catalogue heading «family، given» (fix round 2): turned round and life note dropped, but no
+    word is taken for a title — in «السيد، عبدالحليم محمود» «السيد» is the family name, not "Mr."."""
+    s = heading_display(name) or ""
+    k = key(s) if re.search("[؀-ۿ]", s) else latin_key(s)
+    return k.replace(" ", "")
+
+
+def _holders_index() -> Path:
+    """A derived index of marc.db (heading key -> authority id), built once and rebuilt only when marc.db or the key
+    rule changes: «name key -> who in the catalogue carries it» without folding 2.2M headings on every pass."""
+    import inspect
+    st = MARC.stat()
+    sig = hashlib.sha1(f"{st.st_size}|{st.st_mtime_ns}|{inspect.getsource(heading_key)}|"
+                       f"{inspect.getsource(heading_display)}|{inspect.getsource(split_life)}|"
+                       f"{inspect.getsource(key)}|{inspect.getsource(latin_key)}".encode()).hexdigest()[:16]
+    p = DATA / f"marc_heading_keys47_{sig}.sqlite"
+    if p.exists():
+        return p
+    tmp = p.with_suffix(".tmp")
+    tmp.unlink(missing_ok=True)
+    out = sqlite3.connect(tmp)
+    out.execute("CREATE TABLE k (key TEXT NOT NULL, authority_id TEXT NOT NULL, PRIMARY KEY (key, authority_id)) "
+                "WITHOUT ROWID")
+    mcon = marc()
+    rows = set()
+    for n, la, aid in mcon.execute("SELECT name, latin, authority_id FROM authors WHERE authority_id IS NOT NULL "
+                                   "AND authority_id <> '' AND NOT coalesce(is_org, 0)"):
+        for h in (n, la):
+            if h:
+                k = heading_key(h)
+                if k:
+                    rows.add((k, aid))
+    out.executemany("INSERT INTO k VALUES (?,?)", sorted(rows))
+    out.commit()
+    out.close()
+    tmp.rename(p)
+    return p
+
+
+def catalogue_holders(mcon, keys) -> dict:
+    """{name key: authority ids of marc.db whose person heading (Arabic or Latin) has that key}, for the given keys
+    only — over the whole catalogue (2.2M contributor rows), not only the authorities already in the db."""
+    keys = sorted({k for k in keys if k})
+    out = {}
+    if not keys:
+        return out
+    con = sqlite3.connect(f"file:{_holders_index()}?mode=ro", uri=True)
+    for i in range(0, len(keys), 500):
+        part = keys[i:i + 500]
+        for k, aid in con.execute(f"SELECT key, authority_id FROM k WHERE key IN ({','.join('?' * len(part))})", part):
+            out.setdefault(k, set()).add(aid)
+    con.close()
+    return out
+
+
 def _country_table():
     import inst46
     t = dict(inst46.COUNTRY_OF)
