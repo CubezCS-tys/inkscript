@@ -1485,7 +1485,7 @@ def junk_in_figure(lid, lines, words) -> bool:
     return bool(cs) and sum(cs) / len(cs) < (0.4 if digits else 0.6)
 
 
-def swapped_box(f, blocks, lines) -> bool:
+def swapped_box(f, blocks, lines, proven=False):
     """A figure box given as [y0, x0, y1, x1] (v3, 0355 p1: the photo's box lay over the text column): swap it when
     it covers >= 3 lines of the page's text and the swapped box covers none."""
     fb = fig_box(f)
@@ -1502,6 +1502,19 @@ def swapped_box(f, blocks, lines) -> bool:
     if n >= 3 and m == 0:
         f["box"] = sw
         return True
+    # follow-up 2026-10-21 (0529 p2, the re-asked answer): a box given as [x0, y0, y1, x1], its last two values
+    # swapped, cut the flow chart at its middle and ran down over the text below it. The words printed inside the
+    # picture (the figure's own lines) tell: swap when the swapped box holds them all (>= 95%, more than the given
+    # one) and no line of the page's text, and the given box lies over some of that text, or is already proven
+    # swapped once in the same answer (p3 of that answer: [116, 368, 864, 837] dropped the chart's last line)
+    ownl = [x for x in own if x and x in lines]
+    if len(ownl) >= 3:
+        s2 = fig_box({"box": [fb[0], fb[1], fb[3], fb[2]]})
+        held = lambda bx: sum(1 for x in ownl if inside(lines[x]["b"], bx) >= 0.8) / len(ownl)  # noqa: E731
+        over = lambda bx: sum(1 for x in txt if inside(lines[x]["b"], bx) >= 0.3)  # noqa: E731
+        if s2 and held(s2) >= 0.95 and held(s2) > held(fb) and over(s2) == 0 and (over(fb) >= 1 or proven):
+            f["box"] = s2
+            return "last-two"
     return False
 
 
@@ -1567,15 +1580,19 @@ def bridged(cands, line_boxes):
 
 def figure_swap(ans, lines, log):
     """A figure box with x and y swapped (before text_in_figure, which would take the text under the wrong box)."""
+    proven = False                      # one answer, one convention: a proven [x0,y0,y1,x1] box tells for the rest
     for pg in ans.get("pages") or []:
         blocks = pg.get("blocks") if isinstance(pg, dict) else None
         if not isinstance(blocks, list):
             continue
         for f in [b for b in blocks if isinstance(b, dict) and b.get("type") == "figure" and fig_box(b)]:
             old = fig_box(f)
-            if swapped_box(f, blocks, lines):
-                log["pictures"].append(dict(page=pg.get("page"), action="figure box x/y swapped back", box=f["box"],
-                                            old=old, lines=[], text=""))
+            how = swapped_box(f, blocks, lines, proven)
+            if how:
+                proven = proven or how == "last-two"
+                log["pictures"].append(dict(page=pg.get("page"), action="figure box x/y swapped back" if how is True
+                                            else "figure box [x0,y0,y1,x1] put back", box=f["box"], old=old, lines=[],
+                                            text=""))
 
 
 def pictures(ans, lines, words, log):

@@ -1504,6 +1504,22 @@ The re-render misses a few glyphs (another version of the font). 0529 asked agai
 reader fixes, looked at p1, p2, p5, p15. The views get the new scans (`out/fix3/fix_scans.py`, files of their own,
 the shared reader cache untouched).
 
+**Follow-up (2026-10-21, $0): 0529's flow charts in the Layout view.** p2's chart was drawn cut off at its middle
+and the text under it small and sparse. Not the render: the scans, line boxes and crops all share the 300-dpi frame
+(2004 × 2833 ALTO = 2008 × 2836 image). The re-asked answer gave both figure boxes as [x0, y0, **y1, x1**] (p2
+[148, 179, 646, 864], p3 [116, 368, 864, 837]; the first answer had them right, [148, 178, 864, 646] and
+[118, 368, 829, 862]). On p2 the false box ended at x = 1295 px, cutting the chart, and ran down to y = 2447 over
+the heading and the list below it; the Layout view wraps text round a picture, so those lines shrank to fit beside
+it. On p3 the box lost the chart's last line «رقابة وتقويم». Fix at the root, `rules43.swapped_box`: the figure's
+own words (the lines the answer puts in it) decide; a box whose last two values swapped holds ≥ 95% of them (and
+more than the given box) and no line of the page's text is taken when the given box lies over some of that text,
+or when the same answer has already proven that convention once. Whole exam through the rules again: **only 0529
+changes** (p2f1 998 × 1941 → 1435 × 1323 px, p3f1 1499 × 1329 → 1445 × 1405); `test_rules43` has the case. 0529's
+plain and patched masters and rules replaced (the old ones kept in `out/v33_300b_fix3/before_followup_0529/`),
+views rebuilt; flags unchanged (high 28 / medium 244 / low 430). Looked at beside the scan: pp1–4 (both charts whole,
+the text at its size). Only 0529 was re-rendered in the exam (`out/render_check.jsonl`). Left: the re-rendered scan
+misses a few glyphs (another version of the font), and p1's byline and affiliation are drawn as one line.
+
 **Not done: the judge's edits made consistent across an article (0732, 0849).** 0732: the judge unmarked the
 bottom strip as "another article" on pp3/6 only; the same strip is still other_article on 25 blocks of pp1–13.
 Extending the edit would put a separate running stream into the main text on every page; reverting it would

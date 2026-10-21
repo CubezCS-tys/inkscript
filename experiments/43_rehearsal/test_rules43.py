@@ -260,6 +260,18 @@ def test_picture_among_other_article_and_swapped_box():
     out2, _ = RU.normalize(ans2, lines2)
     f2 = [b for b in out2["pages"][0]["blocks"] if b["type"] == "figure"][0]
     assert f2["box"] == [342, 65, 848, 474]
+    # [x0, y0, y1, x1] (0529 p2, 2026-10-21): the picture's own words lie outside the box, text below lies under it
+    lines3 = {f"2:{k}": dict(text="استراتيجية التعليم", b=[160 + 140 * (k % 5), 190 + 75 * (k // 5), 260 + 140 * (k % 5),
+                                                         210 + 75 * (k // 5)], page=2) for k in range(1, 6 * 5)}
+    lines3.update({f"2:{k}": dict(text="سطر من النص الجاري تحت الشكل", b=[150, 700 + 30 * (k - 40), 860,
+                                                                       720 + 30 * (k - 40)], page=2)
+                   for k in range(40, 46)})
+    ans3 = {"pages": [{"page": 2, "blocks": [
+        {"type": "figure", "box": [148, 179, 646, 864], "lines": [f"2:{k}" for k in range(1, 30)]},
+        {"type": "paragraph", "lines": [f"2:{k}" for k in range(40, 46)]}]}]}
+    out3, _ = RU.normalize(ans3, lines3)
+    f3 = [b for b in out3["pages"][0]["blocks"] if b["type"] == "figure"][0]
+    assert f3["box"] == [148, 179, 864, 646]
 
 
 # ---- layout rules (2026-10-18: 0478 p4, blocks drawn on top of each other)
