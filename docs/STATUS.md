@@ -1,7 +1,30 @@
 # Status
 
-*Last updated 2026-10-20. Update this file whenever a headline number or a
+*Last updated 2026-10-21. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
+
+## The exam, the proof pack and the platform (2026-10-21)
+
+**The pipeline** (experiment 43): Azure's words, Gemini 4 (Argon, prompt v3.3, thinking low, Batch) giving each
+line its type and order, code rules, a judge that edits only through a logged patch layer, flags for a person.
+
+| | Result | Measured on | Date |
+|---|---|---|---|
+| **The exam**: a held-out second 300 run with the pipeline frozen beforehand | 300/300 answered (3 of 491 first-round requests failed, all recovered by smaller chunks), 300/300 JATS DTD + ALTO XSD valid; $31.94 all in = **$0.106 an article, $0.0094 a page** (£0.096 / £0.0085 incl. VAT); 2 h 46 min launch → last answer (64 min of it a Windows reboot); judge on 599 pages: 110 findings, 14 applied automatically (two keys), 73 to the owner | 300 unseen articles, 3,404 pages (`experiments/43_rehearsal`, "The exam") | 2026-10-20 |
+| **The proof pack** (an independent agent, seeded random draws, no paid calls) | pages beside the scan: right 35, minor 23, **serious 2** of 60; words 0 wrong of 1,532 (upper bound 0.25%); citations fully right 57/80, fields 313/341 right, 0 wrong; back references 15/20 right; metadata all fields right 18/30 | `out/v33_300b_final` (`experiments/43_rehearsal/out/proof/proof.md`; page http://127.0.0.1:8899/proof/proof.html) | 2026-10-20 |
+| **Fix round 3** (the proof pack's failures fixed at their root, on a copy) | pages right **35 → 43**, serious **2 → 0** of 60; metadata all right **18 → 25** of 30; citations unchanged 57/80; $1.12 | `out/v33_300b_fix3` (README "Fix round 3"); 0529's flow charts fixed 2026-10-21 (a figure box given as [x0,y0,y1,x1]; only 0529 changed in the exam) | 2026-10-20/21 |
+| **Platform v2** (experiment 47: the database of everything we hold, Web-of-Science style) | independent re-verify round 2: **11 of 11 checks pass**; its gaps fixed 2026-10-21 (publishers keyed on name + country, demo ink links that survive rebuilds, 4 back references); two clean builds in three step orders identical in 81 tables; 354 documents, 580 persons, 315 institutions, 3,080 cited works, 92 accepted catalogue links; served at http://127.0.0.1:8003/platform_v2 | `/home/yassine/data/platform_v2/platform_v2.db` (`experiments/47_platform_v2`, README + VERIFY.md) | 2026-10-21 |
+| Platform v1 (experiment 46) | the first 300 (final), the 55 and the exam (run, final, fix 3) loaded with flags, patches and judge findings | `/home/yassine/data/platform/platform.db`, http://127.0.0.1:8002/platform | 2026-10-20 |
+
+**Spend.** The Gemini log (`experiments/43_rehearsal/out/gemini_spend.jsonl`) stands at **$73.62** since the
+owner's top-up of 2026-10-18 (the credit was then about $78 of API use after VAT). The next step, about 3,000
+articles at the exam's rate, would cost about **$320** and needs a top-up.
+
+**Waits for the owner** (2026-10-21): the ~3,000-article step and its top-up; two judge calls (0732's bottom strip
+unmarked as "another article" on pp3/6 only; 0849 p4's second show-through line, which the code key did not pass);
+the v3.5 prompt test (v3.3 + v3.4's two content lines, without "compact JSON"); citation linking as the next big
+focus; proposed deletions ([handoff.md](handoff.md) section 8). Development moves to the
+owner's server next: [moving-to-a-server.md](moving-to-a-server.md), `ops/pack_v2.sh`.
 
 ## Stroke study (2026-10-18)
 

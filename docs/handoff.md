@@ -1,16 +1,64 @@
-# Handoff: where we are (as of 2026-10-15)
+# Handoff: where we are (as of 2026-10-21)
 
 **Continuation, 2026-10-17:** Codex is working with the owner while Claude is
 unavailable. Read [codex-handoff.md](codex-handoff.md) for the review, reopened
 tracing discussion, current scope and subsequent work before resuming.
 
 I am the Claude session that worked with the owner on the laptop up to 2026-10-13 (section 0 brought up to
-2026-10-15). I'm writing this for the next
+2026-10-15, section 00 to 2026-10-21). I'm writing this for the next
 session, on the owner's Ubuntu ssh server, which will have none of my memory. My private notes (the "memory" files) don't
 travel with git, so everything in them that matters is written out here. Read this first, then `CLAUDE.md` and the
 docs it lists. Where this file and an older doc disagree, this file is newer.
 
-## 0. Since 2026-10-13 (read this first)
+## 00. Since 2026-10-15 (as of 2026-10-21; read this first)
+
+The owner topped up Gemini on 2026-10-18 and the work turned from experiments into a **product rehearsal**:
+Azure's words, Gemini 4 (Argon, prompt v3.3, thinking low, Batch) giving each line its type and order, code rules,
+a judge that edits only through a logged patch layer, flags for a person, and a database of everything we hold.
+Numbers with their dates are in [STATUS.md](STATUS.md) "The exam, the proof pack and the platform".
+
+- **Exp 42, stroke recovery** (Codex, 2026-10-17/18; [codex-handoff.md](codex-handoff.md)): an instrument for the
+  reopened back-writing question; no production change, $0.
+- **Exp 43, the rehearsal** (`experiments/43_rehearsal`, README is long: read its section headings first).
+  - The first 300 articles: run, judge (step A), free fixes (B), final (F): `out/v33_300_final`.
+  - **The exam** (step G): a held-out second 300, pipeline frozen beforehand (stamp in `out/overnight_plan.md`):
+    300/300 answered and valid, **$31.94 = $0.106 an article, $0.0094 a page**; `out/v33_300b` (raw run),
+    `out/v33_300b_final` (fixes + judge patches).
+  - **The proof pack** (step P, an independent agent, seeded draws, no calls): `out/proof/proof.md`, page
+    http://127.0.0.1:8899/proof/proof.html. 60 random pages: right 35, minor 23, serious 2; words 0 wrong of 1,532;
+    citations fully right 57/80 (0 wrong fields); back references 15/20; metadata all right 18/30.
+  - **Fix round 3** (the proof's failures fixed at the root, on a copy, $1.12): `out/v33_300b_fix3`, views
+    http://127.0.0.1:8899/v33_300b_fix3/index.html. Same 60 pages: **right 43, minor 17, serious 0**; metadata
+    all right **25/30**; citations unchanged. 2026-10-21: 0529's flow charts fixed (`rules43.swapped_box`, `fd8efa5`).
+  - Correction tool v1 (D34): http://127.0.0.1:8899/correct/edit/index.html.
+- **Exp 44, bucket map**: 1,013,912 documents in the main bucket (PDF + Azure JSON), 308,593 more in `legacy/` (PDF
+  only). Draws are filtered by `experiments/44_bucket_map/out/ids_main.txt`.
+- **Exp 45, the MARC catalogue as a database**: `~/data/marc/marc.db` (9.5 GB, 1.56M records, FTS5),
+  Datasette :8001.
+- **Exp 46, platform v1**: `~/data/platform/platform.db`, Datasette :8002; holds the 300, the 55 and the exam with
+  flags, patches and judge findings.
+- **Exp 47, platform v2** (Web-of-Science style, the scan under every value): `~/data/platform_v2/platform_v2.db`,
+  Datasette :8003 with an ink viewer. Independent re-verify round 2: **11 of 11 checks pass**; its gaps fixed
+  2026-10-21 (`48d2494`): publishers keyed on name + country, ink links that survive rebuilds, 4 back references.
+- **Spend:** `experiments/43_rehearsal/out/gemini_spend.jsonl` = **$73.62** since the 2026-10-18 top-up (the credit
+  was about $78 of API use after VAT), so about **$4 is left**. Nothing paid until the owner tops up.
+
+**Waiting for the owner (2026-10-21):**
+1. The ~3,000-article step: about **$320** at the exam's rate; needs a top-up.
+2. Two judge calls: 0732 (the judge unmarked the bottom strip as "another article" on pp3/6 only; it stays so on
+   25 blocks of pp1–13) and 0849 p4 (the judge named two show-through lines; the code key passed one).
+3. The v3.5 prompt idea: v3.3 + v3.4's two content lines without the "compact JSON" line, to learn which line caused
+   v3.4's repeat losses (adverts shredded, paragraphs merged).
+4. Citation linking (works cited across articles, «المرجع السابق») as the next big focus.
+5. Proposed deletions: section 8.
+6. **Development moves to the owner's Ubuntu server** (`prod`, user `appuser`): section 7 and
+   [moving-to-a-server.md](moving-to-a-server.md). The owner does every server step.
+
+**What's served on the laptop** (start commands in moving-to-a-server.md): :8899 the views (a plain http.server in
+`experiments/41_azure_structure/out/views`, whose run folders are symlinks into `experiments/43_rehearsal/out`),
+:8001 marc.db, :8002 platform.db, :8003 platform_v2.db.
+
+## 0. 2026-10-13 to 2026-10-15 (history)
 
 Three experiments and one decision landed on 2026-10-14/15. The headline: **Gemini reading structure on top of
 Azure's words works**, and the owner now has two roads to choose between (end of this section).
@@ -55,7 +103,7 @@ Azure's words works**, and the owner now has two roads to choose between (end of
 2. Then: pay Gemini to process the archive, or use Flash labels to train our own specialists.
 3. Round 3 of the layout model or move to order (above, parked).
 
-**Money now:** the Gemini credit **ran out on 2026-10-15**. Don't spend any without the owner. **0 Vast instances.**
+**Money then:** the Gemini credit ran out on 2026-10-15; the owner topped up on 2026-10-18 (section 00). **0 Vast instances.**
 
 ## 1. The owner, and how to work with them
 
@@ -275,6 +323,8 @@ honest if round 2 is not better".
 
 ## 5. Spend so far
 
+- **2026-10-18 to 2026-10-21:** Gemini **$73.62** on the experiment 43 log (rehearsal, judge, the exam $31.94,
+  fix round 3 $1.12). Experiments 44–47 cost $0.015 (S3 listing) and nothing else.
 - **2026-10-14/15:** exp 39 round 2 GPU **$1.94**; exp 40 Gemini **$13.34**; exp 41 Gemini **$10.72**. The Gemini
   credit ran out on 2026-10-15.
 
@@ -392,13 +442,20 @@ path). This file already carries their content.
 
 ## 8. Open items waiting on the owner
 
-- **Proposed deletions** (not done):
+- **Proposed deletions** (not done; list of 2026-10-21):
   - `experiments/39_ink_geometry/out/gpu/result.tgz` (1.1 GB, already unpacked beside it).
   - The every-10-epoch checkpoints in `out/gpu/out/run/weights/` (only `best.pt` matters).
+  - `~/data/platform_v2/`: old builds and drafts `platform_v2.db.bak-20261020-fix0`, `.bak-20261020-fix1`,
+    `.fix1-draft`, `.fix1-draft2`, `.fix2-draft` (with their `-shm`/`-wal`), `link_cache47.json.bak-*`,
+    `metrics47.json.bak-*`: about 1.6 GB. Keep `.bak-20261021-fix2` (the db before the 2026-10-21 follow-up).
+  - `~/data/platform/platform_before_fk.db`, `platform_fk_build.db` (118 MB, build leftovers).
+  - `~/data/marc/slice/` (1.1 GB, the test slice used while building marc.db).
+  - Windows C: had 29 GB free on 2026-10-21.
 - **Edition font switch** to Scheherazade New (section 1), plus the heading-font question.
 - **Exp 37 (edition review) is paused** for the owner's evening session: 20 of 205 documents reviewed, 64 issues.
 - **Exp 41 hand-check, then archive-by-Gemini vs Flash labels for our own specialists** (section 0).
 - **Layout round 3 (rebalanced) vs moving to order** (section 0, parked).
-- **Gemini credit is empty** (2026-10-15): nothing that calls Gemini until the owner tops it up.
+- **Gemini credit is nearly empty again** (2026-10-21: $73.62 of about $78 used since the 2026-10-18 top-up): nothing
+  paid until the owner tops it up. The newer list is in section 00.
 - **The auditor test** (count unclaimed islands on the 44 pages): offered, not approved.
 - **The server move itself** (this document).
