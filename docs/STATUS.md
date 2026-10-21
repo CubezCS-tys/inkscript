@@ -17,7 +17,7 @@ line its type and order, code rules, a judge that edits only through a logged pa
 | Platform v1 (experiment 46) | the first 300 (final), the 55 and the exam (run, final, fix 3) loaded with flags, patches and judge findings | `/home/yassine/data/platform/platform.db`, http://127.0.0.1:8002/platform | 2026-10-20 |
 
 **Spend.** The Gemini log (`experiments/43_rehearsal/out/gemini_spend.jsonl`) stands at **$73.62** since the
-owner's top-up of 2026-10-18 (the credit was then about $78 of API use after VAT). The next step, about 3,000
+owner's top-up of 2026-10-18 (£101.28 incl. VAT; about £35 left). The next step, about 3,000
 articles at the exam's rate, would cost about **$320** and needs a top-up.
 
 **Waits for the owner** (2026-10-21): the ~3,000-article step and its top-up; two judge calls (0732's bottom strip

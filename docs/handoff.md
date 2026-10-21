@@ -40,8 +40,9 @@ Numbers with their dates are in [STATUS.md](STATUS.md) "The exam, the proof pack
 - **Exp 47, platform v2** (Web-of-Science style, the scan under every value): `~/data/platform_v2/platform_v2.db`,
   Datasette :8003 with an ink viewer. Independent re-verify round 2: **11 of 11 checks pass**; its gaps fixed
   2026-10-21 (`48d2494`): publishers keyed on name + country, ink links that survive rebuilds, 4 back references.
-- **Spend:** `experiments/43_rehearsal/out/gemini_spend.jsonl` = **$73.62** since the 2026-10-18 top-up (the credit
-  was about $78 of API use after VAT), so about **$4 is left**. Nothing paid until the owner tops up.
+- **Spend:** `experiments/43_rehearsal/out/gemini_spend.jsonl` = **$73.62** since the 2026-10-18 top-up of £101.28
+  (incl. 20% VAT; budget = log dollars → pounds + 20%, reconciled within 1%), so about **£35 incl. VAT is left**
+  (check the console). Nothing bigger than a small test without the owner's go.
 
 **Waiting for the owner (2026-10-21):**
 1. The ~3,000-article step: about **$320** at the exam's rate; needs a top-up.
@@ -435,7 +436,7 @@ Run Claude Code inside tmux so it survives disconnects: `tmux new -s inkscript`,
 - **Exp 37 (edition review) is paused** for the owner's evening session: 20 of 205 documents reviewed, 64 issues.
 - **Exp 41 hand-check, then archive-by-Gemini vs Flash labels for our own specialists** (section 0).
 - **Layout round 3 (rebalanced) vs moving to order** (section 0, parked).
-- **Gemini credit is nearly empty again** (2026-10-21: $73.62 of about $78 used since the 2026-10-18 top-up): nothing
-  paid until the owner tops it up. The newer list is in section 00.
+- **Gemini credit is about £35 incl. VAT** (2026-10-21: log $73.62 since the 2026-10-18 top-up of £101.28): the
+  ~3,000 step needs a top-up. The newer list is in section 00.
 - **The auditor test** (count unclaimed islands on the 44 pages): offered, not approved.
 - **The server move itself**: [moving-to-a-server.md](moving-to-a-server.md), `ops/pack_v2.sh` (section 7).
