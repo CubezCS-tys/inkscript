@@ -941,3 +941,11 @@ The scripts are in the session scratchpad, `rv2/`:
 | `c6.py`, `c6s.py` | check 6 |
 | `c8a.py` | the independent marc.db homonym scan |
 | `c10.py`, `c10all.py` | ink: the sample and all anchors |
+
+## After re-verify round 2: what the builder changed (2026-10-21)
+
+Not a verification; a pointer for the next verifier. The round-2 gaps were fixed by the builder and are described in
+the README's "Follow-up to re-verify round 2": publishers keyed on name + country (5 names now two bodies each,
+`test_ids47.py --full` identical in 81 tables), `ink.html` links by note or anchor key, the whole-name-only measure
+(1, not 50), and 4 back references (0310 fn-p12-2 now unresolved; 0702 fn-p10-17 → fn-p9-8, fn-p10-21 → fn-p9-4;
+0590 fn-p10-16 → r15). Not yet checked by anyone independent.

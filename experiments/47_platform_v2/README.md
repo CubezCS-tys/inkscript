@@ -16,9 +16,10 @@ fixed in [Fix round 1](#fix-round-1-2026-10-20) below, and the numbers in this R
 - **Checks.** There are 0 orphans, and every view runs.
 - **Serving.** It is served read-only at **http://127.0.0.1:8003/platform_v2**, with 17 canned queries. The schema
   diagram is at http://127.0.0.1:8003/diagram/schema47.html, and the "show me the ink" page is at
-  http://127.0.0.1:8003/diagram/ink.html?a=6479508497353429 (that anchor is «السابق نفسه» of `0069-000-026-005`
-  fn-p15-13, boxed on its page; anchor keys are hashes of `stem|p<page>|w<first>-<last>` since fix round 1, so the
-  link survives every rebuild).
+  http://127.0.0.1:8003/diagram/ink.html?n=0069-000-026-005%7Cfn-p15-13 («السابق نفسه» of `0069-000-026-005`
+  fn-p15-13, boxed on its page). A link by note (`?n=<stem>|<note id>`) or by anchor key (`?k=<stem>|p<page>|w<first>-<last>`)
+  survives rebuilds; a link by `?a=<anchor_pk>` holds only while the anchor's word span is unchanged (the old demo
+  `?a=6479508497353429` died when fix round 2 widened the span to include the note number).
 - **Build time.** A full build from scratch takes 2 min 5 s and peaks at 146 MB memory. That covers the four loads,
   the linking, the checks and the diagram.
 
@@ -426,3 +427,22 @@ re-verifier read; `platform_v2.db.fix2-draft` the first build of this round, bef
 0.33 GB); `marc_heading_keys47_<sig>.sqlite` (42 MB) the derived catalogue name index, rebuilt by itself when marc.db
 or the key rule changes; `build47_fix2.log` the final build's log; `link_cache47.json.bak-fix1` and
 `metrics47.json.bak-fix1` the earlier cache and metrics.
+
+## Follow-up to re-verify round 2 (2026-10-21)
+
+The gaps [VERIFY.md](VERIFY.md) "Re-verify round 2" left, each fixed where it starts. Measured on a clean build
+(`build47.sh` order, 2 min 50 s, peak 151 MB; db sha256 `16294c70351d…`); the db before it is kept as
+`/home/yassine/data/platform_v2/platform_v2.db.bak-20261021-fix2`, and the build log is `build47_followup.log`.
+
+| gap | root cause | change | evidence |
+|---|---|---|---|
+| 2 publisher countries depend on load order | `biblio47` keyed a publisher on its name alone (`INSERT OR IGNORE`: the first journal's country won) | a publisher is keyed on name **and** the journal's country (the most common country of its catalogue records) | publishers 379 → 387; five names are now two bodies each: «المجلس الإسلامي الأعلى» DZ / TN, «مجمع اللغة العربية» EG / SY, «رابطة الجامعات الإسلامية» EG / MA, «معهد الإدارة العامة» OM / SA, «مكتب التربية العربي لدول الخليج» KW / SA (the last one is one body publishing from two countries: the price of the rule; the country is part of what the catalogue says); `test_ids47.py --full`: A, B, C identical in 81 tables (7 min 47 s, peak 0.63 GB) |
+| README demo link `ink.html?a=6479508497353429` stale | an `anchor_pk` is a hash of the word span, and fix round 2 widened the span | `ink.html` also takes `?n=<stem>\|<note id>` (the note's first citation in the shown reading; `&i=2` the second) and `?k=<anchor_key>`; the README demo is now by note | `ink.html?n=0069-000-026-005%7Cfn-p15-13` shows «28. السابق نفسه» boxed on page 15 (screenshot checked) |
+| `checks47.json` "best links agreeing on the whole name only = 50" | counted every evidence carrying a `whole_name` key | counts best links with a `whole_name` match and **no** shared name word; the old count is kept under its own label | **1** («الإرهاب الجديد» → W307323); 50 carry a whole-name match beside shared words |
+| 0310 fn-p12-2 «CHEN … «Le roman policier de Fred Vargas…». Op.Cit.» sent to Vargas's novel | the author was looked for in the whole hint, quoted title included | `link47.resolve`: the author is looked for outside «…» / "…"; a quoted title must be mostly the work's title (≥ half its words), not two shared words | unresolved (the thesis is cited nowhere earlier), as the verifier ruled |
+| 0702 fn-p10-17 «أحمد إبراهيم محمود. المصدر السابق» unresolved | every word of the name is common, so no author token is left | the whole folded name is compared, as `judge_link` does since fix round 2 | → fn-p9-8 «الإرهاب الجديد» (same-author-earliest) |
+| 0702 fn-p10-21 «أدونيس العكرة. المصدر السابق» unresolved | his full citation fn-p9-4 is typed `short` with no parsed title, so it was no in-article work | when no titled work fits, the author's **only** earlier citation without a parsed title is taken (`same-author-untitled`, 0.7, never from the same note) | → fn-p9-4 |
+| (on the way) 0590 fn-p10-16 «الدكتور عبد الحكيم حسن : المرجع السابق» | the same all-common-name blind spot | as 0702 fn-p10-17 | → r15, the verifier's archive-wide example |
+
+Every other back reference of the shown versions is unchanged (diffed mention by mention against the backup: these
+4 differ, nothing else). The 17 canned queries return 200 on the restarted :8003 (`search_arabic` needs its `q`).

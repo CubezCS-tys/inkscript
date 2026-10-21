@@ -333,8 +333,16 @@ def main(argv=None):
         f"""SELECT count(*) FROM (SELECT version_id, container_id, full_mention_pk FROM citation_mentions WHERE
             kind IN ('ibid', 'op_cit', 'loc_cit') AND full_mention_pk IS NOT NULL AND {CUR}
             GROUP BY 1, 2, 3 HAVING count(*) > 1)""")
+    # follow-up 2026-10-21: "only" = the whole name agrees and no name word is shared (was: any evidence carrying
+    # a whole_name key, 50, most of which also share words)
     G["best links agreeing on the whole name only"] = q1(
-        "SELECT count(*) FROM citation_links WHERE best = 1 AND evidence LIKE '%whole_name%'")
+        """SELECT count(*) FROM citation_links WHERE best = 1 AND json_extract(evidence, '$.authors.whole_name')
+           IS NOT NULL AND json_array_length(json_extract(evidence, '$.authors.shared')) = 0""")
+    G["best links whose evidence carries a whole-name match (also sharing words)"] = q1(
+        "SELECT count(*) FROM citation_links WHERE best = 1 AND json_extract(evidence, '$.authors.whole_name') IS NOT NULL")
+    G["publishers with one name in two countries (kept apart)"] = [list(r) for r in con.execute(
+        """SELECT name, group_concat(coalesce(country_code, '?'), ' ') FROM (SELECT name, country_code FROM publishers
+           ORDER BY name, country_code) GROUP BY name HAVING count(*) > 1""")]
     G["candidates with no author to compare"] = q1(
         "SELECT count(*) FROM citation_links WHERE status = 'candidate' AND evidence LIKE '%\"agreement\": \"unknown\"%'")
     out["fix_round_2"] = G

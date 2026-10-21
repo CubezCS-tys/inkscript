@@ -176,6 +176,13 @@ def hint_words(h: str) -> list:
     return [w for w in k.split() if len(w) >= 3 and w not in link46.STOP and not w.isdigit()]
 
 
+QUOTED = re.compile(r"«[^»]*»|\"[^\"]*\"|“[^”]*”")
+
+
+def whole_names(p: dict | None) -> set:
+    return {name_key(f"{gn or ''} {sn or ''}") for sn, gn in (p or {}).get("authors") or []} - {""}
+
+
 def page_of(x) -> int | None:
     v = to_int(str(x)) if x not in (None, "") else None
     return v if v and v < 20000 else None
@@ -247,8 +254,10 @@ def resolve(con, vid: int) -> dict:
     by_pk = {m["mention_pk"]: m for m in ms}
     # what each in-article work is known by: author tokens, first author, title (+ container) words, year
     wk_au, wk_au1, wk_tw, wk_cw, wk_yr = defaultdict(set), defaultdict(set), defaultdict(set), defaultdict(set), {}
+    wk_whole = defaultdict(set)   # follow-up 2026-10-21: whole folded author names («أحمد إبراهيم محمود»: all common)
     for m in works:
         c = canon[m["mention_pk"]]
+        wk_whole[c] |= whole_names(m["p"])
         wk_au[c] |= m["au"]
         wk_au1[c] |= m["au1"]
         wk_tw[c] |= {w for w in m["tk"].split() if len(w) >= 3}
@@ -338,18 +347,26 @@ def resolve(con, vid: int) -> dict:
                 pass
             elif hw:
                 hs = set(hw) | {re.sub(r"^ال", "", h) for h in hw}
+                # follow-up 2026-10-21: the author is looked for outside quoted titles («CHEN. «Le roman policier de
+                # Fred Vargas…». Op.Cit.» names the thesis, not Vargas); the quoted words still count as title words
+                hw_a = hint_words(QUOTED.sub(" ", hint)) if QUOTED.search(hint) else hw
+                hs_a = set(hw_a) | {re.sub(r"^ال", "", h) for h in hw_a}
+                hwhole = name_key(QUOTED.sub(" ", hint).strip(" .،,:؛;()"))
                 pool = list(reversed(earlier)) + [x for x in refs if x not in earlier]
                 cands = []                 # in-article works, most recently cited first
                 for x in pool:
                     c = canon.get(x["mention_pk"], x["mention_pk"])
                     if c not in cands:
                         cands.append(c)
-                A = [c for c in cands if wk_au[c] & hs]
+                A = [c for c in cands if wk_au[c] & hs_a]
+                if not A and hwhole:
+                    # a name made only of common words leaves no token: the whole folded name, as judge_link does
+                    A = [c for c in cands if hwhole in wk_whole[c]]
                 if A:
                     if years and [c for c in A if wk_yr.get(c) in years]:
                         A = [c for c in A if wk_yr.get(c) in years]       # «ROLDAN et al., 2006, op. cit.»
-                    if len(A) > 1 and [c for c in A if wk_au1[c] & hs]:
-                        A = [c for c in A if wk_au1[c] & hs]              # the name printed is the first author
+                    if len(A) > 1 and [c for c in A if wk_au1[c] & hs_a]:
+                        A = [c for c in A if wk_au1[c] & hs_a]            # the name printed is the first author
                     left = {h for h in hs if h not in set().union(*(wk_au[c] for c in A))}
                     # words of the work's own title, then of the book it sits in («La preuve», in Commentaire …)
                     hits = [(len(wk_tw[c] & left) + len(wk_cw[c] & left),
@@ -382,7 +399,8 @@ def resolve(con, vid: int) -> dict:
                     for c in cands:
                         tw = wk_tw[c]
                         n = len(tw & hs2)
-                        if tw and n >= min(2, len(tw)):
+                        if tw and n >= min(2, len(tw)) and (not QUOTED.search(hint) or n >= 0.5 * len(hs2)):
+                            # a quoted title printed whole must be mostly the work's title, not two shared words
                             hits.append((n / len(tw), n, -cands.index(c), c))
                     if hits:
                         hits.sort(reverse=True)
@@ -394,6 +412,20 @@ def resolve(con, vid: int) -> dict:
                             tgt, how, sc = (bp, "title-words+page", 0.7) if bp else (T[0], "title-words-latest", 0.5)
                             if not bp:
                                 why = f"ambiguous: {len(T)} works share the title words; the most recent taken"
+                if not tgt and not why and hs_a:
+                    # follow-up 2026-10-21: an earlier citation by that author whose title the masters did not parse
+                    # («أدونيس العكرة. الإرهاب السياسي…», typed short with no title): the only one by that author
+                    U = []
+                    for x in ms[:idx]:
+                        if x["kind"] in ("full", "short") and not x["tk"] and x["p"] and \
+                                (x["container_kind"], x["container_id"]) != (m["container_kind"], m["container_id"]) and \
+                                ((x["au"] & hs_a) or (hwhole and hwhole in whole_names(x["p"]))):
+                            if not any(by_pk[u_]["au"] == x["au"] and whole_names(by_pk[u_]["p"]) ==
+                                       whole_names(x["p"]) for u_ in U):
+                                U.append(x["mention_pk"])
+                    if len(U) == 1 and not [c for c in cands if wk_au[c] & hs_a]:
+                        tgt, how, sc = U[0], "same-author-untitled", 0.7
+                        why = "the author's only earlier citation; its title was not parsed"
                 if not tgt and not why and (k != "ibid" and len(hw) >= 1):
                     why = "no-earlier-full: names a work not parsed earlier in the article"
             if not tgt and not why:

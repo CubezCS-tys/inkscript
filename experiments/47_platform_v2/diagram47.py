@@ -233,14 +233,17 @@ a { color:#4a5bd0; }
 <h1>Show me the ink</h1>
 <form><label>anchor_pk <input name="a" id="a"></label><button>show</button></form>
 <div id="info" class="card muted">An ink anchor is a page and a span of Azure's word numbers
-(<code>stem|p&lt;page&gt;|w&lt;first&gt;-&lt;last&gt;</code>), the same in every run. Give its anchor_pk.</div>
+(<code>stem|p&lt;page&gt;|w&lt;first&gt;-&lt;last&gt;</code>), the same in every run. Give its anchor_pk, or a
+link that survives rebuilds: <code>?k=&lt;anchor_key&gt;</code>, or <code>?n=&lt;stem&gt;|&lt;note id&gt;</code>
+(the first citation of that note in the shown reading; <code>&amp;i=2</code> for the second).</div>
 <h2 style="font-size:1rem">The crop</h2><canvas id="crop"></canvas>
 <h2 style="font-size:1rem">The page</h2><canvas id="page"></canvas>
 <p class="muted">Page images: experiments/43_rehearsal/out/pages (300 of the 354 documents); boxes are ALTO page pixels
 scaled to the image.</p>
 </main>
 <script>
-const q = new URLSearchParams(location.search), a = q.get("a");
+const q = new URLSearchParams(location.search);
+let a = q.get("a");
 const DB = "/platform_v2";
 async function row(sql, params) {
   const u = new URL(DB + ".json", location.origin);
@@ -250,6 +253,16 @@ async function row(sql, params) {
 }
 function esc(s) { return String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c])); }
 (async () => {
+  // links that survive a rebuild: the anchor's natural key, or a note of the shown reading (follow-up 2026-10-21)
+  if (!a && q.get("k")) a = (await row("select anchor_pk from ink_anchors where anchor_key = :k", {k: q.get("k")}) || {}).anchor_pk;
+  if (!a && q.get("n")) {
+    const [s, n] = q.get("n").split("|");
+    const r = await row(`select m.anchor_pk from citation_mentions m join versions v on v.version_id = m.version_id
+      and v.is_current = 1 where v.stem = :s and m.container_id = :n and m.anchor_pk is not null
+      order by m.reading_ord, m.seq_in_container limit 1 offset cast(:o as integer)`, {s, n, o: Math.max(0, (+q.get("i") || 1) - 1)});
+    a = r && r.anchor_pk;
+    if (!a) { document.getElementById("info").textContent = "No ink for " + q.get("n"); return; }
+  }
   if (!a) return;
   document.getElementById("a").value = a;
   const an = await row("select * from ink_anchors where anchor_pk = :a", {a});

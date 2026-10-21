@@ -163,10 +163,14 @@ def ensure_journal_issue(con, mcon, code: str | None, vol: str | None, iss: str 
                                                kind="unknown", issn_l=None, n_records=row["n"], source="catalogue",
                                                note=None if ok else "check digit fails or not 8 characters")])
         pc = Counter(t["publisher"] for t in tops if t["publisher"])
+        jcc = cc.most_common(1)[0][0] if cc else None
         for name, n in pc.most_common(2):
-            pid = "P" + hashlib.sha1(key(name).encode()).hexdigest()[:8]
+            # follow-up 2026-10-21: a publisher is its name AND its country («المجلس الإسلامي الأعلى» of Tunisia and
+            # of Algeria, «مجمع اللغة العربية» of Damascus and of Cairo are different bodies); keyed on the name alone
+            # they were one row whose country was that of whichever journal loaded first
+            pid = "P" + hashlib.sha1(f"{key(name)}|{jcc or ''}".encode()).hexdigest()[:8]
             insert(con, "publishers", [dict(publisher_id=pid, name=name, name_en=None,
-                                            country_code=cc.most_common(1)[0][0] if cc else None, inst_id=None)],
+                                            country_code=jcc, inst_id=None)],
                    "INSERT OR IGNORE")
             insert(con, "journal_publishers", [dict(journal_id=jid, publisher_id=pid, from_year=None, to_year=None,
                                                     source=f"catalogue 260$b ({n} of the journal's first 400 records)")],
