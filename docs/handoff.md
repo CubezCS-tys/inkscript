@@ -382,63 +382,43 @@ honest if round 2 is not better".
     a patched `check_amp`, and batch 8 with `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` (batch 16 ran out of
     memory at 1280 px).
 
-## 7. Moving to the server (updated)
+## 7. Moving to the server (rewritten 2026-10-21)
 
-`docs/moving-to-a-server.md` still holds for the core pipeline. It doesn't cover experiments 33–39, Vast or the
-agents. Notes:
-- **`~/Desktop/OCR_gem_json/…`**, referred to in `docs/operations.md` and `moving-to-a-server.md`, **no longer exists
-  on this laptop**. Today's data lives under each experiment's `out/` and on S3.
-- **Git holds** code, docs, tests and the bundled fixture. It doesn't hold `experiments/*/out/`, `.env`, `.venv/` or
-  keys.
+**All development moves to the owner's Ubuntu server** (ssh alias `prod`, user `appuser`, home `/home/appuser`,
+950 GB free). The owner does every server step. The full guide, with sizes, the path fix and the numbered steps
+with what to expect after each, is [moving-to-a-server.md](moving-to-a-server.md). In short:
 
-**Sizes measured 2026-10-13** (what the layout work reads):
+- **Git holds** code, docs, tests and the bundled fixture. **`ops/pack_v2.sh`**, run from the laptop, copies the rest:
+  every `experiments/*/out`, `~/data/marc/marc.db`, `~/data/platform`, `~/data/platform_v2`, `~/.cache/inkscript`
+  and the agent's notes. That came to **67.7 GB** in the 2026-10-21 dry run, likely an overnight copy or longer at
+  about 1 MB/s upload. The most needed folders go first. The copy is resumable and skips what is already there.
+- **Never copied:** `.env`, `~/.aws`, `~/.ssh`, `metadata_final.xml` (it is in the bucket), the experiment venvs and
+  39's `result.tgz`. The owner types the keys on the server.
+- **Paths.** Experiments 40–47 find their files from their own location and `Path.home()`. The `/home/yassine/...`
+  paths live in data:
+  - 225 absolute symlinks (the views run folders among them);
+  - `sample43*.json`;
+  - the platform databases' file columns.
+  Fix A is `sudo ln -s /home/appuser /home/yassine`. Fix B, with no sudo, is `python3 ops/relocate_home.py --apply`.
+- **Browse pages on the server:** the same four as on the laptop (:8899 views, :8001 marc.db, :8002 platform.db,
+  :8003 platform_v2.db), all on 127.0.0.1. Reach them from the laptop with an ssh tunnel to local ports 9899 / 9001
+  / 9002 / 9003.
 
-| Folder | Size | Why it's needed |
-|---|---|---|
-| `experiments/34_yardstick/out` | 589 MB | gold pages + images (`gold/`), `pool.json`, the `extra/` documents (435 MB) |
-| `experiments/19_azure_map/out/docs` | part of 1.1 GB | real files behind `experiments/28_scale/out/azure` (those are **symlinks**; copy both, or use `rsync -L`) |
-| `experiments/28_scale/out/azure` | 454 MB followed | the pool's other 127 documents |
-| `experiments/36_vlm_bakeoff/out` | 291 MB | dots.mocr's outputs (`raw/dots_mocr/`), Kraken |
-| `experiments/38_parser/out` | 178 MB | `pages.json` (the 44 pilot pages), parser outputs |
-| `experiments/39_ink_geometry/out` | 8.9 GB in all | skip `out/venv` (1.6 GB, rebuild it) and `out/gpu/result.tgz` (1.1 GB); keep `train/` (2.8 GB), `round2/` (1.1 GB), `more/` (1.2 GB), `score_test/`, `gpu/out/run/weights/best.pt`, the reports |
-| `experiments/29_catalogue/out`, `35_edition/out` | 789 MB, 522 MB | the masters and old editions exp 38 reads |
-
-**Hard-coded paths** that break if the server's home isn't `/home/yassine/inkscript`:
-- `experiments/38_parser/common.py` (`MAIN`), which exp 39 imports for every Gemini call and page reader.
-- `experiments/34_yardstick/*.py` (`OUT`, `MAIN`).
-- `experiments/39_ink_geometry/gpu/gpu_run.sh`, `gpu_end.sh` and `gpu_wait.sh`.
-- The absolute paths inside `experiments/34_yardstick/out/pool.json` (`azure`, `scan`) and inside
-  `39_ink_geometry/out/train/plan.json` and `out/round2/candidates.json`.
-
-The simplest fix: put the checkout at the same path on the server (or a symlink `/home/yassine/inkscript → the
-clone`). Otherwise rewrite those paths with sed after copying.
-
-**Steps**
+**Venvs to rebuild on the server** (not copied; only when that work resumes):
 ```
-# on the server
-git clone git@github.com:CubezCS-tys/inkscript.git && cd inkscript
-bash ops/setup_nosudo.sh                     # main .venv (+ awscli); then .venv/bin/pytest -q (~3 min)
-# the owner types the keys: GEMINI_API_KEY in .env; `.venv/bin/aws configure` with a read-only key for the bucket;
-#   the Vast key and ssh key (section 6)
-# from the laptop (resumable; repeat until it finishes)
-rsync -avh --partial experiments/34_yardstick/out/ SERVER:inkscript/experiments/34_yardstick/out/
-rsync -avh --partial experiments/19_azure_map/out/docs/ SERVER:inkscript/experiments/19_azure_map/out/docs/
-rsync -avh --partial --links experiments/28_scale/out/azure/ SERVER:inkscript/experiments/28_scale/out/azure/
-rsync -avh --partial experiments/{36_vlm_bakeoff,38_parser,29_catalogue,35_edition}/out ...   # one per folder
-rsync -avh --partial --exclude venv --exclude gpu/result.tgz \
-      experiments/39_ink_geometry/out/ SERVER:inkscript/experiments/39_ink_geometry/out/
 # exp 39's CPU venv for the layout model
 python3 -m venv experiments/39_ink_geometry/out/venv
 experiments/39_ink_geometry/out/venv/bin/pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 experiments/39_ink_geometry/out/venv/bin/pip install doclayout-yolo huggingface_hub opencv-python-headless
-# run Claude Code inside tmux so it survives disconnects
-tmux new -s inkscript    # later: tmux attach -t inkscript
+# exp 33 (Kraken: out/env), exp 40 (out/venv), exp 16 (out/torchenv): see each experiment's README
 ```
-Optionally copy my notes: `~/.claude/projects/-home-yassine-inkscript/memory/` (the folder name follows the checkout
-path). This file already carries their content.
+Run Claude Code inside tmux so it survives disconnects: `tmux new -s inkscript`, and later
+`tmux attach -t inkscript`.
 
-**After any reboot** (laptop or server): restart `ops/vast_guard.sh`. If needed, also restart the gold-page server
-(`inkscript view --gold experiments/34_yardstick/out/gold --host 0.0.0.0`) and the viewer, then check they respond.
+**After any reboot** (laptop or server):
+- restart the four browse pages (moving-to-a-server.md, step 6);
+- restart `ops/vast_guard.sh` if a GPU might be rented;
+- check that each page answers.
 
 ## 8. Open items waiting on the owner
 
@@ -458,4 +438,4 @@ path). This file already carries their content.
 - **Gemini credit is nearly empty again** (2026-10-21: $73.62 of about $78 used since the 2026-10-18 top-up): nothing
   paid until the owner tops it up. The newer list is in section 00.
 - **The auditor test** (count unclaimed islands on the 44 pages): offered, not approved.
-- **The server move itself** (this document).
+- **The server move itself**: [moving-to-a-server.md](moving-to-a-server.md), `ops/pack_v2.sh` (section 7).
