@@ -38,7 +38,7 @@ order below, most needed first, so the server agent can start before the older e
 `39/out/gpu/result.tgz` (1.1 GB, unpacked beside it).
 
 **Untracked files outside `out/`** are not copied. On 2026-10-21 that was only
-`experiments/47_platform_v2/research_notes_raw.md`; check `git status --short` before packing.
+the raw research notes of experiment 47 (`research_notes_raw.md`, proposed for deletion); check `git status --short` before packing.
 
 **Symlinks.** `rsync -a` copies them as symlinks, and `-L` is never used, so nothing is duplicated. There are 3,389
 relative links, which work as they are, and 225 absolute ones, which point at `/home/yassine/...`:

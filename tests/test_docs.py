@@ -24,6 +24,9 @@ def test_named_source_files_exist():
     for doc in DOCS:
         for ref in re.findall(r"`((?:src|experiments|tests|docs)/[\w./,-]+\.(?:py|sh|md|html))`", doc.read_text(encoding="utf-8")):
             if not (ROOT / ref).exists():
+                out = re.match(r"(experiments/[^/]+/out)/", ref)
+                if out and not (ROOT / out.group(1)).exists():
+                    continue    # outputs are not in git: a fresh clone has no out/ until the data is copied
                 missing.append(f"{doc.relative_to(ROOT)} -> {ref}")
     assert not missing, missing
 
