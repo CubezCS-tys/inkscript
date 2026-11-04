@@ -14,7 +14,7 @@
 > | 0097 | done (83 of 84 / 72) | pass (0; 0.011%) | live | **applied** | R20261103T160343, R20261103T192456 |
 > | 0130 Word years | done (– / 175) | – (no scans) | live | **applied** | R20261103T174811, R20261103T230107 |
 > | 0246 | done (194 / 269) | pass (0; 0.337%) | live | **applied** | R20261103T205906, R20261104T151029 |
-> | 0013 | done (124 / 124) | pass (0; 0.015%) | live (reading R20261104T003753) | **verified, NOT applied** (plan ready: 5,427 decisions, 486 tasks; dry run was in flight at the stop) | — |
+> | 0013 | done (124 / 124) | pass (0; 0.015%) | live (reading R20261104T003753) | **verified, NOT applied** (plan ready: 5,427 decisions, 486 tasks; its dry run was stopped at the park — redo it) | — |
 > | 0011 | done, judged, built valid (130 / 194) | **look FAILED** (3 words wrong) | not loaded | not run | — |
 > | 0523 | done, judged, built valid (346 / 161) | **look FAILED** (5 words wrong, 3 serious pages) | not loaded | not run | — |
 > | 1182 | Word route built (334); **scans not read: over the cap** | – | not loaded | – | – |
