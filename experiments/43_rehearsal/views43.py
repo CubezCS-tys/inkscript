@@ -742,7 +742,10 @@ def art43(stem: str) -> dict:
     try:
         return art_of(stem)
     except StopIteration:
-        for f, w in (("sample43.json", "b"), ("sample43b.json", "c")):      # set c: the second 300
+        for f, w in (("sample43.json", "b"), ("sample43b.json", "c"), ("../52_journal_gate1/out/sample52.json", "d"),
+                     ("../70_gate2_pilot/out/sample70.json", "f"),  # c: the second 300; d: exp 52
+                     *((str(p), "g")
+                       for p in sorted((HERE.parent / "74_gate2_full" / "out").glob("[0-9][0-9][0-9][0-9]/sample.json")))):  # g: exp 74
             arts = json.loads((HERE / f).read_text(encoding="utf-8"))["articles"]
             hit = [a for a in arts if a["stem"] == stem]
             if hit:
@@ -790,7 +793,7 @@ def main():
     rep = {}
     for s in a.stems:
         art = art43(s)
-        ST.PAGES = HERE / "out" / "pages" if art.get("set") in ("b", "c") else ST.OUT / "pages"   # set b renders live here
+        ST.PAGES = HERE / "out" / "pages" if art.get("set") in ("b", "c", "d", "f", "g") else ST.OUT / "pages"   # set b renders live here
         st = build_layout43(art, load43(art))
         ov = layout_overlaps(st)
         rep[s] = dict(cut_width=st["cut_width"], cut_picture=st["cut_picture"], overlaps=ov)

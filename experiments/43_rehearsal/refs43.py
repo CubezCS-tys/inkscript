@@ -20,12 +20,17 @@ it). A work left with no field is not written.
 Tidy (2026-10-19, applies to saved answers too): volume / issue / pages lose printed labels («Vol.», «ع»، «مج»، «ص»,
 «pp.», «وما بعدها», «et s.»); a year given as a whole date keeps the year in <year> and the date in <string-date>; a
 web address cut by Azure's line breaks is joined. The mixed-citation / note text keep the printed form.
+Prompt v3.5 (draft, 2026-10-22; v35_parts): W's new optional keys — editors, translators, an author's "died",
+edition, cal / year2, cited (the page pointed to, apart from the work's own range), accessed, library / shelf / folio
+(type manuscript), conf (type conference), degree — written only when present, so every earlier answer builds the
+same element-citations as before.
 
     import refs43; refs43.add_parsed(Mo, A, raw_dir)        -> Counter of what was written and dropped
 """
 from __future__ import annotations
 
 import json
+import os
 import re
 from collections import Counter
 from pathlib import Path
@@ -34,8 +39,10 @@ from lxml import etree
 
 XL = "{http://www.w3.org/1999/xlink}"
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
+HYPH_BREAK = re.compile(r"(?<=[^\W\d_])[-‐­]\s+(?=[^\W\d_])")   # experiment 65 M7: «Psychol- ogy»
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
-TYPES = {"book": "book", "journal": "journal", "chapter": "book", "thesis": "thesis", "web": "web", "other": "other"}
+TYPES = {"book": "book", "journal": "journal", "chapter": "book", "thesis": "thesis", "web": "web", "other": "other",
+         "manuscript": "manuscript", "conference": "confproc"}          # the last two: prompt v3.5 types
 SIMPLE = [("volume", "volume"), ("issue", "issue"), ("publisher", "publisher-name"), ("place", "publisher-loc")]
 
 
@@ -142,6 +149,18 @@ def citation(w: dict, printed: str, st: Counter, lang_default: str) -> etree._El
         v = ws(v)
         if not v:
             return None
+        if v not in printed and os.environ.get("EXP65_OFF") != "1":
+            # experiment 65 M7: a part broken at a hyphenated line break («Psychol- ogy») is the printed word
+            # («Psychology» or «Psychol-ogy» in the entry); the joined form is kept when it is in the entry
+            for alt in (HYPH_BREAK.sub("", v), HYPH_BREAK.sub("-", v)):
+                if alt != v and alt in printed:
+                    st[f"refs_hyphen_joined_{field}"] += 1
+                    return alt
+            if HYPH_BREAK.search(printed) and v in HYPH_BREAK.sub("", printed):
+                st[f"refs_hyphen_joined_{field}"] += 1
+                return v
+            st[f"refs_dropped_not_printed_{field}"] += 1
+            return None
         if v not in printed:
             st[f"refs_dropped_not_printed_{field}"] += 1
             return None
@@ -240,11 +259,100 @@ def citation(w: dict, printed: str, st: Counter, lang_default: str) -> etree._El
     if url:
         etree.SubElement(ec, "ext-link", {"ext-link-type": "uri", XL + "href": url}).text = url
         n += 1
+    n += v35_parts(w, ec, ok, typ, st)
     if not n:
         st["refs_dropped_empty_work"] += 1
         return None
     st["refs_fields_written"] += n
     return ec
+
+
+V35_KEYS = ("editors", "translators", "edition", "cal", "year2", "cited", "accessed", "library", "shelf", "folio",
+            "conf", "degree")
+
+
+def _persons(v, ok, field):
+    out = []
+    for au in (v if isinstance(v, list) else [v]):
+        if isinstance(au, str):
+            au = {"surname": au}
+        if not isinstance(au, dict):
+            continue
+        sn, gn = ok(field, au.get("surname")), ok(field, au.get("given"))
+        if sn:
+            nm = etree.Element("name")
+            etree.SubElement(nm, "surname").text = sn
+            if gn:
+                etree.SubElement(nm, "given-names").text = gn
+            out.append(nm)
+        elif gn:
+            e = etree.Element("string-name")
+            e.text = gn
+            out.append(e)
+    return out
+
+
+def v35_parts(w: dict, ec, ok, typ: str, st: Counter) -> int:
+    """Prompt v3.5's new keys of a cited work (experiment 51's priority-1 reference items), each an exact substring
+    of the printed entry (checked by ok()). A work without any of these keys (every answer before v3.5) is left
+    exactly as before. JATS 1.4 (DTD-checked): person-group editor / translator, edition, year[@calendar] (+ a
+    second year in the other calendar), comment[@content-type=death-date | shelfmark | degree], page-range
+    [@content-type=cited-pages | folio] (the work's own range stays fpage / lpage / page-range), date-in-citation
+    [@content-type=access-date], institution[@content-type=library], conf-name / conf-loc (type conference)."""
+    if not any(k in w for k in V35_KEYS) and not any(isinstance(au, dict) and "died" in au
+                                                     for au in w.get("authors") or []):
+        return 0
+    n = 0
+    for k, kind in (("editors", "editor"), ("translators", "translator")):
+        names = _persons(w.get(k) or [], ok, k)
+        if names:
+            pg = etree.SubElement(ec, "person-group", {"person-group-type": kind})
+            for nm in names:
+                pg.append(nm)
+            n += len(names)
+            st[f"refs_v35_{k}"] += len(names)
+    for au in w.get("authors") or []:
+        d = ok("died", au.get("died")) if isinstance(au, dict) else None
+        if d:
+            etree.SubElement(ec, "comment", {"content-type": "death-date"}).text = d
+            n += 1
+            st["refs_v35_died"] += 1
+    ed = ok("edition", w.get("edition"))
+    if ed:
+        etree.SubElement(ec, "edition").text = ed
+        n += 1
+        st["refs_v35_edition"] += 1
+    y = ec.find("year")
+    cal = str(w.get("cal") or "").lower()
+    y2 = ok("year2", w.get("year2"))
+    if y is not None and (cal or y2):
+        y.set("calendar", "islamic" if cal.startswith("hij") else "gregorian")
+        st[f"refs_v35_year_{y.get('calendar')}"] += 1
+    if y2 and year_ok(y2):
+        other = "gregorian" if y is not None and y.get("calendar") == "islamic" or cal.startswith("hij") else "islamic"
+        e = etree.Element("year", {"calendar": other})
+        e.text = y2
+        (y.addnext(e) if y is not None else ec.append(e))
+        n += 1
+        st["refs_v35_year2"] += 1
+    for k, tag, attrs in (("cited", "page-range", {"content-type": "cited-pages"}),
+                          ("accessed", "date-in-citation", {"content-type": "access-date"}),
+                          ("library", "institution", {"content-type": "library"}),
+                          ("shelf", "comment", {"content-type": "shelfmark"}),
+                          ("folio", "page-range", {"content-type": "folio"}),
+                          ("degree", "comment", {"content-type": "degree"}),
+                          ("conf", "conf-name", {})):
+        v = ok(k, w.get(k))
+        if not v:
+            continue
+        etree.SubElement(ec, tag, attrs).text = clean_label(v) if k == "cited" else v
+        n += 1
+        st[f"refs_v35_{k}"] += 1
+    if typ == "conference":                     # the place of a conference is where it met, not a publisher's
+        for pl in ec.findall("publisher-loc"):
+            pl.tag = "conf-loc"
+            st["refs_v35_conf_loc"] += 1
+    return n
 
 
 def add_parsed(Mo, A, raw_dir: Path | None = None, answers: list[dict] | None = None) -> Counter:

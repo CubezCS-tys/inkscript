@@ -145,6 +145,99 @@ FROM judge_findings j JOIN judge_calls c USING (call_id) WHERE c.stem = :stem OR
     "reconciliation_with_v46": dict(
         title="Reconciliation with platform.db (experiment 46)",
         sql="SELECT * FROM reconciliation_v46"),
+    # ---- v3.5b fields (2026-10-22)
+    "doc_types_page_vs_catalogue": dict(
+        title="Articles by document type: the page (prompt v3.5b) vs the catalogue (MARC 336)",
+        description="Every shown publication: the type the reader gave the page, the catalogue's type and the one shown "
+                    "(the page's when there is one). A page type the catalogue's class does not hold is a "
+                    "catalogue report (kind document-type).",
+        sql="""SELECT coalesce(page_type, '(not read: prompt before v3.5b)') AS page_type, catalogue_type, shown,
+       shown_from, count(*) AS publications, sum(disagreement > 0) AS reported
+FROM v_doc_types GROUP BY 1, 2, 3, 4 ORDER BY publications DESC"""),
+    "doc_type_disagreements": dict(
+        title="Document type: page and catalogue disagree",
+        sql=f"""SELECT r.stem, p.title_shown, r.our_value AS page_type, r.catalogue_value AS catalogue_type, r.severity,
+       r.evidence, r.status, {ink('r.anchor_pk')} AS ink
+FROM catalogue_reports r JOIN publications p USING (pub_id) WHERE r.kind = 'document-type' ORDER BY r.severity, r.stem"""),
+    "article_context": dict(
+        title="What an article is about beyond its title: conference, thesis summarised, book reviewed, original",
+        description="v3.5b: conference (name, place, dates), the thesis an article comes from or summarises, the book "
+                    "a review is of, the original of a translation, a part of a series; each value printed on the page.",
+        sql="""SELECT v.stem, p.title_shown, p.doc_type, c.about, group_concat(substr(c.field, length(c.about) + 2) ||
+       ': ' || c.value, ' | ') AS printed
+FROM v_publication_context c JOIN publications p USING (pub_id) JOIN versions v ON v.version_id = p.current_version
+GROUP BY c.pub_id, c.about ORDER BY c.about, v.stem"""),
+    "references_with_editor": dict(
+        title="References naming an editor of the text (تحقيق) or a translator",
+        description="v3.5b: each citation whose reader gave an editor or translator, with them apart from the authors, "
+                    "the edition and the cited work card it belongs to.",
+        sql=f"""SELECT v.stem, m.container_kind || ':' || m.container_id AS place,
+       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND
+        x.role = 'author') AS authors,
+       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND
+        x.role = 'editor') AS editors,
+       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND
+        x.role = 'translator') AS translators,
+       m.edition, json_extract(m.parsed, '$.year') AS year, m.year_calendar, m.year2, w.cited_work_id, m.printed,
+       {ink('m.anchor_pk')} AS ink
+FROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1
+LEFT JOIN cited_work_members cm ON cm.full_mention_pk = m.mention_pk
+LEFT JOIN cited_works w ON w.cited_work_pk = cm.cited_work_pk
+WHERE EXISTS (SELECT 1 FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND x.role IN ('editor',
+      'translator')) ORDER BY v.stem, m.reading_ord"""),
+    "works_with_several_editions": dict(
+        title="Cited works with several editions",
+        description="v3.5b: an edition is what a citation names as edition statement + year + publisher "
+                    "(cited_work_editions); every full citation points at its own (cited_work_members.edition_pk).",
+        sql="""SELECT w.cited_work_id, w.title, w.first_author_key, count(*) AS editions, sum(e.n_members) AS citations,
+       group_concat(coalesce(e.edition_printed, '-') || ' / ' || coalesce(e.year_printed, '-') || ' / ' ||
+       coalesce(e.publisher, '-') || ' (' || e.n_members || ')', ' ¦ ') AS editions_as_cited
+FROM cited_work_editions e JOIN cited_works w USING (cited_work_pk) WHERE w.status = 'active'
+GROUP BY w.cited_work_pk HAVING count(*) > 1 ORDER BY editions DESC, citations DESC LIMIT 500"""),
+    "classical_authors_by_death_date": dict(
+        title="Cited authors by death date (ت … هـ)",
+        description="v3.5b: the death date printed in a citation («ت ٧٥١هـ»), in both calendars, with the works and "
+                    "how often they are cited.",
+        sql="""SELECT ca.died_hijri, ca.died_greg, ca.printed AS author, ca.died AS as_printed, w.cited_work_id, w.title,
+       t.n_citing_pubs, t.n_mentions
+FROM cited_work_authors ca JOIN cited_works w USING (cited_work_pk)
+LEFT JOIN v_times_cited t ON t.cited_work_pk = w.cited_work_pk
+WHERE ca.died IS NOT NULL AND w.status = 'active' ORDER BY ca.died_hijri, ca.printed"""),
+    "citation_parts_of_an_article": dict(
+        title="Every reference of an article with its v3.5b parts",
+        description="Edition, the year in both calendars, the page referred to apart from the work's own range, access "
+                    "date, a manuscript's library / shelfmark / folio, a thesis's degree, a conference.",
+        sql=f"""SELECT m.reading_ord, m.container_kind || ':' || m.container_id AS place, m.kind, m.printed, m.edition,
+       json_extract(m.parsed, '$.year') AS year, m.year_calendar, m.year2, m.year2_calendar, m.cited_pages,
+       m.cited_pages_source, m.work_pages, m.died, m.access_date, m.ms_library, m.ms_shelfmark, m.ms_folio,
+       m.thesis_degree, m.conf_name, m.conf_loc, {ink('m.anchor_pk')} AS ink
+FROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1
+WHERE v.stem = :stem AND m.kind IN ('full', 'short') ORDER BY m.reading_ord"""),
+    "authors_corresponding_ids_twins": dict(
+        title="Authors: corresponding author, ORCID and other ids, the name printed in another script",
+        sql=f"""SELECT v.stem, b.byline_pos, b.printed, b.script, b.is_corresponding, b.ids, b.contrib_type, b.role_phrase,
+       t.printed AS same_person_as, a.person_id,
+       (SELECT group_concat(scheme || ':' || value) FROM external_ids e WHERE e.entity_kind = 'A' AND
+        e.entity_id = a.person_id) AS person_ids, {ink('b.anchor_pk')} AS ink
+FROM byline_mentions b JOIN versions v ON v.version_id = b.version_id AND v.is_current = 1
+LEFT JOIN byline_mentions t ON t.mention_pk = b.twin_of_pk
+LEFT JOIN authorship_mentions am ON am.mention_pk = b.mention_pk LEFT JOIN authorships a USING (authorship_pk)
+WHERE b.is_corresponding = 1 OR b.ids IS NOT NULL OR b.twin_of_pk IS NOT NULL OR b.role_phrase IS NOT NULL
+      OR b.contrib_type <> 'author' ORDER BY v.stem, b.byline_pos, b.script"""),
+    "table_and_figure_notes": dict(
+        title="Notes and «المصدر:» lines under tables and figures",
+        sql=f"""SELECT v.stem, n.figure_id, f.kind AS of_kind, f.label, n.seq, n.kind, n.text, {ink('n.anchor_pk')} AS ink
+FROM figure_notes n JOIN versions v ON v.version_id = n.version_id AND v.is_current = 1
+LEFT JOIN figures f ON f.version_id = n.version_id AND f.figure_id = n.figure_id ORDER BY v.stem, n.figure_id, n.seq"""),
+    "page_problems": dict(
+        title="Page problems the reader saw: handwriting, stamps, scan defects",
+        sql=f"""SELECT v.stem, m.page, m.kind, m.problem, m.line_id, m.text, {ink('m.anchor_pk')} AS ink
+FROM page_marks m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1 ORDER BY v.stem, m.page"""),
+    "figure_kinds": dict(
+        title="Pictures by kind (chart, photo, map, stamp, portrait ...)",
+        sql="""SELECT coalesce(f.fig_type, '(not given)') AS fig_type, count(*) AS figures, count(DISTINCT v.stem) AS documents
+FROM figures f JOIN versions v ON v.version_id = f.version_id AND v.is_current = 1 WHERE f.kind = 'figure'
+GROUP BY 1 ORDER BY figures DESC"""),
 }
 
 LABELS = {"publications": "title_shown", "persons": "preferred_name_ar", "cited_works": "title",
@@ -155,7 +248,9 @@ LABELS = {"publications": "title_shown", "persons": "preferred_name_ar", "cited_
           "issues": "issue_id", "publishers": "name", "judge_calls": "call_id", "affiliation_mentions": "printed",
           "authorships": "pub_id", "flag_detectors": "kind", "storage_roots": "root_id",
           "catalogue_exports": "export_id", "link_runs": "linker", "load_events": "tool",
-          "metadata_assertions": "value", "judge_findings": "type", "notes": "label", "note_calls": "call_text"}
+          "metadata_assertions": "value", "judge_findings": "type", "notes": "label", "note_calls": "call_text",
+          "citation_mention_people": "printed", "cited_work_editions": "edition_printed",
+          "cited_work_contributors": "printed", "figure_notes": "text", "page_marks": "mark_id"}
 
 
 def main():

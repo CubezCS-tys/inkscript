@@ -270,6 +270,9 @@ class Master43(M.Master):
         history dates, affiliation parts, boxed text, endnotes, acknowledgements / appendices)."""
         self.pending_inline = []
         A = super().build()
+        import leaks43                                 # experiment 65 M5: the subtitle also when printed in the title
+        if leaks43.ON:
+            leaks43.subtitle(self, A)
         self.put_inline(A)
         import meta43                                  # D33: metadata corrected, printed kept, changes logged
         meta43.names_pre(self, A)                      # honorifics, roles, a Latin spelling (before the catalogue match)
@@ -806,7 +809,7 @@ class Master43(M.Master):
 
 # ------------------------------------------------------------------------------------------------ version stamp
 
-CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", HERE / "jats43.py", HERE / "refs43.py", HERE / "meta43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
+CODE_FILES = [HERE / "rules43.py", HERE / "masters43.py", HERE / "ink43.py", HERE / "jats43.py", HERE / "refs43.py", HERE / "meta43.py", HERE / "enrich43.py", HERE / "leaks43.py", E41 / "structure.py", E41 / "reader.py", E41 / "masters.py"]
 RAW41 = E41 / "out" / "argon" / "raw"
 DEFAULT_MODEL = "gemini-4-argon"
 
@@ -916,6 +919,7 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | N
     M.MAST = mast
     try:
         Mo = (Master43 if rules else M.Master)(a, cap)
+        Mo.raw_dir = raw_dir                           # experiment 65: names_pre reads the answers' same_as
         mast.mkdir(parents=True, exist_ok=True)
         if Mo.crops.exists():
             shutil.rmtree(Mo.crops)
@@ -924,12 +928,20 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | N
             Mo.add_ornaments()
             import refs43                       # v3.2 parsed references / cited works (no-op on older answers)
             refs43.add_parsed(Mo, art, raw_dir)
+            import enrich43                     # prompt v3.5 (draft) "enrich" part (no-op on older answers)
+            enrich43.apply(Mo, art, raw_dir)
+            import leaks43                      # experiment 65: later bylines, identifiers by code, article lines,
+            if leaks43.ON:                      # prompt v3.6 keys (every answer)
+                leaks43.apply(Mo, art, enrich43.answers_of(a, raw_dir))
         alto = Mo.alto_xml()
     finally:
         M.MAST = real_mast
     st = stamp_of(a, raw_dir, run) if rules else None
     if st:
         put_stamp(art, st)
+    for fg in list(art.iter("fn-group")):          # exp 74 (1001-011-003-005): a footnote group every note left
+        if len(fg) == 0 and not (fg.text or "").strip() and fg.getparent() is not None:
+            fg.getparent().remove(fg)
     doctype = ('<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD with '
                'MathML3 v1.4 20241031//EN" "JATS-archivearticle1-4-mathml3.dtd">')
     (mast / f"{a['stem']}.jats.xml").write_bytes(etree.tostring(art, xml_declaration=True, encoding="UTF-8",
@@ -952,6 +964,9 @@ def build43(a: dict, raw_dir: Path, mast: Path, rules: bool = True, run: str | N
         r["ornaments"] = len(getattr(cap["S"], "ornaments", []))
     if st:
         (mast / f"{a['stem']}.stamp.json").write_text(json.dumps(st, ensure_ascii=False, indent=1))
+    import leaks43
+    if rules and leaks43.ON:                           # experiment 65: every identifier found by code, by line
+        (mast / f"{a['stem']}.ids.json").write_text(json.dumps(leaks43.sidecar(Mo), ensure_ascii=False, indent=0))
     if rules:                                          # D33 change log (empty list: nothing corrected)
         (mast / f"{a['stem']}.metachanges.json").write_text(json.dumps(
             dict(stem=a["stem"], rule="docs/decisions.md D33", changes=getattr(Mo, "meta_changes", [])),

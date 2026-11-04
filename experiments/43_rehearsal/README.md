@@ -1535,6 +1535,218 @@ corrected name inside name-alternatives, the Gregorian year as the article's yea
 `experiments/41_azure_structure/out/views/v33_300b_fix3`), review of 702 flagged spots
 `v33_300b_fix3/review.html`; side-by-sides looked at in `out/fix3/look/`.
 
+## Prompt v3.5 (draft, 2026-10-22)
+
+No calls were made for this section. The check below is prepared and waits for the owner's cap.
+
+**Why.** Experiment 51 listed what one read of an article should take ([its README](../51_extraction_inventory/README.md),
+`inventory.json`). It flagged 37 items "add to the prompt first". On 2026-10-22 the owner said "add all 37".
+
+**What v3.5 is.** It lives in `prompt43.py`: `V35_CHANGES` applied to v3.3, plus `ENRICH_FULL_V35` and
+`ENRICH_PAGES_V35`. Select it with `run43.py --prompt v3.5`. v3.3 is untouched:
+- its text hash `d6b2156150` is the one in the frozen exam stamp;
+- its prompts as sent are byte-identical before and after this change, on all 17 chunks of the check's 12 articles.
+
+v3.5 adds the 37 items, grouped as the inventory groups them:
+- **Document type** (x061, x062, x070, x224): research, review, editorial, book_review, report, conference_paper,
+  thesis_summary, interview, news, letter, obituary, poem, documents, bibliography, front_matter or other.
+- **About the article**: the conference's name, place and dates (x063; such a line under the title is no longer a
+  subtitle, x003); a thesis summary's degree, university, year and supervisor (x064); the reviewed book as one cited
+  work (x066); the original of a translation (x067); a part of a series (x068).
+- **Authors**: the corresponding-author mark (x026); ORCID and other ids (x028, x029); `same_as`, an English byline as
+  the same person (x024); several affiliations, with the faculty apart from the department (x034, x039); the starred
+  author note, as line ids (x040).
+- **Each cited work's missing parts**: editors (تحقيق), translators, edition (ط), an author's death date, `cal` and
+  `year2` (Hijri or Gregorian for each year), the cited page apart from the page range (`cited`), the access date,
+  and for a manuscript its library, shelfmark and folio. Two new types, manuscript and conference; a thesis gets its
+  degree (x117–x121, x127, x133, x135–x137).
+- **Table and figure notes** and «المصدر:» lines, tied to their table or figure (x111, x112). Note kinds: translator,
+  editor or publisher (x110).
+- **Picture kinds** (x158), including stamps (x213); handwriting and stamp lines (x214); scan problems (x216).
+- **Honorific ligatures**: ﷺ ﷻ ﷲ ﷽ are fixed to their single Unicode character, never spelt out (x176).
+- **v3.4's two content lines**, word for word: inline formulas in Arabic sentences (x164) and letters lost in
+  vowelled lines (x178). v3.4's "compact JSON" line is not included.
+
+**Shape, built against the v3.4 losses.** v3.4 shredded an advert and merged paragraphs, in 2 of 2 runs each. So in
+v3.5:
+- every structural passage of v3.3 is left word for word;
+- the new fields go in **their own top-level part of the answer, `"enrich"`**. It has its own ENRICHMENT section
+  placed after all the rules. The section says it "changes nothing above" and is written last;
+- only three things change inside v3.3's passages: v3.4's two lines, one honorific line in the fix rules, and new
+  optional keys of a cited work W in the citations passage. W is not structure, and v3.2 added W there with no
+  structural regression.
+
+**D30 still holds**: Gemini types no text. Every new value is a line id, a word from a closed list, or an exact
+substring of Azure's text (as `aff_parts` already are). The check rejects anything else:
+- a conference title rebuilt from decorative type is dropped (0042: «ندوة» is printed as «ــــدوة»);
+- so are a line id from another chunk, an ORCID that is not printed, and unknown keys and kinds.
+
+**Size and cost.**
+- **Prompt**: 15,214 → 21,040 characters (+5,826). Of that, 3,736 is the ENRICHMENT section, 1,153 the cited-work
+  keys and 911 v3.4's two lines with the honorific line. The `enrich` outline adds 779 characters on a first chunk
+  and 278 on later ones.
+- **As sent**: +6,087 to 6,588 characters a chunk, about **+2,570 input tokens a chunk**. On the check's articles
+  that is +383 tokens a page (3,696 → 4,079, +10%).
+- **Output**: estimated +42 tokens a page on the check's articles (+4%; they cite 2 works a page). At the 300's mix
+  (1.36 works a page) it is about +33 a page (+3.5%; `check35.EXTRA_OUT`).
+- **One call**: about **+$0.00055 a page on Batch (+7%)**. That is +$0.0064 an article, or about +$6.4k per million
+  documents now and +$12.9k from 1 December. For comparison, the 300's run cost $0.0081 a page and $96k per million
+  documents.
+
+**The split, costed.** The alternative is two calls per article:
+- **The structure call**: v3.5 without its ENRICHMENT section. It keeps the cited-work keys, v3.4's lines and the
+  honorific line, and adds about 850 input tokens a chunk.
+- **A second "enrichment" call per article.** Figure kinds, table notes, marks and scan problems need every page, so
+  the pages' images and Azure's lines go again: about **+$0.0038 a page (+47%)**, or about +$45k per million
+  documents now.
+- **A light enrichment call** sees pages 1–2 only and returns only the article's keys: about $0.009 an article
+  (+10%). The page keys would then still have to ride in the main call.
+
+**Recommendation: one call.** It costs about a seventh of the split. The separate part, written last, is the
+design that protects the structure. The check measures whether it does. If the structure moves beyond v3.3's own
+run-to-run noise, the fallback is the split above.
+
+**Parsing.** No `src/` change. No letter handling touched: the letter-fold work in `rules43` and `masters43` is
+another agent's.
+
+| part | what reads it |
+|---|---|
+| `rules43.normalize` | 2 lines: `enrich43.check` runs first, only when the answer has `"enrich"` |
+| `enrich43.check` (new) | checks every value and logs drops in `log["enrich"]`; each figure block gets its kind in the model's own order |
+| `masters43.build43` | 2 lines after refs43: `enrich43.apply`, a no-op without `"enrich"`; `enrich43.py` is in the stamp's `CODE_FILES` |
+| `meta43.enrich` (new) | the article and author keys |
+| `refs43.v35_parts` (new) | a cited work's new keys, written only when present |
+
+Where each field goes in the JATS (DTD-checked):
+
+| field | JATS home |
+|---|---|
+| document type | `@article-type` (JATS list) + `article-categories/subj-group[@subj-group-type="document-type"]` (the prompt's word) |
+| conference | `conference` (`conf-name`, `conf-date`, `conf-loc`); the subtitle it replaces is logged as a D33 change |
+| thesis summary | `product[@product-type="thesis"]` |
+| book review | `product[@product-type="book"]` (the cited-work parts) |
+| translation | `related-article[@related-article-type="translated-from"]` |
+| series part | `custom-meta` series-part |
+| corresponding author | `contrib/@corresp` |
+| ORCID, other ids | `contrib-id[@contrib-id-type="orcid"]` and the other id types |
+| `same_as` | the twin folded into the person (`string-name[@xml:lang]`; a D33 change) |
+| affiliations | the printed affiliation re-tagged with `institution[@content-type="faculty"]`; more as `aff[@content-type="additional"]` |
+| author note | the fn moved to `author-notes`, with `contrib/xref` |
+| figure kind | `fig/@fig-type` |
+| table / figure note | the note's paragraph moved, id and line targets kept, into `table-wrap-foot` (`p[@content-type="table-note" \| "source"]`) or into its `fig` |
+| note kind | `fn[@fn-type="custom"][@custom-type="translator" \| "editor" \| "publisher"]` |
+| cited-work parts | `person-group[@person-group-type="editor" \| "translator"]`, `edition`, `year[@calendar]` (+ a second year), `page-range[@content-type="cited-pages"]` (the work's own range stays `fpage`/`lpage`), `date-in-citation[@content-type="access-date"]`, `comment[@content-type="death-date" \| "shelfmark" \| "degree"]`, `institution[@content-type="library"]`, `page-range[@content-type="folio"]`, `conf-name`/`conf-loc` |
+| marks, scan problems | `custom-meta` (the ALTO is unchanged) |
+
+Simulated v3.5 answers were tried on 0042, 0069 and 0500: hand-written `enrich` and cited-work keys on their v3.3
+answers, kept in the scratchpad and never in `out/`. Every home was filled, and JATS DTD and ALTO XSD were valid.
+Unit tests: `test_enrich43.py` (3, simulated); with the other test files, 65 pass.
+
+**Proof that v3.3 answers build exactly as before.** Two code trees were built in the scratchpad from the saved
+v3.3 answers:
+- A = git HEAD before this change; B = with v3.5;
+- 38 articles of set b (the check's 10, the 10 citing the most works, 18 drawn at random) and the 5 gold articles;
+- three articles with equations (2382, 0168, 2483) fail in **both** trees, because `latex2mathml` is missing on this
+  server (see below).
+
+Result:
+- **All 40 built articles are byte-identical**: JATS (the version stamp stripped: it holds the code hash and the
+  time), ALTO, crops, stats and D33 logs; 418 files compared.
+- Rules output is identical in 77 of 78 chunk files. The 78th (0751) differs only in a logged ink measure, 0.176
+  against 0.175. That measure is unstable from run to run: rerunning both trees gives 0.176 for each.
+
+**The check (prepared, not run).** The plan is in `out/v35_check/PLAN_v35.md`. It covers 12 articles that already
+have v3.3 answers:
+- 2382 and 0747 (gold);
+- 0069 (byline twin, تحقيق, ص, death years);
+- 1608 (editors, editions, access dates);
+- 0500 (corresponding author, «المصدر:» under tables);
+- 0412 (manuscripts and folios);
+- 0042 (conference);
+- 0295 (book review, translation);
+- 0881 (news);
+- 1875 (vowelled verse);
+- 1010-006 (the advert v3.4 shredded);
+- 0787 (the paragraphs v3.4 merged).
+
+The three other gold articles are optional (`--extra-gold`).
+
+`check35.py` (new) has four commands:
+- `build`: both arms through today's code, DTD + XSD checked;
+- `score`: structure compared with v3.3 and with v3.3's own replicate, the v3.4 loss pages block by block, gold
+  differences, the new fields value by value for a person (`fields.md`), the model's fixes, and real tokens and cost
+  per page;
+- `price`: the cost estimated from the same chunks' real v3.3 tokens;
+- `list`: the check's articles and why each is in.
+
+**Dry-run price** for 114 pages and 17 requests:
+
+| | expected | worst case |
+|---|---|---|
+| **Batch now** | **$1.10** (run43: $1.13) | **$2.69** (run43: $2.71) |
+| Standard now | $2.21 | $5.37 |
+
+The same chunks cost $1.04 under v3.3. **Proposed cap**: `--cap 76.40` (the log stands at $73.6244), or `77.05`
+with the three extra gold articles (+$0.25 expected, +$0.66 worst).
+
+**Waiting for the owner**
+1. The check's cap.
+2. Installing `latex2mathml` in this server's `.venv`: `.venv/bin/pip install latex2mathml`. It is not anywhere on
+   the machine, so **no article with an equation can be built into masters on the server today**. This does not
+   come from v3.5. It was not installed here because it is an external download.
+3. After the check: v3.5 live in one call, or the split.
+
+**Files**:
+- `prompt43.py` (v3.5), `enrich43.py`, `check35.py`, `test_enrich43.py`;
+- `meta43.py`, `refs43.py`, `rules43.py` and `masters43.py` (hooks);
+- `out/v35_check/`: PLAN_v35.md, progress.md, dry_run_{a,b,a_extra}.json, price.json, price_extra.json.
+
+## Letter fix (2026-10-22; owner-approved under D30; no calls)
+
+**What and why.** Experiment 51 found Azure writing Persian look-alike letters on Arabic pages (ی U+06CC, ک U+06A9)
+in place of the printed ي / ى / ك. The print shows the Arabic letters, so this is a reader's misreading: under D30 it
+is fixed and recorded. `letters43.py` turns each such word into a code fix of Azure's reading, the same path as
+`rules43.guillemet_halves`. The JATS gets a `named-content content-type="reader-fix"` with Azure's word in
+`xlink:title` and a back note (why: "code: Azure's Persian look-alike letter … (letters43, D30 reader misread)"), and
+the ALTO String keeps Azure's word as ALTERNATIVE. The search text, Layout view and everything downstream read the
+same master. The folding is `src/inkscript/text.py` `fold_letters` (imported; `src/` untouched), plus ھ ہ → ه and ڪ → ك.
+Gemini's metadata and parsed citations, which copy Azure's letters, are folded too, so the printed-vs-metadata checks
+still match.
+- **ی at a word's end → ى, not checked against the print's dot.** Azure's ی covers both forms. In a sample of 73
+  raw final-ی words, 48 were printed ى and 25 ي. An ink test of the dots (89–91% on Azure's own ي/ى) and a spelling
+  model were both too unreliable. ى is the more frequent form, it is text.py's choice, and the platform's search folds
+  ى/ي anyway. Each such fix says "the print's dot not checked". Among fixes that reached the text, 20 of 20 random
+  ی→ى were printed undotted (`out/lettersfix/look/fixes_11.jpg`).
+- **Not folded:** a line in another language, detected by 2+ Kurdish letters, 2+ Urdu letters or words, or Persian
+  words / پ چ ژ گ (two signals needed). Also left alone: every line of a block that is mostly such lines.
+
+**Rebuild.** Both runs were rebuilt the way fix round 3 was (`out/lettersfix/lettersfix.sh`): saved answers → rules +
+letter fix → plain masters → the run's saved patches. The code is a snapshot of experiments 41/43 at git HEAD 4961fcd
+(`out/lettersfix/code/`), because another agent was editing rules43/meta43/masters43/refs43 at the same time.
+`lettersfix43.py` adds the fix at run time, so `rules43.py` is unchanged. latex2mathml 3.81.1 is in
+`out/lettersfix/pylib` (not in the server venv). Peak memory was 0.8 GB. Each run has a control built without the fix.
+
+| | first 300 → `out/v33_300_final_lettersfix/` | exam → `out/v33_300b_fix3_lettersfix/` |
+|---|---|---|
+| words fixed / articles | 1,059 / 106 | 829 / 89 |
+| words with ی→ي / ی→ى / ک→ك / ھ ہ ڪ | 605 / 228 / 330 / 31 | 449 / 263 / 233 / 27 |
+| lines left (another language) | 3: 0909 Persian verse ×2; 0260 «یگگِّبك» (a misread, wrongly left) | 46: 0396 Kurdish header + abstract (44), 1020 Persian (2) |
+| JATS words still with these letters (before) | 11 (1,068): 0909 Persian, 2280 Urdu verse in a note | 78 (890): 0396 Kurdish, 1020 Persian |
+| JATS DTD + ALTO XSD | 300/300 | 300/300 |
+| vs control (exam: vs frozen fix3, which the control reproduces 300/300) | 295 identical once the fixes are undone; the rest the same up to letters and fix marks, except below | 295; same, except below |
+
+Differences that are not letters: refs43 now finds 10 citation parts that it had dropped as "not printed" (e.g. 1677
+publisher «سوريا»; none lost). 0042's metadata subtitle is no longer repeated, because it is a printed front block.
+0775's alt-title is no longer needed (printed and Gemini titles now agree). 0180 loses one misprint flag whose
+"correction" was only this fold. The first-300 rebuild also carries fix round 3's code changes (127 articles differ
+from the frozen `v33_300_final` without the letter fix). Gold check (`out/lettersfix/gold_check_*.txt`): 1140 and
+2382 are unchanged; 0747, 0877 and 0924 change by 18 letter folds only, besides 0747's known fix-round-3 guillemets.
+Looked at against the scan: `out/lettersfix/look/`. Log: `out/lettersfix/progress.md`.
+
+**Not done:** flags, views and the review pages for the new folders; platform v2 / the Desk are not reloaded.
+Reloading would take: `load46.py` and `link46.py` on both new runs (`load46.base_run` would need the `*_lettersfix`
+names), views43 for the Layout pages, and a reload of the Desk's copy.
+
 ## What's next
 
 1. Owner looks at `out/prompt_v2.html`; decide the cap (the dry run suggests $10 on Batch for the 55).
@@ -1560,3 +1772,78 @@ corrected name inside name-alternatives, the Gregorian year as the article's yea
 (simulated), `views_replay/`, `shots/`, `prompt_v2.html` + `prompt_v2/`, `v2_55/dry_run.json`, `v2_fresh/dry_run.json`,
 `features43.json`, `catalogue_draw.json`, `fetch/` (ids, reserves, measure43 / check43 / swaps43 JSON, sheets), `sample2/` (the second sample: draw, fetch,
 measure, sheets, strata, log, progress), `v33_300b/dry_run.json`.
+
+## Prompt v3.5b (2026-10-22; owner-approved; check cap $1.50, **$1.20 billed**, log $75.90)
+
+**Why.** The v3.5 check (`out/v35_check/score.md`, $1.08) gave good new fields, but the structure moved beyond v3.3's
+own run-to-run noise on some pages:
+- gold 2382: 31 differences against 17;
+- 0500: figures and captions read as paragraphs;
+- 0787: footers read as footnotes;
+- 1010-006: the advert split again.
+
+The only content change inside v3.3's structural passages was v3.4's two content lines (inline formulas; letters lost
+in vowelled lines), the cause of v3.4's losses before. The owner chose to drop them rather than add a second
+enrichment call per article (+47% a page).
+
+**What.** `prompt43.PROMPT_V35B` = v3.5 without those two lines: v3.3's structural text word for word, plus the
+honorific-ligature line, the new optional keys of a cited work, and the enrichment section. Exactly 6 lines differ
+from v3.5. Run with `--prompt v3.5b`.
+
+**Check** (the same 12 articles, 114 pages; `out/v35b_check/score.md`, `fields.md`):
+- gold 2382: 12 differences (v3.3 17, its replicate 19); gold 0747: 38 (v3.3 44, replicate 42). Better than v3.3
+  on both.
+- 7 of 10 other articles have the structure exactly unchanged. The remaining changes were looked at:
+  - 0500: the «المصدر:» lines are now table and figure notes (2 `table-wrap-foot`, 11 figure source lines), as
+    intended;
+  - 0787: an unlabelled introduction on p2 is no longer called an abstract; looked at on the scan, either reading is
+    defensible. Its CamScanner watermark is no longer a journal footer;
+  - 1010-006: the advert stays one picture.
+- New fields are kept: editors in 44 reference lines, editions, death dates, cited pages, document types (research,
+  review, report, news, book review), the corresponding author on 0500. Two document types need a person's look:
+  0747 "poem", 1608 "review".
+- Cost: $0.01048 a page against v3.3's $0.00909, i.e. **+15% a page** (output +21%), above the +7% estimated; about
+  +$15k per million articles.
+
+**Used for:** gate 1 (experiment 52, journal 0130, 126 articles; $24.24). In gate 1, 0 corresponding authors were
+found; that field needs a look.
+
+## Prompt v3.6 (draft, 2026-11-02; experiment 65; check $0.80 billed, log $100.94)
+
+**Why.** Experiment 61's "nothing lost" audit ([its README](../61_nothing_lost/README.md)): the post / rank of an
+author, the article's own DOI, the licence line, the journal's section and the bylines printed away from the title
+are not asked for (P1–P3). Experiment 66 ([its README](../66_d30_guard/README.md)): ~4.4% of Gemini's fixes change a
+word printed right, ~1.2% overwrite the author's own misprint.
+
+**What.** `prompt43.PROMPT_V36` = v3.5b + four passages (`V36_CHANGES`, `META_V36_CHANGES`); run with
+`--prompt v3.6`. Every earlier version is unchanged (`PROMPTS["v3.5b"]` is the same object; `test_leaks43`).
+- **P1** metadata `authors[].position`: the post or rank as printed, an exact substring, never in `role`; when it
+  shares a line with the affiliation, the affiliation begins after it.
+- **P2** enrich `doi` (the article's own, not one in its references; exact substring), `license` (line ids),
+  `section` (line ids of the rubric over the title).
+- **P3** enrich `printings`, on any chunk: every other printing of an author (summary-page English byline, a byline
+  on page 2, a closing signature, an author note): `a`, `name`, `lines`, `orcid`, `email`, `position`, `corresp`.
+- **Fix rule (experiment 66, the lead's addition)**, one bullet before the `sic` rule: a fix only where the IMAGE
+  plainly shows other letters than Azure's text; a word the image shows as Azure wrote it is never "corrected" into
+  the expected word («حال» not «مال», «بنسبة» not «بنسية», a printed «هذ»/«ثلك» stays, as `sic`); when unsure, no fix.
+  This is the only change inside v3.3's structural passages.
+  **Dropped on 2026-11-02** after [experiment 69](../69_fix_rule_check/README.md) (44 pages, two variants differing only
+  in this bullet, two runs each, $3.16): it changed nothing measurable in Argon's fixes (the difference between the
+  prompts equals the run-to-run noise). v3.6 is now v3.5b + P1–P3 only; bad fixes are caught by the code guard
+  (`d30guard43.py`, experiment 66).
+
+**Where the new keys go** (`enrich43.check` validates them, `KNOWN` / `PRINTING_KEYS`; homes in `meta43.names_pre`
+and `leaks43.v36`): position → `contrib/role[@content-type="position"]`; doi → `article-id[@pub-id-type="doi"]`;
+license → `permissions/license`; section → `article-categories/subj-group[@subj-group-type="heading"]`; printings
+→ the contrib (`string-name[@xml:lang][@specific-use="printed-again"]`, `contrib-id`, `email`, `@corresp`,
+position) + `xref[@specific-use="printed-again"]` to each printing's paragraph; a printing whose author the metadata
+lacks makes a contrib (`specific-use="from-a-later-printing"`). `test_leaks43.test_v36_schema_every_key_has_a_home`
+fails if the outline grows a key without a home.
+
+**Check** (`run43.py --set e` = `../65_fix_leaks/sample65.json`, Standard; numbers in experiment 65's README):
+two runs, `out/v36_check/` (10 pages, before the fix-rule bullet, $0.33) and `out/v36_check2/` (13 pages, final
+v3.6, $0.47). The new keys came back on every page that prints them; structure as v3.5b's except the lines the new
+keys are about; the fix bullet stopped the four bad fixes of experiment 66's examples and lost four real fixes on a
+faded page (1080-002-010-015 p8). Comparison: `../65_fix_leaks/compare36.py` → `../65_fix_leaks/out/v36_compare.md`.
+
+Plumbing: set `e` in run43, lettersfix43 and pictures43; set `a` in lettersfix43 (the v2_55 rebuild).

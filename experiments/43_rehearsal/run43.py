@@ -53,7 +53,12 @@ import common as C  # noqa: E402  (experiment 41's client: paths re-pointed belo
 OUT = HERE / "out"
 MODEL, THINKING = "gemini-4-argon", "low"
 SETS = {"a": ("v2_55", P.E41 / "out" / "sample.json"), "b": ("v2_fresh", HERE / "sample43.json"),
-        "c": ("v33_300b", HERE / "sample43b.json")}       # c: the second 300 (sample43b.py)
+        "c": ("v33_300b", HERE / "sample43b.json"),       # c: the second 300 (sample43b.py)
+        "d": ("j0130", HERE.parent / "52_journal_gate1" / "out" / "sample52.json"),   # d: one journal, gate 1 (experiment 52)
+        "e": ("v36_check", HERE.parent / "65_fix_leaks" / "sample65.json"),   # e: experiment 65's v3.6 check pages
+        "f": ("j0165", HERE.parent / "70_gate2_pilot" / "out" / "sample70.json"),
+        "g": ("j_gate2", HERE.parent / "74_gate2_full" / "out")}   # g: the rest of gate 2 (experiment 74): every
+# out/<journal>/sample.json under 74_gate2_full; a run named j<journal> (j0011, j0011_final ...) takes its journal's   # f: gate 2's pilot, journal 0165 (experiment 70)   # e: experiment 65's v3.6 check pages
 LOCK = threading.Lock()
 DONE_STATES = {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}
 
@@ -75,7 +80,22 @@ def jdump(p: Path, obj):
 
 
 def articles(which: str) -> list[dict]:
+    if which == "g":
+        return [a for f in sorted(SETS["g"][1].glob("[0-9][0-9][0-9][0-9]/sample.json")) for a in jl(f)["articles"]]
     return jl(SETS[which][1])["articles"]
+
+
+def gate2_journal(run: str) -> str | None:
+    """Experiment 74: the journal of a gate-2 run name (j0011, j0011_final, j0011_x ...), None for any other run."""
+    import re
+    m = re.match(r"j(\d{4})(_|$)", run or "")
+    return m.group(1) if m and m.group(1) not in ("0130", "0165") else None
+
+
+def run_set(run: str, default: str = "b") -> str:
+    """The set letter of a run name (patches43 / summary43; experiment 74 added g)."""
+    return ("d" if run.startswith("j0130") else "f" if run.startswith("j0165") else "g" if gate2_journal(run)
+            else "c" if run.startswith("v33_300b") else default)
 
 
 def raw_file(run, stem, x, y) -> Path:
@@ -132,6 +152,8 @@ def ready_chunks(arts, run) -> list[tuple]:
                 state_for(a, ci, run)
             except KeyError:
                 break
+            finally:
+                ST._az.pop(a["stem"], None)      # exp 74: no Azure JSON kept while scanning every article
             out.append((a, ci, x, y))
             break
     return out
@@ -187,6 +209,7 @@ def estimate(arts, run, calib) -> dict:
             tin += calib["in_factor"] * (1150 * (k + (x > 1)) + len(ptxt) / 2.6)
             tout += calib["out_per_line"] * calib["v2_out_factor"] * ls
             worst_out += max_out(k)
+        ST._az.pop(a["stem"], None)              # exp 74: one article's Azure JSON at a time (346 articles > 3 GB)
     cost = {}
     for mode in ("batch", "standard"):
         for label, when in (("now", None), ("from 2026-12-01", "2026-12-01")):
@@ -304,6 +327,12 @@ def collect(job, run, meta, client):
         if ans is None:
             (OUT / "truncated").mkdir(parents=True, exist_ok=True)
             (OUT / "truncated" / f"{key}.txt").write_text(text, encoding="utf-8")
+            first = rf.parent / (rf.stem + ".failed1.json")
+            if "MAX_TOKENS" not in fin and text.strip() and not first.exists():
+                # experiment 74 (exp 70's issue 3): a malformed JSON answer (finish STOP) is sent once more, in the
+                # next round: kept as .failed1.json, so the chunk is ready again; a second failure stops the article
+                jdump(first, dict(rec, failed=True, resend=True))
+                continue
             jdump(rf.parent / (rf.stem + ".failed.json"), dict(rec, failed=True))
             continue
         jdump(rf, dict(rec, answer=ans if isinstance(ans, dict) else {"pages": ans}))
@@ -329,6 +358,11 @@ def run_batch(arts, run, cap, upload, poll, max_enqueued):
                 time.sleep(poll)
             if st == "JOB_STATE_SUCCEEDED":
                 collect(job, run, r, client)
+            if st in DONE_STATES and r.get("file"):
+                try:                       # exp 74: the File API holds 20 GB a project; a used input file is freed
+                    client.files.delete(name=r["file"])
+                except Exception:          # noqa: BLE001
+                    pass
             r.update(collected=True, final_state=st, done=time.strftime("%Y-%m-%d %H:%M:%S"),
                      create_time=str(getattr(job, "create_time", "")), end_time=str(getattr(job, "end_time", "")))
             jdump(sf, state)
@@ -343,6 +377,7 @@ def run_batch(arts, run, cap, upload, poll, max_enqueued):
         lines, keys, worst, toks = [], [], 0.0, 0
         for a, ci, x, y in todo:
             key, line, est_in, mo = request_line(a, ci, x, y, run, upload, client)
+            ST._az.pop(a["stem"], None)          # one article's Azure JSON in memory at a time (exp 52: 3 GB otherwise)
             w = est_in / 1e6 * pin + mo / 1e6 * pout
             if lines and toks + est_in > max_enqueued:
                 print(f"  enqueued-token limit: this job takes {len(lines)} of {len(todo)} ready requests; the rest "
@@ -375,7 +410,7 @@ def run_batch(arts, run, cap, upload, poll, max_enqueued):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--set", choices=["a", "b", "c"], required=True,
+    ap.add_argument("--set", choices=["a", "b", "c", "d", "e", "f", "g"], required=True,
                     help="a: experiment 41's 55; b: sample43.json; c: sample43b.json (the second 300)")
     ap.add_argument("--mode", choices=["batch", "standard"], default="batch")
     ap.add_argument("--cap", type=float, help="USD: stop before the logged spend could pass this")
@@ -396,9 +431,14 @@ def main():
     global THINKING
     THINKING = args.thinking
     run = args.run or SETS[args.set][0]
-    if args.set in ("b", "c"):                # page renders of the fresh samples stay in this experiment
+    if args.set in ("b", "c", "d", "e", "f", "g"):      # page renders of the fresh samples stay in this experiment
         ST.PAGES = OUT / "pages"
     arts = [a for a in articles(args.set) if not args.stems or a["stem"] in args.stems]
+    if args.set == "g":                            # experiment 74: the run names its journal (--run j0011)
+        J = gate2_journal(run)
+        if not J:
+            sys.exit("--set g needs --run j<journal> (j0011, ...)")
+        arts = [a for a in arts if a["stem"].startswith(J + "-")]
     if args.dry_run:
         e = estimate(arts, run, calibration())
         jdump(OUT / run / "dry_run.json", e)

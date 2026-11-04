@@ -1747,12 +1747,15 @@ def new_log() -> dict:
                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
                 long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[], rubric_title=[],
-                guillemet_halves=[], table_cells_added=[], table_cells_unplaced=[])
+                guillemet_halves=[], table_cells_added=[], table_cells_unplaced=[], fixes_refused_d30=[])
 
 
 def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     ans = copy.deepcopy(ans or {})
     log = new_log()
+    if "enrich" in ans:                        # prompt v3.5 (draft): its separate part checked first (enrich43.py)
+        import enrich43
+        enrich43.check(ans, lines, log)
     if isinstance(ans.get("pages"), list):
         for pg in ans["pages"]:
             for b in (pg.get("blocks") or []) if isinstance(pg, dict) else []:
@@ -1784,6 +1787,8 @@ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
     inline_math_junk(ans, lines, words, log)
     guillemet_halves(ans, lines, log)
     table_missed_cells(ans, lines, words, log)
+    import d30guard43                          # experiment 66 (D30 guard): a risky fix becomes a model-suggestion flag
+    d30guard43.guard(ans, lines, words, log)
     fixes(ans, log)
     return ans, log
 

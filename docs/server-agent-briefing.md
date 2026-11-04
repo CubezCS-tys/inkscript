@@ -35,8 +35,10 @@ fact traceable back to the ink on the scanned page.
 ## Why this is worth doing
 
 The big citation indexes (Web of Science, Scopus, Dimensions, OpenAlex) barely see Arabic scholarship. Clarivate's
-Arabic Citation Index exists but is shallow: metadata only, and none of the footnotes, which is where Arabic
-scholarship does its citing. Mandumah has the depth no one else has. If we can extract it reliably, we can build
+Arabic Citation Index (ARCI, 2020) exists but is a selection: 400+ journals, from 2015 on. Its records do carry cited
+references and times cited (El-Ouahi, arXiv 2101.12177; this briefing once said "metadata only", which was wrong —
+corrected 2026-10-23, experiment 55); whether it captures footnote citations, where Arabic scholarship does much of
+its citing, is not known. Mandumah has the depth no one else has. If we can extract it reliably, we can build
 the index nobody else can.
 
 We think of it as **five layers**, each one proven before we scale, each with a well-known model to copy:

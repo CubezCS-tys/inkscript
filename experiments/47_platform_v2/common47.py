@@ -65,12 +65,51 @@ def connect(path: Path = DB, ro: bool = False) -> sqlite3.Connection:
         con.execute("PRAGMA journal_mode=WAL")
         if new or not con.execute("SELECT 1 FROM sqlite_master WHERE name = 'versions'").fetchone():
             con.executescript(schema_sql())
+        else:
+            migrate(con)
         con.executescript(EXTRA_SQL)
         # declared, not enforced while loading (children are written before parents); checked with
         # PRAGMA foreign_key_check after every load
         con.execute("PRAGMA foreign_keys=OFF")
     con.row_factory = sqlite3.Row
     return con
+
+
+def migrate(con) -> list:
+    """Bring an existing database up to schema47.sql (v3.5b fields, 2026-10-22): the tables, indexes and views it lacks
+    are created and the columns it lacks are added (ALTER TABLE ADD COLUMN: appended, as schema47.sql lists them last).
+    Nothing is dropped or rewritten; a database already up to date is left as it is."""
+    mem = sqlite3.connect(":memory:")
+    mem.executescript(schema_sql())
+    have = {r[0]: r[1] for r in con.execute("SELECT name, type FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'")}
+    done = []
+    for name, typ, sql in mem.execute("SELECT name, type, sql FROM sqlite_master WHERE type = 'table' AND sql IS NOT "
+                                      "NULL AND name NOT LIKE 'sqlite_%' ORDER BY rowid"):
+        if name not in have:
+            con.execute(sql)
+            done.append(f"table {name}")
+            continue
+        cols = {r[1] for r in con.execute(f"PRAGMA table_info([{name}])")}
+        fks = {r[3]: (r[2], r[4]) for r in mem.execute(f"PRAGMA foreign_key_list([{name}])")}
+        for cid, col, ctype, notnull, dflt, pk in mem.execute(f"PRAGMA table_info([{name}])"):
+            if col in cols:
+                continue
+            d = f"{col} {ctype}"
+            if dflt is not None:
+                d += f" DEFAULT {dflt}"
+            if col in fks:
+                d += f" REFERENCES {fks[col][0]}({fks[col][1]})"
+            con.execute(f"ALTER TABLE [{name}] ADD COLUMN {d}")
+            done.append(f"column {name}.{col}")
+    for name, typ, sql in mem.execute("SELECT name, type, sql FROM sqlite_master WHERE type IN ('index', 'view') AND "
+                                      "sql IS NOT NULL ORDER BY rowid"):
+        if name not in have:
+            con.execute(sql)
+            done.append(f"{typ} {name}")
+    con.commit()
+    if done:
+        print(f"  schema migrated: {', '.join(done)}", flush=True)
+    return done
 
 
 def marc() -> sqlite3.Connection:
@@ -140,6 +179,7 @@ STABLE_PK = {
     "catalogue_reports": ("report_pk", ("kind", "field", "c999", "pub_id", "stem", "version_id", "catalogue_value",
                                         "our_value", "evidence")),
     "model_calls": ("call_pk", ("job", "run", "stem", "page", "chunk", "model", "file_key")),
+    "cited_work_editions": ("edition_pk", ("cited_work_pk", "edition_key")),
 }
 
 

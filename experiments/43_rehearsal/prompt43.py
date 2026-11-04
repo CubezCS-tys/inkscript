@@ -181,7 +181,8 @@ def make_prompt(a: dict, ci: int, x: int, y: int, state: dict | None) -> tuple[s
         context += ST.STATE.format(first=x, **state)
     p = PROMPTS[PROMPT_VERSION][0].format(images_note=(ST.IMG_CTX if ctx_img else ST.IMG_WHOLE).format(first=x), context=context,
                          lines="\n".join(lines), first=x, last=y,
-                         metadata_spec=PROMPTS[PROMPT_VERSION][1] if want_meta else ST.META_NONE)
+                         metadata_spec=PROMPTS[PROMPT_VERSION][1] if want_meta else ST.META_NONE,
+                         enrich_spec=enrich_spec(want_meta))
     return p, imgs, len(imgs)
 
 
@@ -199,7 +200,15 @@ def prompt_text_only(a: dict, ci: int, x: int, y: int, state: dict | None) -> st
         context += ST.STATE.format(first=x, **state)
     return PROMPTS[PROMPT_VERSION][0].format(images_note=(ST.IMG_CTX if x > 1 else ST.IMG_WHOLE).format(first=x), context=context,
                             lines="\n".join(lines), first=x, last=y,
-                            metadata_spec=PROMPTS[PROMPT_VERSION][1] if ci == 0 else ST.META_NONE)
+                            metadata_spec=PROMPTS[PROMPT_VERSION][1] if ci == 0 else ST.META_NONE,
+                            enrich_spec=enrich_spec(ci == 0))
+
+
+def enrich_spec(first: bool) -> str:
+    """v3.5's "enrich" outline for this chunk ("" for versions without it: their text has no {enrich_spec}, and
+    str.format ignores the unused value, so their prompts are unchanged)."""
+    e = ENRICH.get(PROMPT_VERSION)
+    return (e[0] if first else e[1]) if e else ""
 
 
 # ------------------------------------------------------------------------------------------------ prompt v3
@@ -370,9 +379,204 @@ V34_CHANGES = [
   must still fit)."""),
 ]
 PROMPT_V34 = _apply(PROMPT_V33, V34_CHANGES)
+
+# ------------------------------------------------------------------------------------------------ prompt v3.5 (draft)
+# 2026-10-22: DRAFT, not live, nothing sent with it (README "Prompt v3.5 (draft, 2026-10-22)"). v3.3 + the 37
+# "add to the prompt first" items of experiment 51 (inventory.json prompt_priority 1; owner: "add all 37").
+# Built against v3.4's two repeat losses (an advert shredded, paragraphs merged; README "Final first 300 and the exam
+# config"): every structural passage of v3.3 is left word for word; the new fields go in their own top-level part of
+# the answer, "enrich", described in its own section and written LAST; the only additions inside v3.3's passages
+# are (a) v3.4's two content lines, verbatim (the owner's 37 include them), (b) one fix line for honorific ligatures
+# and (c) new optional keys of a cited work W in the citations passage (W is not structure). v3.4's "compact JSON"
+# line is NOT included. Gemini still never retypes text (D30): every new value is a line id, a word from a closed
+# list, or an exact substring of Azure's text, checked in code (rules43.enrich_check, enrich43, refs43, meta43).
+# The 37 items, by inventory id (each marked in the text below where it is asked):
+#   document type x061 x062 x070 x224 · about the article x003 x063 x064 x066 x067 x068 · authors x024 x026 x028 x029
+#   x034 x039 x040 · cited works x117 x118 x119 x120 x121 x127 x133 x135 x136 x137 · table / figure notes x111 x112
+#   · note kinds x110 · picture kind x158 · stamps x213 · handwriting x214 · scan problems x216 · honorific glyphs
+#   x176 · v3.4's content lines x164 (inline formulas) x178 (letters lost in vowelled lines)
+V35_CHANGES = [
+    # the answer's shape: one more top-level key, last
+    (''' "missed": [ {{"after": "3:15", "type": "paragraph", "text": "printed text that no Azure line covers"}} ]
+}}
+''',
+     ''' "missed": [ {{"after": "3:15", "type": "paragraph", "text": "printed text that no Azure line covers"}} ],
+ "enrich": {enrich_spec}
+}}
+'''),
+    # cited works: new optional keys of W (x117-x121, x127, x133, x135-x137)
+    ('''leave out fields that are empty instead of writing null.
+''',
+     '''leave out fields that are empty instead of writing null.
+v3.5: W may also hold, each only when printed and each an EXACT substring as above: "editors" and "translators"
+(persons like "authors": the editor of the text after تحقيق / تح / ضبط / ed., the translator after ترجمة / tr.);
+"died" inside a person (a classical author's death date printed with the name: "٧٥١هـ" from «(ت ٧٥١هـ)»);
+"edition" («ط٢»، «الطبعة الثالثة»، «2nd ed.»); "cal": "hijri" when "year" is a Hijri year, and "year2" = a second year
+printed for the same work in the other calendar («١٤٠٤هـ - ١٩٨٤م»: "year": "١٩٨٤م", "year2": "١٤٠٤هـ"); "cited" =
+the page(s) the entry or note points the reader to («ص ٤٥»، «ص ٤٠-٤١»، «p. 12»), "pages" is then only the work's own
+page range (an article's or a chapter's first-last pages); "accessed" = the date a web source was consulted (تاريخ
+الزيارة، Retrieved, consulté le); type "manuscript" with "library" (the library or collection holding it), "shelf"
+(its shelfmark or number) and "folio" (the leaves cited, e.g. «179/ب - 180/أ»); type "conference" with "conf" (the
+conference's name; its place in "place"); a thesis adds "degree" (رسالة دكتوراه، ماجستير، PhD), its university in
+"publisher".
+'''),
+    # v3.4's two content lines, verbatim (x164, x178)
+    ("""- "math": formulas Azure turned into garbage inside a running line (displayed formulas are equation blocks).
+""",
+     """- "math": formulas Azure turned into garbage inside a running line (displayed formulas are equation blocks).
+  v3.4: this includes a short formula inside an ARABIC sentence (e.g. «μT = max ||x|| بحيث أن»): Azure reads it as
+  Latin junk («tostST- max») and may move it within the line; "from" = that junk exactly as in Azure's text, "latex" =
+  the formula as printed. Never leave such junk in the text.
+"""),
+    ("""  dots or hamzas the print lacks.
+""",
+     """  dots or hamzas the print lacks.
+  v3.4: in FULLY VOWELLED lines (verse, Quran, hadith) Azure often drops a letter together with its marks («الزَّاد»
+  read «الْادُ», «الْكَرِيمِ» read «الْكَرِ»): check every word of such lines against the ink, letter by letter, and
+  restore what is printed with a fix.
+  v3.5: an honorific printed as ONE ligature glyph (ﷺ ﷻ ﷲ ﷽) that Azure dropped, split or read as junk letters is
+  fixed to that single character (ﷺ U+FDFA, ﷻ U+FDFB, ﷲ U+FDF2, ﷽ U+FDFD), never spelt out as words; if Azure left
+  nothing, "from" is the text round the gap («الكريم ()» -> «الكريم (ﷺ)»). An honorific printed in words stays so.
+"""),
+    # the enrichment section, after every structural rule and before the last line
+    ("""- Return only the JSON object.""",
+     """ENRICHMENT (v3.5). "enrich" is a SEPARATE part of the answer, written LAST. It changes nothing above: decide every
+block, type, order, split, fix and note exactly as you would without it. Every value in it is a line id, a word from
+the lists below, or an EXACT substring of Azure's text (after your fixes), as "aff_parts" are; never retype, complete
+or translate. Leave out every key that does not apply ("enrich": {{}} when nothing does).
+  doc_type      what the piece is: research, review (a survey of earlier studies), editorial, book_review, report,
+                conference_paper, thesis_summary, interview, news, letter, obituary, poem, documents (texts or
+                records presented), bibliography, front_matter (an issue's contents, editorial board, instructions to
+                authors), other
+  conference    a paper read at a conference: its name, place and dates as printed (such a line under the title is
+                this, not a subtitle)
+  thesis        a thesis summary: the degree (ماجستير، دكتوراه), university, year and supervisor as printed
+  reviewed      a book review: the reviewed book as one W (PARSED REFERENCES)
+  original      a translated article: the original's title, author and source as printed, and its language
+  part          one article of a series: "n" = the part as printed («(٤)»، «الحلقة الثانية»), "of" = the series' title
+                if printed apart from it
+  authors       only authors with one of these; "a" = the author's number in metadata "authors" (1 = the first).
+                "corresp": true = the print marks this author as the corresponding author (Corresponding author,
+                الباحث المراسل). "orcid", "ids" ({{"scopus" | "researcherid" | "scholar": "..."}}) as printed.
+                "same_as": K = this entry is author K printed in another script (an English byline of an Arabic
+                name; both stay in metadata "authors"). "affs" = when the author has more than one affiliation
+                (often matched by superscript numbers) or a faculty / college printed apart from the department:
+                every affiliation of that author, in order, its parts as in "aff_parts" plus "faculty" (كلية،
+                Faculty, College). "note" = the line ids of a starred or numbered note about the author (post,
+                affiliation, address) printed at the foot of the page; it stays a footnote block above
+  figures       for EVERY figure block, by page, its kind, in the order of that page's figure blocks: chart, photo,
+                map, diagram, drawing, manuscript (a facsimile of a manuscript or document), portrait, logo, stamp,
+                cartoon, calligraphy, table_image, ornament, advert, other
+  table_notes   lines printed under a table or figure that belong to it: notes (* p < 0.05، ملاحظة) and source lines
+                («المصدر:»، Source:). "of" = a line id of that table (a cell) or of its caption ("f4.1" = page 4's
+                first figure when it has neither), "lines" = the note's lines (they stay in their block above),
+                "kind": "note" | "source"
+  note_kinds    footnotes and endnotes NOT by the author, by their id: "translator" (المترجم، (م)), "editor" (المحقق،
+                المحرر), "publisher" (the journal's or the editors' note)
+  marks         lines that are not the print, wherever they are above: "handwriting" (readers' notes, marginalia,
+                signatures in ink), "stamp" (library stamps, ownership marks, call numbers)
+  scan          problems of the scan, by page, only when plain: cut_edge (text cut off at an edge), blur, faint, dark,
+                skew, torn, missing_page (a page is missing before this one), duplicate_page, out_of_order
+- Return only the JSON object."""),
+]
+PROMPT_V35 = _apply(PROMPT_V33, V35_CHANGES)
+
+# ------------------------------------------------------------------------------------------------ prompt v3.5b (draft)
+# 2026-10-22, after the v3.5 check (out/v35_check/score.md): v3.5's new fields were good, but the structure moved
+# beyond v3.3's own run-to-run noise on some pages (gold 2382 31 differences vs 17; 0500 figures/captions read as
+# paragraphs; 0787 footers as footnotes; 1010-006's advert split again). The only content change inside v3.3's
+# structural passages was v3.4's two content lines (the cause of v3.4's losses before), so v3.5b = v3.5 WITHOUT them:
+# v3.3's structural text word for word, plus the honorific-ligature line (one of the owner's 37), the new optional keys
+# of a cited work, and the enrichment section. The owner chose this over a second enrichment call per article (+47% a
+# page). Nothing else differs from v3.5.
+_V34_MATH = V35_CHANGES[2]
+_V34_VOWELS_AND_HONORIFIC = V35_CHANGES[3]
+assert "v3.4: this includes a short formula" in _V34_MATH[1]
+assert "FULLY VOWELLED" in _V34_VOWELS_AND_HONORIFIC[1] and "honorific printed as ONE ligature" in _V34_VOWELS_AND_HONORIFIC[1]
+_HONORIFIC_ONLY = (_V34_VOWELS_AND_HONORIFIC[0], _V34_VOWELS_AND_HONORIFIC[0] + _V34_VOWELS_AND_HONORIFIC[1][
+    _V34_VOWELS_AND_HONORIFIC[1].index("  v3.5: an honorific"):])
+V35B_CHANGES = [c for c in V35_CHANGES if c is not _V34_MATH and c is not _V34_VOWELS_AND_HONORIFIC]
+V35B_CHANGES.insert(2, _HONORIFIC_ONLY)
+PROMPT_V35B = _apply(PROMPT_V33, V35B_CHANGES)
+assert "v3.4:" not in PROMPT_V35B and "honorific printed as ONE ligature" in PROMPT_V35B
+# the "enrich" shape shown in the answer's outline (a value, so single braces): with the metadata (first chunk) the
+# article's keys too; on later chunks only the page keys
+ENRICH_FULL_V35 = """{"doc_type": "research", "conference": {"name": "...", "place": "...", "date": "..."},
+   "thesis": {"degree": "...", "university": "...", "year": "...", "supervisor": "..."}, "reviewed": W,
+   "original": {"title": "...", "author": "...", "source": "...", "lang": "en"}, "part": {"n": "...", "of": "..."},
+   "authors": [{"a": 1, "corresp": true, "orcid": "...", "ids": {"scopus": "..."}, "same_as": 2,
+     "affs": [{"department": "...", "faculty": "...", "institution": "...", "city": "...", "country": "..."}],
+     "note": ["1:40"]}],
+   "figures": {"3": ["chart", "photo"]}, "table_notes": [{"of": "4:12", "lines": ["4:30"], "kind": "source"}],
+   "note_kinds": {"fn-3-2": "translator"}, "marks": {"handwriting": ["2:40"], "stamp": ["1:2"]},
+   "scan": {"3": ["cut_edge"]}}"""
+ENRICH_PAGES_V35 = """{"figures": {"3": ["chart", "photo"]}, "table_notes": [{"of": "4:12", "lines": ["4:30"],
+   "kind": "source"}], "note_kinds": {"fn-3-2": "translator"}, "marks": {"handwriting": ["2:40"]},
+   "scan": {"3": ["cut_edge"]}}   (the article's keys are given with its first pages only)"""
+
+# ------------------------------------------------------------------------------------------------ prompt v3.6 (draft)
+# 2026-11-02, experiment 65 (experiment 61's "nothing lost" audit, P1-P3): v3.5b word for word, plus
+#   P1  metadata authors[].position: the author's post / rank as its own exact substring (Gemini put it in "role" or
+#       inside "affiliation"; the masters dropped it, M1);
+#   P2  enrich "doi" (the article's own DOI, not one inside its references), "license" (the licence / copyright /
+#       open-access lines) and "section" (the journal's section or rubric printed over the title) - code catches the
+#       plain cases (leaks43); these are for what it cannot tell apart;
+#   P3  enrich "printings", on ANY chunk: every other printing of an author (an English byline on the summary page at
+#       the end, a byline repeated on page 2, a closing signature, an author note) with its lines, ORCID, e-mail, post
+#       and the corresponding-author mark (0130-027-105-003 lost three ORCIDs on its last pages under v3.5b).
+# Nothing inside v3.3's structural passages changes; the new keys go in the metadata outline and the ENRICHMENT
+# section, as v3.5's did. The answer schema is v3.5b's plus these keys (enrich43.KNOWN, test_leaks43).
+META_V36_CHANGES = [
+    ("""{{"name": "...", "role": "...", "affiliation": "...",""",
+     """{{"name": "...", "role": "...", "position": "...", "affiliation": "...","""),
+    ("""   name only, a phrase printed with it such as بقلم، تأليف، ضبطها وشرحها، ترجمة، by goes in "role")""",
+     """   name only, a phrase printed with it such as بقلم، تأليف، ضبطها وشرحها، ترجمة، by goes in "role"; v3.6:
+   "position" = the author's post or rank as printed («أستاذ مساعد»، «طالبة باحثة في علم الاجتماع»، "PhD Student",
+   "Professor of Psychology"), an exact substring, never in "role"; when the post is printed in the same line as
+   the affiliation it is still "position", and "affiliation" begins after it)"""),
+]
+META_FULL_V36 = _apply(META_FULL_V32, META_V36_CHANGES)
+V36_CHANGES = [
+    ("""  figures       for EVERY figure block, by page, its kind,""",
+     """  doi           the article's OWN DOI as printed (on its first page, its running head or foot, its "how to cite"
+                line or its summary page; never one inside the references or notes), an exact substring
+                ("10.29343/1-79-2" from «Doi: 10.29343/1-79-2»)
+  license       the line ids of the licence / copyright / open-access statement (Creative Commons, ©, جميع الحقوق
+                محفوظة، رخصة المشاع الإبداعي)
+  section       the line id(s) of the journal's section or rubric printed over the title (المقالات، البحوث
+                والدراسات، Research Papers, Book Reviews); not a running head that names the journal
+  printings     on ANY pages: every OTHER printing of an author away from the first byline - an English byline on
+                a summary page at the end, a byline repeated on page 2, a closing signature, a note about the
+                author. One entry per author per printing: "a" = the author's number in metadata "authors" (on
+                later pages: the K-th author of the article's first byline, seen in Image 1), "name" = the name
+                exactly as printed THERE, "lines" = that printing's line ids, and, when printed there, "orcid",
+                "email", "position" (post or rank) and "corresp": true (the corresponding-author mark). Leave out
+                the first byline itself.
+  figures       for EVERY figure block, by page, its kind,"""),
+    ("""ENRICHMENT (v3.5). "enrich" is a SEPARATE part""", """ENRICHMENT (v3.6). "enrich" is a SEPARATE part"""),
+    # (a fix-rule bullet from experiment 66 was tried here and DROPPED on 2026-11-02: experiment 69 found it changed
+    # nothing measurable in Argon's fixes; the code guard d30guard43 is what catches bad fixes)
+]
+PROMPT_V36 = _apply(PROMPT_V35B, V36_CHANGES)
+assert PROMPT_V36.count("printings") == 1 and "v3.4:" not in PROMPT_V36
+_PRINTING = """[{"a": 1, "name": "...", "lines": ["25:7", "25:8"], "orcid": "...", "email": "...",
+     "position": "...", "corresp": true}]"""
+ENRICH_FULL_V36 = ENRICH_FULL_V35.replace(
+    '"part": {"n": "...", "of": "..."},',
+    '"part": {"n": "...", "of": "..."},\n   "doi": "...", "license": ["1:41", "1:42"], "section": ["1:3"],').replace(
+    '   "figures": {"3": ["chart", "photo"]}, "table_notes"',
+    '   "printings": ' + _PRINTING + ',\n   "figures": {"3": ["chart", "photo"]}, "table_notes"')
+ENRICH_PAGES_V36 = ENRICH_PAGES_V35.replace('{"figures": {"3": ["chart", "photo"]},',
+                                            '{"printings": ' + _PRINTING + ', "figures": {"3": ["chart", "photo"]},')
+assert '"doi"' in ENRICH_FULL_V36 and "printings" in ENRICH_FULL_V36 and "printings" in ENRICH_PAGES_V36
+
 PROMPTS = {"v2": (PROMPT_V2, META_FULL_V2), "v3": (PROMPT_V3, META_FULL_V3), "v3.1": (PROMPT_V31, META_FULL_V3),
            "v3.2": (PROMPT_V32, META_FULL_V32), "v3.3": (PROMPT_V33, META_FULL_V32),
-           "v3.4": (PROMPT_V34, META_FULL_V32)}
+           "v3.4": (PROMPT_V34, META_FULL_V32), "v3.5": (PROMPT_V35, META_FULL_V32),
+           "v3.5b": (PROMPT_V35B, META_FULL_V32), "v3.6": (PROMPT_V36, META_FULL_V36)}
+# v3.5's "enrich" outline (first chunk, later chunks); a version without an entry has no {enrich_spec} in its text
+ENRICH = {"v3.5": (ENRICH_FULL_V35, ENRICH_PAGES_V35), "v3.5b": (ENRICH_FULL_V35, ENRICH_PAGES_V35),
+          "v3.6": (ENRICH_FULL_V36, ENRICH_PAGES_V36)}
 # the names the earlier README section used for the (then not live) draft of (a)-(c)
 PROMPT_V3_CANDIDATE, META_FULL_V3_CANDIDATE = PROMPT_V3, META_FULL_V3
 

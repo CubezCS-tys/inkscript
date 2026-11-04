@@ -154,7 +154,8 @@
      "description": "One footnote or endnote, with its printed label and its place on the page. [The reading layer]",
      "label_column": "label",
      "columns": {
-      "kind": "footnote | endnote"
+      "kind": "footnote | endnote",
+      "written_by": "v3.5b: translator | editor | publisher as the reader marked it (fn/@custom-type); NULL = the author's. kind = author-note for the starred note about an author (author-notes)"
      }
     },
     "note_calls": {
@@ -171,11 +172,34 @@
      "description": "Each picture, table and equation as an object: its box, crop, caption, Arabic and English descriptions, text inside it, LaTeX and MathML. [The reading layer]",
      "columns": {
       "figure_id": "JATS id; inline formulas get an anchor-based id",
-      "kind": "figure | table | equation | inline-equation | inline-picture"
+      "kind": "figure | table | equation | inline-equation | inline-picture",
+      "fig_type": "v3.5b: chart | photo | map | diagram | drawing | manuscript | portrait | logo | stamp | cartoon | calligraphy | table_image | ornament | advert | other; decoration (v3.3); fig/@fig-type"
      }
     },
     "table_cells": {
      "description": "Tables as data: every cell with its row, column and spans, so a table can be rebuilt, exported or queried. [The reading layer]"
+    },
+    "figure_notes": {
+     "description": "v3.5b: a note or «المصدر:» source line printed under a table or figure, tied to it (table-wrap-foot / the fig). [The reading layer]",
+     "label_column": "text",
+     "columns": {
+      "figure_id": "the table or figure (figures.figure_id)",
+      "kind": "table-note | figure-note | source | footnote (a footnote whose call sits in a cell)",
+      "block_id": "the note's paragraph (blocks)",
+      "note_id": "a footnote moved whole under its table (notes)"
+     }
+    },
+    "page_marks": {
+     "description": "v3.5b: what the reader saw on a page that is not the article: handwriting, stamps, and scan problems (cut edge, blur, a missing or out-of-order page). [The reading layer]",
+     "label_column": "mark_id",
+     "columns": {
+      "mark_id": "'<kind>|<line>' or 'scan-problem|<page>|<problem>'",
+      "kind": "handwriting | stamp | scan-problem",
+      "problem": "scan-problem: cut_edge | blur | faint | dark | skew | torn | missing_page | duplicate_page | out_of_order",
+      "line_id": "handwriting / stamp: the Azure line (P:N) the reader named",
+      "text": "that line's text",
+      "source": "custom-meta handwriting-lines | stamp-lines | scan-problem"
+     }
     },
     "verse_lines": {
      "description": "Each printed verse line, or hemistich where the print separates them, as printed with its vowels, so poetry can be searched and cited line by line. [The reading layer]",
@@ -245,7 +269,9 @@
       "pub_id": "'W'+c999, or 'WS'+stem for an uncatalogued file (merged later via merged_ids)",
       "type": "article | thesis | conference-paper | book-review | editorial | interview | report",
       "status": "catalogued-only | pdf-only | azure | structured | judged | final | person-checked",
-      "year_shown": "denormalised from the chosen assertions, refreshed per release"
+      "year_shown": "denormalised from the chosen assertions, refreshed per release",
+      "doc_type": "v3.5b: the document type shown (the page's word: research | review | editorial | book_review | report | conference_paper | thesis_summary | interview | news | letter | obituary | poem | documents | bibliography | front_matter | other), from the chosen doc_type assertion",
+      "doc_type_source": "page (the reader's reading of the article) | catalogue (MARC 336 mapped)"
      }
     },
     "metadata_assertions": {
@@ -401,7 +427,12 @@
      "label_column": "printed",
      "columns": {
       "printed": "whole printed string",
-      "titles": "د. | أ.د. | الشيخ | الدكتور ... (kept, not thrown away)"
+      "titles": "د. | أ.د. | الشيخ | الدكتور ... (kept, not thrown away)",
+      "is_corresponding": "v3.5b: contrib/@corresp (the corresponding-author mark printed on the page)",
+      "ids": "v3.5b: JSON {orcid, scopus, researcherid, scholar} as printed (contrib-id)",
+      "contrib_type": "the reader's contrib/@contrib-type (author | translator | reviewer | supervisor | rapporteur ...)",
+      "role_phrase": "the printed role words (contrib/role: «ترجمة»، «مراجعة:»)",
+      "twin_of_pk": "the same person printed again in another script (an English byline): points at the main mention"
      }
     },
     "catalogue_contributors": {
@@ -430,7 +461,9 @@
      "label_column": "printed",
      "columns": {
       "position_title": "«مدرس القانون الدولي العام» (kept)",
-      "kind": "institution | position-only | place-only"
+      "kind": "institution | position-only | place-only",
+      "assembled": "v3.5b: 1 = an extra affiliation the reader gave in printed parts (aff content-type additional), joined here; printed = those parts",
+      "faculty_printed": "v3.5b: the faculty / college as the reader gave it apart (institution[@content-type=faculty]); faculty_text is inst46's reading of the printed string"
      }
     },
     "affiliation_links": {
@@ -480,7 +513,17 @@
       "cited_pages": "the locator: the page cited, not the work's pages",
       "resolve_method": "self | previous-mention | same-author-earliest | title-words | person",
       "resolved_by": "link47 | judge | person",
-      "unresolved_why": "no-earlier-full | ambiguous-author | no-parse | ..."
+      "unresolved_why": "no-earlier-full | ambiguous-author | no-parse | ...",
+      "edition": "«ط٢»، «الطبعة الثالثة», «2nd ed.» (element-citation/edition)",
+      "year_calendar": "hijri | gregorian: the calendar of the year in parsed.year (year/@calendar)",
+      "year2_calendar": "the same year printed in the other calendar («1410هـ / 1990م»)",
+      "work_pages": "the work's own page range (an article's fpage-lpage), kept apart from cited_pages",
+      "cited_pages_source": "cited-pages (v3.5b: page-range[@content-type=cited-pages]) | page-range | fpage | locator",
+      "died": "the cited author's death date as printed («ت ٧٥١هـ»); one per author, ' | ' between",
+      "access_date": "a web source's access date (date-in-citation[@content-type=access-date])",
+      "ms_folio": "a manuscript's library, shelfmark and folio («ورقة ١٧٩/ب»)",
+      "thesis_degree": "a cited thesis's degree («رسالة ماجستير»); its university is parsed.publisher",
+      "conf_loc": "a cited conference paper's conference and where it met"
      }
     },
     "cited_works": {
@@ -493,12 +536,17 @@
      }
     },
     "cited_work_members": {
-     "description": "Which full citations were grouped into each cited work, why, and by whom; a person can move one with a patch. [Citations]"
+     "description": "Which full citations were grouped into each cited work, why, and by whom; a person can move one with a patch. [Citations]",
+     "columns": {
+      "edition_pk": "v3.5b: which edition of the work this citation names (NULL: it names none)"
+     }
     },
     "cited_work_authors": {
      "description": "The authors of a cited work split into the parts of an Arabic name, tied to a person where the catalogue identifies them. [Citations]",
      "columns": {
-      "shuhra": "«ابن جني» is shuhra"
+      "shuhra": "«ابن جني» is shuhra",
+      "died": "v3.5b: the death date as printed in a citation of the work («ت ٧٥١هـ»)",
+      "died_greg": "the death year in both calendars (one read, the other converted)"
      }
     },
     "link_runs": {
@@ -519,6 +567,31 @@
       "method": "catalogue-fts+validate | article-fts+validate | doi | person",
       "matched_on": "printed | printed_fixed",
       "asserted_by": "link47 | judge | person"
+     }
+    },
+    "citation_mention_people": {
+     "description": "v3.5b: the people of one citation as printed, by role: its authors, the editor of the text (تحقيق) and the translator, with a death date when printed («ت ٧٥١هـ»). [Citations]",
+     "label_column": "printed",
+     "columns": {
+      "role": "author | editor | translator",
+      "died": "as printed"
+     }
+    },
+    "cited_work_editions": {
+     "description": "v3.5b: one edition (printing) of a cited work as the citations give it: edition statement + publisher + year; each full citation points at its edition (cited_work_members.edition_pk). [Citations]",
+     "label_column": "edition_printed",
+     "columns": {
+      "edition_key": "folded edition statement | year | publisher",
+      "edition_printed": "«ط٢» as printed (first citation naming this edition)",
+      "n_members": "full citations naming this edition"
+     }
+    },
+    "cited_work_contributors": {
+     "description": "v3.5b: the people of a cited work other than its authors: the editor of the text (تحقيق) and the translator, as printed in its citations. [Citations]",
+     "label_column": "printed",
+     "columns": {
+      "role": "editor | translator",
+      "edition_pk": "the edition whose citation names them first"
      }
     },
     "work_relations": {
@@ -666,6 +739,12 @@
     "v_quran_index": {
      "description": "Quran citation index: how often each aya is quoted or cited, by how many publications."
     },
+    "v_doc_types": {
+     "description": "v3.5b: the document type of each publication as the page and the catalogue give it, and the one shown"
+    },
+    "v_publication_context": {
+     "description": "v3.5b: what the article is about beyond its title: conference, thesis summarised, book reviewed, original of a translation, part of a series"
+    },
     "reconciliation_v46": {
      "description": "Builder report: each table of platform.db (experiment 46), its v2 counterpart's count, and why they differ."
     }
@@ -745,6 +824,56 @@
     "reconciliation_with_v46": {
      "title": "Reconciliation with platform.db (experiment 46)",
      "sql": "SELECT * FROM reconciliation_v46"
+    },
+    "doc_types_page_vs_catalogue": {
+     "title": "Articles by document type: the page (prompt v3.5b) vs the catalogue (MARC 336)",
+     "description": "Every shown publication: the type the reader gave the page, the catalogue's type and the one shown (the page's when there is one). A page type the catalogue's class does not hold is a catalogue report (kind document-type).",
+     "sql": "SELECT coalesce(page_type, '(not read: prompt before v3.5b)') AS page_type, catalogue_type, shown,\n       shown_from, count(*) AS publications, sum(disagreement > 0) AS reported\nFROM v_doc_types GROUP BY 1, 2, 3, 4 ORDER BY publications DESC"
+    },
+    "doc_type_disagreements": {
+     "title": "Document type: page and catalogue disagree",
+     "sql": "SELECT r.stem, p.title_shown, r.our_value AS page_type, r.catalogue_value AS catalogue_type, r.severity,\n       r.evidence, r.status, 'http://127.0.0.1:8003/diagram/ink.html?a=' || r.anchor_pk AS ink\nFROM catalogue_reports r JOIN publications p USING (pub_id) WHERE r.kind = 'document-type' ORDER BY r.severity, r.stem"
+    },
+    "article_context": {
+     "title": "What an article is about beyond its title: conference, thesis summarised, book reviewed, original",
+     "description": "v3.5b: conference (name, place, dates), the thesis an article comes from or summarises, the book a review is of, the original of a translation, a part of a series; each value printed on the page.",
+     "sql": "SELECT v.stem, p.title_shown, p.doc_type, c.about, group_concat(substr(c.field, length(c.about) + 2) ||\n       ': ' || c.value, ' | ') AS printed\nFROM v_publication_context c JOIN publications p USING (pub_id) JOIN versions v ON v.version_id = p.current_version\nGROUP BY c.pub_id, c.about ORDER BY c.about, v.stem"
+    },
+    "references_with_editor": {
+     "title": "References naming an editor of the text (تحقيق) or a translator",
+     "description": "v3.5b: each citation whose reader gave an editor or translator, with them apart from the authors, the edition and the cited work card it belongs to.",
+     "sql": "SELECT v.stem, m.container_kind || ':' || m.container_id AS place,\n       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND\n        x.role = 'author') AS authors,\n       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND\n        x.role = 'editor') AS editors,\n       (SELECT group_concat(printed, '؛ ') FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND\n        x.role = 'translator') AS translators,\n       m.edition, json_extract(m.parsed, '$.year') AS year, m.year_calendar, m.year2, w.cited_work_id, m.printed,\n       'http://127.0.0.1:8003/diagram/ink.html?a=' || m.anchor_pk AS ink\nFROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1\nLEFT JOIN cited_work_members cm ON cm.full_mention_pk = m.mention_pk\nLEFT JOIN cited_works w ON w.cited_work_pk = cm.cited_work_pk\nWHERE EXISTS (SELECT 1 FROM citation_mention_people x WHERE x.mention_pk = m.mention_pk AND x.role IN ('editor',\n      'translator')) ORDER BY v.stem, m.reading_ord"
+    },
+    "works_with_several_editions": {
+     "title": "Cited works with several editions",
+     "description": "v3.5b: an edition is what a citation names as edition statement + year + publisher (cited_work_editions); every full citation points at its own (cited_work_members.edition_pk).",
+     "sql": "SELECT w.cited_work_id, w.title, w.first_author_key, count(*) AS editions, sum(e.n_members) AS citations,\n       group_concat(coalesce(e.edition_printed, '-') || ' / ' || coalesce(e.year_printed, '-') || ' / ' ||\n       coalesce(e.publisher, '-') || ' (' || e.n_members || ')', ' ¦ ') AS editions_as_cited\nFROM cited_work_editions e JOIN cited_works w USING (cited_work_pk) WHERE w.status = 'active'\nGROUP BY w.cited_work_pk HAVING count(*) > 1 ORDER BY editions DESC, citations DESC LIMIT 500"
+    },
+    "classical_authors_by_death_date": {
+     "title": "Cited authors by death date (ت … هـ)",
+     "description": "v3.5b: the death date printed in a citation («ت ٧٥١هـ»), in both calendars, with the works and how often they are cited.",
+     "sql": "SELECT ca.died_hijri, ca.died_greg, ca.printed AS author, ca.died AS as_printed, w.cited_work_id, w.title,\n       t.n_citing_pubs, t.n_mentions\nFROM cited_work_authors ca JOIN cited_works w USING (cited_work_pk)\nLEFT JOIN v_times_cited t ON t.cited_work_pk = w.cited_work_pk\nWHERE ca.died IS NOT NULL AND w.status = 'active' ORDER BY ca.died_hijri, ca.printed"
+    },
+    "citation_parts_of_an_article": {
+     "title": "Every reference of an article with its v3.5b parts",
+     "description": "Edition, the year in both calendars, the page referred to apart from the work's own range, access date, a manuscript's library / shelfmark / folio, a thesis's degree, a conference.",
+     "sql": "SELECT m.reading_ord, m.container_kind || ':' || m.container_id AS place, m.kind, m.printed, m.edition,\n       json_extract(m.parsed, '$.year') AS year, m.year_calendar, m.year2, m.year2_calendar, m.cited_pages,\n       m.cited_pages_source, m.work_pages, m.died, m.access_date, m.ms_library, m.ms_shelfmark, m.ms_folio,\n       m.thesis_degree, m.conf_name, m.conf_loc, 'http://127.0.0.1:8003/diagram/ink.html?a=' || m.anchor_pk AS ink\nFROM citation_mentions m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1\nWHERE v.stem = :stem AND m.kind IN ('full', 'short') ORDER BY m.reading_ord"
+    },
+    "authors_corresponding_ids_twins": {
+     "title": "Authors: corresponding author, ORCID and other ids, the name printed in another script",
+     "sql": "SELECT v.stem, b.byline_pos, b.printed, b.script, b.is_corresponding, b.ids, b.contrib_type, b.role_phrase,\n       t.printed AS same_person_as, a.person_id,\n       (SELECT group_concat(scheme || ':' || value) FROM external_ids e WHERE e.entity_kind = 'A' AND\n        e.entity_id = a.person_id) AS person_ids, 'http://127.0.0.1:8003/diagram/ink.html?a=' || b.anchor_pk AS ink\nFROM byline_mentions b JOIN versions v ON v.version_id = b.version_id AND v.is_current = 1\nLEFT JOIN byline_mentions t ON t.mention_pk = b.twin_of_pk\nLEFT JOIN authorship_mentions am ON am.mention_pk = b.mention_pk LEFT JOIN authorships a USING (authorship_pk)\nWHERE b.is_corresponding = 1 OR b.ids IS NOT NULL OR b.twin_of_pk IS NOT NULL OR b.role_phrase IS NOT NULL\n      OR b.contrib_type <> 'author' ORDER BY v.stem, b.byline_pos, b.script"
+    },
+    "table_and_figure_notes": {
+     "title": "Notes and «المصدر:» lines under tables and figures",
+     "sql": "SELECT v.stem, n.figure_id, f.kind AS of_kind, f.label, n.seq, n.kind, n.text, 'http://127.0.0.1:8003/diagram/ink.html?a=' || n.anchor_pk AS ink\nFROM figure_notes n JOIN versions v ON v.version_id = n.version_id AND v.is_current = 1\nLEFT JOIN figures f ON f.version_id = n.version_id AND f.figure_id = n.figure_id ORDER BY v.stem, n.figure_id, n.seq"
+    },
+    "page_problems": {
+     "title": "Page problems the reader saw: handwriting, stamps, scan defects",
+     "sql": "SELECT v.stem, m.page, m.kind, m.problem, m.line_id, m.text, 'http://127.0.0.1:8003/diagram/ink.html?a=' || m.anchor_pk AS ink\nFROM page_marks m JOIN versions v ON v.version_id = m.version_id AND v.is_current = 1 ORDER BY v.stem, m.page"
+    },
+    "figure_kinds": {
+     "title": "Pictures by kind (chart, photo, map, stamp, portrait ...)",
+     "sql": "SELECT coalesce(f.fig_type, '(not given)') AS fig_type, count(*) AS figures, count(DISTINCT v.stem) AS documents\nFROM figures f JOIN versions v ON v.version_id = f.version_id AND v.is_current = 1 WHERE f.kind = 'figure'\nGROUP BY 1 ORDER BY figures DESC"
     }
    }
   }

@@ -103,12 +103,23 @@ def all_articles() -> dict:
     if f.exists():
         for a in ST.jl(f)["articles"]:
             arts.setdefault(a["stem"], dict(a, set="c"))
+    f = HERE.parent / "52_journal_gate1" / "out" / "sample52.json"      # one journal (set d, experiment 52, 2026-10-22)
+    if f.exists():
+        for a in ST.jl(f)["articles"]:
+            arts.setdefault(a["stem"], dict(a, set="d"))
+    f = HERE.parent / "70_gate2_pilot" / "out" / "sample70.json"        # gate 2's pilot (set f, experiment 70, 2026-11-02)
+    if f.exists():
+        for a in ST.jl(f)["articles"]:
+            arts.setdefault(a["stem"], dict(a, set="f"))
+    for f in sorted((HERE.parent / "74_gate2_full" / "out").glob("[0-9][0-9][0-9][0-9]/sample.json")):   # set g, exp 74
+        for a in ST.jl(f)["articles"]:
+            arts.setdefault(a["stem"], dict(a, set="g"))
     return arts
 
 
 def use_pages_of(a: dict):
     """Page renders of the fresh sample live in this experiment (as in run43.py)."""
-    ST.PAGES = OUT / "pages" if a.get("set") in ("b", "c") else M43.E41 / "out" / "pages"
+    ST.PAGES = OUT / "pages" if a.get("set") in ("b", "c", "d", "f", "g") else M43.E41 / "out" / "pages"
 
 
 def chunk_files(a: dict, raw: Path) -> list[dict]:

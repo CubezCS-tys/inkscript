@@ -51,7 +51,10 @@ def main():
     rules, mast, raw = OUT / run / "rules", OUT / run / "masters", OUT / run / "raw"
     tot, types, per, by_dec, by_len = Counter(), Counter(), {}, defaultdict(Counter), defaultdict(Counter)
     oa_regions = 0
-    for a in run43.articles("c" if run.startswith("v33_300b") else "b"):   # c: the exam
+    G2 = run43.gate2_journal(run)                 # experiment 74: set g holds every gate-2 journal; keep this run's
+    for a in run43.articles(run43.run_set(run)):   # c: the exam; d: exp 52; g: exp 74
+        if G2 and not a["stem"].startswith(G2 + "-"):
+            continue
         s = a["stem"]
         one = CMP.one(s, rules, mast)
         if one is None:

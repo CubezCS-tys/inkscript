@@ -29,6 +29,13 @@ REPO = HERE.parents[1]
 PY = str(REPO / ".venv" / "bin" / "python")
 STEMS = ["0419-000-044-007", "2280-006-001-014", "0328-000-032-006", "0069-000-026-005", "0955-000-025-001",
          "0955-000-023-001", "0523-011-003-011", "2319-000-022,023-022"]
+# v3.5b fields (2026-10-22): journal 0130's final run (prompt v3.5b) joins both builds, on articles that carry the new
+# homes (editors and a twin byline, a conference, a thesis, a translation's original, an author note, a reviewed book,
+# a publisher's note, figure kinds, a second year in the other calendar, «المصدر:» lines, translators)
+J_RUN = "j0130_final"
+J_STEMS = ["0130-018-070-002", "0130-019-073-004", "0130-018-071-003", "0130-025-098-006", "0130-019-073-001",
+           "0130-020-079-004", "0130-024-096-004", "0130-018-070-001", "0130-018-071-006", "0130-021-081-004",
+           "0130-018-071-005"]
 # event and clock columns: they say when and in which load a row was written, not what it is
 VOLATILE = {"created", "load_id", "created_load", "built_load", "link_run_id", "first_load", "started", "finished",
             "merged", "checked_at"}
@@ -54,6 +61,9 @@ def build(db: Path, work: Path, order: list, seed: int, stems: list | None):
     for step in order:
         if step == "link":
             run([str(HERE / "link47.py"), "--db", str(db), "--work", str(work)], seed, work)
+        elif step == J_RUN:
+            run([str(HERE / "load47.py"), "--db", str(db), "--run", step,
+                 *([x for s in J_STEMS for x in ("--stem", s)] if stems else [])], seed, work)
         else:
             extra = st if stems or step != "v33_300_judged" else ["--stem", "0368-000-013-009"]
             if step == "v33_300_judged" and stems:
@@ -94,7 +104,7 @@ def check(full: bool = False, keep: Path | None = None) -> dict:
     tmp = Path(keep or tempfile.mkdtemp(prefix="ids47_"))
     tmp.mkdir(parents=True, exist_ok=True)
     stems = None if full else STEMS
-    runs = ["v33_300", "v2_55", "v33_300_judged", "v33_300_final"] if full else ["v33_300", "v33_300_final"]
+    runs = (["v33_300", "v2_55", "v33_300_judged", "v33_300_final"] if full else ["v33_300", "v33_300_final"]) + [J_RUN]
     a, b = tmp / "a.db", tmp / "b.db"
     for p in (a, b):
         for x in (p, Path(f"{p}-wal"), Path(f"{p}-shm")):
@@ -113,7 +123,7 @@ def check(full: bool = False, keep: Path | None = None) -> dict:
         for x in (c, Path(f"{c}-wal"), Path(f"{c}-shm")):
             x.unlink(missing_ok=True)
         (tmp / "wc").mkdir(exist_ok=True)
-        build(c, tmp / "wc", ["v33_300_final", "v33_300_judged", "link", "v2_55", "v33_300", "link"], 13, stems)
+        build(c, tmp / "wc", ["v33_300_final", J_RUN, "v33_300_judged", "link", "v2_55", "v33_300", "link"], 13, stems)
         res_c = compare(a, c)
         bad.update({f"{t} (A vs C)": r for t, r in res_c.items() if r["only_a"] or r["only_b"]})
     return dict(folder=str(tmp), tables=len(res), differing=bad,

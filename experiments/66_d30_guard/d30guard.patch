@@ -1,0 +1,32 @@
+--- a/experiments/43_rehearsal/rules43.py	2026-11-02 11:13:49.413977428 -0600
++++ b/experiments/43_rehearsal/rules43.py	2026-11-02 11:13:49.465978396 -0600
+@@ -1747,7 +1747,7 @@
+                 text_in_figure=[], figure_trim=[], trans_titles=0, boxed_blocks=0, descriptions_two_languages=0,
+                 pictures=[], pictures_skipped=[], picture_junk=0, pictures_other_article=0, picture_words=0,
+                 long_headings=[], header_text=[], inline_pictures=[], show_through=[], table_columns=[], guillemets=[], vowelled_doubtful=[], inline_math_junk=[], math_parts=[], advert_whole=[], page_numbers=[], rubric_title=[],
+-                guillemet_halves=[], table_cells_added=[], table_cells_unplaced=[])
++                guillemet_halves=[], table_cells_added=[], table_cells_unplaced=[], fixes_refused_d30=[])
+ 
+ 
+ def normalize(ans: dict, lines: dict, words=None) -> tuple[dict, dict]:
+@@ -1787,6 +1787,8 @@
+     inline_math_junk(ans, lines, words, log)
+     guillemet_halves(ans, lines, log)
+     table_missed_cells(ans, lines, words, log)
++    import d30guard43                          # experiment 66 (D30 guard): a risky fix becomes a model-suggestion flag
++    d30guard43.guard(ans, lines, words, log)
+     fixes(ans, log)
+     return ans, log
+ 
+--- a/experiments/41_azure_structure/masters.py	2026-11-02 11:13:49.423977614 -0600
++++ b/experiments/41_azure_structure/masters.py	2026-11-02 11:13:49.465978396 -0600
+@@ -428,7 +428,8 @@
+             elif r[0] == "xref":
+                 sub(el, "xref", {"ref-type": "fn", "rid": r[2]}, r[1])      # no rid: a call whose note Argon did not find
+             elif r[0] == "sic":
+-                n = sub(el, "named-content", {"content-type": "sic", "specific-use": "argon", "rid": self.sic_id(r[2]),
++                n = sub(el, "named-content", {"content-type": r[2].get("kind") or "sic",   # experiment 66: model-suggestion
++                                              "specific-use": "argon", "rid": self.sic_id(r[2]),
+                                               f"{{{XL}}}title": r[2]["corr"]}, r[1])
+                 n.set(f"{{{XL}}}type", "simple")
+             elif r[0] == "fix":

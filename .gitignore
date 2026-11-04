@@ -13,3 +13,48 @@ data/
 .pytest_cache/
 experiments/*/out/
 .claude/worktrees/
+
+# --- 2026-11-04 park: private Mandumah content and build output stay out of git ---
+# any nested out/ (experiments/*/out/ above only covers one level)
+experiments/**/out/
+# build/dev output of the Desk web app
+.next*/
+node_modules/
+*.tsbuildinfo
+*.log
+*.lock
+*.before_check
+*.before_fix.*
+# databases and line-per-record dumps (page text, catalogue)
+*.db
+*.sqlite
+*.jsonl
+marc*.db
+# images and PDFs of Mandumah pages / screenshots of the platform
+experiments/**/*.png
+experiments/**/*.jpg
+experiments/**/*.jpeg
+experiments/**/*.webp
+experiments/**/*.pdf
+# Desk: generated public pages (gate 1/2, inventory, mindmap, mockup, pitch, story shots hold
+# Mandumah titles, names and screenshots), its working state (plan, beats, project map) and the
+# field guide's real examples
+experiments/49_correction_desk/web/public/
+experiments/49_correction_desk/desk/plan/plan.json
+experiments/49_correction_desk/desk/plan/beats/
+experiments/49_correction_desk/desk/project/
+experiments/49_correction_desk/desk/field_guide/*.json
+# shareholder documents (screenshots and names): keep only the build scripts and README
+experiments/57_shareholder_docs/business/*.html
+experiments/57_shareholder_docs/business/img/
+experiments/57_shareholder_docs/technical/*.html
+experiments/57_shareholder_docs/technical/img/
+# judged samples and catalogue overrides holding printed text and names
+experiments/48_linking_probe/a_cited_to_catalogue/judged_*.json
+experiments/56_librarian_institutions/overrides56.json
+experiments/59_reducto/judge59_*.json
+experiments/62_librarian_works/overrides62.json
+experiments/65_fix_leaks/sample65.json
+# token files, if any land in the repo
+*tokens*.txt
+.env.*

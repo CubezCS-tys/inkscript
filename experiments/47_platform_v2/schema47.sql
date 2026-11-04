@@ -252,6 +252,7 @@ CREATE TABLE notes (
   ord INTEGER, page INTEGER,
   first_block_id TEXT, text TEXT,
   anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  written_by TEXT,                     -- v3.5b: translator | editor | publisher as the reader marked it (fn/@custom-type); NULL = the author's. kind = author-note for the starred note about an author (author-notes)
   PRIMARY KEY (version_id, note_id)
 );
 
@@ -284,6 +285,7 @@ CREATE TABLE figures (
   tex TEXT, mathml TEXT, specific_use TEXT,
   crop_key TEXT,
   anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  fig_type TEXT,                       -- v3.5b: chart | photo | map | diagram | drawing | manuscript | portrait | logo | stamp | cartoon | calligraphy | table_image | ornament | advert | other; decoration (v3.3); fig/@fig-type
   PRIMARY KEY (version_id, figure_id)
 );
 
@@ -295,6 +297,52 @@ CREATE TABLE table_cells (
   block_id TEXT, text TEXT,
   PRIMARY KEY (version_id, figure_id, row, col),
   FOREIGN KEY (version_id, figure_id) REFERENCES figures(version_id, figure_id)
+);
+
+-- @role: v3.5b: a note or «المصدر:» source line printed under a table or figure, tied to it (table-wrap-foot / the fig).
+CREATE TABLE figure_notes (
+  version_id INTEGER NOT NULL REFERENCES versions(version_id),
+  figure_id TEXT NOT NULL,             -- the table or figure (figures.figure_id)
+  seq INTEGER NOT NULL,
+  kind TEXT NOT NULL,                  -- table-note | figure-note | source | footnote (a footnote whose call sits in a cell)
+  block_id TEXT,                       -- the note's paragraph (blocks)
+  note_id TEXT,                        -- a footnote moved whole under its table (notes)
+  text TEXT,
+  anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  PRIMARY KEY (version_id, figure_id, seq)
+);
+
+-- @role: v3.5b: what the reader saw on a page that is not the article: handwriting, stamps, and scan problems (cut edge, blur, a missing or out-of-order page).
+CREATE TABLE page_marks (
+  version_id INTEGER NOT NULL REFERENCES versions(version_id),
+  mark_id TEXT NOT NULL,               -- '<kind>|<line>' or 'scan-problem|<page>|<problem>'
+  page INTEGER,
+  kind TEXT NOT NULL,                  -- handwriting | stamp | scan-problem
+  problem TEXT,                        -- scan-problem: cut_edge | blur | faint | dark | skew | torn | missing_page | duplicate_page | out_of_order
+  line_id TEXT,                        -- handwriting / stamp: the Azure line (P:N) the reader named
+  text TEXT,                           -- that line's text
+  anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  source TEXT,                         -- custom-meta handwriting-lines | stamp-lines | scan-problem
+  PRIMARY KEY (version_id, mark_id)
+);
+
+-- @role: Every fixed-format identifier printed on the pages (ORCID, DOI, ISSN, e-mail, URL, phone), found by code on every line, with its check, where it is printed and whose it is (experiment 65).
+CREATE TABLE printed_identifiers (
+  version_id INTEGER NOT NULL REFERENCES versions(version_id),
+  seq INTEGER NOT NULL,
+  kind TEXT NOT NULL,                  -- orcid | doi | issn | email | url | phone
+  value TEXT NOT NULL,                 -- normalised (ORCID 0000-0000-0000-0000, DOI without spaces, ASCII digits)
+  printed TEXT,                        -- as printed on the line
+  valid INTEGER,                       -- ORCID ISO 7064 / ISSN check digit passed (1); 0 = printed but fails its check
+  place TEXT,                          -- front | byline | byline_later | title | header | footer | reference | note | author_note | other | body | table | noise | not_article
+  owner_kind TEXT,                     -- author | article | journal | reference | mention
+  owner_ref TEXT,                      -- the contrib id, the ref id, or where the mention is
+  page INTEGER, azure_line TEXT, alto_line_id TEXT, block_id TEXT,
+  jats_home TEXT,                      -- where the masters store it (contrib-id, contrib/email, article-id[@pub-id-type=doi], journal-meta/issn ...)
+  jats_id TEXT,
+  note TEXT,
+  anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  PRIMARY KEY (version_id, seq)
 );
 
 -- @role: Each printed verse line, or hemistich where the print separates them, as printed with its vowels, so poetry can be searched and cited line by line.
@@ -316,7 +364,7 @@ CREATE TABLE text_corrections (
   corr_pk INTEGER PRIMARY KEY,
   version_id INTEGER NOT NULL REFERENCES versions(version_id),
   xml_id TEXT NOT NULL,                -- fixN | sicN in the masters
-  layer TEXT NOT NULL,                 -- azure-misread | misprint
+  layer TEXT NOT NULL,                 -- azure-misread | misprint | model-suggestion (exp 66 D30 guard: a refused fix)
   block_id TEXT, char_start INTEGER, char_end INTEGER,
   azure_reading TEXT, azure_wc REAL,   -- what Azure read, and how sure it was
   printed TEXT,                        -- what the paper says (the text shown)
@@ -397,7 +445,9 @@ CREATE TABLE publications (
   type_catalogue TEXT,
   status TEXT NOT NULL,                -- catalogued-only | pdf-only | azure | structured | judged | final | person-checked
   title_shown TEXT, year_shown INTEGER,  -- denormalised from the chosen assertions, refreshed per release
-  current_version INTEGER REFERENCES versions(version_id)
+  current_version INTEGER REFERENCES versions(version_id),
+  doc_type TEXT,                       -- v3.5b: the document type shown (the page's word: research | review | editorial | book_review | report | conference_paper | thesis_summary | interview | news | letter | obituary | poem | documents | bibliography | front_matter | other), from the chosen doc_type assertion
+  doc_type_source TEXT                 -- page (the reader's reading of the article) | catalogue (MARC 336 mapped)
 );
 CREATE INDEX pubs_issue ON publications(issue_id, seq_in_issue);
 
@@ -639,6 +689,13 @@ CREATE TABLE byline_mentions (
   block_id TEXT,
   min_word_conf REAL, reader_fixes TEXT,
   anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  is_corresponding INTEGER,            -- v3.5b: contrib/@corresp (the corresponding-author mark printed on the page)
+  ids TEXT,                            -- v3.5b: JSON {orcid, scopus, researcherid, scholar} as printed (contrib-id)
+  contrib_type TEXT,                   -- the reader's contrib/@contrib-type (author | translator | reviewer | supervisor | rapporteur ...)
+  role_phrase TEXT,                    -- the printed role words (contrib/role: «ترجمة»، «مراجعة:»)
+  twin_of_pk INTEGER REFERENCES byline_mentions(mention_pk),   -- the same person printed again in another script (an English byline): points at the main mention
+  position TEXT,                       -- experiment 65: the author's post / rank as printed (contrib/role[@content-type=position]: «أستاذ مساعد», "PhD Student in Sociology")
+  contacts TEXT,                       -- experiment 65: JSON {emails (when more than one), phones, urls, printed_again_in (the paragraphs that print this author again)}
   UNIQUE (version_id, block_id, byline_pos, script)
 );
 
@@ -693,6 +750,10 @@ CREATE TABLE affiliation_mentions (
   country_printed TEXT, country_code TEXT,
   kind TEXT,                           -- institution | position-only | place-only
   anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  assembled INTEGER,                   -- v3.5b: 1 = an extra affiliation the reader gave in printed parts (aff content-type additional), joined here; printed = those parts
+  faculty_printed TEXT,                -- v3.5b: the faculty / college as the reader gave it apart (institution[@content-type=faculty]); faculty_text is inst46's reading of the printed string
+  lang TEXT,                           -- experiment 65: aff/@xml:lang (the twin's affiliation in another script; null = the article's script)
+  twin_of_aff_pk INTEGER REFERENCES affiliation_mentions(aff_pk),   -- experiment 65: the affiliation this one prints in another script (aff/@rid); it hangs on the twin's mention
   UNIQUE (mention_pk, seq)
 );
 
@@ -775,6 +836,17 @@ CREATE TABLE citation_mentions (
   resolved_by TEXT,                    -- link47 | judge | person
   unresolved_why TEXT,                 -- no-earlier-full | ambiguous-author | no-parse | ...
   anchor_pk INTEGER REFERENCES ink_anchors(anchor_pk),
+  -- v3.5b parts of the cited work, each exactly as printed (refs43.v35_parts); NULL when the reader gave none
+  edition TEXT,                        -- «ط٢»، «الطبعة الثالثة», «2nd ed.» (element-citation/edition)
+  year_calendar TEXT,                  -- hijri | gregorian: the calendar of the year in parsed.year (year/@calendar)
+  year2 TEXT, year2_calendar TEXT,     -- the same year printed in the other calendar («1410هـ / 1990م»)
+  work_pages TEXT,                     -- the work's own page range (an article's fpage-lpage), kept apart from cited_pages
+  cited_pages_source TEXT,             -- cited-pages (v3.5b: page-range[@content-type=cited-pages]) | page-range | fpage | locator
+  died TEXT,                           -- the cited author's death date as printed («ت ٧٥١هـ»); one per author, ' | ' between
+  access_date TEXT,                    -- a web source's access date (date-in-citation[@content-type=access-date])
+  ms_library TEXT, ms_shelfmark TEXT, ms_folio TEXT,   -- a manuscript's library, shelfmark and folio («ورقة ١٧٩/ب»)
+  thesis_degree TEXT,                  -- a cited thesis's degree («رسالة ماجستير»); its university is parsed.publisher
+  conf_name TEXT, conf_loc TEXT,       -- a cited conference paper's conference and where it met
   CHECK (kind <> 'full' OR full_mention_pk IS NULL OR full_mention_pk = mention_pk)
 );
 CREATE INDEX cm_version ON citation_mentions(version_id, reading_ord);
@@ -799,7 +871,8 @@ CREATE TABLE cited_work_members (
   cited_work_pk INTEGER NOT NULL REFERENCES cited_works(cited_work_pk),
   method TEXT, score REAL, evidence TEXT,
   asserted_by TEXT NOT NULL,
-  patch_key TEXT REFERENCES patches(patch_key)
+  patch_key TEXT REFERENCES patches(patch_key),
+  edition_pk INTEGER REFERENCES cited_work_editions(edition_pk)   -- v3.5b: which edition of the work this citation names (NULL: it names none)
 );
 CREATE INDEX cwm_work ON cited_work_members(cited_work_pk);
 
@@ -813,6 +886,8 @@ CREATE TABLE cited_work_authors (
   person_id TEXT REFERENCES persons(person_id),
   authority_id TEXT,
   match_method TEXT, match_score REAL,
+  died TEXT,                           -- v3.5b: the death date as printed in a citation of the work («ت ٧٥١هـ»)
+  died_hijri INTEGER, died_greg INTEGER,   -- the death year in both calendars (one read, the other converted)
   PRIMARY KEY (cited_work_pk, seq)
 );
 CREATE INDEX cwa_person ON cited_work_authors(person_id);
@@ -853,6 +928,41 @@ CREATE TABLE citation_links (
 );
 CREATE INDEX links_target ON citation_links(target_pub_id, status);
 CREATE UNIQUE INDEX links_one_best ON citation_links(cited_work_pk) WHERE best = 1;
+
+-- @role: v3.5b: the people of one citation as printed, by role: its authors, the editor of the text (تحقيق) and the translator, with a death date when printed («ت ٧٥١هـ»).
+CREATE TABLE citation_mention_people (
+  mention_pk INTEGER NOT NULL REFERENCES citation_mentions(mention_pk),
+  role TEXT NOT NULL,                  -- author | editor | translator
+  seq INTEGER NOT NULL,
+  printed TEXT, surname TEXT, given TEXT,
+  name_key TEXT,
+  died TEXT,                           -- as printed
+  PRIMARY KEY (mention_pk, role, seq)
+);
+
+-- @role: v3.5b: one edition (printing) of a cited work as the citations give it: edition statement + publisher + year; each full citation points at its edition (cited_work_members.edition_pk).
+CREATE TABLE cited_work_editions (
+  edition_pk INTEGER PRIMARY KEY,
+  cited_work_pk INTEGER NOT NULL REFERENCES cited_works(cited_work_pk),
+  edition_key TEXT NOT NULL,           -- folded edition statement | year | publisher
+  edition_printed TEXT,                -- «ط٢» as printed (first citation naming this edition)
+  year_printed TEXT, year_calendar TEXT, year2 TEXT,
+  publisher TEXT, place TEXT,
+  n_members INTEGER,                   -- full citations naming this edition
+  first_mention_pk INTEGER REFERENCES citation_mentions(mention_pk),
+  UNIQUE (cited_work_pk, edition_key)
+);
+
+-- @role: v3.5b: the people of a cited work other than its authors: the editor of the text (تحقيق) and the translator, as printed in its citations.
+CREATE TABLE cited_work_contributors (
+  cited_work_pk INTEGER NOT NULL REFERENCES cited_works(cited_work_pk),
+  role TEXT NOT NULL,                  -- editor | translator
+  seq INTEGER NOT NULL,
+  printed TEXT, name_key TEXT,
+  edition_pk INTEGER REFERENCES cited_work_editions(edition_pk),   -- the edition whose citation names them first
+  n_mentions INTEGER,
+  PRIMARY KEY (cited_work_pk, role, seq)
+);
 
 -- @role: A typed relation between a cited work and another item (reviewed in, studied in, part of, edition or translation of), stored with its reverse, separate from citations.
 CREATE TABLE work_relations (
@@ -1152,3 +1262,20 @@ CREATE VIEW v_quran_index AS
 SELECT q.sura, q.aya_from, q.aya_to, count(*) AS n_places, count(DISTINCT v.stem) AS n_documents
 FROM quran_citations q JOIN versions v ON v.version_id = q.version_id AND v.is_current = 1
 GROUP BY q.sura, q.aya_from, q.aya_to;
+
+-- v3.5b: the document type of each publication as the page and the catalogue give it, and the one shown
+CREATE VIEW v_doc_types AS
+SELECT p.pub_id, p.c999, v.stem, r.value AS page_type, c.value AS catalogue_type, c.value_norm AS catalogue_class,
+       p.doc_type AS shown, p.doc_type_source AS shown_from,
+       (SELECT count(*) FROM catalogue_reports k WHERE k.pub_id = p.pub_id AND k.kind = 'document-type') AS disagreement
+FROM publications p JOIN versions v ON v.version_id = p.current_version
+LEFT JOIN metadata_assertions r ON r.pub_id = p.pub_id AND r.field = 'doc_type' AND r.form = 'reader'
+     AND r.version_id = p.current_version
+LEFT JOIN metadata_assertions c ON c.pub_id = p.pub_id AND c.field = 'doc_type' AND c.form = 'catalogue';
+
+-- v3.5b: what the article is about beyond its title: conference, thesis summarised, book reviewed, original of a translation, part of a series
+CREATE VIEW v_publication_context AS
+SELECT a.pub_id, substr(a.field, 1, instr(a.field || '.', '.') - 1) AS about, a.field, a.value, a.form, a.version_id
+FROM metadata_assertions a
+WHERE a.is_chosen = 1 AND (a.field LIKE 'conference.%' OR a.field LIKE 'thesis.%' OR a.field LIKE 'reviewed_book.%'
+      OR a.field LIKE 'original.%' OR a.field = 'series_part');

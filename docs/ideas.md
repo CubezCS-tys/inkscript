@@ -484,3 +484,24 @@ reason is recorded), **open** (voiced, not yet judged).
   bespoke retry of just that chunk (judge's note + close-ups, maybe higher thinking), one retry, then the owner.
   Trust earned per kind of edit, calibrated on the owner's marks and the 300 agent's 22 looked-at pages; a random
   sample of automatic edits goes to review every run ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md)).
+
+## The Education Citation Index and the Word route (2026-10-22)
+
+- **Journal by journal, gated** (owner, 2026-10-22, after Garfield's 1961 start of Web of Science: a fixed set of
+  journals, complete): first an Education Citation Index.
+  - **Gate 1:** one journal, مجلة الطفولة العربية (code 0130), with prompt v3.5b ([experiments/52_journal_gate1](../experiments/52_journal_gate1/)).
+  - **Gate 2:** about 10 education journals over the same years.
+    Proposed set, 2010–2025 ([experiments/54_gate2_selection](../experiments/54_gate2_selection/)): 10 journals,
+    3,460 articles (1,660 scans, 1,768 Word), about $456; a cheaper five at about $152. Awaiting the owner.
+  - **Gate 3:** the full slice (162,816 EduSearch articles 2005–2025 in the bucket, about $43k now, about $86k after
+    1 December).
+  - Each gate measures how dense the bridges are and the correction load before the next one.
+  - Status: gate 1 running.
+- **The Word route.** Open; next after gate 1, approved by the owner.
+  - Many years of a journal are only in S3 `legacy/`, as PDFs made from the publishers' Word files. Journal 0130:
+    2009–2016 and 2020–2022, 181 articles; 303 are scans; 111 are nowhere. The Word originals are on the server
+    (`/home/adminuser/ai_data/…/docs`).
+  - A separate route would build the same JATS from the docx: real footnotes, tables and styles, a cheaper text-only
+    Gemini call for roles and reference fields, metadata from the catalogue.
+  - Cautions: the Word file may differ from the print, and it has no printed page numbers, which cited «ص» need.
+  - First test: 0130's 2009–2016 articles.

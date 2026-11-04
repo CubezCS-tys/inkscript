@@ -428,7 +428,8 @@ class Master:
             elif r[0] == "xref":
                 sub(el, "xref", {"ref-type": "fn", "rid": r[2]}, r[1])      # no rid: a call whose note Argon did not find
             elif r[0] == "sic":
-                n = sub(el, "named-content", {"content-type": "sic", "specific-use": "argon", "rid": self.sic_id(r[2]),
+                n = sub(el, "named-content", {"content-type": r[2].get("kind") or "sic",   # experiment 66: model-suggestion
+                                              "specific-use": "argon", "rid": self.sic_id(r[2]),
                                               f"{{{XL}}}title": r[2]["corr"]}, r[1])
                 n.set(f"{{{XL}}}type", "simple")
             elif r[0] == "fix":

@@ -1,16 +1,186 @@
-# Handoff: where we are (as of 2026-10-21)
+# Handoff: where we are (as of 2026-11-02)
 
 **Continuation, 2026-10-17:** Codex is working with the owner while Claude is
 unavailable. Read [codex-handoff.md](codex-handoff.md) for the review, reopened
 tracing discussion, current scope and subsequent work before resuming.
 
 I am the Claude session that worked with the owner on the laptop up to 2026-10-13 (section 0 brought up to
-2026-10-15, section 00 to 2026-10-21). I'm writing this for the next
+2026-10-15, section 00 to 2026-10-21, section 000a to 2026-10-22, section 000 to 2026-11-02). I'm writing this for the next
 session, on the owner's Ubuntu ssh server, which will have none of my memory. My private notes (the "memory" files) don't
 travel with git, so everything in them that matters is written out here. Read this first, then `CLAUDE.md` and the
 docs it lists. Where this file and an older doc disagree, this file is newer.
 
-## 00. Since 2026-10-15 (as of 2026-10-21; read this first)
+## 000. 2026-10-23 to 2026-11-02 (read first)
+
+The plain overview is [overview.md](overview.md) ("two paths, and gates"); the numbers with dates are in
+[STATUS.md](STATUS.md) "Two paths: extraction, reconciliation, gate 2". **The live record of what is running, done
+and waiting is the Desk's Plan page** (`/plan`; data `experiments/49_correction_desk/desk/plan/plan.json`, written
+only with `desk.plan_cli`, which every agent uses to start / beat / finish its item). The Project page (`/project`,
+`desk/project/project.json`) is the owner's dashboard; its `as_of` is still 2026-10-26, so prefer the Plan where they
+differ. This section is what a fresh session needs on top.
+
+**The owner's model: two paths.**
+- **Extraction (islands):** Azure's words + Gemini 4 Argon's structure in line ids (prompt **v3.6** for gate 2 =
+  v3.5b + P1–P3; the fix-rule bullet dropped by experiment 69), code rules (the letter fix, the **D30 guard**,
+  identifiers by code, D45), JATS + ALTO masters. Audit: **99.81% of 435,270 lines in a field** (live 2026-11-02).
+- **Reconciliation (bridges):** the librarian (an AI curator) decides institutions and cited works; a blind second
+  agent checks; only kinds at ≥ 98% are applied, never "unsure"; the owner's rules D37–D44 settle policy. Institutions
+  271 → **242** (93% with a country); cited works 9,137 → 8,850 → **8,903** after the go-live. The production
+  librarian (experiment 71): rules → Gemini Flash for 8 strong kinds → Claude Opus 5.5 where it says high → the Desk;
+  99.1% precise on 522 verified items, about $3 per 1,000 decisions.
+
+**What happened, in order.**
+- **2026-10-23:** the Desk became the product's face for the shareholder demo (index pages, Explorer, article beside
+  its scan, Guide with 70 labels flagged); exp 55 the pitch and the deck (`/pitch`); exp 56 the librarian's first
+  pass on institutions (proposals).
+- **2026-10-26:** the Project page. The owner sent Google Cloud's form about credits (no answer recorded).
+- **2026-10-28:** the shareholder meeting: "they love the product"; exp 57 wrote the business (12 pp) and technical
+  (31 pp) documents the same day. Confidential; they wait for the owner's read.
+- **2026-10-30:** the AI-Search A/B (our chunks +14 points in the top 5, 12 articles); exp 58 Indra (parked); exp 59
+  Reducto (not adopted); the Pipeline page.
+- **2026-10-31:** exp 60, Claude vs Argon as reader: keep Argon ($30.78). Its side finding (Argon "fixes" correctly
+  printed words) led to the guard.
+- **2026-11-02 (one long day):** the owner said they will look only at urgent items, so agents verify each other.
+  Exp 61 audit (99.66%), exp 62 cited-works librarian, exp 63 blind check of institutions (4 errors in 908), exp 64
+  institutions applied (R20261102T155701), exp 65 leak fixes + v3.6, exp 66 the guard, exp 67 cited works applied
+  (R20261102T174226), the Plan page, exp 69 fix-rule check, **exp 68 go-live at 17:16 (release R20261102T231619, the
+  live one)**, then exp 70 gate 2's pilot started (17:22) and exp 71 the model test finished (19:37). The owner
+  **topped up £500** and approved gate 2: fix → re-audit → one journal → nine more.
+
+**Running now (2026-11-02 evening).** Exp 70, gate 2's pilot: مجلة الطفولة والتنمية (0165, Egypt), 363 articles =
+145 scans + 218 Word files, prompt v3.6 + the guard, Argon Batch, hard cap $55 (absolute cap on the exp 43 log
+$159.10), about $40 expected. No README yet; read `experiments/70_gate2_pilot/progress.md` and the Plan item
+`gate2-pilot` before anything else, and do not edit the files it uses while it runs (experiments 43, 46, 47, 53, the
+Desk). Planned after it: the production librarian on 0165 (`lib0165`, cap $10).
+
+**Known disagreements between sources** (see the end of this list for what to trust):
+- Exp 68's README (written 17:10) says "ready, NOT live"; the Plan, exp 70's progress and `68_go_live/out/golive_run.log`
+  show it went live at 17:16. The live release's numbers equal the README's dry run (2,738 applied, 3 orphaned,
+  1 conflict, 8,903 cited works, 99.814%).
+- Exp 70's progress gives "run $20.57" for the scan reading; by the log that is the scan $19.37 + the Word step $1.20.
+- The Project page's money panel and "stage" still say $100.15 / about £11 / gate 2 waiting (as of 2026-10-26).
+
+**Waiting for the owner** (the Plan's "Needs you", 2026-11-02; replaces section 000a's list where they overlap):
+1. **Make the GitHub repo `CubezCS-tys/inkscript` private (urgent).** It is public; it holds one real Mandumah
+   article as the test fixture, and the shareholder documents say Mandumah data is never on a public repository.
+2. **Rotate keys shown in chat:** the Reducto API key, and the Desk admin token (printed once on 2026-10-21).
+3. **Ask Reducto to delete the 49 pages** sent in exp 59 (the free tier's delete call failed).
+4. **Read the shareholder documents** before they go out (exp 57).
+5. **Gate 3 before 1 December** (about $43k now, about $86k after; estimate).
+6. **Remove the October demo decisions?** One blocks a cited-work split («المقدمة» shows 13, not 12); needs an admin.
+7. Review the Guide's 70 flagged labels; the 21 re-minted cited-work ids (keep or restore); the Word route's small
+   paid test (about 20 articles, under $1); "unclear" references in a split; the master tables' shape; commits since
+   2026-10-21 (nothing from experiment 48 on is committed; check for private data first); proposed deletions; older
+   items (Work task wording, the 0732 / 0849 judge calls, which fields each corrector covers, the remote Desk's
+   domain).
+8. Parked ideas, nothing to start without the owner: a local model as a librarian tier (the owner is reading up);
+   Gemini Carbon when public; an ink check for the bad fixes the guard misses; re-reading the 600 with v3.6.
+
+**Money (2026-11-02).** Gemini log $127.08 since the 2026-10-18 top-up (19:43, growing with the pilot); credit roughly
+£480 left by estimate after the £500 top-up; Claude API $33.97 of the owner's $250 credits (exp 60, 71). Details and
+caps: [STATUS.md](STATUS.md) "Spend (2026-11-02)". Every paid step has its own owner-approved cap enforced in code.
+
+**How to see everything.** One tunnel, from the owner's Windows/WSL machine:
+`ssh -N -L 9004:127.0.0.1:8004 prod`, then `http://localhost:9004` (use `localhost`, not 127.0.0.1, under WSL).
+The Desk's admin
+token is in `/home/appuser/data/desk/owner_token.txt` (to be rotated: item 2). Pages: `/project`, `/plan`,
+`/index-home`, `/journals`, `/institutions`, `/most-cited`, `/articles`, `/explore`, `/how-we-collect` (Guide),
+`/librarian`, `/librarian/works`, `/audit`, `/pipeline`, `/pitch`, the correctors' `/`, `/work`, `/works`, `/notes`,
+`/releases`, and the static `/gate1/`, `/gate2/`, `/inventory/`, `/mindmap/`, `/views/…` (table in
+[overview.md](overview.md) "The Desk and its pages"). After a code change in `desk/` the API must restart; a web
+change needs a rebuild of the live copy (`/home/appuser/data/desk/web-live`; experiment 49's README).
+
+**Telling the owner.** `~/bin/tg "text"` (or `tg "caption" image.png`) sends them a Telegram message; the keys are in
+the repo's `.env` and are never printed.
+
+## 000a. 2026-10-21/22 (history; section 000 above is newer)
+
+The plain overview of the whole system is [overview.md](overview.md); the numbers with dates are in
+[STATUS.md](STATUS.md) "Linking, the Desk, gate 1 and the Word route (2026-10-22)". This section is what a fresh
+session needs on top.
+
+**What changed.** Extraction was declared "in a good place" (2026-10-21) and the work turned to linking: the bridges
+between articles (people, works, institutions, journals, citations) and the people who correct them.
+- **Exp 48, linking probes** (the 600): only ~3% of references land on a held work; two-thirds are books and turath;
+  identity links are precise (byline → person 50/50). Cited works must be counted as entities of their own.
+- **Exp 49, the Desk** (P1 + P2 built, 19 tests): the correction backend for about 300 correctors. Decisions are
+  append-only, "no" is stored, detectors make tasks, releases re-apply every decision.
+- **Exp 50, the mind map** of Mandumah's products, AI-Search and this repo (553 nodes).
+- **Exp 51, the extraction inventory:** 235 fields; the owner said "add all 37" priority gaps → prompt **v3.5b**
+  (v3.3 + the 37 in a separate part, without v3.4's two content lines), checked on 12 articles, +15% a page.
+- **The letter fix** (exp 43): Azure's Persian look-alike letters written as the printed Arabic ones, recorded as
+  reader fixes (D30). 1,059 + 829 words in the 600.
+- **Exp 52, gate 1:** one education journal (0130, 126 articles, $24.24). Bridges far denser than random; 9/10
+  random pages right, 0 serious. The owner: "that's what I'm talking about".
+- **Exp 53, the Word route:** 0130's 139 Word files → 139 valid masters by code; page numbers past page 1 are
+  estimates, flagged (D36).
+- **Exp 54, gate 2 selection:** started on the evening of 2026-10-22 (no README yet; `progress.md`).
+- The journal is loaded into the main `platform_v2.db`, now 726 articles.
+
+**The owner's decisions and how they work now.**
+- **Two products on one set of masters:** a much better RAG for ai.mandumah.com, and a Web-of-Science-depth index.
+  Not for universities ranking their staff; the aim is absolute quality. Global scope.
+- **All correctors are equal, and each owns their decisions:** one key, no second checks, tie-breaks or majorities.
+  A corrector who disagrees leaves a note; the two settle it. Admins (the owner) can fix anything. Gold is only a
+  quiet accuracy gauge. Languages Arabic, English, French; remote team; the Desk has its own accounts. Catalogue
+  errors go out as a list for Mandumah's cataloguers, never into the catalogue.
+- **Education Citation Index first, gated, journal by journal** (after Garfield's 1961 start): gate 1 one journal,
+  gate 2 about 10 education journals over the same years, gate 3 the full slice (162,816 articles, ~$43k now,
+  ~$86k after 1 December). Measure bridge density and correction load at each gate. "Hold our horses."
+  Identity stays global (authors publish across journals).
+- **The Word route** is approved, with flagged page estimates (D36); prefer scans where they exist.
+- **Books and turath as the bridge:** an open hypothesis, to re-measure as more is parsed, not a rule.
+- **"The platform is my backend, everything viewable and observable"**: every extracted field should be visible in
+  the platform and the Desk.
+- Model choice: the owner may ask stakeholders about a bake-off (Argon, Flash, Claude, GPT); likely to stay with
+  Gemini 4 Argon. Do not start one without their go.
+
+**Running or ran overnight 2026-10-22/23** (three agents; they may have finished; check their logs before
+anything else):
+1. **The letter-fix reload:** the 600 reloaded with the letter fix into `platform_v2.db` (backup
+   `platform_v2.before_lettersfix_2026-10-22.db`), then a Desk release, the detectors and the tests. A release was
+   being built at 18:31 on 2026-10-22.
+2. **Gate 2 selection** (exp 54, free): its draft picks ten journals, 3,460 articles, ~$456 expected; the Word
+   first-page check on 37 candidates was running. Its page will be at `/gate2/`.
+3. **The platform loader for the v3.5b fields** (exp 47): developed on `dev_fields.db`, waits for the reload, backs
+   up (`before_fields`), reloads, then updates the Desk's Article and Work pages, the Datasette queries and the
+   homes table.
+
+**Waiting for the owner** (2026-10-22; replaces section 00's list where they overlap):
+1. **The AI-Search offline A/B** on the 12 chunked articles: their OK.
+2. **"Unclear" references in a split:** give them their own unlinked card (recommended) instead of leaving them on
+   Book 1's card.
+3. **A top-up for gate 2** (about £11 is left by estimate after $100.15 since 18 Oct; check the console), and their
+   review of gate 2's selection.
+4. **The Word route's small paid test:** about 20 articles, text-only, Flash against Argon, under $1.
+5. **Commits:** nothing in experiments 48–54 is committed. Before committing, check for private data (judged
+   samples with reference text or catalogue records into gitignored `out/`; the Desk's gate1 page holds Mandumah
+   titles; `web/node_modules` and `.next` ignored).
+6. **A "from the catalogue" column** on the homes table (`/inventory/homes.html`), offered.
+7. Still open from before: the Work tasks' wording (they found them confusing); the 0732 / 0849 judge calls;
+   installing `latex2mathml` in the server venv (exp 43 "Prompt v3.5": without it no article with an equation builds
+   into masters there; the letter fix used a private copy in `out/lettersfix/pylib`).
+
+**How to see everything.** One tunnel, from the owner's Windows/WSL machine:
+`ssh -N -L 9004:127.0.0.1:8004 prod`, then open `http://localhost:9004` (use `localhost`, not 127.0.0.1, under WSL).
+The Desk's admin token is in `/home/appuser/data/desk/owner_token.txt` (reissue it before P4: it was printed in chat
+once).
+
+| Page | What |
+|---|---|
+| `/` | the Desk: Overview, Work tasks, Article / Person / Work pages, releases |
+| `/views/…` | the articles beside their scans (Layout pages; e.g. `/views/j0130_final/index.html`), passed through to :8899 |
+| `/gate1/` | gate 1's results page |
+| `/gate2/` | gate 2's selection (once experiment 54 writes it) |
+| `/inventory/` | the 235-field extraction inventory |
+| `/inventory/homes.html` | where each field lives: JATS, ALTO or the platform |
+| `/mindmap/` | the product mind map |
+| `/mockup/` | the Desk's first mockup |
+
+Datasette over the platform is on :8003 (`/platform_v2`) if it is running and that port is tunnelled too
+(`-L 9003:127.0.0.1:8003`).
+
+## 00. Since 2026-10-15 (as of 2026-10-21; history)
 
 The owner topped up Gemini on 2026-10-18 and the work turned from experiments into a **product rehearsal**:
 Azure's words, Gemini 4 (Argon, prompt v3.3, thinking low, Batch) giving each line its type and order, code rules,
@@ -324,6 +494,10 @@ honest if round 2 is not better".
 
 ## 5. Spend so far
 
+- **2026-10-22 to 2026-11-02:** Gemini log $100.15 → **$127.08** (gate 1 $24.24 on 2026-10-22; on 2026-11-02 the
+  v3.6 check $0.80, the fix-rule check $3.16, gate 2's pilot $22.99 so far); exp 71's own log Gemini $3.27; Claude API
+  $30.78 (exp 60) + $3.19 (exp 71); Reducto $4.61 at list price inside free credits. Top-up £500 on 2026-11-02.
+  Current figures: [STATUS.md](STATUS.md) "Spend (2026-11-02)".
 - **2026-10-18 to 2026-10-21:** Gemini **$73.62** on the experiment 43 log (rehearsal, judge, the exam $31.94,
   fix round 3 $1.12). Experiments 44–47 cost $0.015 (S3 listing) and nothing else.
 - **2026-10-14/15:** exp 39 round 2 GPU **$1.94**; exp 40 Gemini **$13.34**; exp 41 Gemini **$10.72**. The Gemini
@@ -422,6 +596,9 @@ Run Claude Code inside tmux so it survives disconnects: `tmux new -s inkscript`,
 - check that each page answers.
 
 ## 8. Open items waiting on the owner
+
+*The current list (2026-11-02) is section 000 "Waiting for the owner" and the Desk's `/plan`; the items below are of
+2026-10-21 and some are settled.*
 
 - **Proposed deletions** (not done; list of 2026-10-21):
   - `experiments/39_ink_geometry/out/gpu/result.tgz` (1.1 GB, already unpacked beside it).

@@ -1,7 +1,119 @@
 # Status
 
-*Last updated 2026-10-21. Update this file whenever a headline number or a
+*Last updated 2026-11-02. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
+
+## Two paths: extraction, reconciliation, gate 2 (2026-10-23 to 2026-11-02)
+
+The work runs on two paths ([overview.md](overview.md) "The picture: two paths, and gates"): **extraction** (each
+article complete on its own: islands) and **reconciliation** (the same person, institution and cited work across
+articles: bridges). The live list of what runs, is done and waits is the Desk's Plan page (`/plan`, data
+`experiments/49_correction_desk/desk/plan/plan.json`).
+
+**Live state (2026-11-02 20:30):** release **R20261103T023001** (experiment 70: gate 2's pilot, journal 0165, 363
+articles added on top of experiment 68's go-live; every Desk decision replayed: 2,738 applied, 3 orphaned, 1 conflict,
+the same as experiment 68's; /audit reads `experiments/70_gate2_pilot/out/audit_live`). The API must be restarted for
+gate 1's random pool to leave 0165 out (`index_pages.WHOLE_JOURNALS`).
+
+### Extraction (islands)
+
+| | Result | Source | Date |
+|---|---|---|---|
+| **Nothing lost: the audit** (exp 61, $0) | every Azure line of the 780 current articles followed through Gemini's answer, the JATS master and the platform: **99.66% of 435,270 lines** in a field or set aside as not article text; 1,460 fell through, mostly the author block and mostly our code (508 returned posts flattened; English twins' affiliations dropped); false alarms 1 of 82 checked on the scans; fix list M1–M7 (code), P1–P4 (prompt); Desk `/audit` | [experiments/61_nothing_lost](../experiments/61_nothing_lost/README.md) | 2026-11-02 |
+| **Leak fixes + prompt v3.6** (exp 65's fixes M1–M7 + identifiers by code, D45; $0.80 for the v3.6 check) | On the 780 articles, printed lines only in generic text **1,457 → 805** (accounted 99.665% → **99.815%**; v3.5b 331 → 45), mapping leaks 953 → 292; every block's text byte-identical; bilingual affiliations in JATS 33 → 89; by code: 74 article DOIs, 443 ISSN printings, 192 author e-mails, 7 ORCIDs | [experiments/65_fix_leaks](../experiments/65_fix_leaks/README.md) | 2026-11-02 |
+| **The D30 guard** (exp 66, $0) | 24,528 Gemini fixes in the 780; 270 judged on the scans: **≈ 94% right**, ≈ 4.4% bad, ≈ 1.2% printed misprints overwritten. Rule: refuse when Azure ≥ 0.97 on every word, the edit changes Arabic letters and Gemini's word is a known word; the print stays, Gemini's word becomes a `model-suggestion` flag. Precision 69% [50, 83], recall ≈ 16% of all bad fixes, 0.5% of good fixes refused | [experiments/66_d30_guard](../experiments/66_d30_guard/README.md) | 2026-11-02 |
+| **v3.6's fix-rule bullet** (exp 69, $3.16 of a $4 cap) | changes nothing measurable: fix overlap between the prompts (Jaccard ≈ 0.55) equals two runs of one prompt (0.54); judged bad fixes made again 25/48 with it and 25/48 without; **dropped**: v3.6 for gate 2 = v3.5b + P1–P3, the guard kept | [experiments/69_fix_rule_check](../experiments/69_fix_rule_check/README.md) | 2026-11-02 |
+| **Go-live** (exp 68: exp 65's fixes + the guard, the four runs rebuilt as `*_fix61_d30`; $0) | **Live at 17:16, R20261102T231619** (the plan; exp 68's README, written at 17:10, still says "ready, not live"). The guard refuses **409** fixes, each a flag beside the printed word, none applied; no other text changed; all masters valid. Release: 2,738 decisions applied, 3 orphaned (two English lines now read inside combined lines, and their faculty row; nothing counted lost), 1 conflict (the October demo); audit **1,457 → 808** generic-only lines, **99.814%** accounted; affiliations counted 591 → 556 (35 English lines are now twins of their Arabic line, not counted twice); ids: every id a Desk decision names resolves except the one orphaned row | [experiments/68_go_live](../experiments/68_go_live/README.md), `out/golive_run.log` | 2026-11-02 |
+| **Gate 2 pilot: journal 0165 whole** (exp 70; $23.29 of a $55 cap) | 363 articles 2010–2025: **145 scans** (v3.6, Batch, judge, retries; $0.0078 a page) + **218 Word-only** (exp 53's route + its text-only gemini-3.8-flash step, first run at scale: $1.20; 218/218 Word files are the right article); 363/363 valid; ten random pages 9 right / 1 minor / 0 serious, 0 words wrong; audit 99.981% of 0165's lines. **Do education journals cite each other? Yes:** 0130 → 0165 15 references (11 to articles read here, 6 of them from the Word route), 0165 → 0130 16, inside 0165 59; 0130 × 0165 share 17 authors (random same-size sets: 0.0) and 157 cited works (26.3); institutions only at chance. Release R20261103T023001 | [experiments/70_gate2_pilot](../experiments/70_gate2_pilot/README.md) | 2026-11-02 |
+
+### Reconciliation (bridges)
+
+The librarian: an AI curator (Claude as an agent, no API call, in experiments 56 and 62) settles the cards; a blind
+second agent re-decides a stratified sample; disagreements are adjudicated; hard checks run by code; **only kinds
+measured at ≥ 98% are applied, never "unsure"** (the owner, 2026-11-02: no routine checks for them).
+
+| | Result | Source | Date |
+|---|---|---|---|
+| **Librarian, institutions** (exp 56, $0) | all 659 affiliations of the 780: 908 decisions; institutions 271 → 234 (proposal), with a country 42% → 95%, 16 bilingual twins joined; ≈ 1,200 tokens in / 330 out a packet | [experiments/56_librarian_institutions](../experiments/56_librarian_institutions/README.md) | 2026-10-23 |
+| **Blind verification, institutions** (exp 63, $0) | 230 re-decided blind, 678 read openly, 18 code checks over all 908: **4 errors in 908 (99.6%)**; blind agreement 208/230; no cross-country, shared-name or parent-chain error; every kind ≥ 98% except medium merges (3/4); a model fault (7 two-country statements with one country) | [experiments/63_verify_institutions](../experiments/63_verify_institutions/README.md) | 2026-11-02 |
+| **Institutions applied** (exp 64: 1,146 Desk decisions of `agent:librarian`; owner's D37–D39; $0) | Release R20261102T155701 (0 conflicts, 0 orphans): **242 institutions** (machine 271), **93% with a country** (42%), 70 in 2+ articles (54); 4 former posts, 4 "educated at", 21 links marked inferred. Gate 1, institutions in 2+ articles: **25 vs 6.3** (was 26 vs 3.8). Not applied: 10 unsure, 22 types. Unchanged by the go-live | [experiments/64_apply_institutions](../experiments/64_apply_institutions/README.md) | 2026-11-02 |
+| **Librarian, cited works** (exp 62, $0) | 143,810 pairs examined, 2,605 decisions; blind rounds 138/156 then 153/160 agree; adjudicated precision same_work 98.5%, edition 100%, links with venue fit 99.1% (other links 76%, no_link 60%: held); recall ≈ 86%; five policy questions → D40–D44 | [experiments/62_librarian_works](../experiments/62_librarian_works/README.md) | 2026-11-02 |
+| **Cited works applied** (exp 67: 1,581 Desk decisions of `agent:librarian`; owner's D40–D44; $0) | Release R20261102T174226 (2,741 applied, 0 orphaned, 1 conflict: the P1 demo's same_work): **9,137 → 8,850** cited works, cited by 2+ 209 → 288; gate 1 shared works 84 vs 10.85 → **118 vs 16.7**; held 6.24% → 6.6%. Held as proposals: 217 links not passing K1c, 700 different works, 84 no link, 21 unsure | [experiments/67_apply_works](../experiments/67_apply_works/README.md) | 2026-11-02 |
+| **After the go-live** (live release R20261102T231619) | cited works **8,903** (+53 titles fix M7 now parses), cited by 2+ **291**, gate 1 shared works **121 vs 16.7**, held 6.63% (908 references); institutions 242 / 93% with a country / 70 in 2+ unchanged | [experiments/68_go_live](../experiments/68_go_live/README.md) | 2026-11-02 |
+| **The production librarian** (exp 71: Flash 3.8, Argon, Sonnet 5.5, Opus 5.5 re-decide 522 verified decisions from the same packets; **$6.47** of a $10 cap: Gemini $3.27, Anthropic $3.19) | answering everything, no model reaches 98% on the 243 judgement items (Opus 95.2%, Flash 93.2%); Claude's "high" is calibrated (Opus 99.0% on 80% of items), Gemini's is not; 8 answer kinds ≈ 100% for every model. **Design: rules → Flash for the 8 strong kinds → Opus where it says high → the Desk: 99.1% precise on all items (98.9% on judgement items), 17% to a person, $2.97 per 1,000 decisions** ($3.37 on judgement items). Projected (estimate): gate 2 $13–16, the education slice $620–1,950, 1M documents $3.8k–21.7k. Caveat: the gold is Claude's own | [experiments/71_librarian_models](../experiments/71_librarian_models/README.md) | 2026-11-02 |
+| **The first production librarian pass** (exp 72: journal 0165's new entities; rules → Flash 3.8 strong kinds → Opus 5.5 high → the Desk; **$4.35** of a $10 cap: Gemini $1.69, Anthropic $2.66) | live release **R20261103T063710** (5,040 applied, 0 orphaned, only the known demo conflict; exp 68's 3 orphans re-anchored): **2,302 Desk decisions** of `agent:librarian` (institutions 338, cited works 1,963, 1 person); of 2,619 items rules 28%, Flash 45%, Opus 13%, **to people 297 (11%: 294 tasks)**; hard checks clean, alarm 40/40 (Sonnet on Flash) and 346/350 (Flash on Opus); hand check 142 right / 3 minor / 1 wrong of 146, and two small kinds read in full and **held** (Flash rows-one-body 16/17, card ok 24/26). 0165: institutions 108 → 96 (with a country 59% → 80%), cited works 5,322 → 5,256, cited by 2+ 210 → 258, held 10.6% → 11.8%, shared with 0130 157 → 198 works. The lead's CBDD9P2BCR wrong join and 4 like it split. Candidate finder 103 → 133 of 138 | [experiments/72_librarian_0165](../experiments/72_librarian_0165/README.md) | 2026-11-03 |
+
+### Evaluations, the Desk and the shareholders
+
+| | Result | Source | Date |
+|---|---|---|---|
+| **AI-Search A/B** (the AI-Search session, offline, 12 articles; small sample) | right passage in the top 5: platform's chunks 62%, ours 72%, **ours with the kind filter 76% (+14 points)** | the Plan page, item `ab-aisearch` | 2026-10-30 |
+| **Indra OCR** (exp 58, local CPU, $0) | words wrong on 34 truth pages **10.4% vs Azure 1.80%**; not a replacement; parked; weights licence (modified OpenRAIL-M) needs a legal reading | [experiments/58_indra_ocr](../experiments/58_indra_ocr/README.md) | 2026-10-30 |
+| **Reducto** (exp 59, $4.61 list price inside free credits) | words wrong r-1 5.2% (3.5% with an "as printed" prompt) vs Azure 2.3%; retypes letters; two-column Arabic left column first 6/6; ~$191k per 1M documents; free tier: no zero retention, deletion failed. **Not adopted** | [experiments/59_reducto](../experiments/59_reducto/README.md) | 2026-10-30 |
+| **Claude Opus 5.5 vs Gemini Argon as reader** (exp 60, **$30.78** of a $40 cap, Anthropic Batch) | proof pages right / minor / serious **15/42/3 vs Argon 42/18/0**; wrong words 21 vs 0 of 1,532; metadata 15 vs 25 of 30; $0.021 a page ($237k per 1M documents). **Keep Argon**; the lesson (refuse a "fix" of a clearly printed word) became the D30 guard | [experiments/60_claude_reader](../experiments/60_claude_reader/README.md) | 2026-10-31 |
+| **The Desk** (exp 49) | pages since 2026-10-23: the index pages, Explorer, article beside its scan, Guide (2026-10-23), Librarian (2026-10-23), Project (2026-10-26), Pipeline (2026-10-30), Audit and Plan (2026-11-02); institution and cited-work decision operations (2026-11-02); **93 tests** in the Desk suite (exp 68's run, 2026-11-02; 19 on 2026-10-21, 47 on 2026-10-23) | [experiments/49_correction_desk](../experiments/49_correction_desk/README.md), exp 68 "Answer" | 2026-11-02 |
+| **Shareholders** (exp 55 deck; exp 57 documents; $0) | the 12-slide deck at Desk `/pitch` (2026-10-23); the owner presented on **2026-10-28** ("they love the product") and was asked for documentation: business overview 12 A4 pages, technical documentation 31 A4 pages, PDF with real screens, confidential; wait for the owner's read | [experiments/55_shareholder_pitch](../experiments/55_shareholder_pitch/README.md), [experiments/57_shareholder_docs](../experiments/57_shareholder_docs/README.md) | 2026-10-28 |
+
+### Gates
+
+| | Result | Source | Date |
+|---|---|---|---|
+| **Gate 1** (exp 52) | done 2026-10-22 (numbers in the next section); with the librarian applied and the go-live: institutions in 2+ articles 25 vs 6.3, shared cited works 121 vs 16.7 | above | 2026-11-02 |
+| **Gate 2 selection** (exp 54, $0) | finished 2026-10-22 19:07: ten journals (0130, 0165, 0011, 0523, 1001, 0246, 1182, 0097, 0840, 0013), 3,460 articles, **~$456 expected**, worst $633; a cheaper five 1,344 articles ~$152. Approved by the owner on 2026-11-02 with a £500 top-up, in the order fix → re-audit → one journal → nine more | [experiments/54_gate2_selection](../experiments/54_gate2_selection/README.md); the Plan, item `w-gate2` | 2026-11-02 |
+| **Gate 2 pilot** (exp 70: مجلة الطفولة والتنمية, 0165, 363 articles = 145 scans + 218 Word files; prompt v3.6 + the D30 guard; hard cap $55) | **done** 2026-11-02 20:33, **$23.29**: live release R20261103T023001; 0130 ↔ 0165 citations 15 + 16, shared authors 17 vs 0.0 and shared cited works 157 vs 26.3 for random same-size sets; the other nine can follow as they are (with the fixes in the README) | [experiments/70_gate2_pilot](../experiments/70_gate2_pilot/README.md) | 2026-11-02 |
+| **Gate 2, the other journals** (exp 74; hard cap $400) | **PARKED 2026-11-04** (owner, for another experiment) at **$365.23**: live release **R20261104T151029** (0 orphans); 1001, 0840, 0097, 0246 and 0130's Word years live with their librarian passes, 0013 live with its librarian verified but not applied; 0011 and 0523 read but held (the ten-page look found 3 and 5 wrong words); 1182's scans over the cap. Seven journals: 30 of 42 ordered pairs cite each other, shared authors and cited works 6–20× random, institutions at chance. Resume steps in the README | [experiments/74_gate2_full](../experiments/74_gate2_full/README.md); the Plan, item `gate2-rest` | 2026-11-04 |
+| **Gate 3** (162,816 EduSearch articles) | about $43k now, about $86k after 1 December (estimate); the owner decides before 1 December | exp 54; the Plan, item `gate3` | 2026-10-22 |
+
+**Spend (2026-11-02).**
+- **Gemini log** (`experiments/43_rehearsal/out/gemini_spend.jsonl`, 4,167 rows, last entry 2026-11-02 19:43,
+  still growing while the pilot runs): **$127.08** since the 2026-10-18 top-up. $100.15 up to 2026-10-22; on
+  2026-11-02 the v3.6 check $0.80 (exp 65), the fix-rule check $3.16 (exp 69), and gate 2's pilot so far **$22.99**
+  (scan reading $19.37, Word step $1.20, judge $2.42 by 19:43; still running). Experiment 71's Gemini $3.27 is in its own log
+  (`experiments/71_librarian_models/out/spend71.jsonl`), experiment 72's $1.69 in
+  `experiments/72_librarian_0165/out/spend72.jsonl`.
+- **Credit:** the owner topped up **£500 on 2026-11-02** (the Plan, item `w-gate2`) on top of about £11 left; roughly
+  **£480 left by estimate** after 2026-11-02's ≈ $30 of Gemini (log dollars → pounds + 20% VAT, as reconciled on
+  2026-10-21). Check the console: the log is our record, not the bill.
+- **Claude API:** **$36.63** (exp 60 $30.78 from `experiments/60_claude_reader/out/calls.jsonl`; exp 71 $3.19; exp 72
+  $2.66 in `experiments/72_librarian_0165/out/spend72.jsonl`), out
+  of the owner's $250 of Claude credits (`desk/project/project.json` timeline).
+- **Reducto:** $4.61 at list price, inside the free credits (exp 59). Indra: local CPU, $0.
+- **Caps:** each paid experiment has an owner-approved cap enforced in code before each batch: exp 60 $40, exp 65
+  $5, exp 69 $4, exp 70 $55, exp 71 $10, exp 72 $10 (Gemini and Anthropic together). Gemini prices double after 1 December (Argon) and 1 January 2027 (Flash).
+
+**Waits on the owner (2026-11-02, the Plan's "Needs you").** Make the GitHub repo `CubezCS-tys/inkscript` private
+(**urgent**: still public, holds one real Mandumah article as a fixture); rotate the Reducto API key and the Desk
+admin token (both shown in chat); ask Reducto to delete the 49 pages; read the shareholder documents; decide gate 3
+before 1 December; remove the October demo decisions (one blocks a cited-work split); review the 70 flagged Guide
+labels; the 21 re-minted cited-work ids; the Word route's small paid test; "unclear" references in a split; the
+master tables' shape; commits since 2026-10-21; proposed deletions; older items (Work task wording, the 0732 / 0849
+judge calls, which fields each corrector covers, the remote Desk's domain).
+
+## Linking, the Desk, gate 1 and the Word route (2026-10-22)
+
+The work turned from making each article right (islands) to connecting them (bridges), journal by journal, starting
+with an Education Citation Index ([overview.md](overview.md), [ideas.md](ideas.md) "The Education Citation Index and
+the Word route"). Reference = what an article cites (outgoing); citation = another article citing it (incoming).
+
+| | Result | Source | Date |
+|---|---|---|---|
+| **Linking probes** (exp 48, the 600; an agent's judgement, no person checked) | ~2.9% of 9,775 references land on a work Mandumah holds (about a third of cited Arabic articles/theses), flat from 50 to 600 articles; about two-thirds are books and turath; ~86% have no record anywhere; back references 43/47 right; cross-article work cards 100/113 (errors from one author-less title rule: «الديوان» = six diwans); byline → person 50/50; 6/40 authority ids hold two people; OpenAlex matches 0/40 Arabic references; projected correction load ~16,800 h at 1M documents | [experiments/48_linking_probe](../experiments/48_linking_probe/README.md) | 2026-10-21 |
+| **The Desk P1 + P2** (exp 49, correction backend) | append-only decisions, ownership, three detectors, releases; 19 tests passed then (P1 11; P2 adds 6 API tests and the coordinator's engine test; **93** by 2026-11-02, see above), Playwright walk-through PASS; web (Next.js) 127.0.0.1:8004, API (FastAPI) :8005, PostgreSQL `inkdesk` schema `desk` | [experiments/49_correction_desk](../experiments/49_correction_desk/README.md) | 2026-10-21 |
+| **Extraction inventory** (exp 51, $0) | **235 fields** in 12 groups, counted in the 600 masters: 88 captured well, 47 partly, 43 text only, 57 not; 37 group-A gaps to add to the prompt first; 190 of 600 articles hold Azure's Persian ی/ک | [experiments/51_extraction_inventory](../experiments/51_extraction_inventory/README.md), page :8004/inventory/ | 2026-10-22 |
+| **Prompt v3.5b** (v3.3 + the 37 fields in a separate "enrich" part, without v3.4's two content lines) | check on 12 articles / 114 pages beside v3.3: lines same type 90–100% per article (1010-006 90.1%, 0787 92.7%, the rest ≥ 97.5%), order 97–100%; gold differences 2382 12 (v3.3 17), 0747 38 (v3.3 44); v3.4's losses did not come back on their pages; **$0.01048 a page against v3.3's $0.00909 (+15%)**; check $1.20 (the v3.5 check before it $1.08). Used for gate 1 | `experiments/43_rehearsal/out/v35b_check/score.md`, `prompt43.py` | 2026-10-22 |
+| **Letter fix** (Azure's ی/ک/ھ written as the printed ي/ى/ك/ه, under D30 as a recorded reader fix; $0) | first 300: **1,059 words in 106 articles**; exam: **829 words in 89 articles**; 300/300 + 300/300 valid; 295/300 identical to the controls once the fixes are undone; gate 1: 408 letters in 331 words | [experiments/43_rehearsal](../experiments/43_rehearsal/README.md) "Letter fix"; exp 52 | 2026-10-22 |
+| **Gate 1: one journal** (exp 52, مجلة الطفولة العربية 0130, v3.5b + letter fix + judge) | 126 articles / 2,439 pp, 126/126 valid. Journal against same-size random sets of the 600 (mean of 20): authors with 2+ articles **16 vs 0.25**; institutions in 2+ articles **26 vs 3.6**; affiliations at a repeat institution 76% vs 14%; shared cited works **84 vs 11**; largest coupled group 48 vs 9; **39 citations inside the journal** (24 articles → 37 of its articles; 38 of 39 read right); **16.9%** of references held (600: 2.9%). Thin: co-authorship (1 pair), corresponding authors (0). Quality: 10 random pages beside the scan 9 right / 1 minor / 0 serious; judge 289 pages, 30 findings. **$24.24** ($0.192 an article, $0.0099 a page; cap $32) | [experiments/52_journal_gate1](../experiments/52_journal_gate1/README.md), page :8004/gate1/ | 2026-10-22 |
+| **The Word route** (exp 53, $0, code only) | 0130's 2009–2016 Word originals: **139/139 masters valid** (JATS DTD); first page = catalogue's 139/139; 98/98 footnotes; 764 tables; 4,613 references; no printed pages past page 1 (estimates, flagged: D36); 17 of 23 Word files with a scan were another article (caught by the first-page test); a text-only Gemini step **$0.010 (Flash) – $0.028 (Argon) an article** vs scan ~$0.12–0.18 | [experiments/53_word_route](../experiments/53_word_route/README.md) | 2026-10-22 |
+| **Platform v2 now** | **726 articles** (the 600 + gate 1's 126; 780 documents with experiment 41's 55), loaded into the main `platform_v2.db` (backup `platform_v2.before_journal0130_2026-10-22.db`); Desk release R20261022T231143, 287 "possible same work" tasks open | read-only count of `documents`, 2026-10-22 18:27; the session's notes | 2026-10-22 |
+| **Gate 2 selection** (exp 54, $0) | finished 2026-10-22 19:07 (result in the 2026-11-02 section above, "Gates"): ten journals, 3,460 articles, ~$456 expected; page :8004/gate2/ | [experiments/54_gate2_selection](../experiments/54_gate2_selection/README.md) | 2026-10-22 |
+
+**Spend.** The Gemini log (`experiments/43_rehearsal/out/gemini_spend.jsonl`, last entry 2026-10-22 15:55) stands at
+**$100.15** since the 2026-10-18 top-up (£101.28 incl. VAT): $73.62 before, then the v3.5 check $1.08, the v3.5b
+check $1.20 and gate 1 $24.24. About **£11 is left by estimate**; check the console. Gate 2 needs a top-up. *(Superseded: the owner topped up £500 on 2026-11-02; spend as of 2026-11-02 above.)*
+
+**Ran overnight 2026-10-22/23** (all three finished: the reload gave release R20261022T233109, the fields load R20261023T005909, exp 54 its README; the Plan page): the 600 reloaded
+with the letter fix into `platform_v2.db`, then a Desk release; the platform loader taught every v3.5b field
+(developed on `dev_fields.db`); the gate 2 selection.
 
 ## The exam, the proof pack and the platform (2026-10-21)
 
@@ -14,6 +126,7 @@ line its type and order, code rules, a judge that edits only through a logged pa
 | **The proof pack** (an independent agent, seeded random draws, no paid calls) | pages beside the scan: right 35, minor 23, **serious 2** of 60; words 0 wrong of 1,532 (upper bound 0.25%); citations fully right 57/80, fields 313/341 right, 0 wrong; back references 15/20 right; metadata all fields right 18/30 | `out/v33_300b_final` (`experiments/43_rehearsal/out/proof/proof.md`; page http://127.0.0.1:8899/proof/proof.html) | 2026-10-20 |
 | **Fix round 3** (the proof pack's failures fixed at their root, on a copy) | pages right **35 → 43**, serious **2 → 0** of 60; metadata all right **18 → 25** of 30; citations unchanged 57/80; $1.12 | `out/v33_300b_fix3` (README "Fix round 3"); 0529's flow charts fixed 2026-10-21 (a figure box given as [x0,y0,y1,x1]; only 0529 changed in the exam) | 2026-10-20/21 |
 | **Platform v2** (experiment 47: the database of everything we hold, Web-of-Science style) | independent re-verify round 2: **11 of 11 checks pass**; its gaps fixed 2026-10-21 (publishers keyed on name + country, demo ink links that survive rebuilds, 4 back references); two clean builds in three step orders identical in 81 tables; 354 documents, 580 persons, 315 institutions, 3,080 cited works, 92 accepted catalogue links; served at http://127.0.0.1:8003/platform_v2 | `/home/yassine/data/platform_v2/platform_v2.db` (`experiments/47_platform_v2`, README + VERIFY.md) | 2026-10-21 |
+| **Gate 1: one journal** (experiment 52; مجلة الطفولة العربية, prompt v3.5b + the letter fix, judge, platform copy `gate1.db`) | 126 articles / 2,439 pp (2010–2025 in the bucket = 2017–19 + 2023–25; the whole 195 priced over the $32 cap), 126/126 valid; **$24.24** ($0.0099 a page); against same-size random sets of the 600: authors with 2+ articles 16 vs 0.25, institutions in 2+ articles 26 vs 3.6, shared cited works 84 vs 11, largest coupled group 48 vs 9; **39 references inside the journal** (24 articles → 37 of its articles); **16.9%** of references land on a held work (600: 2.9%); thin: co-authorship (1 repeat pair), corresponding authors (0); 10 random pages beside the scan 9 right / 1 minor / 0 serious | `experiments/52_journal_gate1`, http://127.0.0.1:8004/gate1/ | 2026-10-22 |
 | Platform v1 (experiment 46) | the first 300 (final), the 55 and the exam (run, final, fix 3) loaded with flags, patches and judge findings | `/home/yassine/data/platform/platform.db`, http://127.0.0.1:8002/platform | 2026-10-20 |
 
 **Spend.** The Gemini log (`experiments/43_rehearsal/out/gemini_spend.jsonl`) stands at **$73.62** since the
@@ -147,6 +260,9 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
 
 ## In flight / where outputs are (this machine)
 
+- **2026-11-02 evening:** gate 2's pilot (experiment 70, journal 0165) finished at 20:33 (release R20261103T023001;
+  `experiments/70_gate2_pilot/README.md`); everything else listed below as running has finished. The live list is the Desk's `/plan`.
+
 - **Correction tool v1 (2026-10-20)** for the owner on the Layout view of the 300:
   http://127.0.0.1:8899/correct/edit/index.html (kinds, noise, split / merge / order, note links, picture boxes, word
   fixes as misread or misprint); corrections → person patches → `correct43.py import` rebuilds the masters; tested end
@@ -234,7 +350,7 @@ An 81-page document builds in about 10 minutes at a peak of 1.6 GB.
   --xml --trust` in `experiments/24_product/out/set/w0..w2/`; numbers in
   `summary.json`, the owner's page `experiments/24_product/out/showcase.html`.
 
-- **The rerun of the 227 journals is running now** (started 2026-09-21,
+- *(Finished 2026-09-22: see "Closed 2026-09-22" above.)* **The rerun of the 227 journals** (started 2026-09-21,
   roadmap item 5): 3 workers into
   `experiments/09_pen_path/out/journals227_v3/`, watchdog up, `src/` must not
   be edited until it ends. It resumes by rerunning the same command

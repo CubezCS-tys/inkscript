@@ -87,15 +87,23 @@ def _atoks(sn, gn) -> set:
     return out
 
 
+def _names_for_matching(p: dict) -> list:
+    """A work's authors; an edited book with no author is known by its editors (v3.5b, 2026-10-22: the editors are
+    no longer read as co-authors, and an author-less «Hewstone, Stroebe & Jonas (Eds.)» must not join McDougall's
+    book of the same title)."""
+    p = p or {}
+    return p.get("authors") or p.get("editors") or []
+
+
 def author_tokens(p: dict) -> set:
     out = set()
-    for sn, gn in (p or {}).get("authors") or []:
+    for sn, gn in _names_for_matching(p):
         out |= _atoks(sn, gn)
     return out
 
 
 def first_author_tokens(p: dict) -> set:
-    a = (p or {}).get("authors") or []
+    a = _names_for_matching(p)
     return _atoks(*a[0]) if a else set()
 
 
@@ -477,17 +485,49 @@ def resolve(con, vid: int) -> dict:
 
 
 # ------------------------------------------------------------------ 2. cited works across articles
+def edition_key(mm: dict) -> str | None:
+    """v3.5b: which edition (printing) of a work a citation names: its edition statement, year and publisher, folded.
+    None when the citation names none of the three."""
+    p = mm.get("p") or {}
+    ed = mm.get("edition") or ((p.get("extra") or {}).get("edition") if isinstance(p.get("extra"), dict) else None)
+    y = year_of(p.get("year"))
+    pub = tnorm(p.get("publisher"))
+    if not (ed or y or pub):
+        return None
+    return f"{' '.join(fold(ed or '').split())}|{y or ''}|{pub}"
+
+
+def died_years(d: str | None) -> tuple:
+    """A death date as printed («ت ٧٥١هـ», «d. 1350») -> (hijri year, gregorian year), one read, the other converted."""
+    if not d:
+        return None, None
+    m = re.search(r"\d{3,4}", fold(d))
+    if not m:
+        return None, None
+    y = int(m.group(0))
+    if calendar_of(d, y) == "hijri":
+        return y, hijri_to_greg(y)
+    return greg_to_hijri(y), y
+
+
 def build_cited_works(con, res: dict, load_id: int) -> dict:
     """One card per work across the shown versions (title key + container + a shared author word). The card's id
     comes from its content key; a card whose key moved (a new member changed its representative) keeps the id its
     members had, and an id no card keeps any more is retired into merged_ids — never re-minted silently."""
     vkey = {r[0]: r[1] for r in con.execute("SELECT version_id, version_key FROM versions")}
+    vstem = {r[0]: r[1] for r in con.execute("SELECT version_key, stem FROM versions")}
     old_of = {}          # (version_key, mention_id) -> old active cited_work_id
-    for r in con.execute("""SELECT v.version_key, c.mention_id, w.cited_work_id FROM cited_work_members m
+    old_of_stem = {}     # (stem, mention_id) -> the same: a stem whose shown version moved to a new run (a rebuild
+    #                      such as the letter fix, 2026-10-22) keeps its cards' ids through its unchanged mention ids
+    for r in con.execute("""SELECT v.version_key, c.mention_id, w.cited_work_id, v.stem FROM cited_work_members m
                             JOIN citation_mentions c ON c.mention_pk = m.full_mention_pk
                             JOIN versions v ON v.version_id = c.version_id
                             JOIN cited_works w ON w.cited_work_pk = m.cited_work_pk WHERE w.status = 'active'"""):
         old_of[(r[0], r[1])] = r[2]
+        old_of_stem[(r[3], r[1])] = r[2]
+
+    def old_id(m):
+        return old_of.get(m) or old_of_stem.get((vstem.get(m[0]), m[1]))
     old_active = {r[0] for r in con.execute("SELECT cited_work_id FROM cited_works WHERE status = 'active'")}
     groups = []          # (canonical pk, mention dict, member pks, version id)
     for vid in sorted(res, key=lambda v: vkey[v]):
@@ -539,7 +579,7 @@ def build_cited_works(con, res: dict, load_id: int) -> dict:
     rest = [cd for cd in cards if "id" not in cd]
     prefs = []
     for cd in rest:
-        votes = Counter(old_of[m] for m in cd["members"] if m in old_of)
+        votes = Counter(old_id(m) for m in cd["members"] if old_id(m))
         for oid, n in votes.items():
             prefs.append((-n, cd["nat"], oid))
     for _, nat, oid in sorted(prefs):
@@ -560,6 +600,14 @@ def build_cited_works(con, res: dict, load_id: int) -> dict:
             claimed[nat] = pid
     con.execute("DELETE FROM cited_work_members")
     con.execute("DELETE FROM cited_work_authors")
+    con.execute("DELETE FROM cited_work_contributors")
+    con.execute("DELETE FROM cited_work_editions")
+    # v3.5b: the people of every citation by role (editors and translators of the work; death dates of its authors)
+    people = defaultdict(list)
+    for r in con.execute("SELECT p.* FROM citation_mention_people p JOIN citation_mentions m USING (mention_pk) JOIN "
+                         "versions v ON v.version_id = m.version_id AND v.is_current = 1 ORDER BY p.mention_pk, "
+                         "p.role, p.seq"):
+        people[r["mention_pk"]].append(dict(r))
     keep, out = set(), {}
     for cd in cards:
         rep, cid = cd["rep"], cd["id"]
@@ -581,36 +629,86 @@ def build_cited_works(con, res: dict, load_id: int) -> dict:
                        year_printed = excluded.year_printed, year_calendar = excluded.year_calendar,
                        year_hijri = excluded.year_hijri, year_greg = excluded.year_greg, place = excluded.place,
                        publisher = excluded.publisher, lang = excluded.lang, status = 'active',
-                       built_load = excluded.built_load""",
+                       edition_note = excluded.edition_note, built_load = excluded.built_load""",
                     (cpk, cid, pt, title_of(p), rep["tk"], cd["akey"] or None, yp, cal,
                      y if cal == "hijri" else (greg_to_hijri(y) if y else None),
-                     hijri_to_greg(y) if cal == "hijri" else y, (p.get("extra") or {}).get("edition") if isinstance(
-                         p.get("extra"), dict) else None, p.get("place"), p.get("publisher"),
+                     hijri_to_greg(y) if cal == "hijri" else y, p.get("edition") or ((p.get("extra") or {}).get(
+                         "edition") if isinstance(p.get("extra"), dict) else None), p.get("place"), p.get("publisher"),
                      "ara" if script(title_of(p)) == "Arab" else ("lat" if title_of(p) else None),
                      "title-key + container + shared author word", load_id))
         cpk = con.execute("SELECT cited_work_pk FROM cited_works WHERE cited_work_id = ?", (cid,)).fetchone()[0]
         keep.add(cid)
+        # v3.5b: the editions of the work as its citations give them (edition statement + year + publisher); each
+        # member points at the edition it names, so no citation's edition is lost when the work is one card
+        mem = []
         for c, m, pks, vid in cd["reps"]:
             for pk in pks:
                 mm = res[vid]["mentions"].get(pk)
                 if mm and (mm["kind"] == "full" or pk == c):
-                    con.execute("INSERT OR REPLACE INTO cited_work_members VALUES (?,?,?,?,?, 'link47', NULL)",
-                                (pk, cpk, "in-article-first" if pk == c else "in-article-repeat",
-                                 1.0 if pk == c else 0.9,
-                                 jdump(dict(title_key=m["tk"], container_key=m["ck"] or None, authors=sorted(m["au"])))))
+                    mem.append((vkey[vid], mm["mention_id"], pk, c, m, mm))
+        mem.sort(key=lambda x: (x[0], x[1]))
+        eds = {}
+        for vk, mid, pk, c, m, mm in mem:
+            ek = edition_key(mm)
+            if ek:
+                eds.setdefault(ek, []).append(mm)
+        ed_pk = {}
+        for ek, mms in sorted(eds.items()):
+            f = mms[0]
+            fp = f["p"] or {}
+            row = fill_pk("cited_work_editions", [dict(
+                cited_work_pk=cpk, edition_key=ek, edition_printed=f.get("edition") or ((fp.get("extra") or {}).get(
+                    "edition") if isinstance(fp.get("extra"), dict) else None), year_printed=fp.get("year"),
+                year_calendar=f.get("year_calendar"), year2=f.get("year2"), publisher=fp.get("publisher"),
+                place=fp.get("place"), n_members=len(mms), first_mention_pk=f["mention_pk"])])[0]
+            insert(con, "cited_work_editions", [row], "INSERT")
+            ed_pk[ek] = row["edition_pk"]
+        for vk, mid, pk, c, m, mm in mem:
+            con.execute("INSERT OR REPLACE INTO cited_work_members (full_mention_pk, cited_work_pk, method, score, "
+                        "evidence, asserted_by, patch_key, edition_pk) VALUES (?,?,?,?,?, 'link47', NULL, ?)",
+                        (pk, cpk, "in-article-first" if pk == c else "in-article-repeat",
+                         1.0 if pk == c else 0.9,
+                         jdump(dict(title_key=m["tk"], container_key=m["ck"] or None, authors=sorted(m["au"]))),
+                         ed_pk.get(edition_key(mm))))
+        # v3.5b: the editor of the text (تحقيق) and the translator, as printed in the work's citations
+        seen_c = {}
+        for vk, mid, pk, c, m, mm in mem:
+            for x in people.get(pk, []):
+                if x["role"] == "author" or not x["name_key"]:
+                    continue
+                k2 = (x["role"], x["name_key"])
+                if k2 not in seen_c:
+                    seen_c[k2] = dict(cited_work_pk=cpk, role=x["role"], printed=x["printed"], name_key=x["name_key"],
+                                      edition_pk=ed_pk.get(edition_key(mm)), n_mentions=0)
+                seen_c[k2]["n_mentions"] += 1
+        nrole = Counter()
+        for k2, d in seen_c.items():
+            nrole[d["role"]] += 1
+            d["seq"] = nrole[d["role"]]
+        insert(con, "cited_work_contributors", list(seen_c.values()), "INSERT")
+        died_of = {}
+        for vk, mid, pk, c, m, mm in mem:
+            for x in people.get(pk, []):
+                if x["role"] == "author" and x["died"] and x["name_key"] and x["name_key"] not in died_of:
+                    died_of[x["name_key"]] = x["died"]
         for k, (sn, gn) in enumerate(cd["authors"]):
             printed = " ".join(x for x in (gn, sn) if x)
             pp = name_parts(printed)
+            dd = died_of.get(name_key(printed))
+            dh, dg = died_years(dd)
             con.execute("INSERT OR REPLACE INTO cited_work_authors (cited_work_pk, seq, printed, honorific, kunya, ism, "
-                        "nasab, nisba, laqab, shuhra, latin, name_key) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                        "nasab, nisba, laqab, shuhra, latin, name_key, died, died_hijri, died_greg) VALUES "
+                        "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                         (cpk, k + 1, printed, pp["titles"], pp["kunya"], pp["ism"], pp["nasab"], pp["nisba"],
                          pp["laqab"], pp["shuhra"], printed if script(printed) == "Latn" else None,
-                         name_key(printed)))
+                         name_key(printed), dd, dh, dg))
         out[cpk] = dict(rep=rep, citing=set(), authors=cd["authors"])
     # retired ids: written to merged_ids (old -> the card that holds most of its members now)
     new_of = {m: cd["id"] for cd in cards for m in cd["members"]}
+    new_of_stem = {(vstem.get(m[0]), m[1]): i for m, i in new_of.items()}
     for oid in sorted(old_active - keep):
-        votes = Counter(new_of[m] for m, o in old_of.items() if o == oid and m in new_of)
+        votes = Counter(new_of.get(m) or new_of_stem.get((vstem.get(m[0]), m[1])) for m, o in old_of.items() if o == oid)
+        votes.pop(None, None)
         con.execute("UPDATE cited_works SET status = 'merged' WHERE cited_work_id = ?", (oid,))
         if votes:
             nid = sorted(votes.items(), key=lambda x: (-x[1], x[0]))[0][0]

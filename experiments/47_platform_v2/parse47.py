@@ -111,7 +111,7 @@ def marked_text(e):
         emit(x.text)
         for c in x:
             walk(c)
-        if name == "named-content" and x.get("content-type") in ("reader-fix", "sic"):
+        if name == "named-content" and x.get("content-type") in ("reader-fix", "sic", "model-suggestion"):  # exp 66/68
             ev.append((start, x.get("content-type"), dict(rid=x.get("rid"), end=n[0], title=x.get(XLINK_T))))
         elif name == "xref" and x.get("ref-type") == "fn":
             ev.append((start, "call", dict(rid=x.get("rid"), end=n[0])))
@@ -282,6 +282,8 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
     ink = Ink(stem, azure, alto)
     V = dict(R=R, ink=ink, alto=alto, anchors={}, extra_anchors=[])
     art_lang = root.get(XML_LANG)
+    fix_works_v35(root, R, stem)                             # v3.5b: editors / translators apart, both years, cited page
+    cx = contrib_extras(root)
 
     def anchor(a, owner_kind=None, owner_key=None):
         """Register anchors (list, one per page); return the first one's key; others go to anchor_links."""
@@ -431,9 +433,16 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
         fb = next((p.get("id") for p in fn.iter("p") if p.get("id") and BLOCK_ID.match(p.get("id"))), None) \
             if fn is not None else None
         b = bmap.get(fb)
-        notes.append(dict(note_id=n["note_id"], kind=n["kind"], label=n["label"], label_int=to_int(n["label"]),
+        kind, by = n["kind"], None
+        if fn is not None:
+            if fn.get("custom-type") == "author-note" or (fn.getparent() is not None and
+                                                          ln(fn.getparent()) == "author-notes"):
+                kind = "author-note"                          # v3.5b: the starred note about an author
+            elif fn.get("fn-type") == "custom" and fn.get("custom-type") in NOTE_BY:
+                by = fn.get("custom-type")                    # v3.5b: a translator's / editor's / publisher's note
+        notes.append(dict(note_id=n["note_id"], kind=kind, label=n["label"], label_int=to_int(n["label"]),
                           ord=n["ord"], page=n["page"], first_block_id=fb, text=n["text"],
-                          anchor_key=b["anchor_key"] if b else None))
+                          anchor_key=b["anchor_key"] if b else None, written_by=by))
     V["notes"] = notes
     calls, targets = [], []
     seq = 0
@@ -495,7 +504,8 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
                          alto_id=fid if (fid in illus or fid in composed) else None, caption_block_id=cap_id,
                          anchor_block_id=anchor_block, label=f["label"], caption=f["caption"], alt_ar=f["alt_ar"],
                          alt_en=f["alt_en"], text_in_figure=f["text_in_figure"], tex=f["tex"], mathml=mathml,
-                         specific_use=f["specific_use"], crop_key=f["graphic"], anchor_key=anchor(anc)))
+                         specific_use=f["specific_use"], crop_key=f["graphic"], anchor_key=anchor(anc),
+                         fig_type=e.get("fig-type") if e is not None and ln(e) == "fig" else None))
     # inline formulas / pictures: id from their block and order in it (a reread of another block cannot renumber)
     MML = "{http://www.w3.org/1998/Math/MathML}math"
     for tag, kind in (("inline-formula", "inline-equation"), ("inline-graphic", "inline-picture")):
@@ -516,8 +526,9 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
                              mathml=etree.tostring(mm, encoding="unicode") if mm is not None else None,
                              specific_use=q.get("specific-use"),
                              crop_key=q.get("{http://www.w3.org/1999/xlink}href"),
-                             anchor_key=b["anchor_key"] if b else None))
+                             anchor_key=b["anchor_key"] if b else None, fig_type=None))
     V["figures"] = figs
+    V["figure_notes"] = figure_notes(root, bmap, {n["note_id"]: n for n in notes})
     cells = []
     for t in root.iter("table-wrap"):
         tid = t.get("id")
@@ -569,11 +580,13 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
     V["verse_lines"] = verses
 
     # ---- text corrections (fixes of Azure misreadings, suspected misprints)
-    inline = {}
+    inline, suggested = {}, set()
     for bid, bo in bobj.items():
         for p, k, d in bo.events:
-            if k in ("reader-fix", "sic") and d.get("rid"):
+            if k in ("reader-fix", "sic", "model-suggestion") and d.get("rid"):
                 inline.setdefault(d["rid"], (bid, p, d["end"], d.get("title")))
+                if k == "model-suggestion":     # exp 66 D30 guard: a refused Gemini fix, its own layer (never applied)
+                    suggested.add(d["rid"])
     corr = []
     for kind, rows in (("azure-misread", R["fixes"]), ("misprint", R["misprints"])):
         for x in rows:
@@ -593,7 +606,10 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
                     ss = ink.strings_of_line(lid)
                     ss = ss[ta:tb] if ta is not None else [s for s in ss if "fix.argon" in s["tags"]] or ss
                     wcs += [s["wc"] for s in ss if s["wc"] is not None]
-            corr.append(dict(xml_id=xid, layer=kind, block_id=bid, char_start=a, char_end=b,
+            if kind == "misprint" and str(x.get("why") or "").startswith("model suggestion, not applied (D30 guard"):
+                suggested.add(xid)              # a refused fix on a line no block holds (a running head): no inline span
+            corr.append(dict(xml_id=xid, layer="model-suggestion" if xid in suggested else kind, block_id=bid,
+                             char_start=a, char_end=b,
                              azure_reading=x.get("azure_reading") if kind == "azure-misread" else None,
                              azure_wc=min(wcs) if wcs else None,
                              printed=x.get("print") if kind == "azure-misread" else x.get("printed"),
@@ -648,19 +664,442 @@ def parse_version(mdir: Path, stem: str, run: str, azure: dict) -> dict:
                 if nk and fold(rest)[:12] and fold(rest)[:12] in fold(txt):
                     anc = ink.place_lines([L["id"] for L in tb["lines"]], "line")
                     break
+        x = cx[a["seq"]] if a["seq"] < len(cx) else {}
+        titles = titles or x.get("prefix")                   # experiment 65: the honorific kept in the masters
         bm.append(dict(byline_pos=a["seq"], printed=printed, titles=titles, name_text=split_titles(name)[1] or name,
                        script=script(name), email=a.get("email"), block_id=bid,
                        min_word_conf=anc[0]["wc_min"] if anc else None, reader_fixes=None,
-                       anchor_key=anchor(anc[:1]), _parts=name_parts(name)))
+                       anchor_key=anchor(anc[:1]), _parts=name_parts(name),
+                       is_corresponding=x.get("corresp"), ids=json.dumps(x["ids"], ensure_ascii=False, sort_keys=True)
+                       if x.get("ids") else None, contrib_type=x.get("contrib_type"), role_phrase=x.get("role"),
+                       position=x.get("position"), contacts=json.dumps(x["contacts"], ensure_ascii=False,
+                                                                       sort_keys=True) if x.get("contacts") else None))
+        # v3.5b same_as (and fix round 3's twins): the person printed again in another script, a mention of its own
+        for tw in x.get("twins") or []:
+            if not tw or script(tw) == script(name) or script(tw) is None:
+                continue
+            thit, tanc = None, []
+            for b in [y for y in blocks if y["role"] == "byline"] + [y for y in blocks if y["page"] == 1]:
+                bo = bobj.get(b["block_id"])
+                if not bo:
+                    continue
+                hf, hidx = fold_map(bo.text)
+                i = ffind(hf, hidx, tw)
+                if i >= 0:
+                    thit = b["block_id"]
+                    tanc = bo.place(i, i + len(tw))
+                    break
+            lg = (x.get("twin_lang") or {}).get(tw)
+            bm.append(dict(byline_pos=a["seq"], printed=tw,
+                           titles=split_titles(tw)[0] or (x.get("tw_prefix") or {}).get(lg) or None,
+                           name_text=split_titles(tw)[1] or tw, script=script(tw), email=None, block_id=thit,
+                           min_word_conf=tanc[0]["wc_min"] if tanc else None, reader_fixes=None,
+                           anchor_key=anchor(tanc[:1]), _parts=name_parts(tw), is_corresponding=None, ids=None,
+                           contrib_type=x.get("contrib_type"),
+                           role_phrase=" | ".join((x.get("tw_roles") or {}).get(lg) or []) or None,
+                           position=" | ".join((x.get("tw_pos") or {}).get(lg) or []) or None, contacts=None,
+                           _twin_of=a["seq"]))
     V["byline_mentions"] = bm
-    V["affiliations"] = R["affiliations"]
+    V["affiliations"] = affiliations_v35(root, R)
 
     # ---- citation mentions
     V["citation_mentions"] = citation_mentions(root, R, bobj, bmap, ink, anchor, stem)
 
     # ---- Quran references (notes and body) and quotations (﴿…﴾)
     V["quran"] = quran_places(blocks, bobj, V["citation_mentions"], anchor)
+    # ---- v3.5b: handwriting, stamps and scan problems the reader saw (custom-meta; the ALTO is unchanged)
+    V["page_marks"] = page_marks(root, V, ink, anchor)
+    # ---- experiment 65: identifiers found by code on every line (sidecar <stem>.ids.json)
+    V["printed_ids"] = printed_ids(mdir, stem, V, ink, anchor)
     return V
+
+
+# ------------------------------------------------------------------ prompt v3.5b fields (2026-10-22)
+# Where experiment 43 writes them: enrich43.py / meta43.enrich / refs43.v35_parts (its README "Prompt v3.5"). Each
+# reader below returns nothing for a master without them, so every v3.3 master loads as before.
+NOTE_BY = {"translator", "editor", "publisher"}
+CAL = {"islamic": "hijri", "hijri": "hijri", "gregorian": "gregorian"}
+NONAUTHOR_GROUPS = {"editor", "translator", "supervisor"}
+
+
+def _names_of(el) -> list:
+    out = []
+    for x in el:
+        if not isinstance(x.tag, str):
+            continue
+        if ln(x) == "name":
+            out.append(((x.findtext("surname") or "").strip(), (x.findtext("given-names") or "").strip()))
+        elif ln(x) in ("string-name", "collab"):
+            out.append((text_of(x), ""))
+    return out
+
+
+def ec_v35(ec) -> tuple:
+    """(v3.5b parts, the authors without the editors and translators or None when there are none to remove, field
+    overrides) of one element-citation."""
+    v, over = {}, {}
+    groups = {}
+    for pg in ec.findall("person-group"):
+        groups.setdefault(pg.get("person-group-type") or "author", []).extend(_names_of(pg))
+    for k, t in (("editors", "editor"), ("translators", "translator")):
+        if groups.get(t):
+            v[k] = [list(x) for x in groups[t]]
+    died = [text_of(c) for c in ec.findall("comment") if c.get("content-type") == "death-date"]
+    if died:
+        v["died"] = died
+    ed = ec.find("edition")
+    if ed is not None and text_of(ed):
+        v["edition"] = text_of(ed)
+    years = ec.findall("year")
+    if years:
+        if years[0].get("calendar"):
+            v["year_calendar"] = CAL.get(years[0].get("calendar"))
+        if len(years) > 1:
+            v["year2"] = text_of(years[1])
+            v["year2_calendar"] = CAL.get(years[1].get("calendar") or "")
+            over["year"] = text_of(years[0])            # parse46 kept the last year element: the first is the year
+    prs = ec.findall("page-range")
+    plain = [text_of(x) for x in prs if not x.get("content-type")]
+    for x in prs:
+        if x.get("content-type") == "cited-pages":
+            v["cited_pages"] = text_of(x)
+        elif x.get("content-type") == "folio":
+            v["folio"] = text_of(x)
+    if len(plain) != len(prs):
+        over["page_range"] = plain[-1] if plain else None   # the work's own range, not the page pointed to
+    for tag, ct, k in (("date-in-citation", "access-date", "access_date"), ("institution", "library", "library"),
+                       ("comment", "shelfmark", "shelfmark"), ("comment", "degree", "degree")):
+        x = next((e for e in ec.findall(tag) if e.get("content-type") == ct), None)
+        if x is not None and text_of(x):
+            v[k] = text_of(x)
+    for tag, k in (("conf-name", "conf_name"), ("conf-loc", "conf_loc")):
+        x = ec.find(tag)
+        if x is not None and text_of(x):
+            v[k] = text_of(x)
+    authors = None
+    if any(t in groups for t in NONAUTHOR_GROUPS):
+        # parse46 took every name of the citation (ec.iter("name")): an editor became a co-author. The same order,
+        # without the names inside an editor / translator / supervisor group.
+        def keep(x):
+            return not any(ln(a) == "person-group" and (a.get("person-group-type") or "author") in NONAUTHOR_GROUPS
+                           for a in x.iterancestors())
+        authors = [((n.findtext("surname") or "").strip(), (n.findtext("given-names") or "").strip())
+                   for n in ec.iter("name") if keep(n)]
+        authors += [(text_of(n), "") for n in ec.iter("string-name") if keep(n)]
+        authors += [(text_of(n), "") for n in ec.iter("collab") if keep(n)]
+    return v, authors, over
+
+
+def fix_works_v35(root, R, stem):
+    """Each of parse46's works gets its element-citation's v3.5b parts (w["_v35"]) and its people by role
+    (w["_people"]); its authors, year and page range are corrected where parse46 mixed them (editors read as
+    authors, the second year, the cited page)."""
+    ecs = {}
+    for ref in root.iter("ref"):
+        for s_, ec in enumerate(ref.findall("element-citation")):
+            ecs[f"{stem}|ref:{ref.get('id')}|{s_}"] = ec
+    fns = {fn.get("id"): fn for fn in root.iter("fn")}
+    for n in R["notes"]:
+        fn = fns.get(n["note_id"])
+        for s_, ec in enumerate(fn.findall(".//element-citation") if fn is not None else []):
+            ecs[f"{stem}|note:{n['note_id']}|{s_}"] = ec
+    for w in R["works"]:
+        ec = ecs.get(w["work_id"])
+        if ec is None:
+            continue
+        v, authors, over = ec_v35(ec)
+        w["_v35"] = v
+        if authors is not None:
+            w["authors"] = json.dumps(authors, ensure_ascii=False) if authors else None
+            w["first_author"] = " ".join(x for x in (authors[0][1], authors[0][0]) if x) if authors else None
+            w["first_author_key"] = key(authors[0][0]) if authors else None
+        if "year" in over:
+            w["year"], w["year_int"] = over["year"], year_of(over["year"])
+        if "page_range" in over:
+            w["page_range"] = over["page_range"]
+        try:
+            au = json.loads(w["authors"] or "[]")
+        except Exception:                                    # noqa: BLE001
+            au = []
+        died = v.get("died") or []
+        people = []
+        for k, (sn, gn) in enumerate(au):
+            # refs43 writes one death-date comment per author who has one, in author order, not tied to the name:
+            # one date goes to the first author; as many dates as authors go one each
+            d = died[k] if len(died) == len(au) else (died[0] if k == 0 and len(died) == 1 else
+                                                     (died[k] if k < len(died) else None))
+            people.append(dict(role="author", seq=k + 1, surname=sn, given=gn, died=d))
+        for role, k_ in (("editor", "editors"), ("translator", "translators")):
+            for k, (sn, gn) in enumerate(v.get(k_) or []):
+                people.append(dict(role=role, seq=k + 1, surname=sn, given=gn, died=None))
+        w["_people"] = people
+
+
+def mention_v35(w, in_ref_list: bool) -> dict:
+    """The v3.5b columns of one citation mention (all None for a back reference or a citation without them)."""
+    v = (w or {}).get("_v35") or {}
+    src = None
+    if w:
+        src = "cited-pages" if v.get("cited_pages") else ("page-range" if w.get("page_range") else
+                                                          ("fpage" if w.get("fpage") else None))
+        if in_ref_list and not v.get("cited_pages"):
+            src = None                       # a reference-list entry's pages are the work's own, not a page cited
+    wp = None
+    if w and (in_ref_list or v.get("cited_pages")):
+        wp = w.get("page_range") or ("-".join(x for x in (w.get("fpage"), w.get("lpage")) if x) or None)
+    return dict(edition=v.get("edition"), year_calendar=v.get("year_calendar"), year2=v.get("year2"),
+                year2_calendar=v.get("year2_calendar"), work_pages=wp, cited_pages_source=src,
+                died=" | ".join(v["died"]) if v.get("died") else None, access_date=v.get("access_date"),
+                ms_library=v.get("library"), ms_shelfmark=v.get("shelfmark"), ms_folio=v.get("folio"),
+                thesis_degree=v.get("degree"), conf_name=v.get("conf_name"), conf_loc=v.get("conf_loc"),
+                _people=(w or {}).get("_people") or [])
+
+
+def contrib_extras(root) -> list:
+    """Per contrib, in parse46's order (article-meta iter("contrib")): corresp, printed ids, the reader's contrib-type,
+    the printed role words, and its name printed again in another script (name-alternatives string-name[@xml:lang])."""
+    am = root.find("front/article-meta")
+    out = []
+    for c in (am.iter("contrib") if am is not None else []):
+        ids = {}
+        for x in c.findall("contrib-id"):
+            if x.get("contrib-id-type") and text_of(x):
+                ids[x.get("contrib-id-type")] = text_of(x)
+        # experiment 65: <role content-type="position"> is the post / rank, the others the printed role words; a
+        # role, a post, an affiliation or e-mail with xml:lang belongs to the name printed in that language
+        roles = [r for r in c.findall("role") if not r.get(XML_LANG)]
+        role = next((r for r in roles if r.get("content-type") != "position"), None)
+        pos = [text_of(r) for r in roles if r.get("content-type") == "position" and text_of(r)]
+        twins = [text_of(x) for x in c.findall("name-alternatives/string-name") if x.get(XML_LANG)
+                 and x.get("specific-use") != "printed-on-the-page"]
+        twin_lang = {text_of(x): x.get(XML_LANG) for x in c.findall("name-alternatives/string-name")
+                     if x.get(XML_LANG) and x.get("specific-use") != "printed-on-the-page"}
+        tw_roles, tw_pos = {}, {}
+        for r in c.findall("role"):
+            lg = r.get(XML_LANG)
+            if lg and text_of(r):
+                (tw_pos if r.get("content-type") == "position" else tw_roles).setdefault(lg, []).append(text_of(r))
+        pr = next((x for x in c.iter("string-name") if x.get("specific-use") == "printed-on-the-page"
+                   and not x.get(XML_LANG)), None)
+        prefix = text_of(pr.find("prefix")) if pr is not None and pr.find("prefix") is not None else None
+        tw_prefix = {x.get(XML_LANG): text_of(x.find("prefix")) for x in c.iter("string-name")
+                     if x.get("specific-use") == "printed-on-the-page" and x.get(XML_LANG) and x.find("prefix") is not None}
+        contacts = {}
+        ems = [text_of(e) for e in c.iter("email") if text_of(e)]
+        if len(ems) > 1:
+            contacts["emails"] = ems
+        for tag, k in (("phone", "phones"), ("uri", "urls")):
+            v = [text_of(e) for e in c.iter(tag) if text_of(e)]
+            if v:
+                contacts[k] = v
+        printings = [x.get("rid") for x in c.findall("xref") if x.get("specific-use") == "printed-again"]
+        if printings:
+            contacts["printed_again_in"] = printings
+        out.append(dict(corresp=1 if c.get("corresp") == "yes" else None, ids=ids or None,
+                        contrib_type=c.get("contrib-type"), role=text_of(role) if role is not None else None,
+                        position=" | ".join(pos) or None, twins=twins, twin_lang=twin_lang, tw_roles=tw_roles,
+                        tw_pos=tw_pos, prefix=prefix or None, tw_prefix=tw_prefix, contacts=contacts or None))
+    return out
+
+
+def affiliations_v35(root, R) -> list:
+    """parse46's affiliation rows (unchanged, so the institutions linked from them stay the same), with the faculty
+    the reader gave apart (v3.5b institution[@content-type=faculty]; parse46 also keeps it inside orgname) and an
+    extra affiliation the reader gave in parts marked assembled."""
+    am = root.find("front/article-meta")
+    els = {}
+    for i, c in enumerate(am.iter("contrib") if am is not None else []):
+        for j, a in enumerate(c.findall("aff")):
+            els[(i, j)] = a
+    out = []
+    for r in R["affiliations"]:
+        a = els.get((r["author_seq"], r["seq"]))
+        r = dict(r, faculty=None, assembled=None)
+        if a is not None:
+            fac = [text_of(x) for x in a.findall("institution") if x.get("content-type") == "faculty"]
+            if fac:
+                r["faculty"] = " | ".join(fac)
+            if a.get("content-type") == "additional":
+                r["assembled"] = 1
+            # experiment 65: the twin's affiliation (another script) and the one it translates
+            r["_lang"], r["_id"], r["_rid"] = a.get(XML_LANG), a.get("id"), a.get("rid")
+        out.append(r)
+    return out
+
+
+def figure_notes(root, bmap, notes) -> list:
+    """Notes and «المصدر:» lines printed under a table or a figure, tied to it (v3.5b table-wrap-foot / fig p)."""
+    out = []
+    for t in root.iter("table-wrap", "fig"):
+        fid = t.get("id")
+        if not fid:
+            continue
+        holders = t.findall("table-wrap-foot") if ln(t) == "table-wrap" else [t]
+        k = 0
+        for h in holders:
+            for x in h:
+                if not isinstance(x.tag, str):
+                    continue
+                n = ln(x)
+                if n == "p":
+                    ct = x.get("content-type")
+                    if ln(t) == "fig" and ct not in ("figure-note", "source"):
+                        continue
+                    kind = "source" if ct == "source" else ("table-note" if ln(t) == "table-wrap" else "figure-note")
+                    bid, nid = x.get("id"), None
+                elif n == "fn" and ln(t) == "table-wrap":
+                    kind = "footnote"
+                    nid = x.get("id")
+                    bid = next((p.get("id") for p in x.iter("p") if p.get("id")), None)
+                elif n == "attrib":
+                    kind, bid, nid = "source", x.get("id"), None
+                else:
+                    continue
+                k += 1
+                b = bmap.get(bid)
+                out.append(dict(figure_id=fid, seq=k, kind=kind, block_id=bid if b else None, note_id=nid,
+                                text=(notes[nid]["text"] if nid in notes else text_of(x)) or None,
+                                anchor_key=b["anchor_key"] if b else None))
+    return out
+
+
+def page_marks(root, V, ink, anchor) -> list:
+    """custom-meta handwriting-lines / stamp-lines (Azure line labels P:N) and scan-problem («page 3: blur, faint»)."""
+    out = {}
+    for cm in root.iter("custom-meta"):
+        nm = (cm.findtext("meta-name") or "").strip()
+        val = text_of(cm.find("meta-value")) if cm.find("meta-value") is not None else ""
+        if nm in ("handwriting-lines", "stamp-lines"):
+            kind = nm.split("-")[0]
+            for lab in val.split():
+                m = re.match(r"^(\d+):(\d+)", lab)
+                if not m:
+                    continue
+                pg, no = int(m.group(1)), int(m.group(2))
+                al = V["azl"].get((pg, no))
+                anc = ink.place_lines([al], "line") if al else []
+                txt = " ".join(s["content"] or "" for s in ink.strings_of_line(al)) if al else None
+                out[f"{kind}|{lab}"] = dict(mark_id=f"{kind}|{lab}", page=pg, kind=kind, problem=None, line_id=lab,
+                                            text=txt or None, anchor_key=anchor(anc[:1]), source=nm)
+        elif nm == "scan-problem":
+            for m in re.finditer(r"page\s+(\d+)\s*:\s*([^;]+)", val):
+                pg = int(m.group(1))
+                for pr in [x.strip() for x in m.group(2).split(",") if x.strip()]:
+                    out[f"scan-problem|{pg}|{pr}"] = dict(mark_id=f"scan-problem|{pg}|{pr}", page=pg,
+                                                          kind="scan-problem", problem=pr, line_id=None, text=None,
+                                                          anchor_key=None, source=nm)
+    return [out[k] for k in sorted(out)]
+
+
+BOOK_PARTS = (("source", "title"), ("article-title", "title"), ("chapter-title", "chapter"),
+              ("publisher-name", "publisher"), ("publisher-loc", "place"), ("year", "year"), ("string-date", "date"),
+              ("edition", "edition"), ("series", "series"), ("volume", "volume"), ("isbn", "isbn"))
+GROUP_FIELD = {"author": "authors", "editor": "editors", "translator": "translators"}
+
+
+def article_v35(root) -> dict:
+    """The article-level v3.5b fields (meta43.enrich) as {field: value}: doc_type (the prompt's word) and
+    article_type (JATS), conference.*, thesis.*, reviewed_book.*, original.*, series_part. Empty for a v3.3 master
+    (its @article-type is the builder's default, not a reading, and is not taken)."""
+    am = root.find("front/article-meta")
+    out = {}
+    if am is None:
+        return out
+    sub = am.find("article-categories/subj-group[@subj-group-type='document-type']/subject")
+    if sub is not None and text_of(sub):
+        out["doc_type"] = text_of(sub)
+        out["article_type"] = root.get("article-type")
+    cf = am.find("conference")
+    if cf is not None:
+        for tag, k in (("conf-name", "name"), ("conf-loc", "place"), ("conf-date", "date")):
+            x = cf.find(tag)
+            if x is not None and text_of(x):
+                out[f"conference.{k}"] = text_of(x)
+    for pr in am.findall("product"):
+        typ = pr.get("product-type")
+        if typ == "thesis":
+            for tag, ct, k in (("comment", "degree", "degree"), ("institution", None, "university"),
+                               ("year", None, "year")):
+                x = next((e for e in pr.findall(tag) if e.get("content-type") == ct), None)
+                if x is not None and text_of(x):
+                    out[f"thesis.{k}"] = text_of(x)
+            sv = pr.find("person-group[@person-group-type='supervisor']")
+            if sv is not None:
+                names = [" ".join(x for x in (g, s_) if x) for s_, g in _names_of(sv)]
+                if names:
+                    out["thesis.supervisor"] = "؛ ".join(names)
+        elif typ == "book":
+            for pg in pr.findall("person-group"):
+                t = pg.get("person-group-type") or "author"
+                names = [" ".join(x for x in (g, s_) if x) for s_, g in _names_of(pg)]
+                if names:
+                    out[f"reviewed_book.{GROUP_FIELD.get(t, t)}"] = "؛ ".join(names)
+            for tag, k in BOOK_PARTS:
+                x = pr.find(tag)
+                if x is not None and text_of(x) and f"reviewed_book.{k}" not in out:
+                    out[f"reviewed_book.{k}"] = text_of(x)
+            for x in pr.findall("comment"):
+                if x.get("content-type") == "death-date" and text_of(x):
+                    out["reviewed_book.died"] = text_of(x)
+    ra = am.find("related-article[@related-article-type='translated-from']")
+    if ra is not None:
+        for tag, k in (("article-title", "title"), ("string-name", "author"), ("source", "source")):
+            x = ra.find(tag)
+            if x is not None and text_of(x):
+                out[f"original.{k}"] = text_of(x)
+        if ra.get(XML_LANG):
+            out["original.lang"] = ra.get(XML_LANG)
+    for cm in am.iter("custom-meta"):
+        if (cm.findtext("meta-name") or "").strip() == "series-part" and cm.find("meta-value") is not None:
+            out["series_part"] = text_of(cm.find("meta-value"))
+    # experiment 65: printed lines kept as fields (leaks43): how to cite, the journal's section, licence, copyright,
+    # a closing signature's place and date, the journal's ISSN printed on the pages (several joined by " | ")
+    many = defaultdict(list)
+    for cm in am.iter("custom-meta"):
+        nm = (cm.findtext("meta-name") or "").strip()
+        if nm in ("how-to-cite", "signature") and cm.find("meta-value") is not None:
+            many[nm.replace("-", "_")].append(text_of(cm.find("meta-value")))
+    for sg in am.iter("subj-group"):
+        if sg.get("subj-group-type") == "heading":
+            many["journal_section"] += [text_of(x) for x in sg.findall("subject")]
+    pm = am.find("permissions")
+    if pm is not None:
+        many["copyright"] += [text_of(x) for x in pm.findall("copyright-statement")]
+        many["license"] += [text_of(x) for x in pm.findall("license")]
+        many["license_url"] += [x.get("{http://www.w3.org/1999/xlink}href") for x in pm.findall("license")
+                                if x.get("{http://www.w3.org/1999/xlink}href")]
+    jm = root.find("front/journal-meta")
+    for x in (jm.findall("issn") if jm is not None else []):
+        if x.get("specific-use") == "printed":
+            many["issn_printed"].append(text_of(x))
+    for k, v in many.items():
+        v = [y for y in dict.fromkeys(v) if y]
+        if v:
+            out[k] = " | ".join(v)
+    return out
+
+
+def printed_ids(mdir: Path, stem: str, V: dict, ink, anchor) -> list:
+    """experiment 65: every identifier found by code on the pages (<stem>.ids.json beside the masters): kind, value,
+    printed form, check, place, owner and the ink of its line."""
+    p = mdir / f"{stem}.ids.json"
+    if not p.exists():
+        return []
+    try:
+        ids = json.loads(p.read_text(encoding="utf-8")).get("ids") or []
+    except (OSError, ValueError):
+        return []
+    out = []
+    for k, x in enumerate(ids, 1):
+        al = x.get("alto_line")
+        anc = ink.place_lines([al], "line") if al else []
+        ow = x.get("owner") or {}
+        out.append(dict(seq=k, kind=x.get("kind"), value=x.get("value"), printed=x.get("printed"),
+                        valid=1 if x.get("valid") else 0, place=x.get("place"), owner_kind=ow.get("kind"),
+                        owner_ref=ow.get("contrib") or ow.get("ref") or ow.get("where"), page=x.get("page"),
+                        azure_line=x.get("line"), alto_line_id=al, block_id=x.get("block"), jats_home=x.get("home"),
+                        jats_id=x.get("jats_id"), note=x.get("note"), anchor_key=anchor(anc[:1])))
+    return out
 
 
 # ------------------------------------------------------------------ citations
@@ -672,6 +1111,7 @@ def _ec_fields(w: dict) -> dict:
         d["authors"] = json.loads(d["authors"])
     if d.get("extra"):
         d["extra"] = json.loads(d["extra"])
+    d.update({k: v for k, v in (w.get("_v35") or {}).items() if v})
     return d
 
 
@@ -719,9 +1159,10 @@ def citation_mentions(root, R, bobj, bmap, ink, anchor, stem) -> list:
             out.append(dict(container_kind="ref-list", container_id=ref.get("id"), seq_in_container=k + 1,
                             kind=mention_kind(w, bo.text if bo else w["printed"]), marker=None,
                             printed=bo.text if bo else w["printed"],
-                            parsed=_ec_fields(w), cited_volume=None, cited_pages=None,
+                            parsed=_ec_fields(w), cited_volume=None,
+                            cited_pages=(w.get("_v35") or {}).get("cited_pages"),
                             page=b["page"] if b else w["page"], block_id=bid, anchors=anc,
-                            _y=anc[0]["y"] if anc else 0, _w=w, _hint=None, _note_ord=None))
+                            _y=anc[0]["y"] if anc else 0, _w=w, _hint=None, _note_ord=None, **mention_v35(w, True)))
     # notes, in their order; each note split into its citations and back-reference markers by position
     fns = {fn.get("id"): fn for fn in root.iter("fn")}
     for n in R["notes"]:
@@ -799,12 +1240,13 @@ def citation_mentions(root, R, bobj, bmap, ink, anchor, stem) -> list:
                 printed = text[s0:s1].strip(" ،,;؛") if s0 is not None else None
                 rec = dict(container_kind="note", container_id=n["note_id"], kind=mention_kind(w, printed), marker=None,
                            printed=printed or w["printed"], parsed=_ec_fields(w),
-                           cited_volume=w.get("volume"), cited_pages=w.get("page_range") or w.get("fpage"),
-                           _w=w, _hint=None, _span=(s0, s1))
+                           cited_volume=w.get("volume"), cited_pages=(w.get("_v35") or {}).get("cited_pages") or
+                           w.get("page_range") or w.get("fpage"), _w=w, _hint=None, _span=(s0, s1),
+                           **mention_v35(w, False))
             elif kind == "quran":
                 rec = dict(container_kind="note", container_id=n["note_id"], kind="quran", marker=None,
                            printed=payload, parsed=None, cited_volume=None, cited_pages=None, _w=None, _hint=None,
-                           _span=(a, b))
+                           _span=(a, b), **mention_v35(None, False))
             else:
                 hint_start = prev_end
                 for sep in ("وانظر", "انظر", "ينظر", ". ", "؛"):
@@ -831,7 +1273,8 @@ def citation_mentions(root, R, bobj, bmap, ink, anchor, stem) -> list:
                 s1 = b + (lm.end() if lm and lm.start() < 6 else (vp.end() if vp else 0))
                 rec = dict(container_kind="note", container_id=n["note_id"], kind=kind, marker=payload,
                            printed=text[hint_start:s1].strip(" ،,;؛:"), parsed=None, cited_volume=vol,
-                           cited_pages=pg, _w=None, _hint=hint, _span=(hint_start, s1))
+                           cited_pages=pg, _w=None, _hint=hint, _span=(hint_start, s1),
+                           **dict(mention_v35(None, False), cited_pages_source="locator" if pg else None))
             s0, s1 = rec.pop("_span")
             anc = []
             if s0 is not None:

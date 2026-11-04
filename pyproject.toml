@@ -15,6 +15,7 @@ dependencies = [
   "google-genai>=1.0",
   "pypdfium2==5.12.1",   # pdfium 7947: reads RTL lines like Chrome 144 (7559); 5.13 (7999) does not
   "lxml>=5",             # enrich/: writes JATS and ALTO, validates them against the official DTD/XSD
+  "latex2mathml>=3",     # exp 41/43 masters: equations as MathML beside the LaTeX (was never listed; missing on the server, 2026-10-22)
 ]
 
 [project.optional-dependencies]

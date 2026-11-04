@@ -353,7 +353,7 @@ def build(run: str, out: Path, stems: list[str] | None = None, off: bool = False
     (or `stems`). Never writes under out/<run>/."""
     import masters43 as M43
     import run43
-    if which in ("b", "c"):
+    if which in ("b", "c", "d", "f", "g"):
         M43.ST.PAGES = OUT / "pages"
     out = Path(out).resolve()
     src = Path(src).resolve() if src else OUT / run / "rules"      # --src: the plain rules output (fix round 3)
@@ -392,7 +392,9 @@ def main():
     ap.add_argument("--off", action="store_true", help="build without any patch (the reversibility check)")
     ap.add_argument("--src", help="folder of the plain rules output (default out/<run>/rules)")
     a = ap.parse_args()
-    build(a.run, Path(a.out), a.stems, a.off, "c" if a.run.startswith("v33_300b") else "b", a.src)   # c: the exam
+    import run43
+    build(a.run, Path(a.out), a.stems, a.off, run43.run_set(a.run),
+          a.src)   # c: the exam; d: experiment 52
 
 
 if __name__ == "__main__":

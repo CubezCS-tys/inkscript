@@ -22,7 +22,10 @@ XLINK = "{http://www.w3.org/1999/xlink}href"
 def azure_paths() -> dict:
     """stem -> local Azure JSON path, from the sample files of experiments 41/43 (the paths the runs read)."""
     out = {}
-    for f in (E43 / "sample43.json", E43 / "sample43b.json", REPO / "experiments/41_azure_structure/out/sample.json"):
+    for f in (E43 / "sample43.json", E43 / "sample43b.json", REPO / "experiments/41_azure_structure/out/sample.json",
+              REPO / "experiments/52_journal_gate1/out/sample52_all.json",           # exp 52: one journal (gate 1)
+              REPO / "experiments/70_gate2_pilot/out/sample70.json",                  # exp 70: gate 2's pilot (0165)
+              *sorted((REPO / "experiments/74_gate2_full/out").glob("[0-9][0-9][0-9][0-9]/sample.json"))):  # exp 74
         if not f.exists():
             continue
         d = json.loads(f.read_text(encoding="utf-8"))

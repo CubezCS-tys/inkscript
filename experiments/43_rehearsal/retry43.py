@@ -161,7 +161,10 @@ def retry(run: str, stem: str, p: int, instruction: str, evidence: str, blocks: 
     f.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"  check: {chk['why']} -> {'apply' if chk['ok'] else 'owner'}")
     pdir = (OUT / "v33_300_judged" / "patches" if run == "v33_300" else OUT / "v33_300b_final" / "patches"
-            if run == "v33_300b" else OUT / run / "patches" if run.startswith("v33_300b_")
+            if run == "v33_300b" else OUT / "j0130_final" / "patches" if run == "j0130"
+            else OUT / "j0165_final" / "patches" if run == "j0165"
+            else OUT / f"{run}_final" / "patches" if JG.run43.gate2_journal(run) and not run.endswith("_final")   # exp 74
+            else OUT / run / "patches" if run.startswith("v33_300b_")
             else JG.J / f"{run}_judged" / "patches")          # v33_300b: the exam (2026-10-20); v33_300b_fix3: round 3
     ps = [q for q in PA.load_patches(pdir, stem) if q["id"] != patch["id"]]
     PA.save_patches(pdir, stem, ps + [patch])

@@ -1,0 +1,172 @@
+// Every interface string of the Desk, in one module (P2: English). Arabic and French go in as two more objects with
+// the same keys; `lang` then comes from the actor's ui_lang, and the layout mirrors for Arabic (DESIGN §10).
+// Arabic *content* (titles, citations, names) is already set right-to-left wherever it is shown.
+
+const en = {
+  app: 'inkscript Desk',
+  nav: { overview: 'Overview', work: 'Work', articles: 'Articles', top: 'Top cited', notes: 'Notes', releases: 'Releases', explore: 'Explorer' },
+  search: { placeholder: 'Search articles, people, works…', title: 'Search', articles: 'Articles', persons: 'People', works: 'Cited works', none: 'Nothing found.', folded: 'searched as' },
+  signin: {
+    title: 'Sign in to the Desk',
+    lead: 'Paste the token you were given.',
+    token: 'Token',
+    go: 'Sign in',
+    bad: 'That token is not known, or it was revoked.',
+    authNote: 'P1/P2 sign-in: one token per person, kept in an httpOnly cookie on this machine. P4 brings real accounts (invitation, password and a second factor, HTTPS on a separate server).',
+    out: 'Sign out',
+  },
+  common: {
+    loading: 'Loading…', error: 'Something went wrong', retry: 'Retry', none: '—', current: 'Current', history: 'History', notes: 'Notes',
+    readFrom: 'read from', release: 'release', reading: "the machine's reading", open: 'Open', close: 'Close', save: 'Save', cancel: 'Cancel',
+    ink: 'Ink', showInk: 'Show the ink', hideInk: 'Hide the ink', noImage: 'no page image on this server', page: 'page', id: 'id',
+    yes: 'yes', no: 'no', you: 'you',
+  },
+  overview: {
+    title: 'Overview', start: 'Start working',
+    sub: '{release} · {articles} articles · built {when}',
+    openTasks: 'Open tasks', openTasksSub: 'from {n} detectors',
+    today: 'Decisions today', todaySub: 'by everyone',
+    mine: 'My decisions', mineSub: '{n} in the last 24 h · all yours to change',
+    notesOnMine: 'Notes on my decisions', notesOnMineSub: 'left by colleagues',
+    orphaned: 'Orphaned', orphanedSub: 'decisions whose keys vanished',
+    lastRelease: 'Last release', lastReleaseSub: '{applied} of {n} decisions applied',
+    queue: 'Queue by kind', queueSub: 'most impact first · one key: whoever answers owns the decision',
+    cols: { kind: 'Task', open: 'Open', held: 'Held', answered: 'Answered', mine: 'By me', median: 'Median time', owner: 'Decided by' },
+    ownerWording: 'One corrector · owns it',
+    ownerTitle: 'The corrector who answers owns the decision. Others leave a note on it; only the owner or an admin changes it.',
+    go: 'Work on these',
+  },
+  kinds: {
+    work_joined_without_author: 'Work joined without an author',
+    possible_same_work: 'Possible same work',
+    byline_twin: 'Byline twin (byline without authority)',
+    orphaned_decision: 'Orphaned decision',
+    conflict: 'Conflict between decisions',
+  } as Record<string, string>,
+  work: {
+    all: 'All kinds', none: 'No task waiting for you here. Pick another kind, or come back after the next release.',
+    taskOf: 'task {id}', leaseLeft: 'yours for {t}', leaseGone: 'lease expired: take the next task',
+    sessionDone: '{n} decided this session',
+    saved: 'Saved as a decision. Next task loading…',
+    note: 'Note (optional)', notePh: 'Why, in a few words (others see it)',
+    unsure: 'Unsure', skip: 'Skip', next: 'Next',
+    whatDoes: 'What this decision does',
+    ownNote: 'It is yours: others can leave you a note on it, but only you (or an admin) can change it.',
+    keys: 'Keys',
+    // work joined without an author
+    wjQ: 'Are these all the same work?',
+    wjLead: '{n} references in different articles point to «{title}», and the machine put them on one card because some name no author. Are they really one book? Give references to the same book the same number.',
+    citations: 'The references, as printed in each article', pick: 'pick a book for each reference',
+    unclear: 'Unclear', book: 'Book {n}',
+    groupsSummary: '{books} separate works · {unclear} left unclear',
+    unclearStay: 'Unclear references stay on Book 1’s card (it keeps the id {id}).',
+    saveSplit: 'Save split', allOne: 'All one work',
+    wjDoesSplit: 'It becomes split_work on card {id}: {books} cards, one per book. The next release splits the card, and the linker can never join these books again.',
+    wjDoesOne: 'It becomes confirm_work on card {id}: these references stay together, and the question is not asked again.',
+    noAuthor: 'no author printed', authorPrinted: 'author printed: {a}',
+    // possible same work
+    swQ: 'Are these the same work?',
+    swLead: 'Two cards whose titles look alike once author words, edition and volume marks are stripped ({rule}).',
+    same: 'Same work', notSame: 'Not the same',
+    swDoesSame: 'same_work: one card ({keep} keeps its id; {other} points to it). Times cited add up.',
+    swDoesNot: 'not_same_work: the linker can never join these two cards.',
+    sample: 'Sample references', mentions: '{n} mentions', articlesN: '{n} articles', machine: 'Machine’s guess: {g} (same in {p}% of probe B’s sample)',
+    // byline twin
+    btQ: 'Is this byline one of the catalogue’s contributors?',
+    btLead: 'The byline «{name}» of {stem} matched no authority. The catalogue record lists contributors no byline matched.',
+    theByline: 'The byline, as printed', candidates: 'The catalogue’s contributors',
+    samePerson: 'Same person', noneOfThem: 'None of them',
+    btDoesSame: 'same_person: the byline’s person joins {cand}; the article counts one author, not two.',
+    btDoesNone: 'not_same_person with each contributor: they stay apart for good.',
+    score: 'name match {s}', works: '{n} works', authority: 'authority {a}',
+    generic: 'This task kind has no screen of its own in P2. Read it, then skip it or answer it from the entity page.',
+  },
+  history: {
+    title: 'History', lead: 'Every decision on this subject, newest first. Nothing is ever deleted; a decision is undone by a newer one.',
+    none: 'No decision yet: the machine’s reading stands.',
+    by: 'by {who}', owner: 'owner', mine: 'yours',
+    change: 'Change', fix: 'Fix', leaveNote: 'Leave a note',
+    changeLead: 'To change your decision, undo it (a newer decision restores the machine’s reading for these subjects), then decide again.',
+    fixLead: 'As an admin you can undo anyone’s decision. It is logged as yours, with your note.',
+    undo: 'Undo this decision', undoNotePh: 'Why (kept with the undo)',
+    notePh: 'Your note to {owner} (they see it in their inbox)',
+    sendNote: 'Send note', sent: 'Note sent.',
+    applied: 'in release {r}: {s}',
+    standing: 'Standing decisions',
+    notesTitle: 'Notes', notesNone: 'No notes.', addNote: 'Leave a note on this page', resolve: 'Resolve', resolved: 'resolved',
+    machine: 'machine', tasks: 'Tasks',
+  },
+  article: {
+    printed: 'printed', corrected: 'corrected', catalogue: 'catalogue', shown: 'shown', translated: 'translated title',
+    journal: 'Journal', year: 'Year', pages: 'Pages', volIssue: 'Vol. / issue', ids: 'Ids', version: 'Reading',
+    authors: 'Authors', text: 'Full text', citations: 'References', citedBy: 'Cited by', citedByNone: 'No article in this release cites this one yet. As more articles are processed and linked, citing articles appear here.', citedByMentions: '{n} reference(s)', quality: 'Quality',
+    notesTitle: 'Notes (footnotes and endnotes)', calledFrom: 'called from', backToCall: 'back to the call',
+    noCard: 'not on a work card', catalogueLink: 'in the catalogue', backref: '→ points to', unresolved: 'unresolved',
+    timesCited: 'cited by {n} articles', flags: 'Flags', findings: 'Judge findings', corrections: 'Corrections',
+    azure: 'Azure read', printedAs: 'printed', proposed: 'proposed', table: 'Table', figure: 'Figure', verse: 'Verse',
+    decisionsHere: 'Decisions touching this article',
+    docType: 'Document type', docPage: 'the page', docCatalogue: 'catalogue', docDisagree: 'page and catalogue disagree',
+    besideScan: 'View beside the scan',
+    docNotRead: 'not read from the page (prompt before v3.5b)',
+    about: 'About this article', conference: 'Conference', thesis: 'From a thesis', reviewed_book: 'Book reviewed',
+    original: 'Original of the translation', series_part: 'Part of a series',
+    corresponding: 'corresponding author', alsoPrinted: 'also printed as', faculty: 'faculty', partsAsPrinted: 'parts as printed',
+    editors: 'ed. (تحقيق)', translators: 'tr.', edition: 'edition', died: 'd.', citedPage: 'page referred to',
+    workPages: 'pages of the work', accessed: 'accessed', manuscript: 'manuscript', degree: 'degree', conf: 'conference',
+    calendar: { hijri: 'Hijri', gregorian: 'Gregorian' }, figureKind: 'kind', tableNotes: 'Notes under the table',
+    figureNotes: 'Notes under the figure', noteBy: { translator: "translator's note", editor: "editor's note", publisher: "publisher's note" },
+    authorNote: 'note on the author', pageProblems: 'Page problems the reader saw', pageProblemsNone: 'None reported.',
+    pageProblemKinds: { handwriting: 'handwriting', stamp: 'stamp', 'scan-problem': 'scan problem' },
+  },
+  person: {
+    title: 'Person', names: 'Name forms', authorities: 'Authority ids', works: 'Works', coauthors: 'Co-authors', institutions: 'Institutions',
+    cited: 'This person’s works that others cite', citationsReceived: 'Citations received: {pubs} citations to {w} works ({m} mentions), counted per work',
+    merged: 'merged here from {ids}', wrong: 'This is wrong',
+    sameAs: 'Same person as…', notSameAs: 'Not the same person as…', unlink: 'Unlink a byline',
+    otherId: 'The other person’s id (A…)', bylineToUnlink: 'Byline to unlink',
+  },
+  workPage: {
+    title: 'Cited work', members: 'References to this work, as printed in the citing articles', authors: 'Authors', citing: 'Citing articles', links: 'Links', relations: 'Relations',
+    merged: 'merged here from {ids}', pending: 'This card is made by a split decision and appears at the next release.',
+    wrong: 'This is wrong', split: 'Split into books', sameAs: 'Same work as…', notSameAs: 'Not the same as…', move: 'Move a reference to another card',
+    setType: 'Set the work type', otherId: 'The other card’s id (C…)', target: 'Target card id (C…)', member: 'Reference',
+    type: 'Type',
+    editions: 'Editions, as the citations give them', editionsNone: 'No citation names an edition, year or publisher.',
+    editionCols: { edition: 'Edition', year: 'Year', publisher: 'Publisher', place: 'Place', n: 'Citations' },
+    contributors: 'Editors and translators', died: 'd.', edition: 'edition',
+  },
+  top: { title: 'Top cited', lead: 'Times cited: works ranked by the number of articles that cite them (then by references, «المرجع السابق» included), from {src}.', rank: '#', work: 'Work', authors: 'Authors', citing: 'Citing articles', mentions: 'Mentions' },
+  releases: {
+    title: 'Releases', lead: 'A release is the machine’s reading plus every accepted decision. Pages and the top-cited list read the newest one.',
+    build: 'Build a release', building: 'Building… {phase}', built: 'Built {id} in {s} s', failed: 'Build failed: {e}', notePh: 'Note (optional)',
+    adminOnly: 'Only an admin builds a release.',
+    cols: { id: 'Release', when: 'Built', applied: 'Applied', orphaned: 'Orphaned', conflict: 'Conflicts', note: 'Note', copy: 'Copy on disk' },
+    compare: 'Before / after', vs: 'compared with', topBefore: 'Before', topAfter: 'After',
+    cards: 'Cards changed', persons: 'Persons', noCards: 'No card changed.', noPersons: 'No person merged or added.',
+    split: 'split', merged: 'merged', moved: 'members moved', renamed: 'renamed', newPerson: 'new', into: 'into', from: 'from',
+    leftTop: 'Left the top list', bylinesMoved: 'Bylines moved to another person', joined: '{n} authorships joined (twins)',
+    rankMove: 'rank {a} → {b}',
+  },
+  notes: {
+    title: 'Notes', inbox: 'Notes on my decisions', written: 'Notes I wrote', none: 'No notes.', on: 'on', resolve: 'Resolve',
+    resolved: 'resolved', showResolved: 'Show resolved',
+  },
+  ops: {
+    split_work: 'Split the card', same_work: 'Same work', not_same_work: 'Not the same work', move_member: 'Moved a reference',
+    set_work_type: 'Set the work type', confirm_work: 'Confirmed: one work', same_person: 'Same person',
+    not_same_person: 'Not the same person', link_byline: 'Linked a byline', unlink_byline: 'Unlinked a byline',
+    resolve_backref: 'Resolved a back reference', unresolvable: 'Back reference unresolvable', revert: 'Undone', retire: 'Retired',
+  } as Record<string, string>,
+};
+
+export type Strings = typeof en;
+const ALL: Record<string, Strings> = { en };
+export let lang = 'en';
+export const S: Strings = ALL[lang];
+
+// "{n} articles" -> "12 articles"
+export function f(s: string, vars: Record<string, any> = {}): string {
+  return s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] == null ? '' : String(vars[k])));
+}
+export const kindLabel = (k: string) => S.kinds[k] || k;
+export const opLabel = (o: string) => S.ops[o] || o;

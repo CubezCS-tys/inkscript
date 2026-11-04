@@ -91,7 +91,7 @@ def main():
     import masters43  # noqa: F401  (experiment 41's paths)
     import structure as ST
     import run43
-    arts = {x["stem"]: x for w in ("a", "b", "c") for x in (run43.articles(w) if Path(run43.SETS[w][1]).exists() else [])}
+    arts = {x["stem"]: x for w in ("a", "b", "c", "d", "f", "g") for x in (run43.articles(w) if Path(run43.SETS[w][1]).exists() else [])}
     for f in sorted((OUT / a.run / "raw").glob("*.failed.json")):
         rec = json.loads(f.read_text(encoding="utf-8"))
         stem = rec.get("stem") or f.name.split("_c")[0]

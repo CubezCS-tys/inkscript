@@ -15,7 +15,7 @@ XLINK_T = "{http://www.w3.org/1999/xlink}title"
 XML_LANG = "{http://www.w3.org/XML/1998/namespace}lang"
 ALTO_NS = "{http://www.loc.gov/standards/alto/ns-v4#}"
 
-BLOCK_ID = re.compile(r"^p(\d+)(b\d+|t\d+c\d+)$")
+BLOCK_ID = re.compile(r"^p(\d+)(b\d+|t\d+c\d+)$|^[wh]\d+$")   # [wh]N: the Word route's paragraphs / headings (exp 53 / 70; no scan page)
 LINE_ID = re.compile(r"^p(\d+)")
 BACKREF = re.compile(r"(المرجع\s+السابق|مرجع\s+سابق|المصدر\s+السابق|مصدر\s+سابق|المرجع\s+نفسه|المصدر\s+نفسه|"
                      r"المرجع\s+ذاته|المصدر\s+ذاته|نفس\s+المرجع|نفس\s+المصدر|السابق\s+نفسه|م\.\s?س\.?|"
@@ -255,10 +255,16 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
         if nm is None:                                     # the corrected name inside name-alternatives (D33)
             nm = next((x for x in c.iterfind("name-alternatives/string-name")
                        if x.get("specific-use") != "printed-on-the-page" and not x.get(XML_LANG)), None)
+        if nm is None:      # experiment 68: only the name as printed (v2 masters rebuilt by experiment 65, M3)
+            nm = next((x for x in c.iterfind("name-alternatives/string-name")
+                       if x.get("specific-use") == "printed-on-the-page" and not x.get(XML_LANG)), None)
         if nm is not None:
             name = text_of(nm)
         else:
             n = c.find("name")
+            if n is None:   # experiment 68: the parts inside name-alternatives
+                n = next((x for x in c.iterfind("name-alternatives/name") if not x.get(XML_LANG) or
+                          x.get(XML_LANG) == (art_lang or "ar")), None)
             name = " ".join(x for x in (first("given-names", n), first("surname", n)) if x) if n is not None else ""
         em = c.find("email")
         R["authors"].append(dict(stem=stem, seq=i, printed_name=name, email=text_of(em) if em is not None else None,
@@ -294,7 +300,8 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
             t = text_of(e)
         lines = [x.get("id") for x in e.iter("target") if x.get("id")]
         pages = [int(LINE_ID.match(x).group(1)) for x in lines if LINE_ID.match(x)]
-        page = int(BLOCK_ID.match(i).group(1))
+        g = BLOCK_ID.match(i).group(1)
+        page = int(g) if g else None
         box = ablocks.get(i) or union([alines.get(x) for x in lines])
         sec = next((a.get("id") for a in ancestors(e) if ln(a) == "sec"), None)
         R["blocks"].append(dict(stem=stem, block_id=i, page=page, last_page=max(pages) if pages else page, ord=ord_,
@@ -335,7 +342,7 @@ def parse_article(mdir: Path, stem: str, run: str) -> dict:
             if prev is not None:
                 blk = block_of_line.get(prev.get("id"))
         R["note_calls"].append(dict(stem=stem, note_id=x.get("rid"), call_text=text_of(x), block_id=blk,
-                                    page=int(BLOCK_ID.match(blk).group(1)) if blk and BLOCK_ID.match(blk) else None,
+                                    page=int(BLOCK_ID.match(blk).group(1)) if blk and BLOCK_ID.match(blk) and BLOCK_ID.match(blk).group(1) else None,
                                     **S))
         calls[x.get("rid")] = calls.get(x.get("rid"), 0) + 1
     for n in R["notes"]:

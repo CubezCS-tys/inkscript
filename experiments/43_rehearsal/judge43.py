@@ -34,7 +34,7 @@ import evidence43 as EV  # noqa: E402
 ST, C = M43.ST, run43.C
 OUT = HERE / "out"
 J = OUT / "judge"
-PW = HERE.parent / "40_gemini4_vlm" / "out" / "venv" / "bin" / "python"
+PW = Path(os.environ.get("JUDGE43_PW") or HERE.parent / "40_gemini4_vlm" / "out" / "venv" / "bin" / "python")  # exp 52: its own venv
 CAP_TOTAL = float(os.environ.get("JUDGE43_CAP") or 33.9235 + 5.0)   # the live log's total when this work began + the
 #                  owner's $5 cap for the judge; JUDGE43_CAP = the exam's judge cap (2026-10-20, step G)
 PRICE = {"gemini-3.8-flash": (0.75, 3.75), "gemini-4-argon": (2.0, 10.0)}   # Standard, per M tokens; Batch = half
@@ -50,8 +50,15 @@ RUNS = {
     "v33_300b": dict(rules=OUT / "v33_300b" / "rules", views=OUT / "v33_300b" / "views", set="c"),     # the exam
     "v33_300b_final": dict(rules=OUT / "v33_300b_final" / "rules", views=OUT / "v33_300b_final" / "views", set="c"),
     "v33_300b_fix3": dict(rules=OUT / "v33_300b_fix3" / "rules", views=OUT / "v33_300b_fix3" / "views", set="c"),  # round 3
+    "j0130": dict(rules=OUT / "j0130" / "rules", views=OUT / "j0130" / "views", set="d"),            # exp 52 (one journal)
+    "j0130_final": dict(rules=OUT / "j0130_final" / "rules", views=OUT / "j0130_final" / "views", set="d"),
+    "j0165": dict(rules=OUT / "j0165" / "rules", views=OUT / "j0165" / "views", set="f"),            # exp 70 (gate 2 pilot)
+    "j0165_final": dict(rules=OUT / "j0165_final" / "rules", views=OUT / "j0165_final" / "views", set="f"),
     "replay": dict(rules=OUT / "replay" / "raw", views=OUT / "judge" / "views_replay", set="a"),   # views43 on out/masters
 }
+for _j in ("0011", "0523", "1001", "0246", "1182", "0097", "0840", "0013"):     # experiment 74 (the rest of gate 2)
+    for _r in (f"j{_j}", f"j{_j}_final"):
+        RUNS[_r] = dict(rules=OUT / _r / "rules", views=OUT / _r / "views", set="g")
 KINDS = ["title", "trans_title", "subtitle", "byline", "abstract", "keywords", "heading", "paragraph", "list_item",
          "quote", "verse", "boxed", "footnote", "reference", "caption", "figure", "table", "equation", "header",
          "footer", "other_article", "other"]
@@ -70,7 +77,7 @@ def art(run: str, stem: str) -> dict:
     w = RUNS[run]["set"]
     if w not in _arts:
         _arts[w] = {a["stem"]: a for a in run43.articles(w)}
-    ST.PAGES = OUT / "pages" if w in ("b", "c") else M43.E41 / "out" / "pages"
+    ST.PAGES = OUT / "pages" if w in ("b", "c", "d", "f", "g") else M43.E41 / "out" / "pages"
     return _arts[w][stem]
 
 
@@ -467,7 +474,8 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
         up = client.files.upload(file=str(bf), config=types.UploadFileConfig(display_name=f"judge-{run}",
                                                                              mime_type="jsonl"))
         job = client.batches.create(model=model, src=up.name, config={"display_name": f"judge-{run}"})
-        state = dict(job=job.name, keys=keys, worst=round(worst, 4), sent=time.strftime("%Y-%m-%d %H:%M:%S"))
+        state = dict(job=job.name, keys=keys, worst=round(worst, 4), sent=time.strftime("%Y-%m-%d %H:%M:%S"),
+                     file=up.name)
         st_f.write_text(json.dumps(state, indent=1))
         print(f"  {len(lines)} pages, worst ${worst:.3f}, job {job.name}", flush=True)
     while True:
@@ -477,6 +485,11 @@ def batch(run: str, pages: list[tuple[str, int]], model: str, cap_total: float, 
         if s in run43.DONE_STATES:
             break
         time.sleep(poll)
+    if state.get("file"):
+        try:                               # exp 74: free the File API (20 GB a project) once the job is done
+            client.files.delete(name=state["file"])
+        except Exception:                  # noqa: BLE001
+            pass
     if s != "JOB_STATE_SUCCEEDED" or state.get("collected"):
         return
     views = json.loads((J / "batch" / f"{mdir(model)}_{run}_views.json").read_text())

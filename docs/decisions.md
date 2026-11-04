@@ -462,3 +462,162 @@ empty (the table's numbers are then wrong to a reader) or OCRing the cell crop l
 handful of digits). Honorifics and roles (same round) follow D33: the printed name kept, the change logged
 ([experiments/43_rehearsal](../experiments/43_rehearsal/README.md), "Fix round 3 (proof pack)").
 
+
+**D36 · Word-route articles carry estimated page numbers, flagged as estimates (2026-10-22, the owner; experiment
+53).** Many years of a journal exist only as the publishers' Word files: S3 `legacy/` and the `.doc` originals on the
+server.
+- **What is known:** the Word file gives the first printed page exactly (139/139 for journal 0130). It does not give
+  where later printed pages begin, and the legacy PDF's footers are wrong past page 1.
+- **Chosen:** keep the printed first page and the catalogue's page range as fact. Give every block an *estimated*
+  printed page, marked as an estimate in the JATS (`custom-meta` / an `@specific-use="estimated"` mark on page
+  anchors) and in the platform (a flag, so a reference «ص ٤٥» pointing into such an article is matched loosely and
+  shown as approximate). Prefer the scan route wherever a scan exists.
+- **Not chosen, for now:**
+  - looking for the printed versions of those years (unknown availability);
+  - re-creating the print layout with the journal's original fonts (needs an install and a test).
+
+  Either can replace the estimates later, without rework, because estimates are marked as such
+  ([experiments/53_word_route](../experiments/53_word_route/README.md)).
+
+**D37 · A degree-granting university printed in a byline is not an affiliation; it is kept as "educated at"
+(2026-11-02, the owner; experiments 63 and 64).** «A Ph.D. … from the University of Malaya», «ماجستير … بجامعة أم
+القرى», «دكتوراه … جامعة القاضي عياض»: experiment 56 linked three such lines as the author's institution and dropped a
+fourth («دكتوراه دولة … كلية الآداب - الرباط»).
+- **Chosen:** the university that granted a degree stays linked to the statement, as `educated_at`
+  (`affiliation_links.level = 'educated_at'`), and does **not** count as that institution's output (articles, authors,
+  institutions in 2+ articles, gate 1). The author's post printed beside it, if any, is the affiliation (the Palm
+  Strategic Initiative Centre beside Malaya).
+- **Why:** an index counts what a body publishes; a degree says where a person studied, which is worth keeping (an
+  academic genealogy) but is not that body's research. A doctoral *student* («طالب دكتوراه … جامعة القدس») is enrolled
+  there now: that is a current affiliation, not this rule.
+- **Not chosen:** dropping degree lines (loses the information); counting them (inflates the degree-granting
+  universities). Applied to the four cases experiment 63 listed ([experiments/64_apply_institutions](../experiments/64_apply_institutions/README.md)).
+
+**D38 · A former post is linked, marked `former`, and not counted as the body's current output (2026-11-02, the
+owner; experiments 63 and 64).** «نائب رئيس جامعة الزقازيق سابقا», «… جامعة القاهرة سابقا», «مُحاضرة سابقة … جامعة السلطان
+قابوس», «رئيس مجلس الوزراء اللبناني السابق».
+- **Chosen:** link the body with `affiliation_links.level = 'former'`. It shows on the article and the person, and
+  it is left out of every count of the body's output.
+- **Why:** the owner chose to keep the history ("link them marked as former") over dropping it or counting it as
+  current. The index measures where work is done now; a person's career is still visible.
+- **Reading the words:** «سابقا» must qualify the *post*. In «قسم تربية الموهوبين- كلية الدراسات العليا (سابقا) جامعة
+  الخليج العربي» it qualifies the college's old name, so the Arabian Gulf University link stays current (one of the
+  five experiment 63 listed; flagged for the owner in experiment 64).
+
+**D39 · An unnamed body may be filled in from the journal's publishing institution only when the wording points to
+it, and the link is marked `inferred` (2026-11-02, the owner; experiments 56, 63 and 64).** «بالمعهد», «عضو المجمع»,
+«بالجامعة», «بالكلية», «للجماعة», «فرع الإسكندرية», or a department printed with no university, in the journal that body
+publishes.
+- **Chosen:** link the publisher (from the catalogue's publisher of the journal) when the words are a pointer to
+  "this" body («بالكلية» = "at the college", «الرئيس العام للجماعة» = "the society's president", «العضو المراسل» = a
+  member of the academy) or a unit of it (a department of the faculty that publishes the journal). The link carries
+  `inferred: {from: journal}` (or `article`, when the article itself names the body elsewhere), so it is always
+  visible as a filled-in link and can be counted with or without.
+- **Not chosen:** never filling (loses about 10 true links per 780 articles: experiment 63 found 14 cases where the
+  librarian held back, none wrong); filling from the journal's country alone, or from world knowledge where nothing
+  points to the publisher (the Al-Zahraa hospital line, S116, stays as printed).
+- **Measured:** 8 new links filled this way, 13 of experiment 56's context links marked `inferred`, and one body's
+  country (the bibliographic centre that publishes J1510)
+  ([experiments/64_apply_institutions](../experiments/64_apply_institutions/README.md)).
+
+**D40 · «صحيح مسلم بشرح النووي» is a citation of Sahih Muslim; al-Nawawi's commentary is recorded as its edition
+(2026-11-02, the owner; experiments 62 and 67).** An article cites a hadith as «صحيح مسلم بشرح النووي 12/131 دار
+الفكر 1981». Experiment 62's librarian had read it as al-Nawawi's commentary, a work of its own, and asked.
+- **Chosen:** the citation counts for Sahih Muslim (the text quoted). The printing it names — Muslim's text with
+  al-Nawawi's commentary — is kept as that citation's edition, labelled «بشرح النووي».
+- **Why:** the reader cites the hadith, and the book on the shelf is one printing of Sahih Muslim; the index counts
+  the work cited. The edition label keeps the commentary visible, so nothing is lost if it is ever counted apart.
+- **Scope:** the printed title «صحيح مسلم بشرح النووي». Al-Nawawi's «شرح صحيح مسلم», cited under al-Nawawi's name,
+  stays his own work: exp 62's edition_of between the two (D62-816f18302505) was not applied, since applying both
+  would make one work of Muslim and al-Nawawi again (the chain exp 62's authors check caught). Other commented
+  classics (بشرح, مع شرح, حاشية) follow the same reading when they come up
+  ([experiments/67_apply_works](../experiments/67_apply_works/README.md)).
+
+**D41 · A manual's editions are one work, each edition kept apart (2026-11-02, the owner; experiments 62 and 67).**
+The DSM: DSM-IV-TR (2000), DSM-5 (2013) and the French DSM-5 (2015) were four cards in seven articles.
+- **Chosen:** one cited work; every citation keeps the edition it names (`cited_work_editions`, one row per edition,
+  each citation pointing at its own). The work is cited by 7 articles.
+- **Why:** a reader asks "who cites the DSM"; the edition stays on every citation, so a count by edition (Web of
+  Science's way) can still be made. The same holds for the 86 edition_of decisions (Zahran, Armstrong …).
+- **How:** the Desk's `edition_of` operation joins the two cards and gives the second card's citations an edition of
+  their own when they named none or shared one with the first
+  ([experiments/67_apply_works](../experiments/67_apply_works/README.md)).
+
+**D42 · A chapter cited under its own author is its own work, part of the collective book (2026-11-02, the owner;
+experiments 62 and 67).** Two citations print the same collective book («الثقافة العربية: أسئلة التطور والمستقبل»,
+مركز دراسات الوحدة العربية 2003, series 29) under two different authors (عبد الدايم, سليم). Experiment 62 had joined
+them as the book.
+- **Chosen:** each citation is a chapter, credited to the author printed, typed `chapter`, and `part of` the book. The
+  book is a work of its own (made by a `define_work` decision when no card stands for it) and shows the chapters it
+  holds.
+- **Why:** credit goes to the chapter's author (an author's record and h-index count it); the book is still visible
+  as the container.
+- **Applied to:** that pair (not joined; two chapters of one book) and exp 62's one part_of (Aguessy's contribution
+  to the 1981 UNESCO volume). The chapter titles are not printed, so the cards keep the book's title
+  ([experiments/67_apply_works](../experiments/67_apply_works/README.md)).
+
+**D43 · A thesis and the article drawn from it are two works, linked as related ("derived from") (2026-11-02, the
+owner; experiments 62 and 67).** The same title as a thesis (Ain Shams 2002) and as a journal article (2003) by the
+same author.
+- **Chosen:** two works. The article `is_derived_from` the thesis (`work_relations`); a citation of the thesis does
+  not count as a citation of the article, nor the other way round.
+- **Why:** they are two publications with their own dates, venues and (often) co-authors (the supervisor). Rule P6 of
+  exp 62 reproduced the librarian's answer 12 times out of 12, and the blind check agreed on every case it saw.
+- **Applied to:** 2 pairs of cards (relate_works derived_from) and 18 catalogue relations where the cited work is a
+  thesis and Mandumah holds the article (or the other way round); a book edition of a thesis stays an edition
+  (exp 62's edition_of) ([experiments/67_apply_works](../experiments/67_apply_works/README.md)).
+
+**D44 · The same text in two journals: the citation is linked to the one Mandumah holds, marked "same text"
+(2026-11-02, the owner; experiments 62 and 67).** A citation names one journal (e.g. the Fayoum kindergarten-college
+journal 2016); Mandumah holds an article of the same title and author in another (مجلة بحوث ودراسات الطفولة 2015).
+Experiment 62's librarian had held such links back as relations.
+- **Chosen:** link the citation to the publication Mandumah holds, with the link marked `same_text`
+  (`citation_links.method = 'person: the same text (D44)'`, `evidence.link_as = 'same_text'`, the printed citation
+  kept as `cited_as`). It counts as held: a reader can follow it to the text.
+- **Why:** the reader's need is the text; the mark keeps the venue difference visible.
+- **Applied to:** 9 cards: 6 relations "another venue", 2 reprints/copies (a 1976 article reprinted 1988; a 1998
+  article cited from a 2015 copy) and the escalated case. A book cited and an article of the same title is not this
+  rule: it stays related ([experiments/67_apply_works](../experiments/67_apply_works/README.md)).
+
+**D45 · Nothing printed is left as generic text when it has a field; fixed-format identifiers are found by code
+(2026-11-02, the owner approved experiment 61's fix plan steps 1–3; experiment 65).** Experiment 61 found 1,457
+printed lines only in generic text, most of them because our code dropped or flattened what Gemini returned.
+- **Chosen:** fields are added beside the printed text, never by rewriting it (D30 holds: every block's text is
+  byte-identical before and after, proved on all 780 masters). An author's post or rank is
+  `contrib/role[@content-type="position"]` (a role phrase «بقلم», "by" is `role[@content-type="role-phrase"]`, an
+  honorific is the printed name's `<prefix>`); a name printed in two scripts keeps both scripts' affiliations, posts,
+  e-mails and ids, the second marked `xml:lang` and its affiliation pointing at the one it translates (`aff/@rid`);
+  a byline printed again in the text links to its author (`contrib/xref[@specific-use="printed-again"]`).
+  ORCID (ISO 7064 check), DOI, ISSN (check digit), e-mail, URL and phone are found by code on every line of every
+  page and attached by position (a line naming the author, the same byline block, the nearest name above it, the
+  only author); the article's own DOI is told from DOIs in the references by where it is printed (front matter,
+  byline, running head or foot, a short line of its own) — never by the model; every identifier found, attached or
+  not, is listed with its ALTO line (`<stem>.ids.json`, platform `printed_identifiers`).
+- **Why:** gate 2's journals print ORCIDs, DOIs and posts on every article; a regex with a check digit is exact and
+  free where a model is neither, and the owner's rule is that nothing printed is lost.
+- **Applied to:** all four current runs, rebuilt from their saved answers into `*_fix61` folders; prompt v3.6 asks
+  only for what code cannot tell apart (the post, the DOI / licence / section when ambiguous, other printings of an
+  author) ([experiments/65_fix_leaks](../experiments/65_fix_leaks/README.md)).
+
+**D46 · The catalogue is the truth for bibliographic identity; the print for content; everything is still collected
+(2026-11-03, the owner: "we still collect everything but on top of the catalogue").** Asked after a page footnote
+(«presented at the Mediterranean symposium, Tangier, 21–23 Oct 2010») made the reader type 0165-000-033-005 a
+conference paper while the catalogue says «بحوث ومقالات».
+- **Chosen:** (1) for what an item IS and WHERE it was published — document type, journal, volume / issue, year, page
+  range, DOI, language, subjects, and who the people are (authority ids) — the catalogue's value is the one shown
+  WHEN THE CATALOGUE HAS ONE; where it has no record or the field is empty, our own value (the page's reading by
+  Gemini + rules) is shown, marked "from the page" — nothing is left blank because the catalogue is silent. The
+  reading and the librarian run as before on everything: the page's values are evidence beside the catalogue's, and
+  the librarian still reconciles institutions, cited works and their links, and people (authority ids are its
+  strongest clue; a person without one is decided by the librarian);
+  (2) for what the catalogue does not hold — full text, affiliations, references and citations, notes, tables,
+  printed names and their scripts, printed abstracts, ORCIDs, "presented at" — the page is the truth; (3) where both
+  have a value and differ, the catalogue's is shown, the printed form is kept beside it (D33), the disagreement is
+  flagged and listed for Mandumah's cataloguers (never written into the catalogue); (4) a person's Desk decision that
+  the catalogue is wrong wins in our data and still goes on the cataloguers' list. A "presented at" footnote never
+  changes the document type: it is its own field (conference name, place, date, as printed), like Web of Science,
+  where a paper is a Proceedings Paper only when published in proceedings.
+- **Why:** the catalogue is human-made and consistent across 1.56M records; the page is the only source for content
+  and the evidence behind every value; keeping both, with the disagreement visible, loses nothing.
+- **To apply:** after gate 2's remaining journals (experiment 74) finish — a rebuild from the saved answers, no model
+  calls.

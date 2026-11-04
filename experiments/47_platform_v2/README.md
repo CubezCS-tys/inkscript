@@ -446,3 +446,110 @@ The gaps [VERIFY.md](VERIFY.md) "Re-verify round 2" left, each fixed where it st
 
 Every other back reference of the shown versions is unchanged (diffed mention by mention against the backup: these
 4 differ, nothing else). The 17 canned queries return 200 on the restarted :8003 (`search_arabic` needs its `q`).
+
+## The 600 reloaded with the letter fix (2026-10-22)
+
+Owner-approved. `v33_300_final_lettersfix` and `v33_300b_fix3_lettersfix` (experiment 43, section "Letter fix
+(2026-10-22)": Azure's ی ک ھ ہ ڪ written as Arabic ي/ى ك ه, recorded as Azure-misread fixes, D30; the first-300
+rebuild also carries fix round 3's code) loaded with `--kind final`, then `link47.py`, `checks47.py`. No calls. Backup
+first (SQLite backup API): `/home/appuser/data/platform_v2/platform_v2.before_lettersfix_2026-10-22.db`. Logs:
+`load_lettersfix_300.log`, `load_lettersfix_300b.log`, `link_lettersfix.log`, `checks_lettersfix.log` in the data folder.
+
+- **Shown version:** all 600 stems now show the `_lettersfix` run (both final, both complete; reason "newest", their
+  stamps are of 2026-10-22). `v33_300_final` and `v33_300b_fix3` stay beside them as history. Journal 0130
+  (`j0130_final`, 126 shown) and v2_55 are unchanged. Orphans 0 (load, link and checks).
+- **Code (`load47`):** `source_run` / `run_file`. A `<run>_lettersfix` folder holds only masters and patches, so its
+  `flags.json` and `raw/` (chunk costs) are read from its source run (same answers, same Azure line ids; a flag's block
+  is re-resolved through the new version's line map). Caveat: `v33_300_final`'s flags predate fix round 3's code.
+  Judge answers need no mapping (`base_run`: `v33_300_final_lettersfix` → `v33_300`; the exam's judge rows stay on `v33_300b`).
+- **Measured (shown blocks of the 600, backup → now):** words with ی ک ھ ہ ڪ **1,887 → 85** (ی 1,676 → 100, ک 589 → 45,
+  ھ 48 → 1, ہ 12 → 5). The 85 left are other languages, kept on purpose: 0396 (Kurdish), 0909 (Persian verse), 2280
+  (Urdu verse). Blocks 92,949 and words 2,182,161 unchanged; Azure-misread fixes 24,560 → 26,733; misprints 3,027 → 3,026 (0180's
+  fold-only sic).
+- **Unchanged:** publications 2,018, documents 780, persons 1,949, active cited works 9,132, citation links 900
+  (783 accepted / 55 candidate / 62 rejected), work relations 398, mentions 9,891 per 600.
+- **Changed beyond letters, all fix round 3's code in the first 300:** shown bylines 943 → 938 and person names
+  −10 / +5 (honorifics out of 5 names; 5 Latin bylines folded into their Arabic person; 1594 «نال» → «منال»), institutions 705 → 701
+  (those Latin bylines' affiliations), metadata assertions +18 and publication dates +18 (Hijri years), table cells
+  +21, catalogue reports 506 → 505. The provisional person «طه حسين» changed id (ARY70PEFQX → A5Q8CQX30X: its name
+  lost «الدكتور»).
+- **Found: 21 cross-article cited-work cards got new public ids** (e.g. «الأغاني» CC8ACBQFGF → C5H5GCNRKQ, «البحر
+  المحيط» CRTJTVTZSQ → CCNHQZQ2EJ, «كشف الظنون» C098G0W6PP → C4QA6M3KAQ); the old ids are `merged` with **no**
+  `merged_ids` row. Cause: `build_cited_works` inherits an old id through members keyed by (version key, mention id),
+  and every key changes when a stem's shown version moves to a new run; a card whose representative changed (the
+  tie-break reads the version key) was minted anew. **Fix in `link47`:** fall back to (stem, mention id) for the old id
+  and for the `merged_ids` vote (mention ids are stable: 9,886 / 9,891). A draft redone from the backup with the
+  fix (`/home/appuser/data/platform_v2/platform_v2.lettersfix-draft.db`) keeps every active card id (0 lost, 0 new)
+  and differs from the live db only by those 21 tombstones. Copying it over the live db was **not** done (refused as a
+  shared-resource write): the owner decides. The draft was built while another agent was editing experiment 47
+  (v3.5b fields, 18:29 on), so rebuild it before using it.
+
+## v3.5b fields: everything extracted is in the platform (2026-10-22)
+
+The owner, 2026-10-22: "that platform is my backend, I need everything viewable and observable there". The loader
+predated prompt v3.5b, so most of the new JATS homes were not loaded. No calls; the design is DESIGN.md §11.
+
+**The audit** (`audit_fields47.py` → [out/field_audit.md](out/field_audit.md), `.json`): each of experiment 51's 235
+fields, its JATS / ALTO slot, how many of the 726 masters fill it (the 600 `_lettersfix` + `j0130_final`'s 126), and
+where the database holds it, before and now, with a count from the database. **124 fields have a filled slot.**
+Before: 102 were in the database, 6 partly (edition, year calendar, access date, degree, conference only inside
+`parsed.extra`, faculty only as inst46's reading), 3 **wrongly** (an editor or translator read as a co-author; the
+cited page and the work's own page range in one value, the last one winning), 13 missing. **Now all 124 are in.**
+The other 111 fields have no filled slot in any master (the reader does not fill them yet: death dates, ORCID,
+corresponding author, handwriting and stamp lines, manuscripts …) or no slot of their own; they load when a master
+carries them.
+
+**Added** (schema47.sql; `common47.migrate` applies it to an existing db, nothing dropped):
+
+| what | where | in the db now (shown versions) |
+|---|---|---|
+| document type, page and catalogue | `metadata_assertions` `doc_type` (form `reader` = the page, `catalogue` = MARC 336); `publications.doc_type`, `doc_type_source`; `catalogue_reports` kind `document-type`; view `v_doc_types` | page 126 (research 111, report 3, editorial 3, other 3, conference paper 2, book review 2, review 1, interview 1); catalogue for the other 654; **4 disagreements** (2 conference papers, 2 book reviews catalogued «بحوث ومقالات») |
+| conference / thesis / reviewed book / original / series part | `metadata_assertions` `conference.*`, `thesis.*`, `reviewed_book.*`, `original.*`, `series_part`; view `v_publication_context` | 3 / 3 / 3 / 1 / 0 articles |
+| authors | `byline_mentions.twin_of_pk` (the English byline as the same person, both under one authorship), `is_corresponding`, `ids`, `contrib_type`, `role_phrase`; `external_ids` A (printed ORCID …); `authorships.is_corresponding`; `affiliation_mentions.faculty_printed`, `assembled` | 126 twin bylines, 41 non-author roles (40 role phrases), 118 faculties apart, 49 extra affiliations; 0 corresponding marks / ids printed |
+| references: people | `citation_mention_people` (author / editor / translator, death date) | 121 citations with an editor, 79 with a translator |
+| references: parts | `citation_mentions.edition`, `year_calendar`, `year2`, `year2_calendar`, `cited_pages` + `cited_pages_source`, `work_pages`, `died`, `access_date`, `ms_library` / `ms_shelfmark` / `ms_folio`, `thesis_degree`, `conf_name` / `conf_loc` | edition 177, calendar 35 (second year 6), page referred to 52, access date 83, thesis degree 300, conference 95, work pages 2,863 |
+| works and editions | `cited_work_editions` (edition statement + year + publisher; every full citation points at its own: `cited_work_members.edition_pk`); `cited_work_contributors` (editors 207 on 113 works, translators 101 on 76); `cited_work_authors.died` / `died_hijri` / `died_greg` | 8,622 editions of 8,268 works; **257 works with several editions**; 172 editions with a printed statement; 9,472 of 10,530 memberships name an edition |
+| notes | `notes.written_by`; `notes.kind` `author-note` | 5 publisher's notes, 1 author note |
+| tables / figures | `figures.fig_type`; `figure_notes` | kinds on 196 pictures (decoration 70, chart 43, diagram 30, photo 17, cartoon 17 …); 108 notes under 101 tables and figures (table notes 95, «المصدر:» 10, footnotes 2, figure note 1) |
+| page level | `page_marks` (handwriting, stamp, scan-problem) | 10 scan problems in 2 articles (out of order) |
+
+**Letters.** The letter fix's reader-fixes load as `text_corrections` layer `azure-misread`: all 2,212 of the
+shown versions' JATS letter-fix notes (1,057 + 825 + 330), 517 of them with "the print's dot not checked".
+
+**Reloaded** (backup first: `platform_v2.before_fields_2026-10-22.db`, backup API):
+`load47.py --run v33_300_final_lettersfix --kind final --force`, the same for `v33_300b_fix3_lettersfix` (`--kind
+final`: its name says exam), `--run j0130_final --force`, `--run v2_55 --force` (its 54 shown), then `link47.py`
+and `checks47.py`: **orphans 0** at every step; 2.7 min a run, peak 0.22 GB. Log
+`/home/appuser/data/platform_v2/load_fields_2026-10-22.log`. Against the backup: publications 2,018, active cited
+works 9,132 (**every card id kept: 0 lost, 0 new**), links 900, relations 398, mentions 13,919, corrections,
+notes, figures, institutions 701 and merged_ids 14 all unchanged; bylines +126 (the twins); cited-work author rows
+−306 (editors and translators now apart); metadata assertions +1,098; catalogue reports +4.
+
+**Found and fixed on the way** (each on the dev copy `dev_fields.db` first):
+- a forced re-load of every shown run lost link47's memory of which card a citation was on (`delete_version`
+  dropped the memberships), so a card whose content key moved got a new id with no `merged_ids` row (88 in the
+  first trial; the same gap as the letter-fix reload's 21). `delete_version` now keeps the memberships of the
+  mentions that come back (same `mention_pk`) and `gone_mentions` drops the rest;
+- with the editors no longer authors, «Hewstone, Stroebe & Jonas (Eds.), An Introduction to Social Psychology»
+  joined McDougall's book of that title: link47 now matches an author-less work by its editors;
+- `refresh_institutions` already writes inst46's faculty into `faculty_text`, and taking the faculty out of
+  `org_text` re-keyed 21 institutions: `org_text` stays as it was, the reader's faculty is `faculty_printed`;
+- two positional `INSERT … VALUES` (publications in biblio47, a Desk card member in experiment 49's `release.py`)
+  named their columns.
+
+**Not in the database, and why.** One authority person, «عبدالصمد الرواعي» (AWWTG17VHS), existed only as the
+4th "author" of a cited work where he is its translator; he is now a translator of that work
+(`cited_work_contributors`) and no longer a person (no survivor, so no `merged_ids` row); editors and translators are
+not matched to persons yet. A card the Desk builds by a split names no edition until the next link47. The
+reviewed book is kept as its printed parts, not linked to a cited work yet.
+
+**Tests.** `test_ids47.py` (now with 11 `j0130_final` articles in every build): small identical in 86 tables
+(158 s); `--full` **A, B and C identical in 86 tables** (1,698 s, peak 0.93 GB). Its first full run caught one
+row that depended on load order, older than this work and only reachable with journal 0130 in the test: a
+publisher spelt «العربي» by one journal and «العربى» by another kept the first journal's spelling; `biblio47` now
+keeps the smaller of the two (the live db keeps the spelling it has until that journal is loaded again).
+`checks47.py`: orphans 0, 17 views run. Desk tests 19 / 19 (experiment 49). Datasette :8003: 11 new canned queries (`doc_types_page_vs_catalogue`, `doc_type_disagreements`,
+`article_context`, `references_with_editor`, `works_with_several_editions`, `classical_authors_by_death_date`,
+`citation_parts_of_an_article`, `authors_corresponding_ids_twins`, `table_and_figure_notes`, `page_problems`,
+`figure_kinds`; the death-date one returns nothing until a master prints a death date), 28 in all; descriptions of the 5 new tables and every new column from schema47.sql (`meta47.py`).
+Progress log: [progress_fields.md](progress_fields.md).

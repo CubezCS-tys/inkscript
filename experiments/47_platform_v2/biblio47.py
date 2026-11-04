@@ -17,6 +17,8 @@ from common47 import (E46, OUT43, akey, calendar_of, country_iso, fill_pk, hashe
                       latin_key, name_key, name_parts, now, ratio, script, split_titles, to_int, year_of)
 
 sys.path.insert(0, str(E46))
+from lxml import etree  # noqa: E402
+import parse47  # noqa: E402
 import load46  # noqa: E402  (catalogue(), match_authors(), disagreements(), title_key())
 import inst46  # noqa: E402
 from parse46 import parse_article  # noqa: E402
@@ -40,6 +42,25 @@ COUNTRY = {"مصر": "EG", "الجزائر": "DZ", "العراق": "IQ", "الس
 LANG3 = {"ar": "ara", "en": "eng", "fr": "fre", "de": "ger", "es": "spa", "it": "ita", "fa": "per", "tr": "tur",
          "ara": "ara", "eng": "eng", "fre": "fre", "fra": "fre", "ger": "ger", "spa": "spa", "per": "per",
          "tur": "tur", "urd": "urd", "ita": "ita", "heb": "heb", "rus": "rus"}
+# v3.5b document types (2026-10-22). The catalogue's 336 in the page's words (its class is coarser: «بحوث ومقالات»
+# holds every kind of journal item), and which catalogue classes agree with each page type.
+CAT_DOC = {"بحوث ومقالات": "research", "رسائل جامعية": "thesis", "بحوث المؤتمرات": "conference_paper",
+           "عروض كتب": "book_review", "افتتاحيات": "editorial", "نصوص أدبية": "literary_text",
+           "عروض رسائل": "thesis_summary", "ببليوجرافية": "bibliography", "عروض ابحاث": "paper_review",
+           "تشريعات": "documents", "فتاوى": "fatwa", "اخرى": "other"}
+_ANY_ARTICLE = {"research", "other"}
+DOC_AGREES = {"research": {"research"}, "review": {"research", "paper_review"}, "editorial": {"editorial", "research"},
+              "book_review": {"book_review"}, "report": {"research", "conference_paper"},
+              "conference_paper": {"conference_paper"}, "thesis_summary": {"thesis_summary", "thesis", "research"},
+              "poem": {"literary_text", "research"}, "bibliography": {"bibliography", "research"},
+              "documents": {"documents", "research", "other"}}
+DOC_MAJOR = {"book_review", "conference_paper", "thesis_summary", "thesis", "literary_text", "poem"}
+
+
+def doc_agrees(page: str, cat: str | None) -> bool:
+    return not cat or cat in DOC_AGREES.get(page, _ANY_ARTICLE)
+
+
 FR_WORDS = set("le la les des du de et est une un dans pour par sur au aux qui que ne pas cette ces".split())
 EN_WORDS = set("the of and in to is a for on that with as by this are from".split())
 
@@ -169,9 +190,11 @@ def ensure_journal_issue(con, mcon, code: str | None, vol: str | None, iss: str 
             # of Algeria, «مجمع اللغة العربية» of Damascus and of Cairo are different bodies); keyed on the name alone
             # they were one row whose country was that of whichever journal loaded first
             pid = "P" + hashlib.sha1(f"{key(name)}|{jcc or ''}".encode()).hexdigest()[:8]
-            insert(con, "publishers", [dict(publisher_id=pid, name=name, name_en=None,
-                                            country_code=jcc, inst_id=None)],
-                   "INSERT OR IGNORE")
+            # two journals may spell one publisher two ways («العربي» / «العربى»: one key); the name kept is the
+            # smaller of the two, not the first journal's (2026-10-22: test_ids47 with journal 0130 caught it)
+            con.execute("""INSERT INTO publishers (publisher_id, name, name_en, country_code, inst_id) VALUES (?,?,NULL,?,NULL)
+                           ON CONFLICT(publisher_id) DO UPDATE SET name = CASE WHEN excluded.name < publishers.name
+                           THEN excluded.name ELSE publishers.name END""", (pid, name, jcc))
             insert(con, "journal_publishers", [dict(journal_id=jid, publisher_id=pid, from_year=None, to_year=None,
                                                     source=f"catalogue 260$b ({n} of the journal's first 400 records)")],
                    "INSERT OR IGNORE")
@@ -202,7 +225,8 @@ def ensure_catalogued_pub(con, mcon, c999: str, load_id=None) -> str | None:
     st = mcon.execute("SELECT stem FROM pdf_ids WHERE rec = ? ORDER BY seq LIMIT 1", (r["rec"],)).fetchone()
     code, vol, iss = stem_parts(st["stem"]) if st else (r["journal_code"], None, None)
     jid, iid = ensure_journal_issue(con, mcon, r["journal_code"] or code, vol, iss, r)
-    con.execute("INSERT INTO publications VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+    con.execute("INSERT INTO publications (pub_id, c999, journal_id, issue_id, seq_in_issue, type, type_catalogue, "
+                "status, title_shown, year_shown, current_version) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (pid, c999, jid, iid, to_int(r["article_seq"]), TYPE.get(r["type"], "other"), r["type"],
                  "catalogued-only", r["title"], r["year_int"], None))
     cat_assertions(con, pid, r, load_id)
@@ -215,12 +239,14 @@ def cat_assertions(con, pid, r, load_id=None):
             ("title_translated", r["title_en"], "en"), ("fpage", r["page_first"], None),
             ("lpage", r["page_last"], None), ("volume", r["volume"], None), ("issue", r["issue"], None),
             ("year", r["year_int"], None), ("year_hijri", r["year_hijri"], None), ("doi", r["doi"], None),
-            ("journal_title", r["journal"], None), ("language", r["language"], None)]
+            ("journal_title", r["journal"], None), ("language", r["language"], None),
+            ("doc_type", r["type"], None)]        # v3.5b: MARC 336 / Mandumah type beside the page's
     rows = []
     for f, v, lang in vals:
         if v in (None, ""):
             continue
-        rows.append(dict(pub_id=pid, field=f, value=str(v), value_norm=norm(f, v), lang=lang, script=script(str(v)),
+        rows.append(dict(pub_id=pid, field=f, value=str(v), value_norm=CAT_DOC.get(str(v), "other") if f == "doc_type"
+                         else norm(f, v), lang=lang, script=script(str(v)),
                          form="catalogue", source="catalogue", export_id=EXPORT, confidence=None,
                          actor_id="catalogue:mandumah", is_chosen=0, created=now(), load_id=load_id))
     insert(con, "metadata_assertions", rows, "INSERT")
@@ -261,7 +287,7 @@ def trans_title(jats: Path) -> str | None:
 
 
 # ------------------------------------------------------------------ one document's publication layer
-CHOOSE = {"person": 1, "judge": 2, "corrected": 3, "printed": 4, "catalogue": 5, "gemini-title": 6,
+CHOOSE = {"person": 1, "judge": 2, "corrected": 3, "printed": 4, "reader": 4.5, "catalogue": 5, "gemini-title": 6,
           "qdrant-payload": 7}
 
 
@@ -295,7 +321,8 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
         con.execute("INSERT OR REPLACE INTO merged_ids VALUES (?,?, 'publication', 'merged-into', ?, ?, 'load47', NULL)",
                     (old[0], pid, now(), "the document's primary catalogue record changed"))
     level = con.execute("SELECT level FROM documents WHERE stem = ?", (stem,)).fetchone()[0]
-    con.execute("""INSERT INTO publications VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(pub_id) DO UPDATE SET
+    con.execute("""INSERT INTO publications (pub_id, c999, journal_id, issue_id, seq_in_issue, type, type_catalogue,
+                   status, title_shown, year_shown, current_version) VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(pub_id) DO UPDATE SET
                    journal_id = excluded.journal_id, issue_id = excluded.issue_id, status = excluded.status,
                    current_version = excluded.current_version, type = excluded.type, type_catalogue = excluded.type_catalogue""",
                 (pid, prim["c999"] if prim else None, jid, iid, to_int(prow["article_seq"]) if prow else None,
@@ -308,8 +335,8 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
             continue
         ensure_catalogued_pub(con, mcon, c["c999"], load_id)
     # ---- metadata assertions: every version's print (and D33 corrections), the catalogue
-    con.execute("DELETE FROM metadata_assertions WHERE pub_id = ? AND form IN ('printed', 'corrected', 'gemini-title')",
-                (pid,))
+    con.execute("DELETE FROM metadata_assertions WHERE pub_id = ? AND form IN ('printed', 'corrected', 'gemini-title', "
+                "'reader')", (pid,))
     title_anchor = {}
     for vid, Rv in Rs.items():
         a = Rv["article"]
@@ -345,6 +372,24 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
                     supersedes=pa["assert_pk"], actor_id="rule:d33", is_chosen=0, created=now(), load_id=load_id)],
                     "INSERT")
                 S["d33"] += int(vid == cur["version_id"])
+    # v3.5b (2026-10-22): the document type the reader gave the page (form reader: a judgement, not printed words)
+    # and what the page says the article is about (conference, thesis, reviewed book, original, series part: printed)
+    for vid in Rs:
+        mk = con.execute("SELECT masters_key FROM versions WHERE version_id = ?", (vid,)).fetchone()[0]
+        try:
+            A35 = parse47.article_v35(etree.parse(str(OUT43 / mk)).getroot())
+        except Exception:                                    # noqa: BLE001
+            A35 = {}
+        for f, v in sorted(A35.items()):
+            if f == "article_type" or v in (None, ""):
+                continue
+            insert(con, "metadata_assertions", [dict(
+                pub_id=pid, field=f, value=str(v), value_norm=str(v) if f == "doc_type" else fold(str(v)),
+                lang=None, script=script(str(v)), form="reader" if f == "doc_type" else "printed", source="masters",
+                version_id=vid, block_id=None, anchor_pk=title_anchor.get(vid) if f == "doc_type" else None,
+                actor_id="model:gemini-4-argon", is_chosen=0, created=now(), load_id=load_id,
+                rule=f"JATS article-type {A35.get('article_type')}" if f == "doc_type" else None)], "INSERT")
+            S["v35_" + f.split(".")[0]] += int(vid == cur["version_id"])
     if prow:
         cat_assertions(con, pid, prow, load_id)
     # the Gemini front page Azure's JSON may carry (the S3 gemini.title.json reading)
@@ -371,7 +416,7 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
     best = {}
     for r in con.execute("SELECT assert_pk, field, lang, form, version_id FROM metadata_assertions WHERE pub_id = ?",
                          (pid,)):
-        if r["form"] in ("printed", "corrected") and r["version_id"] != cur["version_id"]:
+        if r["form"] in ("printed", "corrected", "reader") and r["version_id"] != cur["version_id"]:
             continue
         k = (r["field"], r["lang"])
         rk = CHOOSE.get(r["form"], 9)
@@ -386,6 +431,12 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
                     (pid,)).fetchone()
     con.execute("UPDATE publications SET title_shown = ?, year_shown = ? WHERE pub_id = ?",
                 (t[0] if t else None, to_int(y[0]) if y else None, pid))
+    # v3.5b: the document type shown (the page's when the reader gave one, else the catalogue's in the page's words)
+    dt = con.execute("SELECT form, value, value_norm FROM metadata_assertions WHERE pub_id = ? AND field = 'doc_type' "
+                     "AND is_chosen = 1", (pid,)).fetchone()
+    con.execute("UPDATE publications SET doc_type = ?, doc_type_source = ? WHERE pub_id = ?",
+                ((dt["value"] if dt["form"] == "reader" else dt["value_norm"]) if dt else None,
+                 ({"reader": "page", "catalogue": "catalogue"}.get(dt["form"], dt["form"])) if dt else None, pid))
     # ---- dates, both calendars
     con.execute("UPDATE publication_dates SET pair_pk = NULL WHERE pub_id = ?", (pid,))
     con.execute("DELETE FROM publication_dates WHERE pub_id = ?", (pid,))
@@ -503,6 +554,19 @@ def refresh_stem(con, mcon, stem: str, load_id: int, S: Counter):
                           severity=d["severity"], evidence=d["kind"], anchor_pk=anc, found_in_export=EXPORT,
                           status="open", load_id=load_id, note=d["note"]))
         S["reports"] += 1
+    # v3.5b: the page's document type against the catalogue's 336
+    pdt = con.execute("SELECT value, anchor_pk FROM metadata_assertions WHERE pub_id = ? AND field = 'doc_type' AND "
+                      "form = 'reader' AND version_id = ?", (pid, cur["version_id"])).fetchone()
+    if pdt and prow and prow["type"] and not doc_agrees(pdt["value"], CAT_DOC.get(prow["type"], "other")):
+        cv = CAT_DOC.get(prow["type"], "other")
+        rrows.append(dict(kind="document-type", field="336", c999=prow["c999"], pub_id=pid, stem=stem,
+                          version_id=cur["version_id"], catalogue_value=prow["type"], our_value=pdt["value"],
+                          who_is_right="unknown",
+                          severity="medium" if {pdt["value"], cv} & DOC_MAJOR else "low",
+                          evidence=f"the page reads as {pdt['value']}; the catalogue's type is {prow['type']} ({cv})",
+                          anchor_pk=pdt["anchor_pk"], found_in_export=EXPORT, status="open", load_id=load_id,
+                          note="prompt v3.5b doc_type vs MARC 336"))
+        S["reports_doc_type"] += 1
     if len([c for c in crow if c["c999"]]) > 1:
         rrows.append(dict(kind="stem-on-several-records", field="pdf_ids", c999=prim["c999"] if prim else None,
                           pub_id=pid, stem=stem, version_id=cur["version_id"],
@@ -555,7 +619,12 @@ def authorships(con, pid, vid, R, prim, cauth, load_id, S):
     con.execute("DELETE FROM authorship_mentions WHERE authorship_pk IN (SELECT authorship_pk FROM authorships WHERE "
                 "pub_id = ?)", (pid,))
     con.execute("DELETE FROM authorships WHERE pub_id = ?", (pid,))
-    mentions = {r["byline_pos"]: r for r in con.execute("SELECT * FROM byline_mentions WHERE version_id = ?", (vid,))}
+    mentions, twins = {}, defaultdict(list)
+    for r in con.execute("SELECT * FROM byline_mentions WHERE version_id = ? ORDER BY mention_pk", (vid,)):
+        if r["twin_of_pk"]:
+            twins[r["byline_pos"]].append(r)                 # the same person printed again in another script
+        else:
+            mentions[r["byline_pos"]] = r
     authors = [dict(a) for a in R["authors"]]
     load46.match_authors(authors, cauth)
     c999 = prim["c999"] if prim else None
@@ -610,11 +679,14 @@ def authorships(con, pid, vid, R, prim, cauth, load_id, S):
                                      latin=c["latin"] if c else None, match=a["match"],
                                      authority_not_taken=c["authority_id"] if c and method == "weak-name-rejected"
                                      else None, note=why)), from_version=vid)
+        r["is_corresponding"] = int(any((mentions.get(x["seq"]) or {}) and mentions[x["seq"]]["is_corresponding"]
+                                        for x in grp))
         rows.append(r)
         for x in grp:
             m = mentions.get(x["seq"])
             if m:
                 links.append(m["mention_pk"])
+            links += [t["mention_pk"] for t in twins.get(x["seq"], [])]
         links.append(None)
         S["authorships"] += 1
     fill_pk("authorships", rows)
@@ -986,6 +1058,16 @@ def refresh_institutions(con, load_id):
                      for r in rows])
     st = inst46.rebuild(mem)
     old_links = {(r[0], r[1]): r[2] for r in con.execute("SELECT aff_pk, level, inst_id FROM affiliation_links")}
+    # experiment 68: where each linked affiliation is printed (article, byline, script, order; its text), so an id
+    # whose row vanishes when a new version of the article is loaded (new aff_pks; inst46's cluster keys move when
+    # the set of printed names changes) is carried to the row that now holds the same printed affiliations
+    old_names = defaultdict(set)          # experiment 68: a vanished id is carried only to a row of the same body
+    for i_, nm_ in con.execute("SELECT inst_id, name FROM institution_names"):
+        old_names[i_].add(nm_)
+    aff_place = {r[0]: (r[1], r[2], r[3], r[4], r[5]) for r in con.execute(
+        """SELECT am.aff_pk, v.stem, b.byline_pos, b.script, am.seq, am.printed FROM affiliation_mentions am
+           JOIN byline_mentions b USING (mention_pk) JOIN versions v ON v.version_id = b.version_id
+           WHERE am.aff_pk IN (SELECT aff_pk FROM affiliation_links)""")}
     old_live = {r[0] for r in con.execute("SELECT inst_id FROM institutions")}
     con.execute("DELETE FROM affiliation_links")
     con.execute("DELETE FROM institution_relations")
@@ -1108,6 +1190,67 @@ def refresh_institutions(con, load_id):
         if oi in old_live and oi not in live and ni in live:
             con.execute("INSERT OR IGNORE INTO merged_ids VALUES (?,?, 'institution', 'merged-into', ?, ?, 'link47', "
                         "NULL)", (oi, ni, now(), "its affiliations now sit under a numbered university"))
+    # experiment 68: an id that vanished because its article was loaded again (or inst46 chose another key for the
+    # same names): merged into the live row that now holds most of its printed affiliations, found by place
+    # (stem, byline, script, order) and, for a line that moved to its twin's mention (experiment 65), by its text
+    cur_place, cur_text, cur_words = {}, defaultdict(list), {}
+    for r in con.execute("""SELECT am.aff_pk, v.stem, b.byline_pos, b.script, am.seq, am.printed FROM
+                            affiliation_mentions am JOIN byline_mentions b USING (mention_pk)
+                            JOIN versions v ON v.version_id = b.version_id AND v.is_current = 1"""):
+        cur_place[(r[1], r[2], r[3], r[4], r[5])] = r[0]          # same place and the same printed text
+        cur_text[(r[1], r[5])].append(r[0])
+        cur_words.setdefault(r[1], {}).setdefault((r[0], frozenset(re.findall(r"\w+", (r[5] or "").lower()))),
+                                                  []).append(r[0])
+    con.execute("DELETE FROM merged_ids WHERE kind = 'institution' AND asserted_by = 'link47' AND reason LIKE "
+                "'%experiment 68 continuity%' AND old_id IN (SELECT inst_id FROM institutions)")   # live again
+    gone = defaultdict(Counter)
+    for (apk, lvl), oi in old_links.items():
+        if oi not in old_live or oi in live or con.execute("SELECT 1 FROM merged_ids WHERE old_id = ?",
+                                                             (oi,)).fetchone() or apk not in aff_place:
+            continue
+        st_, bp, sc, sq, pr = aff_place[apk]
+        cands = [cur_place.get((st_, bp, sc, sq, pr))] + cur_text.get((st_, pr), [])
+        # the line rewritten as printed (experiment 65: the post kept, Latin commas): the article's row whose words
+        # overlap it most, when clearly so (half its words or more, no tie)
+        w0 = set(re.findall(r"\w+", (pr or "").lower()))
+        sc_ = sorted(((len(w0 & w) / max(1, len(w0 | w)), c) for (s2, t2), cs in cur_words.get(st_, {}).items()
+                      for c in cs for w in [t2]), key=lambda x: (-x[0], x[1]))
+        if sc_ and sc_[0][0] >= 0.5 and (len(sc_) == 1 or sc_[1][0] < sc_[0][0]):
+            cands.append(sc_[0][1])
+        for c in cands:
+            if c is not None and new_links.get((c, lvl)) in live:
+                gone[oi][new_links[(c, lvl)]] += 1
+                break
+    new_names = defaultdict(set)
+    for i_, nm_ in con.execute("SELECT inst_id, name FROM institution_names"):
+        new_names[i_].add(nm_)
+
+    def words_(n):
+        return frozenset(re.sub(r"^ال", "", w) for w in re.findall(r"\w+", fold(n or "").lower()))
+
+    def same_body(a_, b_):
+        """The machine may now read another body from the same line («... أكاديميون العالمية ... جامعة الإسكندرية»:
+        once AIU, now Alexandria): carried only when, for some pair of their names in one script, one name's words
+        hold the other's; names only in different scripts cannot be compared and pass."""
+        shared = False
+        for x in a_:
+            for y in b_:
+                if script(x) != script(y):
+                    continue
+                shared = True
+                wx, wy = words_(x), words_(y)
+                if wx and wy and (wx <= wy or wy <= wx):
+                    return True
+        return not shared
+    for oi, cnt in sorted(gone.items()):
+        cnt = Counter({ni_: n_ for ni_, n_ in cnt.items() if same_body(old_names.get(oi, set()),
+                                                                         new_names.get(ni_, set()))})
+        if not cnt:
+            continue
+        ni, n_ = sorted(cnt.items(), key=lambda kv: (-kv[1], kv[0]))[0]
+        con.execute("INSERT OR IGNORE INTO merged_ids VALUES (?,?, 'institution', 'merged-into', ?, ?, 'link47', NULL)",
+                    (oi, ni, now(), f"its printed affiliations are linked to this row now ({n_} of "
+                                    f"{sum(cnt.values())}; experiment 68 continuity)"))
     # the faculty inst46 reads out of an affiliation, for the shown versions only (the printed parts are never
     # overwritten, so a version shown once and then replaced keeps exactly what it was loaded with)
     con.execute("UPDATE affiliation_mentions SET faculty_text = NULL")
@@ -1165,6 +1308,7 @@ def refresh_global(con, mcon, load_id) -> dict:
     S = Counter()
     refresh_supervisions(con, load_id)
     S["persons"] = refresh_persons(con, mcon, load_id)
+    S["person_ids_printed"] = refresh_person_ids(con)
     S.update({f"inst_{k}": v for k, v in refresh_institutions(con, load_id).items()})
     # ISSNs that fail their check digit: a report per journal
     con.execute("DELETE FROM catalogue_reports WHERE kind = 'invalid-issn' AND status = 'open'")
@@ -1186,6 +1330,22 @@ def refresh_global(con, mcon, load_id) -> dict:
     if t is not None:
         S["translit_pairs"] = t
     return dict(S)
+
+
+def refresh_person_ids(con) -> int:
+    """v3.5b: an ORCID (or Scopus / ResearcherID / Google Scholar id) printed beside a byline of a shown version is an
+    external id of that byline's person (external_ids entity_kind A, assigned_by author)."""
+    con.execute("DELETE FROM external_ids WHERE entity_kind = 'A' AND assigned_by = 'author'")
+    rows = []
+    for r in con.execute("""SELECT DISTINCT b.ids, b.anchor_pk, v.stem, a.person_id FROM byline_mentions b
+                            JOIN versions v ON v.version_id = b.version_id AND v.is_current = 1
+                            JOIN authorship_mentions am ON am.mention_pk = b.mention_pk
+                            JOIN authorships a ON a.authorship_pk = am.authorship_pk
+                            WHERE b.ids IS NOT NULL AND a.person_id IS NOT NULL ORDER BY v.stem, b.mention_pk"""):
+        for sc, val in sorted(json.loads(r["ids"]).items()):
+            rows.append(dict(entity_kind="A", entity_id=r["person_id"], scheme=sc, value=val, assigned_by="author",
+                             source=f"printed beside the byline of {r['stem']} (masters)", anchor_pk=r["anchor_pk"]))
+    return insert(con, "external_ids", rows, "INSERT OR IGNORE")
 
 
 def refresh(con, mcon, stems, load_id) -> dict:

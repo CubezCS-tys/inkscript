@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The light admin look of AI-Search's /admin-vdb: gray-50 ground, white cards, indigo accent. */
+:root { color-scheme: light; }
+body { background: #f9fafb; color: #111827; }
+/* Arabic content: right-to-left in its own block, Noto Naskh Arabic */
+.ar { font-family: var(--font-naskh), "Noto Naskh Arabic", "Geeza Pro", serif; direction: rtl; unicode-bidi: isolate; text-align: right; }
+.ar-inline { font-family: var(--font-naskh), "Noto Naskh Arabic", serif; unicode-bidi: isolate; }
+.crop-empty { background: repeating-linear-gradient(0deg, #f3f4f6 0 18px, #ffffff 18px 19px); }
+kbd { font-family: ui-monospace, monospace; font-size: 11px; padding: 1px 5px; border: 1px solid #d1d5db; border-bottom-width: 2px; border-radius: 4px; background: #fff; color: #374151; }
+:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+.notecall { color: #4338ca; font-size: 0.75em; vertical-align: super; text-decoration: none; }
+.notecall:hover { text-decoration: underline; }
+:target { scroll-margin-top: 5rem; background: #eef2ff; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* /pipeline, how a page is read (2026-10-30). Every animation takes its delay and length from --d / --t (ms at 1x)
+   times --k (1 / speed), so one class on the root pauses all of them and the speed control scales all of them.
+   The resting style of every element is its finished state; the keyframes only describe where it comes from, so
+   prefers-reduced-motion (animations off, above) shows each stage finished. */
+.pl-root { --k: 1; }
+.pl-anim { animation-duration: calc(var(--t, 600) * var(--k) * 1ms); animation-delay: calc(var(--d, 0) * var(--k) * 1ms);
+  animation-fill-mode: both; animation-timing-function: cubic-bezier(.22, .7, .2, 1); }
+.pl-paused .pl-anim { animation-play-state: paused; }
+.pl-done .pl-anim { animation: none; }
+.pl-fade { animation-name: pl-fade; }
+.pl-pop { animation-name: pl-pop; transform-box: fill-box; transform-origin: center; }
+.pl-grow-r { animation-name: pl-grow; transform-box: fill-box; transform-origin: right center; }
+.pl-grow-l { animation-name: pl-grow; transform-box: fill-box; transform-origin: left center; }
+.pl-draw { animation-name: pl-draw; animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+.pl-rise { animation-name: pl-rise; }
+.pl-fly { animation-name: pl-fly; transform-origin: 0 0; opacity: 0; animation-timing-function: cubic-bezier(.55, .05, .25, 1); }
+.pl-flash { animation-name: pl-flash; }
+.pl-sweep { animation-name: pl-sweep; animation-timing-function: ease-in-out; }
+.pl-bar { animation-name: pl-bar; transform-origin: left center; }
+.pl-dim { animation-name: pl-dim; }
+@keyframes pl-fade { from { opacity: 0; } }
+@keyframes pl-pop { from { opacity: 0; transform: scale(.55); } }
+@keyframes pl-grow { from { opacity: 0; transform: scaleX(0); } }
+@keyframes pl-draw { from { stroke-dashoffset: var(--len); } }
+@keyframes pl-rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes pl-fly {
+  0% { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(var(--s)); box-shadow: none; }
+  8% { opacity: 1; transform: translate(var(--fx), var(--fy)) scale(var(--s)); }
+  80% { opacity: 1; transform: none; box-shadow: 0 12px 28px rgba(15, 23, 42, .18); }
+  100% { opacity: 0; transform: none; } }
+@keyframes pl-flash { 0% { fill-opacity: 0; stroke-opacity: 0; } 25% { fill-opacity: .45; stroke-opacity: 1; } }
+@keyframes pl-sweep { 0% { opacity: 1; transform: translateY(0); } 92% { opacity: 1; } 100% { opacity: 0; transform: translateY(var(--dist)); } }
+@keyframes pl-bar { from { transform: scaleX(0); } }
+@keyframes pl-dim { to { opacity: .28; } }
+.pl-full { background: #f6f7f5; padding: 20px 24px; overflow: auto; }
+
+/* Nothing lost (/audit, experiment 61): calm reveals; nothing moves for a reader who asked for less motion */
+.au-reveal { transform-box: fill-box; transform-origin: left center; animation: au-reveal 1100ms cubic-bezier(.45, 0, .25, 1) both; }
+@keyframes au-reveal { from { transform: scaleX(0); } }
+.au-node rect { animation: au-fade 500ms ease-out both; }
+.au-label { paint-order: stroke; stroke: #fff; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.au-rise { animation: au-rise 450ms ease-out both; }
+@keyframes au-rise { from { opacity: 0; transform: translateY(6px); } }
+.au-bar > div { transform-origin: left center; animation: au-grow 700ms cubic-bezier(.3, 0, .2, 1) both; }
+@keyframes au-grow { from { transform: scaleX(0); } }
+@keyframes au-fade { from { opacity: 0; } }
+.au-box { transition: box-shadow 200ms; }
+.au-box-focus { box-shadow: 0 0 0 4px rgba(17, 24, 39, .18); animation: au-pulse 1.4s ease-out 2; }
+@keyframes au-pulse { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, .45); } 100% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); } }
+@media (prefers-reduced-motion: reduce) { .au-reveal, .au-node rect, .au-rise, .au-bar > div, .au-box-focus { animation: none; } }

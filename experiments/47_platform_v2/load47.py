@@ -31,13 +31,13 @@ sys.path.insert(0, str(HERE))
 import biblio47  # noqa: E402
 import ink47  # noqa: E402
 import parse47  # noqa: E402
-from common47 import (DB, E43, OUT43, connect, country_iso, fill_pk, fold, insert, jdump, marc, now, sha_file, sha_files,  # noqa: E402
-                      spk, stemmed, AYAT, SURAS)
+from common47 import (DB, E43, OUT43, connect, country_iso, fill_pk, fold, insert, jdump, marc, name_key, now,  # noqa: E402
+                      sha_file, sha_files, spk, stemmed, AYAT, SURAS)
 
 PURPOSE = {"final": 1, "judged": 2, "base": 3, "exam": 4, "sample": 5, "replay": 6}
 VERSION_TABLES = ["line_map", "sections", "block_parts", "blocks", "page_regions", "note_call_targets", "note_calls",
                   "notes", "table_cells", "figures", "verse_lines", "text_corrections", "quran_citations", "flags",
-                  "abstracts", "publication_keywords"]
+                  "abstracts", "publication_keywords", "figure_notes", "page_marks", "printed_identifiers"]
 REGION_STATIC = None
 
 
@@ -53,6 +53,17 @@ def run_kind(run: str) -> str:
     if "replay" in run:
         return "replay"
     return "base"
+
+
+def source_run(run: str) -> str:
+    """A rebuild folder named <run>_lettersfix (experiment 43's letter fix, 2026-10-22) holds only masters and patches:
+    its flags.json and raw/ chunk answers are its source run's (same answers, same Azure lines)."""
+    return re.sub(r"_lettersfix$", "", re.sub(r"_fix61(_d30)?$", "", run))   # exp 65: <run>_fix61 likewise (exp 68: _fix61_d30)
+
+
+def run_file(run: str, name: str) -> Path:
+    p = OUT43 / run / name
+    return p if p.exists() else OUT43 / source_run(run) / name
 
 
 def parent_of(run: str) -> str | None:
@@ -214,6 +225,23 @@ def ensure_document(con, stem: str, az: dict, azpath: Path, load_id: int):
     insert(con, "azure_lines", lines)
 
 
+def ensure_word_document(con, stem: str, docx: Path, legacy_pdf: Path | None, load_id: int):
+    """A Word-route document (experiment 53 / 70): no scan and no Azure reading in the main bucket; the text is the
+    publisher's Word file (docx sha as the document's source hash), the legacy PDF (S3 legacy/, made from the same Word
+    file) its picture. level 'legacy-pdf', no pages or azure_lines rows."""
+    sha = sha_file(docx)
+    d = con.execute("SELECT azure_sha FROM documents WHERE stem = ?", (stem,)).fetchone()
+    if d and d["azure_sha"] == sha:
+        return
+    rel = str(docx.relative_to(E43.parents[1])) if str(docx).startswith(str(E43.parents[1])) else str(docx)
+    con.execute("""INSERT INTO documents (stem, level, in_main_bucket, legacy_only, has_azure_json, scan_pages, pdf_sha,
+                   azure_sha, root_id, scan_key, azure_key, qdrant_doc_id, first_load, part_label, part_kind, part_seq)
+                   VALUES (?, 'legacy-pdf', 0, 1, 0, NULL, ?, ?, 'local-repo', ?, ?, ?, ?, ?, ?, ?)
+                   ON CONFLICT(stem) DO UPDATE SET azure_sha = excluded.azure_sha, azure_key = excluded.azure_key""",
+                (stem, sha_file(legacy_pdf) if legacy_pdf and legacy_pdf.exists() else None, sha,
+                 f"s3://mandumah-source-docs/legacy/{stem}/{stem}.pdf", rel, stem, load_id, *thesis_part(stem)))
+
+
 def jpeg_size(path: Path):
     """(width, height) from a JPEG's SOF marker (no imaging library needed)."""
     import struct
@@ -249,7 +277,11 @@ def thesis_part(stem: str):
 
 
 # ------------------------------------------------------------------ one version
-def delete_version(con, vid: int):
+def delete_version(con, vid: int) -> set:
+    """Remove a version's rows before it is written again. Its citations' card memberships and link evidence are
+    kept for the mentions that come back (same mention_pk: the id is built on Azure's words), so link47 can keep each
+    card's public id across a re-load (v3.5b fields, 2026-10-22: a forced re-load of every shown run otherwise left
+    link47 no member to inherit an id through, and 88 cards were minted anew); gone_mentions() drops the rest."""
     for (uid, f, s) in con.execute("SELECT uid, folded, stemmed FROM search_units WHERE version_id = ?", (vid,)).fetchall():
         con.execute("INSERT INTO search_fts(search_fts, rowid, folded, stemmed) VALUES ('delete', ?, ?, ?)", (uid, f, s))
     con.execute("DELETE FROM search_units WHERE version_id = ?", (vid,))
@@ -260,14 +292,30 @@ def delete_version(con, vid: int):
     con.execute(f"DELETE FROM authorship_mentions WHERE mention_pk IN ({mp})", (vid,))
     con.execute("DELETE FROM byline_mentions WHERE version_id = ?", (vid,))
     cp = "SELECT mention_pk FROM citation_mentions WHERE version_id = ?"
-    con.execute(f"DELETE FROM cited_work_members WHERE full_mention_pk IN ({cp})", (vid,))
-    con.execute(f"UPDATE citation_links SET via_mention_pk = NULL WHERE via_mention_pk IN ({cp})", (vid,))
+    old = {r[0] for r in con.execute(cp, (vid,))}
+    con.execute(f"DELETE FROM citation_mention_people WHERE mention_pk IN ({cp})", (vid,))
     con.execute("DELETE FROM citation_mentions WHERE version_id = ?", (vid,))
     for t in VERSION_TABLES:
         con.execute(f"DELETE FROM {t} WHERE version_id = ?", (vid,))
     con.execute("DELETE FROM metadata_assertions WHERE version_id = ?", (vid,))
     con.execute("DELETE FROM anchor_links WHERE owner_key LIKE ?", (f"{vid}:%",))
     con.execute("DELETE FROM link_run_versions WHERE version_id = ?", (vid,))
+    return old
+
+
+def gone_mentions(con, vid: int, old: set):
+    """After a version is written again: memberships and link evidence of citations that did not come back."""
+    new = {r[0] for r in con.execute("SELECT mention_pk FROM citation_mentions WHERE version_id = ?", (vid,))}
+    gone = sorted(old - new)
+    for i in range(0, len(gone), 500):
+        ch = gone[i:i + 500]
+        q = ",".join("?" * len(ch))
+        con.execute(f"DELETE FROM cited_work_members WHERE full_mention_pk IN ({q})", ch)
+        con.execute(f"UPDATE citation_links SET via_mention_pk = NULL WHERE via_mention_pk IN ({q})", ch)
+
+
+V35_MENTION_COLS = ("edition", "year_calendar", "year2", "year2_calendar", "work_pages", "cited_pages_source", "died",
+                    "access_date", "ms_library", "ms_shelfmark", "ms_folio", "thesis_degree", "conf_name", "conf_loc")
 
 
 def write_version(con, V: dict, vid: int, vkey: str) -> dict:
@@ -306,29 +354,57 @@ def write_version(con, V: dict, vid: int, vkey: str) -> dict:
     n["table_cells"] = insert(con, "table_cells", strip(V["table_cells"]))
     n["verse_lines"] = insert(con, "verse_lines", strip(V["verse_lines"]))
     n["text_corrections"] = insert(con, "text_corrections", strip(V["text_corrections"]))
-    # bylines and their affiliations
-    for m in V["byline_mentions"]:
+    n["figure_notes"] = insert(con, "figure_notes", strip(V.get("figure_notes") or []))
+    n["page_marks"] = insert(con, "page_marks", strip(V.get("page_marks") or []))
+    n["printed_identifiers"] = insert(con, "printed_identifiers", strip(V.get("printed_ids") or []))
+    # bylines and their affiliations; a name printed again in another script (v3.5b same_as) is a mention of its own
+    # pointing at the main one (twin_of_pk)
+    pos_pk, twin_pk = {}, {}
+    for m in sorted(V["byline_mentions"], key=lambda m: "_twin_of" in m):
         d = {k: v for k, v in m.items() if not k.startswith("_") and k != "anchor_key"}
         d.update(version_id=vid, anchor_pk=ap(m["anchor_key"]))
+        if "_twin_of" in m:
+            d["twin_of_pk"] = pos_pk.get(m["_twin_of"])
         fill_pk("byline_mentions", [d])
-        insert(con, "byline_mentions", [d], "INSERT")
+        insert(con, "byline_mentions", [d], "INSERT OR IGNORE")
         m["_pk"] = d["mention_pk"]
-    pos_pk = {m["byline_pos"]: m["_pk"] for m in V["byline_mentions"]}
+        if "_twin_of" not in m:
+            pos_pk[m["byline_pos"]] = m["_pk"]
+        else:
+            twin_pk.setdefault((m["byline_pos"], m["script"]), m["_pk"])
     import inst46
+    main_script = {m["byline_pos"]: m["script"] for m in V["byline_mentions"] if "_twin_of" not in m}
+    used, aff_pk_of = set(), {}
     for a in V["affiliations"]:
         mpk = pos_pk.get(a["author_seq"])
         if not mpk:
             continue
+        # experiment 65: the twin's affiliation (aff/@xml:lang in another script) hangs on the twin's mention
+        lang_script = parse47.script(a["printed"] or "") if a.get("_lang") else None
+        if lang_script and lang_script != main_script.get(a["author_seq"]) and \
+                twin_pk.get((a["author_seq"], lang_script)):
+            mpk = twin_pk[(a["author_seq"], lang_script)]
+        if a.get("_lang"):                                 # numbered after what the mention already holds
+            aseq = max([q for (m_, q) in used if m_ == mpk] + [0]) + 1
+        else:
+            aseq = a["seq"] + 1                                # as before
+        used.add((mpk, aseq))
         printed = a["printed"] or ""
         rest = inst46.strip_role(printed)
         pos_title = printed[:len(printed) - len(rest)].strip(" ،,") if rest != printed else None
-        has_inst = bool(a["orgname"] or a["dept"] or re.search(
+        has_inst = bool(a["orgname"] or a["dept"] or a.get("faculty") or re.search(
             r"جامع|كلي|قسم|معهد|مركز|وزار|univ|coll|facult|depart|institut|ministry|centre|center", printed, re.I))
         kind = "institution" if has_inst else ("place-only" if (a["city"] or a["country"]) else "position-only")
-        insert(con, "affiliation_mentions", [dict(mention_pk=mpk, seq=a["seq"] + 1, printed=printed,
-                                                  position_title=pos_title, org_text=a["orgname"], faculty_text=None,
-                                                  dept_text=a["dept"], city=a["city"], country_printed=a["country"],
-                                                  country_code=country_iso(a["country"]), kind=kind)], "INSERT")
+        row = dict(mention_pk=mpk, seq=aseq, printed=printed, position_title=pos_title, org_text=a["orgname"],
+                   faculty_text=None, faculty_printed=a.get("faculty"), dept_text=a["dept"], city=a["city"],
+                   country_printed=a["country"], country_code=country_iso(a["country"]), kind=kind,
+                   assembled=a.get("assembled"))
+        if a.get("_lang") or a.get("_rid"):                # experiment 65 columns, only for the new markup
+            fill_pk("affiliation_mentions", [row])
+            row.update(lang=a.get("_lang"), twin_of_aff_pk=aff_pk_of.get(a.get("_rid")))
+        insert(con, "affiliation_mentions", [row], "INSERT")
+        if a.get("_id"):
+            aff_pk_of[a["_id"]] = row.get("aff_pk") or fill_pk("affiliation_mentions", [dict(row)])[0]["aff_pk"]
     n["byline_mentions"] = len(V["byline_mentions"])
     # citation mentions (unresolved here; link47 resolves back references and builds the cited works)
     mrows = []
@@ -339,10 +415,21 @@ def write_version(con, V: dict, vid: int, vkey: str) -> dict:
                           printed=m["printed"], printed_fixed=m["printed_fixed"], parsed=jdump(m["parsed"]),
                           cited_volume=m["cited_volume"], cited_pages=m["cited_pages"], page=m["page"],
                           block_id=m["block_id"], anchor_pk=ap(m["anchor_key"]),
-                          resolve_evidence=jdump(dict(hint=m["_hint"])) if m["_hint"] else None))
+                          resolve_evidence=jdump(dict(hint=m["_hint"])) if m["_hint"] else None,
+                          **{k: m.get(k) for k in V35_MENTION_COLS}))
     n["citation_mentions"] = insert(con, "citation_mentions", mrows)
     mpk = {r["mention_id"]: r["mention_pk"] for r in con.execute(
         "SELECT mention_id, mention_pk FROM citation_mentions WHERE version_id = ?", (vid,))}
+    # v3.5b: the people of each citation by role (authors, the editor of the text, the translator), as printed
+    prow = []
+    for m in V["citation_mentions"]:
+        for x in m.get("_people") or []:
+            pr = " ".join(y for y in (x["given"], x["surname"]) if y)
+            prow.append(dict(mention_pk=mpk.get(m["mention_id"]), role=x["role"], seq=x["seq"], printed=pr or None,
+                             surname=x["surname"] or None, given=x["given"] or None, name_key=name_key(pr) or None,
+                             died=x["died"]))
+    n["citation_mention_people"] = insert(con, "citation_mention_people", [r for r in prow if r["mention_pk"]],
+                                          "INSERT OR IGNORE")
     # Quran: a note reference is the citation mention of kind quran in the same block; a quotation stands alone
     qrows = []
     qm = defaultdict(list)
@@ -366,7 +453,8 @@ def write_version(con, V: dict, vid: int, vkey: str) -> dict:
     return n
 
 
-def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: int, azp: dict) -> tuple:
+def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: int, azp: dict,
+                  word: Path | None = None) -> tuple:
     kind = run_kind(run)
     done, skipped, touched, counts = 0, 0, [], Counter()
     t0 = time.time()
@@ -379,20 +467,26 @@ def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: 
         if old and old["inputs_sha"] == sha and not force:
             skipped += 1
             continue
-        if stem not in azp:
+        if word is not None:                         # the Word route (exp 70): no Azure, no ALTO, no ink anchors
+            az = {"pages": {}}
+            lp = word / "legacy_pdf" / f"{stem}.pdf"
+            ensure_word_document(con, stem, word / "docx" / f"{stem}.docx", lp if lp.exists() else None, load_id)
+        elif stem not in azp:
             print(f"  no Azure JSON for {stem}: skipped", flush=True)
             continue
-        az = ink47.read_azure(azp[stem])
-        ensure_document(con, stem, az, azp[stem], load_id)
+        else:
+            az = ink47.read_azure(azp[stem])
+            ensure_document(con, stem, az, azp[stem], load_id)
         V = parse47.parse_version(mdir, stem, run, az)
         stamp = {}
         if (mdir / f"{stem}.stamp.json").exists():
             stamp = json.loads((mdir / f"{stem}.stamp.json").read_text(encoding="utf-8"))
         pages = sorted({b["page"] for b in V["blocks"]} | {r["page"] for r in V["page_regions"]})
         exp = len(az["pages"])
+        old_mentions = set()
         if old:
             vid = old["version_id"]
-            delete_version(con, vid)
+            old_mentions = delete_version(con, vid)
         else:
             vid = spk("versions", f"V:{stem}@{run}")      # from the version key, never from load order
         con.execute("""INSERT INTO versions (version_id, version_key, stem, run, stamp_run, made, load_id, jats_sha, alto_sha,
@@ -408,6 +502,7 @@ def load_versions(con, run: str, mdir: Path, stems: list, force: bool, load_id: 
                      sha_files(files[2:4]), sha, pages_text(pages), exp, int(len(pages) >= exp),
                      f"{run}/masters/{stem}.jats.xml"))
         n = write_version(con, V, vid, f"V:{stem}@{run}")
+        gone_mentions(con, vid, old_mentions)
         counts.update(n)
         # consistency of the line crosswalk with the masters' own 'P:N' labels on fixes and misprints
         for c in V["text_corrections"]:
@@ -643,7 +738,7 @@ def load_patches(con, run: str, mdir: Path, pdirs: list, load_id: int) -> tuple:
 
 
 def base_run(run: str) -> str:
-    return re.sub(r"_(judged|fixed|patched|final)\w*$", "", run)
+    return re.sub(r"_(judged|fixed|patched|final)\w*$", "", re.sub(r"_fix61(_d30)?$", "", run))
 
 
 def load_judge(con, run: str) -> tuple:
@@ -723,7 +818,7 @@ def load_model_calls(con, run: str) -> int:
     """The reader's chunk calls (out/<run>/raw/<stem>_cXXX-YYY.json): cost per version."""
     con.execute("DELETE FROM model_calls WHERE run = ? AND job IN ('read', 'retry')", (run,))
     rows = []
-    for f in sorted((OUT43 / run / "raw").glob("*_c[0-9][0-9][0-9]-[0-9][0-9][0-9].json")):
+    for f in sorted(run_file(run, "raw").glob("*_c[0-9][0-9][0-9]-[0-9][0-9][0-9].json")):
         if f.name.endswith(".failed.json"):
             continue
         try:
@@ -894,6 +989,8 @@ def main(argv=None):
     ap.add_argument("--kind", help="run kind (default from the name): sample | base | judged | final | exam")
     ap.add_argument("--db", default=str(DB))
     ap.add_argument("--note")
+    ap.add_argument("--word", help="Word-route run (exp 70): the folder holding docx/ and legacy_pdf/ beside masters/; "
+                                   "no Azure JSON or ALTO is read")
     a = ap.parse_args(argv)
     run = a.run
     mdir = Path(a.masters) if a.masters else OUT43 / run / "masters"
@@ -928,10 +1025,11 @@ def main(argv=None):
                                                   HERE / "biblio47.py"]), run, EXPORT, " ".join(sys.argv[1:])))
     load_id = cur.lastrowid
     azp = ink47.azure_paths()
-    done, skipped, touched, counts, checks = load_versions(con, run, mdir, stems, a.force, load_id, azp)
+    done, skipped, touched, counts, checks = load_versions(con, run, mdir, stems, a.force, load_id, azp,
+                                                           Path(a.word) if a.word else None)
     all_run = [r[0] for r in con.execute("SELECT stem FROM versions WHERE run = ?", (run,))]
     choose_current(con, all_run)
-    nf = load_flags(con, run, Path(a.flags) if a.flags else OUT43 / run / "flags.json")
+    nf = load_flags(con, run, Path(a.flags) if a.flags else run_file(run, "flags.json"))
     pdirs = [Path(p) for p in a.patches] if a.patches else [OUT43 / run / "patches"]
     np_, napp = load_patches(con, run, mdir, pdirs, load_id)
     nj = load_judge(con, run)

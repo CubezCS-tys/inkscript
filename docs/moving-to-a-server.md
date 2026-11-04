@@ -1,5 +1,24 @@
 # Moving development to the server
 
+> **2026-10-22: the move is done.** Development runs on the server; this page is kept as the record of how it was
+> moved. What is different from the plan below:
+> - **Paths.** Fix A was used: `/home/yassine` is a symlink to `/home/appuser` (made 2026-10-21), so every stored
+>   laptop path resolves and `ops/relocate_home.py` was not needed. New paths are written under `/home/appuser`.
+> - **New services.** PostgreSQL 16 is installed (Ubuntu's package, under systemd, port 5432; database `inkdesk`,
+>   schema `desk`) for the Desk ([experiment 49](../experiments/49_correction_desk/README.md)). The Desk adds
+>   127.0.0.1:8004 (web app) and :8005 (API). Step 6's four browse pages still run as written; the start, stop and
+>   check commands for all seven are in [runbooks.md](runbooks.md#services).
+> - **One tunnel.** `ssh -N -L 9004:127.0.0.1:8004 prod`, then http://localhost:9004 (on Windows / WSL use
+>   `localhost`). The Desk proxies the views at `/views/…`; Datasette still needs its own `-L` ports.
+> - **Sharing the box with AI-Search.** Our ports are 8001–8005 and 8899, all on 127.0.0.1; nothing heavy on
+>   Qdrant; at most 2 heavy workers during the day; kill processes by port, never by name.
+> - **Not on the server:** experiment 40's Playwright venv (gate 1 made `experiments/52_journal_gate1/out/pwvenv`
+>   for the judge's screenshots, passed as `JUDGE43_PW`). `latex2mathml` was missing from `.venv` on the morning
+>   of 2026-10-22 and present by the evening.
+> - **Money.** "About $4 left" in "The server agent's first hour" was wrong: the credit is counted from the
+>   2026-10-18 top-up of £101.28; see [runbooks.md](runbooks.md#money).
+> - How the system is now built: [architecture.md](architecture.md).
+
 *Rewritten 2026-10-21. This covers moving **all** development to the owner's Ubuntu server, so that the server
 agent sees everything the laptop has: experiments 40–47, the older experiments that today's code still reads, and
 the databases. The owner does every server step. The agent on the laptop prepares and tests; it never connects to
