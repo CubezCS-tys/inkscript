@@ -95,7 +95,98 @@ It is fully differentiable, batched over lines, and runs in PyTorch on the GPU.
 - Page style: libraries screened on one line, then the best 2 fitted jointly on 3 lines.
 - Checker: the style is frozen and only the line's position, baseline and warp are fitted, for 100 steps.
 
+## Results (2026-11-06/07; GPU $7.89 of $8: three RTX 5090 rentals; no paid API)
+
+**Letter programs.**
+- AlQalam: 256 codes, 683 pen strokes and 50 fills, giving 31 rasm bodies × forms plus dots, hamza and madda.
+- 13 OFL faces and 11 traced faces, each with every glyph our texts use (99–879 glyphs, 3k–32k strokes).
+- Licences: AlQalam LPPL 1.3+, modern faces SIL OFL 1.1, traced faces ours. All are recorded in the program files.
+
+**Stage 1, the ceiling** (`out/ceiling87.json`; pictures `out/look/ceiling_*.png`, `tg_first_written.png`):
+
+| lines | IoU (best library) | IoU (page's library) | chamfer px | ink explained | writing on ink |
+|---|---|---|---|---|---|
+| rung 0: 115 font-rendered lines, own face | 0.74 | – | 0.23 | 97% | 97% |
+| 217 modern (2000+) | 0.54 | 0.58 | 0.67 | 88% | 84% |
+| 227 1950–99 | 0.55 | 0.58 | 0.73 | 88% | 84% |
+| 198 pre-1950 | 0.49 | 0.55 | 0.76 | 88% | 81% |
+
+- Against the success criteria: chamfer ≤ 1.0 px is met everywhere. IoU ≥ 0.55 is borderline: 0.54–0.55 with the best
+  library per line, 0.58 with the page's library. Pre-1950 IoU ≥ 0.45 is met.
+- The wrong-text control discriminates: with the same library, the true text beats another line's text on 100% of the
+  130 paired lines (IoU 0.55–0.58 against 0.27–0.31; chamfer under 1 px against 8–12 px).
+- Libraries that win:
+  - 2000+: AlQalam, Noto Sans, Mirza;
+  - 1950–99: Amiri Bold, Scheherazade;
+  - pre-1950: Amiri Bold, Amiri, AlQalam.
+  - The traced faces rarely win: their excluded letters (hamza forms) bar them from most lines.
+- **Kill signal part 1 does not hold**: the writer reproduces real clean lines.
+- Fixed on the way:
+  - with plain IoU the fit eroded dots and teeth away, and could shrink or hide marks;
+  - now the loss is weighted toward sparse ink, erosion ≥ −0.6 px, and the mark offset and scale are bounded;
+  - this was the "حاجة → حاحه" seen in the first picture. AlQalam's own dots were always right
+    (`out/look/dots.png`).
+
+**Stage 2, the checker.** The rule is designed on pool pages (`out/checker87.json`, round 2 `out/checker87_r2.json`;
+5-fold by page), frozen, then applied to the held-out tests. Planted errors caught at 10% false flags:
+
+| set | block_drop | word_drop | word_add | word_sub | letter |
+|---|---|---|---|---|---|
+| pool, round 1 | 94% | 58% | 31% | 10% | 10% |
+| pool, round 2 | 97% | 69% | **60%** | 10% | 11% |
+| held-out pages, round 1 (5,881 readings; `out/held87.json`) | 93% | 50% | 30% | 13% | 12% |
+
+- Round 2 added per-word coverage (the share of a word's writing that lies on ink, and of the ink in its columns that
+  is written) and a warp floor (no letter squeezed below 60% of the line's width). Its held-out planted set was not
+  rerun, to stay within budget.
+
+**Exp 81's judged held-out lines** (2,755 with a truth, exp 81's stratified weights; v1's line wrong 21.7% strict,
+10.9% folded). Recall at 10% flagged, strict / folded:
+
+| warning | round 1 | round 2 |
+|---|---|---|
+| checker alone | 16% / 15% | 15% / 17% |
+| v1 vs s2r disagreement (the baseline) | 32% / 55% | 32% / 55% |
+| checker + disagreement (rank sum) | 25% / 37% | 24% / 37% |
+| combination − disagreement [95% CI] | −7 [−12, −2] / −18 points | −8 [−13, −5] / −18 points |
+
+- The lowest-mismatch candidate is the judge's reading on 48% / 46% of lines with 2+ distinct candidates. Chance is
+  44%; always picking v1 gives 66%.
+- Files: `out/held87*.json`, `out/run/check_judged.jsonl`, `out/run2/check_judged.jsonl`.
+- **Verdict: the main criterion (≥ 60%) and the "clear addition" criterion both fail in both rounds.**
+  - The checker sees what is MISSING or ADDED (blocks, words), not WRONG LETTERS.
+  - A one-letter or one-word difference changes the fit less than the fit varies from line to line.
+  - Readers' real errors are mostly letters, marks and hamza, so the checker adds nothing to the two-reader warning
+    there. **Kill signal part 2 holds.**
+
+**Ladder.**
+- Rung 0 (synthetic) and rungs 1–2 (clean modern, old print) ran, each through several fitting rounds (look, ceiling,
+  round 2).
+- Rung 3 (0097's calligraphic masthead) did not run: no budget was left.
+- Under PLAN.md's rule (kill only if BOTH signals hold) the writer is not killed. The "re-write to verify" brick is
+  dropped as a letter checker and kept as an omission/addition detector.
+
+**The Try page** (2026-11-06, owner's request): "Show the writer" and "Watch it write".
+- Code: `write87.py` and experiment 89's `serve_reader.py` POST /write, proxied by
+  `49_correction_desk/desk/try_reader.py` and shown in `web/pages/try-reader.tsx`.
+- Speed: 17–25 s per line on the shared CPU (48 px, short fit); about 25 s on the GPU with the full budget, during
+  a 30-minute demo through an ssh tunnel.
+
+## What it changed
+
+- Nothing in `src/` and nothing in another experiment's results.
+- Added: letter programs from METAFONT strokes and our fonts, a GPU writer that reproduces real print to under 1 px,
+  and an omission detector that can be used as is. It catches skipped blocks (93–97%) and dropped words (50–69%) at
+  10% false flags. That covers what exp 81 saw from Nuqta (a skipped column) and pages read in part.
+
+## Next steps (not started; the owner decides)
+
+1. Use the checker only for omissions and additions: page-level "block missing" flags in the Desk.
+2. Letter-level checking would need the candidates compared to each other, not scored alone (which of two readings
+   explains this word's ink better), plus a sharper writer, e.g. a per-page library learned from the page (stage 3).
+3. Stage 3 (fit a page's style from a few letters) and the 0097 calligraphy demo are open, with a new budget.
+
 ## Status
 
-In progress (2026-11-06): letter programs built, writer and fitter built and checked by eye on the CPU; the GPU runs
-are waiting for a host.
+Done for stages 1–2 (2026-11-07). No host is left (all three were destroyed; the keeper destroyed the last two after
+20 idle minutes).
