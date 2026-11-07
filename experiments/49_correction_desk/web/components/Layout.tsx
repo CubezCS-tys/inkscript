@@ -24,6 +24,9 @@ const GROUPS: Group[] = [
     { href: '/pipeline', label: 'How a page is read', sub: 'One real page, step by step' },
     { href: '/audit', label: 'Nothing lost', sub: 'Every printed line reaches a field' },
     { href: '/how-we-collect', label: 'How we collect', sub: 'The field guide' },
+    { href: '/lab', label: 'OCR lab', sub: 'Our own readers beside ours, one document at a time' },
+    { href: '/readers', label: 'Our own readers', sub: 'From-scratch line readers against Azure, line by line' },
+    { href: '/try-reader', label: 'Try our reader', sub: 'Give it an image of a line, see what it reads' },
   ] },
   { key: 'librarian', label: 'Librarian', items: [
     { href: '/librarian', label: 'Institutions', sub: 'The same institution written many ways' },

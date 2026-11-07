@@ -1,0 +1,12 @@
+{
+ "written": "2026-11-06, before any reading of the new reader (t91) on a test line was scored or looked at",
+ "candidate": "t91 = v7-28M fine-tuned 2 epochs (one-cycle 2e-4, warm-up 10%) on exp 89's mix + 24,278 catalogue-matched title lines at ~6% of each epoch; checkpoint = last epoch (fixed in advance; best.pt by dev CER is not used)",
+ "keep_if_all": [
+  "titles improve clearly: on exp 89's held-out title test (strict letters, judged truth incl. judge91's answers for uncovered lines), the paired difference t91 - l28 is below 0 and its 95% document-bootstrap interval excludes 0",
+  "no era worse beyond noise on exp 81's held-out lines (strict letters, est81 paired page bootstrap, 0097 header counted as in exp 89's headline): for all, pre-1950, 1950-1999 and 2000+, the lower end of the 95% interval of t91 - l28 is <= 0"
+ ],
+ "reported_not_gating": [
+  "exp 90's locked titles (674 lines) as a SECOND READ: nothing was tuned on them; reported as paired t91 - l28 and t91 - Azure",
+  "the owner's 20 pages (original truth and rev2), folded measures, the no-header view, tdev91 (title dev, training-pool documents)"
+ ]
+}

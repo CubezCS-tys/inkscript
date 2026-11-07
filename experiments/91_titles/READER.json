@@ -1,0 +1,630 @@
+{
+ "name": "t91 (v7-28M + catalogue titles)",
+ "decided": "2026-11-06, experiment 91, by the rule in RULE91.json (written before scoring)",
+ "scope": "supersedes FINAL_READER.json (v7-28M) for article TITLES only, after passing the rule; it also passed the no-regression rule on experiment 81's held-out lines, so it can replace v7-28M everywhere if the lead agrees",
+ "weights": "experiments/91_titles/out/weights/t91/last.pt",
+ "weights_sha256": "6fdbaf09e36368289764a87688d5e314929cbc56df4ab5946f2e48accc16c557",
+ "format": "experiment 77's checkpoint, as FINAL_READER.json (463 classes, lstm, hid 768, cw 1.5, feat 640, H 48); read with train91.py infer (= train89.py's)",
+ "recipe": {
+  "init": "experiments/89_final_reader/out/weights/v7_28m/last.pt (v7-28M)",
+  "data": "exp 89's mix re-cut from S3 on the host (2,739,957 lines: exp 83 consensus lines with v6r labels, (( )) Azure lines dropped, exp 84's 300k synthetic display / «» lines) + 24,278 catalogue-matched title lines (train-t91) repeated x7 = 5.8% of each epoch (2,909,733 items)",
+  "labels": "title lines: Azure's line where it equals the catalogue title in folded form; where Azure differs, the catalogue word as the current reader read it (only when the reader's reading equals the catalogue in folded form), else dropped; the same lines' ordinary copies relabelled (overrides91, v6r's labels win)",
+  "schedule": "2 epochs, AdamW, one-cycle peak 2e-4, warm-up 10%, polarity 6% inverted / 4% band; checkpoint = last epoch (fixed in advance)",
+  "guard": "train91.py --forbid forbidden91.json: 3,402,089 training + label keys checked, none held out or locked"
+ },
+ "title_lines": {
+  "docs": 19340,
+  "docs_ok": 16646,
+  "kept": {
+   "train": 24519,
+   "dev": 796
+  },
+  "kept_by_era": {
+   "1950-1999": 11917,
+   "pre-1950": 2953,
+   "2000+": 10445
+  },
+  "kept_by_set": {
+   "new": 11076,
+   "plan83": 10734,
+   "o80": 645,
+   "r77": 2860
+  },
+  "kept_journals": 3827,
+  "kept_display_1p2": 15003,
+  "azure_differs_from_catalogue_folded": 1871,
+  "label_differs_from_azure_strict": 381,
+  "label_decisions": {
+   "1950-1999|agree": 11695,
+   "pre-1950|agree": 2878,
+   "pre-1950|differ_three_way": 223,
+   "2000+|agree": 10361,
+   "1950-1999|differ_reader_with_azure": 326,
+   "1950-1999|differ_three_way": 507,
+   "pre-1950|differ_reader_with_catalogue": 75,
+   "pre-1950|differ_reader_with_azure": 104,
+   "1950-1999|differ_reader_with_catalogue": 222,
+   "2000+|differ_reader_with_azure": 260,
+   "2000+|differ_reader_with_catalogue": 84,
+   "2000+|differ_three_way": 70
+  }
+ },
+ "scores": {
+  "heldout_titles_exp89_strict": {
+   "azure": {
+    "lines": 250,
+    "docs": 114,
+    "letters": 2.456,
+    "letters_ci": [
+     1.514,
+     3.547
+    ],
+    "words": 16.157,
+    "lines_wrong": 24.4,
+    "coverage": 100.0
+   },
+   "l28": {
+    "lines": 250,
+    "docs": 114,
+    "letters": 3.936,
+    "letters_ci": [
+     2.447,
+     5.439
+    ],
+    "words": 21.144,
+    "lines_wrong": 32.4,
+    "coverage": 100.0
+   },
+   "t91": {
+    "lines": 250,
+    "docs": 114,
+    "letters": 3.575,
+    "letters_ci": [
+     2.2,
+     4.96
+    ],
+    "words": 20.013,
+    "lines_wrong": 29.6,
+    "coverage": 100.0
+   },
+   "paired": {
+    "t91-l28": {
+     "letters_diff": -0.361,
+     "ci": [
+      -0.667,
+      -0.128
+     ]
+    },
+    "t91-azure": {
+     "letters_diff": 1.12,
+     "ci": [
+      0.546,
+      1.8
+     ]
+    },
+    "l28-azure": {
+     "letters_diff": 1.481,
+     "ci": [
+      0.791,
+      2.318
+     ]
+    }
+   },
+   "1950-1999": {
+    "azure": 7.585,
+    "l28": 14.474,
+    "t91": 13.08
+   }
+  },
+  "heldout_titles_exp89_folded": {
+   "azure": 0.719,
+   "l28": 2.082,
+   "t91": 1.66,
+   "paired": {
+    "t91-l28": {
+     "letters_diff": -0.421,
+     "ci": [
+      -0.707,
+      -0.182
+     ]
+    },
+    "t91-azure": {
+     "letters_diff": 0.942,
+     "ci": [
+      0.53,
+      1.44
+     ]
+    },
+    "l28-azure": {
+     "letters_diff": 1.363,
+     "ci": [
+      0.813,
+      2.04
+     ]
+    }
+   }
+  },
+  "locked_titles_exp90_second_read_strict": {
+   "azure": {
+    "line": 29.1,
+    "letters": 5.376,
+    "line_ci": [
+     23.688,
+     35.226
+    ],
+    "letters_ci": [
+     4.297,
+     6.512
+    ]
+   },
+   "final": {
+    "line": 30.387,
+    "letters": 7.096,
+    "line_ci": [
+     25.276,
+     36.461
+    ],
+    "letters_ci": [
+     5.792,
+     8.526
+    ]
+   },
+   "l28": {
+    "line": 30.693,
+    "letters": 7.074,
+    "line_ci": [
+     25.366,
+     36.765
+    ],
+    "letters_ci": [
+     5.783,
+     8.48
+    ]
+   },
+   "t91": {
+    "line": 29.595,
+    "letters": 6.266,
+    "line_ci": [
+     24.383,
+     35.73
+    ],
+    "letters_ci": [
+     5.052,
+     7.542
+    ]
+   },
+   "paired": {
+    "t91-l28": {
+     "letters_diff": -0.808,
+     "letters_ci": [
+      -1.045,
+      -0.586
+     ],
+     "line_diff": -1.098,
+     "line_ci": [
+      -2.573,
+      0.233
+     ]
+    },
+    "t91-azure": {
+     "letters_diff": 0.89,
+     "letters_ci": [
+      0.444,
+      1.391
+     ],
+     "line_diff": 0.494,
+     "line_ci": [
+      -1.963,
+      2.778
+     ]
+    },
+    "l28-azure": {
+     "letters_diff": 1.698,
+     "letters_ci": [
+      1.191,
+      2.267
+     ],
+     "line_diff": 1.593,
+     "line_ci": [
+      -0.77,
+      3.978
+     ]
+    },
+    "l28-final": {
+     "letters_diff": -0.022,
+     "letters_ci": [
+      -0.094,
+      0.053
+     ],
+     "line_diff": 0.306,
+     "line_ci": [
+      -0.176,
+      0.906
+     ]
+    }
+   }
+  },
+  "locked_titles_exp90_second_read_folded": {
+   "azure": 1.77,
+   "l28": 3.526,
+   "t91": 2.764,
+   "paired": {
+    "t91-l28": {
+     "letters_diff": -0.762,
+     "letters_ci": [
+      -0.991,
+      -0.565
+     ],
+     "line_diff": -1.567,
+     "line_ci": [
+      -2.903,
+      -0.321
+     ]
+    },
+    "t91-azure": {
+     "letters_diff": 0.994,
+     "letters_ci": [
+      0.651,
+      1.374
+     ],
+     "line_diff": 2.94,
+     "line_ci": [
+      0.973,
+      4.952
+     ]
+    },
+    "l28-azure": {
+     "letters_diff": 1.756,
+     "letters_ci": [
+      1.319,
+      2.236
+     ],
+     "line_diff": 4.508,
+     "line_ci": [
+      2.202,
+      7.011
+     ]
+    },
+    "l28-final": {
+     "letters_diff": -0.04,
+     "letters_ci": [
+      -0.106,
+      0.024
+     ],
+     "line_diff": 0.003,
+     "line_ci": [
+      -0.615,
+      0.639
+     ]
+    }
+   }
+  },
+  "heldout_exp81_letters_two_phase": {
+   "strict": {
+    "l28": {
+     "all": 0.789,
+     "pre-1950": 0.535,
+     "1950-1999": 0.798,
+     "2000+": 0.833
+    },
+    "t91": {
+     "all": 0.771,
+     "pre-1950": 0.551,
+     "1950-1999": 0.788,
+     "2000+": 0.781
+    }
+   },
+   "strict_nohdr": {
+    "l28": {
+     "all": 0.699,
+     "pre-1950": 0.535,
+     "1950-1999": 0.798,
+     "2000+": 0.436
+    },
+    "t91": {
+     "all": 0.692,
+     "pre-1950": 0.551,
+     "1950-1999": 0.788,
+     "2000+": 0.434
+    }
+   },
+   "folded": {
+    "l28": {
+     "all": 0.521,
+     "pre-1950": 0.265,
+     "1950-1999": 0.562,
+     "2000+": 0.465
+    },
+    "t91": {
+     "all": 0.49,
+     "pre-1950": 0.28,
+     "1950-1999": 0.545,
+     "2000+": 0.377
+    }
+   },
+   "folded_nohdr": {
+    "l28": {
+     "all": 0.482,
+     "pre-1950": 0.265,
+     "1950-1999": 0.562,
+     "2000+": 0.291
+    },
+    "t91": {
+     "all": 0.47,
+     "pre-1950": 0.28,
+     "1950-1999": 0.545,
+     "2000+": 0.287
+    }
+   }
+  },
+  "heldout_exp81_paired_t91_minus_l28": {
+   "strict": {
+    "all": {
+     "letters_diff": -0.02,
+     "letters_ci": [
+      -0.037,
+      -0.007
+     ],
+     "line_diff": -0.056,
+     "line_ci": [
+      -0.812,
+      0.439
+     ]
+    },
+    "pre-1950": {
+     "letters_diff": 0.018,
+     "letters_ci": [
+      -0.008,
+      0.053
+     ],
+     "line_diff": 0.753,
+     "line_ci": [
+      -0.267,
+      2.635
+     ]
+    },
+    "1950-1999": {
+     "letters_diff": -0.013,
+     "letters_ci": [
+      -0.038,
+      0.003
+     ],
+     "line_diff": -0.153,
+     "line_ci": [
+      -1.212,
+      0.473
+     ]
+    },
+    "2000+": {
+     "letters_diff": -0.052,
+     "letters_ci": [
+      -0.078,
+      -0.026
+     ],
+     "line_diff": 0.117,
+     "line_ci": [
+      -0.176,
+      0.435
+     ]
+    }
+   },
+   "strict_nohdr": {
+    "all": {
+     "letters_diff": -0.009,
+     "letters_ci": [
+      -0.024,
+      0.004
+     ],
+     "line_diff": -0.056,
+     "line_ci": [
+      -0.782,
+      0.431
+     ]
+    },
+    "pre-1950": {
+     "letters_diff": 0.018,
+     "letters_ci": [
+      -0.008,
+      0.053
+     ],
+     "line_diff": 0.753,
+     "line_ci": [
+      -0.267,
+      2.635
+     ]
+    },
+    "1950-1999": {
+     "letters_diff": -0.013,
+     "letters_ci": [
+      -0.038,
+      0.003
+     ],
+     "line_diff": -0.153,
+     "line_ci": [
+      -1.212,
+      0.473
+     ]
+    },
+    "2000+": {
+     "letters_diff": -0.003,
+     "letters_ci": [
+      -0.014,
+      0.008
+     ],
+     "line_diff": 0.121,
+     "line_ci": [
+      -0.189,
+      0.446
+     ]
+    }
+   },
+   "folded": {
+    "all": {
+     "letters_diff": -0.031,
+     "letters_ci": [
+      -0.049,
+      -0.017
+     ],
+     "line_diff": -0.183,
+     "line_ci": [
+      -0.95,
+      0.276
+     ]
+    },
+    "pre-1950": {
+     "letters_diff": 0.016,
+     "letters_ci": [
+      -0.01,
+      0.053
+     ],
+     "line_diff": 0.51,
+     "line_ci": [
+      -0.728,
+      2.45
+     ]
+    },
+    "1950-1999": {
+     "letters_diff": -0.017,
+     "letters_ci": [
+      -0.042,
+      -0.001
+     ],
+     "line_diff": -0.268,
+     "line_ci": [
+      -1.257,
+      0.323
+     ]
+    },
+    "2000+": {
+     "letters_diff": -0.088,
+     "letters_ci": [
+      -0.117,
+      -0.06
+     ],
+     "line_diff": -0.029,
+     "line_ci": [
+      -0.284,
+      0.231
+     ]
+    }
+   },
+   "folded_nohdr": {
+    "all": {
+     "letters_diff": -0.012,
+     "letters_ci": [
+      -0.028,
+      0.0
+     ],
+     "line_diff": -0.184,
+     "line_ci": [
+      -0.928,
+      0.28
+     ]
+    },
+    "pre-1950": {
+     "letters_diff": 0.016,
+     "letters_ci": [
+      -0.01,
+      0.053
+     ],
+     "line_diff": 0.51,
+     "line_ci": [
+      -0.728,
+      2.45
+     ]
+    },
+    "1950-1999": {
+     "letters_diff": -0.017,
+     "letters_ci": [
+      -0.042,
+      -0.001
+     ],
+     "line_diff": -0.268,
+     "line_ci": [
+      -1.257,
+      0.323
+     ]
+    },
+    "2000+": {
+     "letters_diff": -0.004,
+     "letters_ci": [
+      -0.013,
+      0.005
+     ],
+     "line_diff": -0.03,
+     "line_ci": [
+      -0.298,
+      0.225
+     ]
+    }
+   }
+  },
+  "owner_20_pages": {
+   "rev1": {
+    "azure": {
+     "letters_punct": 0.84,
+     "words_punct": 2.21,
+     "letters": 0.6,
+     "words": 1.42
+    },
+    "l28": {
+     "letters_punct": 1.05,
+     "words_punct": 3.4,
+     "letters": 0.68,
+     "words": 1.59
+    },
+    "t91": {
+     "letters_punct": 1.03,
+     "words_punct": 3.38,
+     "letters": 0.67,
+     "words": 1.61
+    }
+   },
+   "rev2": {
+    "azure": {
+     "letters_punct": 1.01,
+     "words_punct": 2.64,
+     "letters": 0.6,
+     "words": 1.42
+    },
+    "l28": {
+     "letters_punct": 0.97,
+     "words_punct": 3.25,
+     "letters": 0.68,
+     "words": 1.59
+    },
+    "t91": {
+     "letters_punct": 0.97,
+     "words_punct": 3.26,
+     "letters": 0.67,
+     "words": 1.61
+    }
+   }
+  },
+  "owner_quotes_rev2": {
+   "l28": {
+    "matched": 59,
+    "written": 59,
+    "in_truth": 59,
+    "precision": 1.0,
+    "recall": 1.0
+   },
+   "t91": {
+    "matched": 59,
+    "written": 59,
+    "in_truth": 59,
+    "precision": 1.0,
+    "recall": 1.0
+   }
+  },
+  "title_dev_tdev91_cer_pct": {
+   "l28": 1.28,
+   "t91": 1.078
+  }
+ },
+ "rule_result": {
+  "titles_clearly_better": true,
+  "no_era_worse_beyond_noise": true,
+  "kept": true
+ }
+}

@@ -1,0 +1,32 @@
+# Experiment 75, document 1, E0 (each engine's documented native settings). What was actually run (2026-11-04).
+dataset: doc1
+pages: [2399-003-008-002_p021]          # one-based page 21 of the article PDF
+render: {renderer: pypdfium2 5.12.1 / pdfium 152.0.7947.0, dpi: 300, colour: grey, format: png}
+gpu: {vast_offer: 57913313, card: RTX 4060 Ti 16 GB, usd_per_hour: 0.269, image: "pytorch/pytorch:2.9.0-cuda12.8-cudnn9-runtime"}
+engines:
+  - engine: paddle_vl
+    variant: pipeline                    # official complete parsing pipeline (PP-DocLayoutV3 + PaddleOCR-VL-1.6 0.9B)
+    model_revision: c5630abae1d940eafe0697512a0325494b02ab42
+    layout_revision: 241f8bdfc77a7c7bee915a5057aaee58c235a8d3
+    settings: {pipeline_version: v1.6}   # every other option = PaddleOCRVL defaults (native backend)
+    env: {python: /opt/paddle, paddlepaddle-gpu: 3.2.1 (cu126), paddleocr: 3.7.0, paddlex: 3.7.2}
+  - engine: paddle_vl
+    variant: bare_ocr                    # the VL recogniser alone on the whole page: use_layout_detection=False, prompt_label=ocr
+    model_revision: c5630abae1d940eafe0697512a0325494b02ab42
+    settings: {pipeline_version: v1.6}
+  - engine: paddle_vl
+    variant: layout_stage                # PP-DocLayoutV3 alone (LayoutDetection), boxes + labels + order, no text
+    model_revision: 241f8bdfc77a7c7bee915a5057aaee58c235a8d3
+    settings: {}
+  - engine: nuqta
+    variant: as_written                  # the card's as-written prompt
+    model_revision: 6a8cdd625f7360203bfce10ef48a41c4a5c1ad3c
+    settings: {max_new_tokens: 8192}     # + do_sample=False, bf16, enable_thinking=False, card prepare() to ~2.4 MP
+    env: {python: /opt/nuqta (system torch), torch: 2.9.0+cu128, transformers: 5.8.1, accelerate: 1.15.0}
+  - engine: nuqta
+    variant: markdown                    # the card's Markdown prompt
+    model_revision: 6a8cdd625f7360203bfce10ef48a41c4a5c1ad3c
+    settings: {max_new_tokens: 8192}
+imported:                                # existing outputs, no inference
+  - {engine: azure_read, variant: existing, source: "experiments/28_scale/out/azure/2399-003-008-002/*.json (prebuilt-read 2024-11-30)"}
+  - {engine: paddle_vl15_exp36, variant: pipeline, source: "experiments/36_vlm_bakeoff/out/raw/paddle_vl15/2399-003-008-002_p021.json"}

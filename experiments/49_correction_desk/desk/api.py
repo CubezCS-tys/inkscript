@@ -784,3 +784,21 @@ app.include_router(librarian_works.router)
 # the headline numbers every show page quotes, from one place (experiment 73; desk/headlines.py, 2026-11-03)
 from . import headlines  # noqa: E402
 app.include_router(headlines.router)
+
+
+# the OCR lab: our own readers (PaddleOCR-VL, Nuqta) beside ours on one document at a time, the owner's fresh
+# correction as append-only revisions, scores against it (experiment 75; desk/lab.py, /lab, 2026-11-04)
+from . import lab  # noqa: E402
+app.include_router(lab.router)
+
+
+# our own readers: the from-scratch line readers' overnight results, line by line against Azure (experiments 77, 78,
+# 79; desk/readers.py, /readers, 2026-11-05)
+from . import readers  # noqa: E402
+app.include_router(readers.router)
+
+
+# try our reader: upload a line image, the final reader (v7-28M, experiment 89's serve_reader.py on 127.0.0.1:8171)
+# reads it; nothing stored (desk/try_reader.py, /try-reader, 2026-11-06)
+from . import try_reader  # noqa: E402
+app.include_router(try_reader.router)
