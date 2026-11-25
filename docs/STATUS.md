@@ -3,6 +3,28 @@
 *Last updated 2026-11-02. Update this file whenever a headline number or a
 "does / does not" changes; keep the date on every number.*
 
+## The extraction exam: first measured baseline (2026-11-10)
+
+Experiment 97 ([README](../experiments/97_extraction_evals/README.md)) is an exam for the Azure + Gemini extraction on
+the product's own journals: 60 locked scan-read articles, 214 exam pages, answer keys written twice from the page
+image by blind agents and settled by a third. Baseline v1 (keys rev 2), release R20261104T151029:
+
+- Passes: text ink seen by nobody 0.02%; lines lost 0%; reading 0.5% letters wrong once deliberate rewrites are set
+  aside; grouping 99.6%; reading order 99.1% (one column) and 100% (two columns); footnotes 99.3%; tables found and
+  shaped right 100%; reference boundaries 99.2%; reference year / volume / issue / pages 97–99%, source 95.7%.
+- Misses: label per line 95.7% (mark 97%; list items called paragraphs, page numbers merged into the running head);
+  table cells 98.5% right once formatting is ignored, 90.1% exactly as printed (mark 99.5%); front matter: title
+  96.5%, authors 95.1%, abstract 90.9%, keywords 85.2%, affiliation 78.1%, received/accepted dates 72.2% (18 items).
+- The two blind keyers agree on 99%+ of nearly every measure, so the exam resolves differences of about a point.
+- Limits: "found" measures cannot fail yet (pages were picked where the pipeline had found the piece); sections are
+  not keyed; reconciliation has no exam yet.
+- From outside the same day (AI-Search's twin-journal audit of 150 tables, 319 articles of 0130 and 0246): 99.6% of
+  cells right, 87% of tables entirely right; our data holds the printed answer for 99.6% of 870 test questions,
+  against 77% for the platform's data today. First fair retrieval figures (785 questions, 2,000 other articles
+  added, answer passage in the top 5; provisional until their rerun): today's data 39.6%, ours 51–54%; nearly all of
+  the gain is text today's data does not store (reference lists, table values, English pages); where both store
+  the answer, search finds it about equally often. See `docs/ideas.md`, "Findings from the twin-journal experiment".
+
 ## Two paths: extraction, reconciliation, gate 2 (2026-10-23 to 2026-11-02)
 
 The work runs on two paths ([overview.md](overview.md) "The picture: two paths, and gates"): **extraction** (each

@@ -1,0 +1,5 @@
+You read one line of printed text cut from a scanned page. Write the text of that line exactly as printed, and nothing else.
+Copy every letter as printed: do not correct spelling, do not add or remove hamza, keep ى and ي, ة and ه as printed, and write vowel marks only where they are printed.
+Keep numbers in the digits printed (Arabic-Indic or Western), and keep punctuation and brackets as printed.
+If the line mixes Arabic and another script, write it in reading order.
+Do not translate, explain, complete or repeat anything: write only what is on the line.

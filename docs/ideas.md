@@ -505,3 +505,169 @@ reason is recorded), **open** (voiced, not yet judged).
     Gemini call for roles and reference fields, metadata from the catalogue.
   - Cautions: the Word file may differ from the print, and it has no printed page numbers, which cited «ص» need.
   - First test: 0130's 2009–2016 articles.
+
+## Findings from the twin-journal experiment (2026-11-10)
+
+The AI-Search session runs the owner's twin experiment: the live RAG engine on 319 scan-read articles of journals
+0130 and 0246, our Azure + Gemini reading against AI-Search's stored text. Our side is one frozen export
+(`ops/export_twin.py` → `/home/appuser/data/exports/twin/`, release R20261104T151029). Their reports are in
+`/home/appuser/ai-search-eval-archive/2026-11-10-twin-journal/` (outside this repo, private).
+
+- **Table cells measured for the first time.** Open; their audit of 150 tables against the page images, weighted to
+  the 3,014 tables: 99.6% of cells and 99.7% of numbers right; 87% of tables entirely right; about 2% carry an error
+  that changes a value or its meaning. Our `table_cells_lost` flag catches about one in five of those.
+- **A gate for "safe to compute on".** Open; their rule (the flag, a marked header row, every data column under a
+  heading, every number cell parses as one number) held all 8 seriously wrong tables and passes 65% of tables. Pick up
+  by turning it into a detector in the flags table.
+- **Continuation tables.** Open; about one table in five is the next page of the previous table, stored as its own
+  table with no caption, no header row and no link to its first part. The biggest practical gap for table tools.
+- **Split digits in cells.** Open; cells keep Azure's split numbers («3 2 | 1 7. 7»).
+- **List items promoted to headings.** Open; gives one-sentence sections in some articles (0130-027-105-001).
+- **Abstract headings open an empty section.** Open; the abstract blocks are front matter (no section), so a section
+  headed «الملخص» holds only the received/accepted line.
+- **Title languages.** Open; 22 chosen main titles in the two journals have no language; three translated-title slots
+  tagged "en" hold Arabic text.
+- **`noise_rescued` blocks were real paragraphs** in all three cases of the set: the flag marks a model omission the
+  code repaired, not suspect text.
+- **Citations inside a small set are thin.** Only about 13 references point from one of the 319 articles to another;
+  about 1,980 cited works are held elsewhere in the catalogue. "Cites X, which we hold" needs the wider catalogue.
+- **Five table requests from the audit, for a later release.** Open, owner to decide; details with stems, pages and
+  cells in their `TABLE-FEEDBACK.md`.
+  1. Link page-split tables (a "continues" field, or one table with page parts).
+  2. A check flag on every table from cheap tests: the item-number column skips a number, a printed total differs
+     from the column sum, a data column has no heading, a cell is not one clean number.
+  3. Re-read lone «٥» / «٠» cells and significance stars wrapped onto the next line (.787** stored as .787*).
+  4. Store each cell's logical text beside the displayed text (numbers broken by line wraps, minus after the number).
+  5. Fill the table-number field from the caption text.
+  - Also confirmed by them: the 319 S3 PDFs are byte-identical to the ones we read, and export page N = viewer page N
+    on all 8,876 pages with text.
+
+## The library map (AI-Search project, 2026-11-22/23): what it means for us
+
+The AI-Search session labelled every catalogue record (1,558,415) with one of 20 top-level subjects using a Gemini
+Flash-Lite model, behind a gate written before any result; this session reviewed the plans, supplied extracts and
+audited the result ([experiment 98](../experiments/98_library_map_audit/README.md)). Their files:
+`/home/appuser/ai-search-eval-archive/2026-11-23-library-map/` (outside this repo).
+
+- **Result.** Done; 90.9% of records classified; on a sealed test and again on a fresh 500: 0.912–0.916 strict,
+  0.927–0.937 either reference labeller's primary, 0.968 with second subjects accepted. All against model-made
+  reference labels: a cataloguer's read is still owed before researchers see it.
+- **The catalogue's own "field of study" (MARC 773 $4/$6) is a journal-level label.** It matches a careful judge on
+  about half of records at article level, and 30.3% of the library has none or only a catch-all. Worth remembering
+  whenever we treat a journal's field as an article's subject (the citation index's categories included).
+- **Our extracts for it** (`/home/appuser/data/exports/library_map_v1/`, scripts in `ops/`): thesis details for
+  169,600 theses; headings, printed keywords and cited journals for our 2,573 articles; labeller inputs for every
+  record (subtitle, author keywords, abstracts by kind, role flags, full-text availability, page count); English and
+  parallel titles.
+- **Full text against subject: struck.** The first reading ("60% of Natural Sciences records have no file") was
+  wrong: the archive listing of 19 Oct holds no thesis files at all (experiment 44: none of the 169,644 theses'
+  chapter PDFs is in that bucket), and those subjects are mostly theses. Among non-theses only 6.3% have no file
+  (Natural Sciences 4.3%, Health 5.9%). Lesson: `full_text = none` in our extract means "not in that bucket",
+  never "no full text anywhere"; for theses it must not be used at all.
+- **Citations as the later, stronger route to subjects.** Parked; article-level subject by who cites whom needs the
+  citation index at scale (gate 3). The model labels are the interim.
+- **Lessons for our own exams**, learned there and worth copying: a label can depend on which records share the
+  call (about 9% at top level; fixed by shuffling and a second draw); score in production-like company; report
+  three strictness levels when an "acceptable set" is used.
+
+## LiteParse as the free baseline (experiment 99, 2026-11-23)
+
+[Experiment 99](../experiments/99_liteparse_baseline/README.md): LlamaIndex's open-source local parser (v2.21.1)
+run once on the 214 exam pages of experiment 97, in four modes, at no cost and with no network use.
+
+- **Tried and dropped for our Arabic journals.** Labels 48–55% (Azure + Gemini 95.7%), grouping 68–76% (99.6%),
+  table cells 4–29% (98.5%); it has no name for 15 of our roles (title, author, abstract, reference, footnote…).
+  One-column reading order is its only pass (99.3–99.8%).
+- **Its own small OCR model (ocria-nano, 8.1 M parameters) reads our lines at 8.9% letters wrong**, against 0.6% for
+  Azure and 0.7% for our reader t91 on the same 584 lines; Tesseract 54% (word order reversed on multi-piece lines).
+  Its licence forbids use in a parsing or OCR product anyway.
+- **What we pay the model for is real:** the free rule-based route is nowhere near on labels, tables or references.
+- **Found on the way, worth remembering:** the text layer inside the archive's PDFs is poor: scans carry someone
+  else's OCR (about 26% letters wrong), born-digital PDFs often hold their text twice and Word / InDesign Arabic
+  fonts return broken letters; on 78 of the 214 pages (ScanToPDF files) the text layer is offset from the ink by the
+  crop box. Anything that reads those PDFs' own text, in either project, inherits this.
+- **Possible small use, parked:** its Apache-only mode as a fast raw-text reader for born-digital legacy PDFs
+  (16.7 pages a second, 87 MB), if we de-duplicate the text and fix line order ourselves.
+
+## OCRia-1 on the exam, and our own fine-tune of an open model (experiment 100, 2026-11-24)
+
+[Experiment 100](../experiments/100_ocria1_exam/README.md): LlamaIndex's 4B open-weights page model (a fine-tune of
+Qwen3.5-4B), run once on the 214 exam pages on a rented RTX 5090 ($0.65), image size chosen on 40 dev pages.
+
+- **Tried; not adoptable.** Letters wrong 2.5% (Azure 0.6%, our reader 0.7%, its small sibling 8.9%); printed text
+  missing 1.3%; invented 0.5% plus one looping page; table cells 74.8% (98.5% for Azure + Gemini); grouping 92.0%;
+  reference boundaries 87.4%; two-column order 98.3%. It cannot express a third of our roles and gives no positions.
+  The licence allows evaluation only and forbids training on its outputs.
+- **Arabic faults:** Arabic-Indic digits kept on only 118 of 221; «ى» written «ي»; spelling tidied; number pairs
+  reversed; 28% of its headings are not headings.
+- **Cost is the interesting number:** $0.31 per 1,000 pages on one rented card, against $7.80 for the Gemini step;
+  about $9,200 for 30 M pages (estimate).
+- **Open, owner to decide: our own fine-tune of the Apache-2.0 base (Qwen3.5-4B) on our pages.** The lead's view:
+  structure first (the model labels and joins Azure's lines by id, trained on the ~32,000 pages Gemini already
+  labelled, scored on the exam; stop if labels < 90% or grouping < 97%); reading later, if pages cannot leave the
+  Kingdom or the whole archive is approved. We hold Azure text for 20–30 M pages as reading supervision. Never train
+  on OCRia-1's weights or outputs. The lead's prediction, written before the run, is in the experiment folder.
+- **Reading, stage 1 done (experiment 102, 2026-11-25): Qwen3.5-4B + LoRA as a LINE reader on 200k of our lines.**
+  [Experiment 102](../experiments/102_qwen_line_reader/README.md), $6.36 GPU. Exam lines 0.69% letters wrong (untrained
+  4.11%, Azure 0.53%, t91 0.71%); locked test 2.07% strict (v7-28M 1.34%, Azure 1.50%; the judge saw only 55% of its
+  readings), so the 2.0% bar is missed by 0.07. It reads 58 lines/s (~$4.9 per million lines). Open: put the Latin runs
+  of mixed lines into true logical order in the targets (Azure's order is most of its exam error), then decide on L
+  (623k lines, ~$17) and stage 2 (the writer as reward). Also found: t91 trained on 235 of the 600 exam lines.
+
+## Plain Qwen on the exam, and the decision to train it (experiment 101, 2026-11-24)
+
+[Experiment 101](../experiments/101_qwen_base_exam/README.md): the untrained Apache-2.0 models Qwen3.5-4B and 9B on the
+214 exam pages, with our own prompt ($0.78 of GPU).
+
+- **Plain Qwen reads our Arabic about three times worse than its fine-tune OCRia-1:** letters wrong 7.2% (4B) and
+  7.5% (9B) against 2.5%; on the lines it does write 3.0% / 2.5% against 1.7%; text missing 5–6% against 1.3%;
+  11–12 looping pages of 214 against 1. Azure on the same lines: 0.5%.
+- **What a 101,000-page, mostly non-Arabic fine-tune bought:** error cut to a third, loops nearly gone, dropped lines
+  32 → 14, proper HTML tables, headings 40% → 93%. The comparison also mixes prompt and image size.
+- **The 9B is not better at reading** (and costs more); it keeps printed digits better (78% against 32%).
+- **Plain faults:** plausible-word substitution, corrected spelling, Western digits, dropped tashkeel, reversed ranges.
+- **Decided by the owner (2026-11-24, "ok lets do that"):** fine-tune first, then use our writer as the judge while
+  the model learns; "teach the model itself to write" stays research. In progress as experiment 102 (line reader on
+  our consensus lines; cap $60; bars: at most 1.0% letters wrong on the exam lines and 2.0% on the locked test).
+- **The writer as the reward** (idea, stage 2): the model's reading is written back in the page's style and compared
+  with the ink; no answer key is needed. Our writer catches dropped blocks 93–97% and dropped words 50–69%, the
+  faults these page-writing models make most; it is weak on single dots (38% on real disputes).
+
+## The writer as the judge of our reader, and mixed-line targets (experiment 103, 2026-11-25)
+
+[Experiment 103](../experiments/103_writer_as_judge/README.md); GPU $2.51 of $40.
+
+**Mixed-line targets.**
+- Azure stores a Latin run inside an Arabic line in a reversed order that still DISPLAYS as printed: «(2005 ,Adin)»
+  for «(Adin, 2005)».
+- `fix103.py` puts the run into typing order and refuses any change that alters the display. It changes 0.32% of M's
+  lines and 0.73% of the local pool.
+- **The repair failed its pre-registered bars by one.** Continuing M on the fixed lines took the order fault from 19%
+  to 0.9% letters wrong on held-back mixed lines, and DEV went from 1.40% to 1.20%. But unchanged mixed lines went
+  1.65% → 1.74% (bar +0.05).
+- A blind check of those 141 lines is staged (`out/blind_repair/`). Open: refit the repair if the blind check shows
+  the labels, not the reader, are wrong there.
+
+**The writer as a judge: no use, on both uses tested. The idea stays parked.**
+- **Gross errors (B1, FAIL).**
+  - The writer scores the reader's 242 real gross errors at AUC 0.59 and catches 0.8% when 99% of correct lines are
+    kept.
+  - The reader's own token confidence does AUC 0.91 and catches 42%.
+  - On the 61 empty / show-through crops where the reader invented text, the confidence flags 61 of 61 and the
+    writer 2.
+- **Disagreements with Azure (B2, no use).** Always-Azure picks the settled reading on 77% of lines; the writer on
+  74%; writer + confidence on 76%. The folded scoring tells the same story.
+- **Planted errors:** the writer catches dropped words 46% and wrong words 18% at 10% false flags. That is experiment
+  87's picture again.
+- **What it changed:**
+  - A writer reward (B4: about $14 per 10,000 lines) is not justified by these numbers.
+  - The free signals win: the reader's confidence is the abstain flag, and Azure wins disagreements 3 to 1.
+  - Next, if anything: confidence-gated abstention for the reader. Seen on the way: the reader reverses a digit run
+    in a few lines («0102» for 2010).
+
+- **Blind check of the repair (lead, 2026-11-25, after the bars).** One blind reader typed the 141 unchanged mixed lines where M and
+  the repaired reader differ: the repaired reader is nearer the print on 62, M on 32 (letters wrong 5.08% against 6.67%;
+  Azure's label 4.28%). The failed bar was a labels artefact; the repaired reader (`out/weights/R/ckpt-150`) is the one to
+  carry forward. Open: the reader writes some numbers backwards («0102» for 2010), and it is behind Azure on unseen
+  documents (Azure right in about 4 of 5 disagreements). **Status: writer-as-judge closed for this writer (second fail after
+  experiment 95); what the trained reader is for is the owner's question.**

@@ -1,0 +1,823 @@
+{
+ "schema": "eval97-1",
+ "release": "R20261104T151029",
+ "seed": 97,
+ "per_journal": 6,
+ "wide": 18,
+ "articles": [
+  {
+   "stem": "0013-026-004-003",
+   "journal": "0013",
+   "version_id": 8398713178583296,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 44,
+   "pages": {
+    "front": 1,
+    "table": 35,
+    "refs": 41,
+    "notes": 21,
+    "body": 25
+   }
+  },
+  {
+   "stem": "0013-028-003-004",
+   "journal": "0013",
+   "version_id": 4675359525915536,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 64,
+   "pages": {
+    "front": 1,
+    "table": 43,
+    "refs": 55,
+    "notes": 8,
+    "body": 31
+   }
+  },
+  {
+   "stem": "0013-034-003-002",
+   "journal": "0013",
+   "version_id": 8365792234439810,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 46,
+   "pages": {
+    "front": 1,
+    "table": 31,
+    "refs": 45,
+    "notes": 9,
+    "body": 15
+   }
+  },
+  {
+   "stem": "0013-028-002-001",
+   "journal": "0013",
+   "version_id": 3095354267726816,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 79,
+   "pages": {
+    "front": 1,
+    "table": 67,
+    "refs": 76,
+    "notes": 19,
+    "body": 16
+   }
+  },
+  {
+   "stem": "0013-035-003-002",
+   "journal": "0013",
+   "version_id": 1611531572674316,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 95,
+   "pages": {
+    "front": 1,
+    "table": 61,
+    "refs": 89,
+    "notes": 2,
+    "body": 62
+   }
+  },
+  {
+   "stem": "0013-034-004-002",
+   "journal": "0013",
+   "version_id": 6738410139913465,
+   "run": "j0013_final",
+   "doc_type": "research",
+   "n_pages": 78,
+   "pages": {
+    "front": 1,
+    "table": 37,
+    "refs": 77,
+    "notes": 55,
+    "body": 8
+   }
+  },
+  {
+   "stem": "0097-034-000-007",
+   "journal": "0097",
+   "version_id": 3836738966279820,
+   "run": "j0097_final",
+   "doc_type": "report",
+   "n_pages": 12,
+   "pages": {
+    "front": 1,
+    "table": 4,
+    "body": 6
+   }
+  },
+  {
+   "stem": "0097-043-001-005",
+   "journal": "0097",
+   "version_id": 5288213083355319,
+   "run": "j0097_final",
+   "doc_type": "research",
+   "n_pages": 44,
+   "pages": {
+    "front": 1,
+    "table": 32,
+    "refs": 40,
+    "body": 6
+   }
+  },
+  {
+   "stem": "0097-034-000-003",
+   "journal": "0097",
+   "version_id": 1418365385785623,
+   "run": "j0097_final",
+   "doc_type": "research",
+   "n_pages": 42,
+   "pages": {
+    "front": 1,
+    "table": 40,
+    "body": 20
+   }
+  },
+  {
+   "stem": "0097-043-001-003",
+   "journal": "0097",
+   "version_id": 8700295364300418,
+   "run": "j0097_final",
+   "doc_type": "research",
+   "n_pages": 37,
+   "pages": {
+    "front": 1,
+    "table": 21,
+    "refs": 33,
+    "body": 27
+   }
+  },
+  {
+   "stem": "0097-034-000-006",
+   "journal": "0097",
+   "version_id": 867540018177440,
+   "run": "j0097_final",
+   "doc_type": "research",
+   "n_pages": 19,
+   "pages": {
+    "front": 1,
+    "refs": 18,
+    "notes": 11,
+    "body": 4
+   }
+  },
+  {
+   "stem": "0097-043-002-006",
+   "journal": "0097",
+   "version_id": 2217574586791878,
+   "run": "j0097_final",
+   "doc_type": "research",
+   "n_pages": 31,
+   "pages": {
+    "front": 1,
+    "table": 25,
+    "refs": 31,
+    "body": 7
+   }
+  },
+  {
+   "stem": "0130-026-103-002",
+   "journal": "0130",
+   "version_id": 4197118405764917,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 24,
+   "pages": {
+    "front": 1,
+    "table": 10,
+    "refs": 23,
+    "body": 7
+   }
+  },
+  {
+   "stem": "0130-025-100-002",
+   "journal": "0130",
+   "version_id": 251629617121672,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 28,
+   "pages": {
+    "front": 1,
+    "table": 16,
+    "refs": 28,
+    "body": 19
+   }
+  },
+  {
+   "stem": "0130-026-101-005",
+   "journal": "0130",
+   "version_id": 5073994734801797,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 13,
+   "pages": {
+    "front": 1,
+    "refs": 13,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0130-019-076-001",
+   "journal": "0130",
+   "version_id": 3550267655068701,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 27,
+   "pages": {
+    "front": 1,
+    "table": 23,
+    "refs": 27,
+    "body": 7
+   }
+  },
+  {
+   "stem": "0130-020-078-006",
+   "journal": "0130",
+   "version_id": 4251383676965058,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "conference_paper",
+   "n_pages": 4,
+   "pages": {
+    "front": 1,
+    "body": 4
+   }
+  },
+  {
+   "stem": "0130-018-070-004",
+   "journal": "0130",
+   "version_id": 4103392230165840,
+   "run": "j0130_final_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 5,
+   "pages": {
+    "front": 1,
+    "refs": 5,
+    "body": 4
+   }
+  },
+  {
+   "stem": "0165-000-034-007",
+   "journal": "0165",
+   "version_id": 5424164782956996,
+   "run": "j0165_final",
+   "doc_type": "report",
+   "n_pages": 10,
+   "pages": {
+    "front": 1,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0165-007-028-003",
+   "journal": "0165",
+   "version_id": 196471476463702,
+   "run": "j0165_final",
+   "doc_type": "research",
+   "n_pages": 26,
+   "pages": {
+    "front": 1,
+    "notes": 26,
+    "body": 13
+   }
+  },
+  {
+   "stem": "0165-008-029-005",
+   "journal": "0165",
+   "version_id": 2415981222160386,
+   "run": "j0165_final",
+   "doc_type": "research",
+   "n_pages": 15,
+   "pages": {
+    "front": 1,
+    "refs": 15,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0165-000-035-009",
+   "journal": "0165",
+   "version_id": 6386435172141717,
+   "run": "j0165_final",
+   "doc_type": "report",
+   "n_pages": 5,
+   "pages": {
+    "front": 1,
+    "body": 5
+   }
+  },
+  {
+   "stem": "0165-000-050-004",
+   "journal": "0165",
+   "version_id": 5426590451822703,
+   "run": "j0165_final",
+   "doc_type": "research",
+   "n_pages": 22,
+   "pages": {
+    "front": 1,
+    "table": 16,
+    "refs": 18,
+    "body": 19
+   }
+  },
+  {
+   "stem": "0165-000-047-003",
+   "journal": "0165",
+   "version_id": 457196574587127,
+   "run": "j0165_final",
+   "doc_type": "research",
+   "n_pages": 31,
+   "pages": {
+    "front": 1,
+    "table": 17,
+    "refs": 27,
+    "notes": 2,
+    "body": 6
+   }
+  },
+  {
+   "stem": "0246-016-004-006",
+   "journal": "0246",
+   "version_id": 5596539537995831,
+   "run": "j0246_final",
+   "doc_type": "conference_paper",
+   "n_pages": 35,
+   "pages": {
+    "front": 1,
+    "table": 21,
+    "refs": 34,
+    "body": 24
+   }
+  },
+  {
+   "stem": "0246-015-004-008",
+   "journal": "0246",
+   "version_id": 2230078526371715,
+   "run": "j0246_final",
+   "doc_type": "research",
+   "n_pages": 42,
+   "pages": {
+    "front": 1,
+    "table": 25,
+    "refs": 40,
+    "body": 29
+   }
+  },
+  {
+   "stem": "0246-016-002-009",
+   "journal": "0246",
+   "version_id": 3328099369397935,
+   "run": "j0246_final",
+   "doc_type": "research",
+   "n_pages": 43,
+   "pages": {
+    "front": 1,
+    "table": 23,
+    "refs": 40,
+    "body": 9
+   }
+  },
+  {
+   "stem": "0246-017-003-007",
+   "journal": "0246",
+   "version_id": 5246959322349785,
+   "run": "j0246_final",
+   "doc_type": "research",
+   "n_pages": 23,
+   "pages": {
+    "front": 1,
+    "table": 12,
+    "refs": 22,
+    "body": 21
+   }
+  },
+  {
+   "stem": "0246-021-003-004",
+   "journal": "0246",
+   "version_id": 286886083429019,
+   "run": "j0246_final",
+   "doc_type": "research",
+   "n_pages": 34,
+   "pages": {
+    "front": 1,
+    "table": 14,
+    "refs": 32,
+    "body": 29
+   }
+  },
+  {
+   "stem": "0246-016-001-002",
+   "journal": "0246",
+   "version_id": 299905642228595,
+   "run": "j0246_final",
+   "doc_type": "research",
+   "n_pages": 45,
+   "pages": {
+    "front": 1,
+    "table": 36,
+    "refs": 44,
+    "body": 5
+   }
+  },
+  {
+   "stem": "0840-000-014-006",
+   "journal": "0840",
+   "version_id": 4170506375803990,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 13,
+   "pages": {
+    "front": 1,
+    "table": 11,
+    "refs": 12,
+    "body": 10
+   }
+  },
+  {
+   "stem": "0840-000-013-006",
+   "journal": "0840",
+   "version_id": 8493303149698010,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 9,
+   "pages": {
+    "front": 1,
+    "refs": 9,
+    "body": 7
+   }
+  },
+  {
+   "stem": "0840-000-015-007",
+   "journal": "0840",
+   "version_id": 2850226216270539,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 12,
+   "pages": {
+    "front": 1,
+    "refs": 12,
+    "body": 9
+   }
+  },
+  {
+   "stem": "0840-015-001-003",
+   "journal": "0840",
+   "version_id": 2449183657397000,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 23,
+   "pages": {
+    "front": 1,
+    "table": 17,
+    "refs": 21,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0840-014-001-020",
+   "journal": "0840",
+   "version_id": 2317516148353174,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 14,
+   "pages": {
+    "front": 1,
+    "table": 9,
+    "notes": 14,
+    "body": 13
+   }
+  },
+  {
+   "stem": "0840-000-013-009",
+   "journal": "0840",
+   "version_id": 152917349214346,
+   "run": "j0840_final",
+   "doc_type": "research",
+   "n_pages": 16,
+   "pages": {
+    "front": 1,
+    "table": 9,
+    "refs": 14,
+    "body": 8
+   }
+  },
+  {
+   "stem": "1001-011-003-010",
+   "journal": "1001",
+   "version_id": 6469470681019588,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 20,
+   "pages": {
+    "front": 1,
+    "table": 12,
+    "refs": 17,
+    "body": 15
+   }
+  },
+  {
+   "stem": "1001-012-001-009",
+   "journal": "1001",
+   "version_id": 942882035369894,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 17,
+   "pages": {
+    "front": 1,
+    "table": 13,
+    "refs": 16,
+    "body": 17
+   }
+  },
+  {
+   "stem": "1001-012-001-005",
+   "journal": "1001",
+   "version_id": 8908892681012012,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 15,
+   "pages": {
+    "front": 1,
+    "table": 9,
+    "refs": 13,
+    "body": 3
+   }
+  },
+  {
+   "stem": "1001-018-001-008",
+   "journal": "1001",
+   "version_id": 2154955396383367,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 15,
+   "pages": {
+    "front": 1,
+    "table": 11,
+    "refs": 14,
+    "body": 12
+   }
+  },
+  {
+   "stem": "1001-014-001-004",
+   "journal": "1001",
+   "version_id": 8443376650535406,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 18,
+   "pages": {
+    "front": 1,
+    "table": 14,
+    "refs": 17,
+    "body": 12
+   }
+  },
+  {
+   "stem": "1001-018-001-004",
+   "journal": "1001",
+   "version_id": 5722033372445730,
+   "run": "j1001_final",
+   "doc_type": "research",
+   "n_pages": 16,
+   "pages": {
+    "front": 1,
+    "table": 9,
+    "refs": 13,
+    "body": 4
+   }
+  },
+  {
+   "stem": "0738-002-003-016",
+   "journal": "0738",
+   "version_id": 38088928546043,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "literary_text",
+   "n_pages": 3,
+   "pages": {
+    "front": 1,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0368-000-013-009",
+   "journal": "0368",
+   "version_id": 3829667159188364,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 27,
+   "pages": {
+    "front": 1,
+    "table": 17,
+    "notes": 27,
+    "body": 20
+   }
+  },
+  {
+   "stem": "0300-010-004-005",
+   "journal": "0300",
+   "version_id": 7370910340494708,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 24,
+   "pages": {
+    "front": 1,
+    "table": 6,
+    "notes": 20,
+    "body": 17
+   }
+  },
+  {
+   "stem": "1408-000-040-020",
+   "journal": "1408",
+   "version_id": 5599631437904875,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 20,
+   "pages": {
+    "front": 1,
+    "notes": 12,
+    "body": 18
+   }
+  },
+  {
+   "stem": "0345-045-004-023",
+   "journal": "0345",
+   "version_id": 8796601106985690,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 14,
+   "pages": {
+    "front": 1,
+    "table": 2,
+    "refs": 11,
+    "body": 4
+   }
+  },
+  {
+   "stem": "0702-002-007-010",
+   "journal": "0702",
+   "version_id": 694783192665454,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 4,
+   "pages": {
+    "front": 1,
+    "notes": 4,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0619-002-008-010",
+   "journal": "0619",
+   "version_id": 8488592933806490,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "literary_text",
+   "n_pages": 6,
+   "pages": {
+    "front": 1,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0082-000-031-021",
+   "journal": "0082",
+   "version_id": 4212624585858740,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 2,
+   "pages": {
+    "front": 1,
+    "body": 2
+   }
+  },
+  {
+   "stem": "0590-004-003-008",
+   "journal": "0590",
+   "version_id": 8584872009366634,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 10,
+   "pages": {
+    "front": 1,
+    "refs": 8,
+    "notes": 10,
+    "body": 3
+   }
+  },
+  {
+   "stem": "1956-017-002-013",
+   "journal": "1956",
+   "version_id": 1280110010362058,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 8,
+   "pages": {
+    "front": 1,
+    "table": 4,
+    "refs": 8,
+    "body": 2
+   }
+  },
+  {
+   "stem": "0633-026-012-009",
+   "journal": "0633",
+   "version_id": 7893644781379644,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 6,
+   "pages": {
+    "front": 1,
+    "body": 2
+   }
+  },
+  {
+   "stem": "0924-008-004,005-002",
+   "journal": "0924",
+   "version_id": 3359950199897222,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 13,
+   "pages": {
+    "front": 1,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0354-004-008-012",
+   "journal": "0354",
+   "version_id": 641649140296392,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 7,
+   "pages": {
+    "front": 1,
+    "body": 6
+   }
+  },
+  {
+   "stem": "0706-000-011-021",
+   "journal": "0706",
+   "version_id": 3411513641365209,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 24,
+   "pages": {
+    "front": 1,
+    "notes": 24,
+    "body": 21
+   }
+  },
+  {
+   "stem": "0048-011-042-001",
+   "journal": "0048",
+   "version_id": 486491707852203,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 28,
+   "pages": {
+    "front": 1,
+    "table": 22,
+    "notes": 27,
+    "body": 21
+   }
+  },
+  {
+   "stem": "0529-004-007-007",
+   "journal": "0529",
+   "version_id": 7071220053195932,
+   "run": "v33_300b_fix3_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 15,
+   "pages": {
+    "front": 1,
+    "body": 3
+   }
+  },
+  {
+   "stem": "0005-012-004-007",
+   "journal": "0005",
+   "version_id": 4172214594987572,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 6,
+   "pages": {
+    "front": 1,
+    "notes": 2,
+    "body": 5
+   }
+  },
+  {
+   "stem": "0595-026-001,002-017",
+   "journal": "0595",
+   "version_id": 1479899040221730,
+   "run": "v33_300_final_lettersfix_fix61_d30",
+   "doc_type": "research",
+   "n_pages": 15,
+   "pages": {
+    "front": 1,
+    "notes": 6,
+    "body": 10
+   }
+  }
+ ]
+}

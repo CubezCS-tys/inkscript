@@ -802,3 +802,9 @@ app.include_router(readers.router)
 # reads it; nothing stored (desk/try_reader.py, /try-reader, 2026-11-06)
 from . import try_reader  # noqa: E402
 app.include_router(try_reader.router)
+
+
+# the extraction exam: experiment 97's scorecard drawn as bars, with real examples from the pages beside every number
+# (desk/exam.py, /exam, 2026-11-10)
+from . import exam  # noqa: E402
+app.include_router(exam.router)

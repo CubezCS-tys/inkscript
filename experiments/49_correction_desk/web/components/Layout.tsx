@@ -27,6 +27,7 @@ const GROUPS: Group[] = [
     { href: '/lab', label: 'OCR lab', sub: 'Our own readers beside ours, one document at a time' },
     { href: '/readers', label: 'Our own readers', sub: 'From-scratch line readers against Azure, line by line' },
     { href: '/try-reader', label: 'Try our reader', sub: 'Give it an image of a line, see what it reads' },
+    { href: '/exam', label: 'The extraction exam', sub: 'Scores against blind answer keys, with the pages behind them' },
   ] },
   { key: 'librarian', label: 'Librarian', items: [
     { href: '/librarian', label: 'Institutions', sub: 'The same institution written many ways' },

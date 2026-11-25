@@ -1,0 +1,270 @@
+{
+ "experiment": "84_display_fonts",
+ "date": "2026-11-05",
+ "note": "locked: no training, no tuning, no peeking; opened once for the final claim with the owner's OK",
+ "rule": "- Eligible document: catalogue (marc.db, read-only) language 'ara', the article-like types of experiments 80/83,\n  1900-2025, 2-40 printed pages, both <id>.pdf and <id>.json in the main bucket (experiment 44's listing), so a test\n  can later be cut from S3 exactly as experiment 83 cut its lines.\n- Eligible journal: at least MIN_DOCS eligible documents, and its code in NONE of:\n  split76 held-out (= experiment 81's test; includes lab documents 1-3's journals 2399, 0018, 0877);\n  experiment 77's training/dev/old80 manifests and select77.json; experiment 83's plan83 (its 7,763 documents) and\n  candidates already cut; experiment 80's plan/manifest/ids; experiment 76's inventory; every document stem found on\n  this machine (a scan of every file NAME under /home/appuser, AI-Search not walked, out/data/ondisk84_stems.txt;\n  plus every stem MENTIONED in a text/json file of the repo outside experiment 44's bucket listing,\n  out/data/mentioned84_stems.txt; plus experiments 80/83's ondisk lists).  A journal is out if ANY of its documents\n  is in any of these.\n- Choice (seed 84): strata by the journal's median eligible year: pre-1980 (every eligible one, with MIN_DOCS_OLD),\n  1980-1999 (9), 2000+ (11); the pre-1980 slots found nothing and are not refilled.  Measured 2026-11-05: NO journal with a document before 1960 is left (all 363 journals\n  with pre-1980 documents in the main bucket are excluded but two, 0871 (1970) and 1204 (1978-79): experiments 77, 80\n  and 83 took every old journal into training), so the locked test cannot hold pre-1950 print at journal level.\n  Inside a stratum journals are taken round-robin over their field of study (catalogue 773$4, first field), largest\n  journals first within a field, so subjects spread; in 2000+ two slots go first to fields where display-face\n  headers and titles are likely (arts, design, architecture, media), the only hint the catalogue gives.",
+ "guard": "experiments/84_display_fonts/locked.py: locked_codes(), assert_not_locked(stems)",
+ "pages_opened": 0,
+ "journals": [
+  {
+   "code": "0174",
+   "name": "اللغة والأدب",
+   "name_en": "Language and Art",
+   "country": "الجزائر",
+   "field": "اللغة واللغويات",
+   "era": "1980-1999",
+   "years": [
+    1996,
+    1996
+   ],
+   "eligible_docs": 13
+  },
+  {
+   "code": "0352",
+   "name": "الواحة",
+   "name_en": "Oasis",
+   "country": "لبنان",
+   "field": "العلوم الإنسانية ، متعددة التخصصات",
+   "era": "1980-1999",
+   "years": [
+    1995,
+    1995
+   ],
+   "eligible_docs": 31
+  },
+  {
+   "code": "0583",
+   "name": "الناشر العربي",
+   "name_en": "Arab Publisher",
+   "country": "ليبيا",
+   "field": "علوم المعلومات وعلوم المكتبات",
+   "era": "1980-1999",
+   "years": [
+    1983,
+    1991
+   ],
+   "eligible_docs": 513
+  },
+  {
+   "code": "0637",
+   "name": "الإيمان",
+   "name_en": "Faith",
+   "country": "المغرب",
+   "field": "الدراسات الإسلامية",
+   "era": "1980-1999",
+   "years": [
+    1982,
+    1985
+   ],
+   "eligible_docs": 107
+  },
+  {
+   "code": "0874",
+   "name": "مجلة المال والصناعة",
+   "name_en": "Finance & Industry",
+   "country": "الكويت",
+   "field": "الاقتصاد",
+   "era": "1980-1999",
+   "years": [
+    1986,
+    2006
+   ],
+   "eligible_docs": 37
+  },
+  {
+   "code": "1047",
+   "name": "مجلة الموسم",
+   "name_en": "Al Mawsem Magazin",
+   "country": "لبنان",
+   "field": "علم الآثار",
+   "era": "1980-1999",
+   "years": [
+    1989,
+    1989
+   ],
+   "eligible_docs": 12
+  },
+  {
+   "code": "1166",
+   "name": "مجلة الأمن",
+   "name_en": "Journal of Security",
+   "country": "السعودية",
+   "field": "العلوم الاجتماعية ، متعددة التخصصات",
+   "era": "1980-1999",
+   "years": [
+    1990,
+    1999
+   ],
+   "eligible_docs": 66
+  },
+  {
+   "code": "1297",
+   "name": "مجلة دراسات سينمائية",
+   "name_en": "Journal of Cinematic Studies",
+   "country": "المغرب",
+   "field": "فنون",
+   "era": "1980-1999",
+   "years": [
+    1986,
+    1991
+   ],
+   "eligible_docs": 30
+  },
+  {
+   "code": "1366",
+   "name": "مجلة كلية الآداب والعلوم الإنسانية",
+   "name_en": "Journal of the Faculty of Arts and Humanities",
+   "country": "المغرب",
+   "field": "الادب",
+   "era": "1980-1999",
+   "years": [
+    1990,
+    1999
+   ],
+   "eligible_docs": 84
+  },
+  {
+   "code": "0187",
+   "name": "مجلة دراسات المعلومات",
+   "name_en": "Journal of Information Studies",
+   "country": "السعودية",
+   "field": "علوم المعلومات وعلوم المكتبات",
+   "era": "2000+",
+   "years": [
+    2008,
+    2024
+   ],
+   "eligible_docs": 66
+  },
+  {
+   "code": "1273",
+   "name": "مجلة دفاتر جغرافية",
+   "name_en": "Geography Books",
+   "country": "المغرب",
+   "field": "جغرافيا",
+   "era": "2000+",
+   "years": [
+    2005,
+    2008
+   ],
+   "eligible_docs": 37
+  },
+  {
+   "code": "1486",
+   "name": "مجلة المعرفة التربوية",
+   "name_en": "Educational Knowledge",
+   "country": "مصر",
+   "field": "التربية والتعليم",
+   "era": "2000+",
+   "years": [
+    2015,
+    2023
+   ],
+   "eligible_docs": 71
+  },
+  {
+   "code": "2023",
+   "name": "المجلة السعودية للعلوم النفسية",
+   "name_en": "Saudi Journal of Psychological Sciences",
+   "country": "السعودية",
+   "field": "علم النفس",
+   "era": "2000+",
+   "years": [
+    2019,
+    2025
+   ],
+   "eligible_docs": 47
+  },
+  {
+   "code": "2131",
+   "name": "مجلة الشهاب",
+   "name_en": "AlShihab",
+   "country": "الجزائر",
+   "field": "الدراسات الإسلامية",
+   "era": "2000+",
+   "years": [
+    2015,
+    2025
+   ],
+   "eligible_docs": 326
+  },
+  {
+   "code": "2151",
+   "name": "مجلة جامعة البعث سلسلة العلوم الاقتصادية",
+   "name_en": "",
+   "country": "سوريا",
+   "field": "الاقتصاد",
+   "era": "2000+",
+   "years": [
+    2021,
+    2024
+   ],
+   "eligible_docs": 238
+  },
+  {
+   "code": "2255",
+   "name": "مجلة العلوم الاجتماعية",
+   "name_en": "",
+   "country": "الجزائر",
+   "field": "علم الإجتماع",
+   "era": "2000+",
+   "years": [
+    2018,
+    2025
+   ],
+   "eligible_docs": 68
+  },
+  {
+   "code": "2351",
+   "name": "المجلة السعودية للفن والتصميم",
+   "name_en": "Saudi Art and Design Journal",
+   "country": "السعودية",
+   "field": "فنون",
+   "era": "2000+",
+   "years": [
+    2022,
+    2025
+   ],
+   "eligible_docs": 39
+  },
+  {
+   "code": "2469",
+   "name": "مجلة جامعة دمشق للدراسات التاريخية",
+   "name_en": "Damascus University Journal of Historical Studies",
+   "country": "سوريا",
+   "field": "علم الآثار",
+   "era": "2000+",
+   "years": [
+    2021,
+    2025
+   ],
+   "eligible_docs": 140
+  },
+  {
+   "code": "2522",
+   "name": "مجلة الفن والتصميم",
+   "name_en": "Journal of Art and Design",
+   "country": "مصر",
+   "field": "فنون",
+   "era": "2000+",
+   "years": [
+    2024,
+    2025
+   ],
+   "eligible_docs": 62
+  },
+  {
+   "code": "2611",
+   "name": "مجلة السياق",
+   "name_en": "Assiaq",
+   "country": "الجزائر",
+   "field": "اللغة واللغويات",
+   "era": "2000+",
+   "years": [
+    2018,
+    2025
+   ],
+   "eligible_docs": 88
+  }
+ ]
+}
